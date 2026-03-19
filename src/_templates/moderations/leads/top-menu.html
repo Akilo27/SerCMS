@@ -1,0 +1,155 @@
+{% load static %}
+{% load i18n %}
+
+<style>
+    /* Стили для активного элемента */
+    .menu-item {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .menu-item:hover {
+        background-color: #e3f2fd !important;
+        transform: translateY(-2px);
+    }
+
+    .menu-item.active {
+        background-color: #1c242e !important;
+        border-color: #003366 !important;
+        box-shadow: 0 4px 8px rgba(0, 64, 128, 0.2);
+    }
+
+    .menu-item.active .text-dark {
+        color: white !important;
+    }
+
+    .menu-item.active .text-secondary {
+        color: #b3d9ff !important;
+    }
+
+    .menu-item.active .fs-12 {
+        color: #e6f2ff !important;
+    }
+
+    /* Анимация для иконок */
+    .menu-item.active iconify-icon {
+        transform: scale(1.1);
+        transition: transform 0.3s ease;
+    }
+
+    /* Стиль для активных ссылок */
+    .stretched-link.active {
+        color: white !important;
+        text-decoration: none;
+    }
+
+    /* Эффект при нажатии */
+    .menu-item:active {
+        transform: scale(0.98);
+    }
+</style>
+
+<div class="border-start border-bottom border-2 bg-primary bg-opacity-10 rounded mt-3">
+    <div class="mt-3 d-flex flex-wrap gap-2">
+        <div class="menu-item d-flex p-2 gap-2 bg-light-subtle align-items-center text-start position-relative border rounded"
+             onclick="setActive(this, '{% url 'crm:lead_update' lead.id %}')">
+            <iconify-icon icon="solar:settings-line-duotone" class="text-secondary fs-24"></iconify-icon>
+            <div>
+                <h4 class="fs-14 mb-1">
+                    <a href="{% url 'crm:lead_update' lead.id %}" class="text-dark stretched-link">{% trans "Общие настройки" %}</a>
+                </h4>
+                <p class="fs-12 mb-0">{% trans "Общая информация об проекте" %}</p>
+            </div>
+        </div>
+        <div class="menu-item d-flex p-2 gap-2 bg-light-subtle align-items-center text-start position-relative border rounded"
+             onclick="setActive(this, '{% url 'crm:lead_document' lead.id %}')">
+            <iconify-icon icon="solar:clipboard-check-broken" class="text-secondary fs-24"></iconify-icon>
+            <div>
+                <h4 class="fs-14 mb-1">
+                    <a href="{% url 'crm:lead_document' lead.id %}" class="text-dark stretched-link">{% trans "Документы" %}</a>
+                </h4>
+                <p class="fs-12 mb-0">{% trans "Прикрепленные документы к проекту" %}</p>
+            </div>
+        </div>
+        <div class="menu-item d-flex p-2 gap-2 bg-light-subtle align-items-center text-start position-relative border rounded"
+             onclick="setActive(this, '{% url 'crm:lead_task' lead.id %}')">
+            <iconify-icon icon="solar:checklist-minimalistic-line-duotone" class="text-secondary fs-24"></iconify-icon>
+            <div>
+                <h4 class="fs-14 mb-1"><a href="{% url 'crm:lead_task' lead.id %}" class="text-dark stretched-link">{% trans "Задачи" %}</a></h4>
+                <p class="fs-12 mb-0">{% trans "Перечень задач в рамках проекта" %}</p>
+            </div>
+        </div>
+        <div class="menu-item d-flex p-2 gap-2 bg-light-subtle align-items-center text-start position-relative border rounded"
+             onclick="setActive(this, '{% url 'chats:chat_list' %}')">
+            <iconify-icon icon="solar:chat-round-call-linear" class="text-secondary fs-24"></iconify-icon>
+            <div>
+                <h4 class="fs-14 mb-1">
+                    <a href="{% url 'crm:lead_update' lead.id %}" class="text-dark stretched-link">{% trans "Чаты" %}</a>
+                </h4>
+                <p class="fs-12 mb-0">{% trans "Список чатов" %}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Функция для установки активного элемента
+function setActive(element, url) {
+    // Удаляем класс active у всех элементов
+    document.querySelectorAll('.menu-item').forEach(el => {
+        el.classList.remove('active');
+    });
+
+    // Добавляем класс active выбранному элементу
+    element.classList.add('active');
+
+    // Сохраняем активный элемент в localStorage
+    localStorage.setItem('activeMenuItem', url);
+
+    // Переходим по ссылке
+    window.location.href = url;
+}
+
+// Функция для восстановления активного состояния при загрузке страницы
+function restoreActiveState() {
+    const currentUrl = window.location.href;
+    const menuItems = document.querySelectorAll('.menu-item');
+
+    menuItems.forEach(item => {
+        const link = item.querySelector('a');
+        if (link && link.href === currentUrl) {
+            item.classList.add('active');
+        }
+    });
+
+    // Альтернативно: проверяем localStorage
+    const savedActiveItem = localStorage.getItem('activeMenuItem');
+    if (savedActiveItem) {
+        menuItems.forEach(item => {
+            const link = item.querySelector('a');
+            if (link && link.href === savedActiveItem) {
+                item.classList.add('active');
+            }
+        });
+    }
+}
+
+// Вызываем при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    restoreActiveState();
+
+    // Добавляем обработчики для ссылок
+    document.querySelectorAll('.stretched-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const menuItem = this.closest('.menu-item');
+            setActive(menuItem, this.href);
+        });
+    });
+});
+
+// Обработчик для кнопок "назад/вперед" браузера
+window.addEventListener('popstate', function() {
+    restoreActiveState();
+});
+</script>

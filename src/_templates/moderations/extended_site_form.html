@@ -1,0 +1,107 @@
+{% extends 'moderations/base.html' %}
+{% load static %}
+{% load i18n %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+
+{% block content %}
+<h1>{% if object %}{% trans "Редактировать" %}{% else %}{% trans "Создать" %}{% endif %} {% trans "домена" %}</h1>
+
+
+<form method="post">
+    {% csrf_token %}
+
+    <div class="mb-3">
+        {{ form.site_domain.label_tag }}<br>
+        {{ form.site_domain }}
+    </div>
+
+    <div class="mb-3">
+        {{ form.site_name.label_tag }}<br>
+        {{ form.site_name }}
+    </div>
+
+    <div class="mb-3 d-none">
+        {{ form.templates }}
+    </div>
+
+
+    <button type="submit">{% trans "Сохранить" %}</button>
+</form>
+<form method="get" class="mb-4">
+    <label for="category">{% trans "Выберите категорию" %}:</label>
+    <select name="category" id="category" class="form-control" onchange="this.form.submit()">
+        <option value="">-- {% trans "Все категории" %} --</option>
+        {% for cat in all_categories %}
+        <option value="{{ cat.id }}" {% if selected_category == cat.id %}selected{% endif %}>
+            {{ cat.name }}
+        </option>
+        {% endfor %}
+    </select>
+</form>
+<h4>{% trans "Доступные темы" %}:</h4>
+{% if filtered_themes %}
+{% for theme in filtered_themes %}
+<div class="form-check mb-2">
+    <input type="radio" name="templates" value="{{ theme.slug }}" class="form-check-input"
+           id="theme_{{ theme.id }}"
+           {% if theme.slug in selected_templates %}checked{% endif %}>
+
+    <label class="form-check-label" for="theme_{{ theme.id }}" data-info="{{ theme.slug }}">
+        {{ theme.name }}
+    </label>
+</div>
+{% endfor %}
+{% else %}
+<p>{% trans "Нет доступных тем в выбранной категории" %}.</p>
+{% endif %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const templateInput = document.querySelector("input[name='templates']");
+    const themeRadios = document.querySelectorAll("input[type='radio'][name='templates']");
+
+    // Когда пользователь выбирает тему — вставляем slug из data-info в input
+    themeRadios.forEach(radio => {
+        radio.addEventListener("change", function () {
+            const label = document.querySelector(`label[for="${this.id}"]`);
+            if (label && label.dataset.info) {
+                templateInput.value = label.dataset.info;
+            }
+        });
+    });
+
+    // Если уже есть значение в input, выбираем соответствующую радио-кнопку
+    if (templateInput.value) {
+        themeRadios.forEach(radio => {
+            const label = document.querySelector(`label[for="${radio.id}"]`);
+            if (label && label.dataset.info === templateInput.value) {
+                radio.checked = true;
+            }
+        });
+    }
+
+    // Красивая форма
+    document.querySelectorAll("form input, form select, form textarea").forEach(function (element) {
+        if (!element.classList.contains("form-control")) {
+            element.classList.add("form-control");
+        }
+    });
+});
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll("form input, form select, form textarea").forEach(function (element) {
+        if (!element.classList.contains("form-control")) {
+            element.classList.add("form-control");
+        }
+    });
+});
+
+</script>
+
+{% endblock content %}

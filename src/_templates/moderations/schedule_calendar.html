@@ -1,0 +1,702 @@
+{% extends 'moderations/base.html' %}
+{% load i18n %}
+{% load static  %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<link href="{% static 'site/moderations/assets/vendor/fullcalendar/main.min.css' %}" rel="stylesheet" type="text/css" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+{% endblock head %}
+{% block content %}
+<div class="container-xxl">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-xl-3">
+                            <div class="d-grid">
+                                <button type="button" class="btn btn-primary " id="btn-new-event">
+                                    <i class="bx bx-plus fs-18 me-2"></i> {% trans 'Добавить' %}
+                                </button>
+                                <button type="button" class="btn btn-outline-primary mt-2" data-bs-toggle="modal" data-bs-target="#shiftModal">
+                                    <i class="bx bx-plus fs-18 me-2"></i> {% trans 'Добавить несколько смен' %}
+                                </button>
+                            </div>
+                            <div id="external-events">
+                                <br>
+                                <p class="text-muted">{% trans 'Ближайшие даты' %}</p>
+                                {% for event in upcoming_events %}
+                                <div class="external-event {{ event.get_pagetype_class }} text-write" data-class="{{ event.get_pagetype_class }}">
+                                    <i class="bx bxs-circle me-2 vertical-middle"></i>{{ event.name }} ({{ event.data_start }})
+                                </div>
+                                {% empty %}
+                                <p class="text-muted">{% trans 'Нет предстоящих событий' %}</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <!-- end col-->
+                        <div class="col-xl-9">
+                            <div class="mt-4 mt-lg-0">
+                                <div id="calendar"></div>
+                            </div>
+                        </div>
+                        <!-- end col -->
+                    </div> <!-- end row -->
+                </div> <!-- end card body-->
+            </div> <!-- end card -->
+
+            <!-- Add New Event MODAL -->
+            <div class="modal fade" id="event-modal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <form class="needs-validation" name="event-form" id="forms-event" novalidate>
+                            {% csrf_token %}
+                            <input  type="hidden" name="id" id="event-id" required />
+                            <div class="modal-header p-3 border-bottom-0">
+                                <h5 class="modal-title" id="modal-title">Event</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body px-3 pb-3 pt-0">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="mb-3">
+                                            <label class="control-label form-label" for="event-title">Event Name</label>
+                                            <input class="form-control" placeholder="Insert Event Name" type="text" name="title" id="event-title" required />
+                                            <div class="invalid-feedback">Please provide a valid event name</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="mb-3">
+                                            <label class="control-label form-label" for="event-category">Category</label>
+                                            <select class="form-select" name="category" id="event-category" required>
+                                                <option value="1">Blue</option>
+                                                <option value="2">Gray Dark</option>
+                                                <option value="3">Green</option>
+                                                <option value="4">Cyan</option>
+                                                <option value="5">Yellow</option>
+                                                <option value="6">Red</option>
+                                                <option value="7">Dark</option>
+                                            </select>
+                                            <div class="invalid-feedback">Please select a valid event category</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="mb-3">
+                                            <label class="control-label form-label" for="event-start-date">Start Date</label>
+                                            <input class="form-control" type="date" name="start_date" id="event-start-date" required />
+                                            <div class="invalid-feedback">Please provide a valid start date</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="mb-3">
+                                            <label class="control-label form-label" for="event-end-date">End Date</label>
+                                            <input class="form-control" type="date" name="end_date" id="event-end-date" required />
+                                            <div class="invalid-feedback">Please provide a valid end date</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="mb-3">
+                                            <label class="control-label form-label" for="event-start-time">Start Time</label>
+                                            <input class="form-control" type="time" name="start_time" id="event-start-time" required />
+                                            <div class="invalid-feedback">Please provide a valid start time</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="mb-3">
+                                            <label class="control-label form-label" for="event-end-time">End Time</label>
+                                            <input class="form-control" type="time" name="end_time" id="event-end-time" required />
+                                            <div class="invalid-feedback">Please provide a valid end time</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="mb-3">
+                                            <label class="control-label form-label" for="event-user">User</label>
+                                            <input class="form-control" type="text" name="end_time" id="event-user" value="{{user.id}}" required />
+                                            <div class="invalid-feedback">Please select a valid user</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="mb-3">
+                                            <label class="control-label form-label" for="event-description">Description</label>
+                                            <textarea class="form-control" placeholder="Insert Event Description" name="description" id="event-description" rows="4"></textarea>
+                                            <div class="invalid-feedback">Please provide a valid event description</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <button type="button" class="btn btn-danger" id="btn-delete-event">Delete</button>
+                                    </div>
+                                    <div class="col-6 text-end">
+                                        <button type="button" class="btn btn-light me-1" data-bs-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-primary" id="btn-save-event">Save</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div> <!-- end modal-content-->
+                </div> <!-- end modal dialog-->
+            </div> <!-- end modal-->
+        </div> <!-- end col -->
+    </div> <!-- end row -->
+    <!-- Modal (Попап) -->
+    <div class="modal fade" id="shiftModal" tabindex="-1" aria-labelledby="shiftModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="shiftModalLabel">{% trans 'Добавить смены' %}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="calendar1"></div> <!-- Контейнер для календаря -->
+
+                    <div class="mb-3">
+                        <label for="shift-dates" class="form-label">{% trans 'Выберите даты' %}</label>
+                        <textarea id="shift-dates" class="form-control" rows="3" placeholder="Добавьте даты здесь...">
+                        { title: 'Смена', start: '2025-08-22' },
+{ title: 'Смена', start: '2025-08-20' },
+{ title: 'Смена', start: '2025-08-21' }
+                    </textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans 'Закрыть' %}</button>
+                    <button type="button" class="btn btn-primary" id="save-dates">{% trans 'Сохранить' %}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        #calendar1 {
+            width: 100%;
+            height: 500px;
+        }
+
+        /* Стили для выделенной даты только в calendar1 */
+        #calendar1 .fc-daygrid-day.selected {
+            background-color: rgba(0, 123, 255, 0.2) !important;
+        }
+
+        #calendar1 .fc-daygrid-day-number.selected {
+            background-color: #007bff !important;
+            color: white !important;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #calendar1 .fc-event {
+            cursor: pointer;
+        }
+    </style>
+
+
+</div>
+{% endblock content %}
+{% block footerbottom %}
+<script src="{% static 'site/moderations/assets/vendor/fullcalendar/main.min.js' %}"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<!-- Подключение CSS FullCalendar -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.css" rel="stylesheet">
+
+<!-- Подключение JS FullCalendar -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>
+
+
+<script>
+    // Объявляем переменные в области видимости функции
+    let calendar1;
+    let calendarEvents = [];
+
+    function initializeShiftModal() {
+        const shiftDatesTextArea = document.getElementById('shift-dates');
+
+        // Функция для проверки, является ли дата прошедшей
+        function isPastDate(dateStr) {
+            const selectedDate = new Date(dateStr);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Устанавливаем время на начало дня
+            return selectedDate < today;
+        }
+
+        // Функция для парсинга данных из textarea
+        function parseTextAreaData() {
+            const text = shiftDatesTextArea.value.trim();
+            if (!text) return [];
+
+            const regex = /{ title: '([^']+)', start: '([^']+)' }/g;
+            const matches = [];
+            let match;
+
+            while ((match = regex.exec(text)) !== null) {
+                // Проверяем, не является ли дата прошедшей
+                if (!isPastDate(match[2])) {
+                    matches.push({
+                        title: match[1],
+                        start: match[2],
+                    });
+                }
+            }
+
+            return matches;
+        }
+
+        // Функция для обновления textarea
+        function updateTextArea() {
+            const eventsText = calendarEvents.map(event =>
+                `{ title: '${event.title}', start: '${event.start}' }`
+            ).join(',\n');
+
+            shiftDatesTextArea.value = eventsText;
+        }
+
+        // Функция для добавления события
+        function addEvent(dateStr) {
+            // Проверяем, не является ли дата прошедшей
+            if (isPastDate(dateStr)) {
+                alert('Нельзя выбирать прошедшие даты!');
+                return;
+            }
+
+            // Проверяем, нет ли уже события на эту дату
+            const existingEvent = calendarEvents.find(event => event.start === dateStr);
+            if (existingEvent) return; // Если уже есть, не добавляем
+
+            const event = {
+                title: 'Смена',
+                start: dateStr,
+                backgroundColor: '#007bff',
+                borderColor: '#007bff',
+                textColor: 'white'
+            };
+
+            // Добавляем событие в календарь
+            calendar1.addEvent(event);
+
+            // Сохраняем в нашем массиве
+            calendarEvents.push(event);
+
+            // Обновляем textarea
+            updateTextArea();
+
+            // Выделяем дату на календаре
+            highlightDate(dateStr);
+        }
+
+        // Функция для удаления события
+        function removeEvent(dateStr) {
+            // Находим и удаляем событие из календаря
+            const events = calendar1.getEvents();
+            const eventToRemove = events.find(event => event.startStr === dateStr);
+
+            if (eventToRemove) {
+                eventToRemove.remove();
+            }
+
+            // Удаляем из нашего массива
+            calendarEvents = calendarEvents.filter(event => event.start !== dateStr);
+
+            // Обновляем textarea
+            updateTextArea();
+
+            // Убираем выделение с даты
+            unhighlightDate(dateStr);
+        }
+
+        // Функция для выделения даты на календаре
+        function highlightDate(dateStr) {
+            const dayElement = document.querySelector(`#calendar1 .fc-day[data-date="${dateStr}"]`);
+            if (dayElement) {
+                dayElement.classList.add('selected');
+                const dayNumber = dayElement.querySelector('.fc-daygrid-day-number');
+                if (dayNumber) {
+                    dayNumber.classList.add('selected');
+                }
+            }
+        }
+
+        // Функция для снятия выделения с даты
+        function unhighlightDate(dateStr) {
+            const dayElement = document.querySelector(`#calendar1 .fc-day[data-date="${dateStr}"]`);
+            if (dayElement) {
+                dayElement.classList.remove('selected');
+                const dayNumber = dayElement.querySelector('.fc-daygrid-day-number');
+                if (dayNumber) {
+                    dayNumber.classList.remove('selected');
+                }
+            }
+        }
+
+        // Функция для загрузки начальных событий из textarea
+        function loadInitialEvents() {
+            const initialEvents = parseTextAreaData();
+            initialEvents.forEach(event => {
+                // Проверяем, не является ли дата прошедшей
+                if (!isPastDate(event.start)) {
+                    calendarEvents.push({
+                        title: event.title,
+                        start: event.start,
+                        backgroundColor: '#007bff',
+                        borderColor: '#007bff',
+                        textColor: 'white'
+                    });
+                }
+            });
+        }
+
+        // Инициализация календаря только если он еще не инициализирован
+        if (!calendar1) {
+            calendar1 = new FullCalendar.Calendar(document.getElementById('calendar1'), {
+                initialView: 'dayGridMonth',
+                locale: 'ru',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                buttonText: {
+                    today: 'Сегодня',
+                    month: 'Месяц',
+                    week: 'Неделя',
+                    day: 'День'
+                },
+                events: calendarEvents,
+                editable: true,
+                selectable: true,
+                validRange: {
+                    start: new Date() // Запрещаем выбор дат до сегодняшнего дня
+                },
+                dateClick: function(info) {
+                    const selectedDate = info.dateStr;
+
+                    // Проверяем, не является ли дата прошедшей
+                    if (isPastDate(selectedDate)) {
+                        alert('Нельзя выбирать прошедшие даты!');
+                        return;
+                    }
+
+                    // Проверяем, есть ли уже событие на эту дату
+                    const existingEvent = calendarEvents.find(event => event.start === selectedDate);
+
+                    if (existingEvent) {
+                        // Если событие уже есть, удаляем его
+                        removeEvent(selectedDate);
+                    } else {
+                        // Если события нет, добавляем его
+                        addEvent(selectedDate);
+                    }
+                },
+                eventClick: function(info) {
+                    // При клике на событие - удаляем его
+                    removeEvent(info.event.startStr);
+                },
+                datesSet: function() {
+                    // После рендера календаря выделяем даты с событиями
+                    setTimeout(() => {
+                        calendarEvents.forEach(event => {
+                            highlightDate(event.start);
+                        });
+                    }, 100);
+                },
+                eventDidMount: function(info) {
+                    // При монтировании события выделяем дату
+                    highlightDate(info.event.startStr);
+                },
+                dayCellDidMount: function(info) {
+                    // Добавляем обработчик для прошедших дат
+                    if (isPastDate(info.date.toISOString().split('T')[0])) {
+                        info.el.style.cursor = 'not-allowed';
+                        info.el.title = 'Прошедшие даты нельзя выбрать';
+                    }
+                }
+            });
+
+            // Загружаем начальные события
+            loadInitialEvents();
+            calendar1.render();
+        }
+
+        // При изменении значения в textarea обновляем календарь
+        shiftDatesTextArea.addEventListener('input', function() {
+            const newEvents = parseTextAreaData();
+
+            // Удаляем все текущие события
+            calendar1.getEvents().forEach(event => {
+                unhighlightDate(event.startStr);
+                event.remove();
+            });
+            calendarEvents = [];
+
+            // Добавляем новые события из textarea (только будущие)
+            newEvents.forEach(event => {
+                if (!isPastDate(event.start)) {
+                    addEvent(event.start);
+                }
+            });
+        });
+
+        // Кнопка "Сохранить"
+        document.getElementById('save-dates').addEventListener('click', function() {
+            console.log('Сохраненные даты:', calendarEvents);
+
+            // Фильтруем прошедшие даты на всякий случай
+            const validEvents = calendarEvents.filter(event => !isPastDate(event.start));
+
+            if (validEvents.length === 0) {
+                alert('Нет valid дат для сохранения!');
+                return;
+            }
+
+            // Здесь можно добавить отправку данных на сервер
+            alert('Даты сохранены: ' + validEvents.map(e => e.start).join(', '));
+
+            // Закрываем модальное окно
+            $('#shiftModal').modal('hide');
+        });
+    }
+
+    // Инициализируем при загрузке документа
+    document.addEventListener('DOMContentLoaded', function() {
+        // Инициализируем только когда модальное окно открывается
+        $('#shiftModal').on('shown.bs.modal', function () {
+            initializeShiftModal();
+            if (calendar1) {
+                calendar1.render();
+                // Перевыделяем все даты
+                calendarEvents.forEach(event => {
+                    const dayElement = document.querySelector(`#calendar1 .fc-day[data-date="${event.start}"]`);
+                    if (dayElement) {
+                        dayElement.classList.add('selected');
+                        const dayNumber = dayElement.querySelector('.fc-daygrid-day-number');
+                        if (dayNumber) {
+                            dayNumber.classList.add('selected');
+                        }
+                    }
+                });
+            }
+        });
+
+        // Очищаем при закрытии модального окна (опционально)
+        $('#shiftModal').on('hidden.bs.modal', function () {
+            // Можно добавить очистку если нужно
+        });
+    });
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+    class CalendarSchedule {
+        constructor() {
+            this.body = document.body;
+            this.modal = new bootstrap.Modal(document.getElementById("event-modal"), { backdrop: "static" });
+            this.calendar = document.getElementById("calendar");
+            this.formEvent = document.getElementById("forms-event");
+            this.btnNewEvent = document.getElementById("btn-new-event");
+            this.btnDeleteEvent = document.getElementById("btn-delete-event");
+            this.btnSaveEvent = document.getElementById("btn-save-event");
+            this.modalTitle = document.getElementById("modal-title");
+            this.calendarObj = null;
+            this.selectedEvent = null;
+            this.newEventData = null;
+        }
+
+        onEventClick(e) {
+            this.formEvent?.reset();
+            this.formEvent.classList.remove("was-validated");
+            this.newEventData = null;
+            this.btnDeleteEvent.style.display = "block";
+            this.modalTitle.textContent = "Редактировать событие";
+            this.modal.show();
+            this.selectedEvent = e.event;
+
+            // Проверка содержимого события
+            console.log("Selected Event:", this.selectedEvent);
+
+            // Извлечение данных из события
+            const eventData = this.selectedEvent.extendedProps || {};
+
+            // Заполнение формы данными из события
+            document.getElementById("event-title").value = this.selectedEvent.title || "";
+            document.getElementById("event-category").value = eventData.pagetype || "";
+            document.getElementById("event-start-date").value = this.selectedEvent.startStr.split("T")[0] || "";
+            document.getElementById("event-end-date").value = this.selectedEvent.endStr.split("T")[0] || "";
+            document.getElementById("event-start-time").value = eventData.time_start || "";
+            document.getElementById("event-end-time").value = eventData.time_end || "";
+            document.getElementById("event-description").value = eventData.description || "";
+            document.getElementById("event-user").value = eventData.user_id || "";
+
+            // Печатаем ID события
+            console.log("Event ID:", this.selectedEvent.id);
+
+            // Если ID есть, присваиваем его в поле
+            if (this.selectedEvent.id) {
+                document.getElementById("event-id").value = this.selectedEvent.id;
+
+                // Запрос для получения данных события с использованием ID
+                var csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+                $.ajax({
+                    type: "GET",
+                    url: `/moderation/schedule/update/${this.selectedEvent.id}/`, // Путь к API для получения события по ID
+                    headers: {
+                        "X-CSRFToken": csrftoken,
+                    },
+                    success: function (response) {
+                        console.log("Event data:", response);
+                        // Обновляем форму с данными, полученными от сервера
+                        document.getElementById("event-title").value = response.event.title || "";
+                        document.getElementById("event-category").value = response.event.category || "";
+                        document.getElementById("event-start-date").value = response.event.start_date || "";
+                        document.getElementById("event-end-date").value = response.event.end_date || "";
+                        document.getElementById("event-start-time").value = response.event.start_time || "";
+                        document.getElementById("event-end-time").value = response.event.end_time || "";
+                        document.getElementById("event-description").value = response.event.description || "";
+                        document.getElementById("event-user").value = response.event.user_id || "";
+                    },
+                    error: function (response) {
+                        console.log("Error fetching event data:", response);
+                    }
+                });
+            } else {
+                console.error("Event ID is not present");
+            }
+        }
+
+        onSelect(e) {
+            this.formEvent?.reset();
+            this.formEvent?.classList.remove("was-validated");
+            this.selectedEvent = null;
+            this.newEventData = e;
+            this.btnDeleteEvent.style.display = "none";
+            this.modalTitle.textContent = "Добавить новое событие";
+            this.modal.show();
+            this.calendarObj.unselect();
+        }
+
+        submitForm(event) {
+        event.preventDefault();
+
+        let eventId = document.getElementById("event-id").value;
+        let eventData = {
+    title: document.getElementById("event-title").value,
+    category: document.getElementById("event-category").value,
+    start_date: document.getElementById("event-start-date").value,
+    end_date: document.getElementById("event-end-date").value,
+    start_time: document.getElementById("event-start-time").value,
+    end_time: document.getElementById("event-end-time").value,
+    description: document.getElementById("event-description").value,
+    user_id: document.getElementById("event-user").value
+};
+
+
+        let csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        let url = eventId ? `/moderation/schedule/update/${eventId}/` : "{% url 'moderation:schedule_create' %}";
+        let method = eventId ? "PUT" : "POST";
+
+        fetch(url, {
+            method: method,
+            headers: {
+                "X-CSRFToken": csrftoken,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(eventData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log("Success:", data);
+            this.modal.hide();
+        })
+        .catch(error => console.error("Error:", error));
+    }
+
+        init() {
+            const a = this;
+
+            // Берём события из Django и парсим JSON
+            let eventsData = {{ events|safe }};
+
+            a.calendarObj = new FullCalendar.Calendar(a.calendar, {
+                plugins: [],
+                slotDuration: "00:30:00",
+                slotMinTime: "07:00:00",
+                slotMaxTime: "19:00:00",
+                themeSystem: "bootstrap",
+                bootstrapFontAwesome: false,
+                buttonText: {
+                    today: "Сегодня",
+                    month: "Месяц",
+                    week: "Неделя",
+                    day: "День",
+                    list: "Список",
+                    prev: "Назад",
+                    next: "Вперёд"
+                },
+                initialView: "dayGridMonth",
+                handleWindowResize: true,
+                height: window.innerHeight - 200,
+                headerToolbar: { left: "prev,next today", center: "title", right: "dayGridMonth,timeGridWeek,timeGridDay,listMonth" },
+                initialEvents: eventsData, // Используем данные из Django
+                editable: true,
+                droppable: true,
+                selectable: true,
+                dateClick: function (e) { a.onSelect(e) },
+                eventClick: function (e) { a.onEventClick(e) }
+            });
+
+            a.calendarObj.render();
+
+            a.btnNewEvent.addEventListener("click", function (e) {
+                a.onSelect({ date: new Date, allDay: true });
+            });
+
+            // Обработчик формы для создания / редактирования события
+            a.formEvent?.addEventListener("submit", function (e) {
+                a.submitForm(e);  // Используем общий метод для отправки формы
+            });
+
+            a.btnDeleteEvent.addEventListener("click", function (e) {
+                if (a.selectedEvent) {
+                    a.selectedEvent.remove();
+                    a.selectedEvent = null;
+                    a.modal.hide();
+                }
+            });
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        (new CalendarSchedule).init();
+    });
+</script>
+
+
+{% endblock footerbottom %}

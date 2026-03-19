@@ -1,0 +1,630 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PDF формы + изображения — исправленное сохранение (с полями / без полей)</title>
+  <style>
+    :root { --bg:#0b0f14; --panel:#11161d; --panel2:#0e141b; --text:#e7edf3; --muted:#9fb3c8; --brand:#1e5ea4; --border:#223041; --radius:12px; }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body { margin: 0; font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Sans","Liberation Sans",sans-serif; color:var(--text);
+           background: radial-gradient(1200px 600px at 20% -10%, #122032 0, #0b0f14 60%); }
+    .wrap { display:grid; grid-template-rows:auto 1fr; height:100%; }
+    header { display:flex; gap:10px; flex-wrap:wrap; align-items:center; padding:10px 14px; border-bottom:1px solid var(--border);
+             background:linear-gradient(180deg,var(--panel),var(--panel2)); position:sticky; top:0; z-index:5; }
+    .group { display:flex; gap:8px; align-items:center; }
+    input[type="text"] { background:#0f1a2a; color:var(--text); border:1px solid var(--border); border-radius:8px; padding:8px 10px; width: 180px; }
+    .btn { appearance:none; border:1px solid #173557; background:#122338; color:#fff; padding:8px 12px; border-radius:9px; cursor:pointer; font-weight:600; }
+    .btn.primary { background:var(--brand); border-color:#134476; }
+    .btn.warn { background:#b32d38; border-color:#7a1f26; }
+    .btn.ghost { background:transparent; color:#e7edf3; }
+    .info { color:#9fb3c8; font-size:13px; }
+    main { overflow:auto; padding:16px; }
+    #stage { display:grid; gap:16px; grid-template-columns: 1fr 460px; align-items: start; max-width: 1680px; margin: 0 auto; }
+    #viewerWrap { background:#0e141b; border:1px solid var(--border); border-radius:var(--radius); padding:12px; }
+    #canvasStack { position: relative; display:inline-block; }
+    #pdfCanvas { max-width:100%; display:block; background:#fff; border-radius:8px; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+    #overlay { position:absolute; inset:0; pointer-events:none; }
+    .panel { background:#0e141b; border:1px solid var(--border); border-radius:var(--radius); padding:12px; position: sticky; top: 76px; }
+    .row { display:flex; gap:8px; align-items:center; margin:8px 0; flex-wrap: wrap; }
+    .pill { font-size:12px; color:#cad6e4; background:#0f1a2a; border:1px solid var(--border); border-radius:999px; padding:4px 8px; }
+    .field-item { background:#0f1a2a; border:1px solid var(--border); border-radius:10px; padding:8px; margin-top:8px; }
+    .field-item small { color:#9fb3c8; display:block; margin-top:4px; }
+    .muted { color:#9fb3c8; font-size:13px; }
+    .list { max-height: 48vh; overflow:auto; padding-right:6px; }
+    .disabled { opacity:.6; pointer-events:none; }
+    .spin { display:none; margin-left:8px; font-size:12px; color:#9fb3c8; }
+    .spin.on { display:inline; }
+    .sep { width:1px; height:28px; background:#223041; margin:0 4px; }
+    /* Image boxes */
+    .img-box { position:absolute; border:1.5px dashed rgba(255,255,255,.85); border-radius:6px; box-shadow: 0 3px 14px rgba(0,0,0,.35);
+               user-select:none; cursor:move; pointer-events:auto; }
+    .img-box.selected { border-color:#61dafb; box-shadow: 0 6px 18px rgba(0,0,0,.5); }
+    .img-box img { display:block; width:100%; height:100%; object-fit:contain; border-radius:6px; pointer-events:none; }
+    .handle { width:12px; height:12px; border-radius:50%; background:#1e5ea4; border:2px solid #fff; position:absolute; pointer-events:auto; cursor: nwse-resize; }
+    .handle.nw { top:-6px; left:-6px; cursor:nwse-resize; }
+    .handle.ne { top:-6px; right:-6px; cursor:nesw-resize; }
+    .handle.sw { bottom:-6px; left:-6px; cursor:nesw-resize; }
+    .handle.se { bottom:-6px; right:-6px; cursor:nwse-resize; }
+    .img-toolbar { position:absolute; top:-34px; left:0; display:flex; gap:6px; pointer-events:auto; }
+    .img-btn { font-size:12px; padding:2px 6px; border-radius:6px; border:1px solid #173557; background:#122338; color:#fff; cursor:pointer; }
+  </style>
+
+  <!-- PDF.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script>
+    window['pdfjs-dist/build/pdf'].GlobalWorkerOptions.workerSrc =
+      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  </script>
+
+  <!-- pdf-lib -->
+  <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="group">
+        <label class="btn" for="file">Открыть PDF</label>
+        <input id="file" type="file" accept="application/pdf" style="display:none">
+      </div>
+
+      <div class="group">
+        <span class="info">Режим:</span>
+        <button id="modeDesign" class="btn">Конструктор</button>
+        <button id="modeFill" class="btn primary">Заполнение</button>
+        <span id="liveSpin" class="spin">обновление предпросмотра…</span>
+      </div>
+
+      <div class="group" id="designTools" style="display:none">
+        <span class="info">Конструктор:</span>
+        <button id="modeText" class="btn">Текстовое поле</button>
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="group">
+        <button id="saveMode" class="btn primary">Сохранить (по режиму)</button>
+        <button id="saveAsForm" class="btn">Сохранить как форму</button>
+        <button id="saveFlat" class="btn warn">Сохранить без полей</button>
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="group">
+        <label class="btn" for="imgFile">Добавить изображение</label>
+        <input id="imgFile" type="file" accept="image/*" style="display:none">
+        <button id="clearImages" class="btn ghost">Очистить изображения</button>
+      </div>
+
+      <span class="info" id="status">Откройте PDF. В «Заполнении» значения отображаются в документе в реальном времени. Изображения можно двигать и менять размер.</span>
+    </header>
+
+    <main>
+      <div id="stage">
+        <div id="viewerWrap">
+          <div id="canvasStack">
+            <canvas id="pdfCanvas"></canvas>
+            <div id="overlay"></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="row"><span class="pill">Поля документа</span></div>
+
+          <!-- Конструктор (скрыт по умолчанию) -->
+          <div id="designerPanel" style="display:none">
+            <div class="row">
+              <input id="fieldName" type="text" placeholder="Имя поля (id)" />
+              <input id="fieldValue" type="text" placeholder="Значение" />
+              <button id="setValue" class="btn">Установить значение</button>
+            </div>
+            <div class="row"><span class="pill">Добавленные поля</span></div>
+            <div id="fieldsList" class="list"></div>
+          </div>
+
+          <!-- Заполнение (по умолчанию) -->
+          <div id="fillerPanel">
+            <div class="muted">Режим «Заполнение»: создание полей отключено. Введите значения — PDF обновится сразу.</div>
+            <div class="row"><span class="pill">Существующие поля</span></div>
+            <div id="existingFields" class="list"></div>
+            <div class="row">
+              <button id="clearFillValues" class="btn ghost">Очистить значения</button>
+            </div>
+          </div>
+
+          <div class="row"><span class="pill">Изображения</span></div>
+          <div class="muted">Перетаскивайте, изменяйте размер; у выбранного — удалить / на верх.</div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // ===== helpers =====
+    const $ = (id) => document.getElementById(id);
+    const cloneArrayBuffer = (ab) => ab.slice(0);
+    const debounce = (fn, ms=250) => { let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); }; };
+    const uid = () => Math.random().toString(36).slice(2,9);
+
+    // ===== state =====
+    let pdfArrayBuffer = null;
+    let pdfjsDoc = null;
+    let pageIndex = 0;
+    let canvasScale = 1.25;
+    const fields = [];
+    const pdfCanvas = $('pdfCanvas');
+    const ctx = pdfCanvas.getContext('2d');
+    const pageSize = { width: 0, height: 0 };
+
+    let modeApp = 'fill';
+    let existingFieldsCache = []; // [{name,type:'text',value}]
+
+    // images overlay state
+    const overlay = $('overlay');
+    const images = []; // {id, dataURL, pageIndex, x, y, w, h, el}
+    let activeImg = null;
+    let dragState = null;
+
+    const liveSpin = $('liveSpin');
+    const setSpin = (on) => liveSpin.classList.toggle('on', !!on);
+    const setStatus = (msg) => $('status').textContent = msg;
+
+    // ===== UI toggles =====
+    function setAppMode(nextMode) {
+      modeApp = nextMode;
+      $('modeDesign').classList.toggle('primary', modeApp === 'design');
+      $('modeFill').classList.toggle('primary', modeApp === 'fill');
+      $('designTools').style.display = (modeApp === 'design') ? '' : 'none';
+      $('designerPanel').style.display = (modeApp === 'design') ? '' : 'none';
+      $('fillerPanel').style.display = (modeApp === 'fill') ? '' : 'none';
+
+      if (modeApp === 'fill') {
+        renderExistingFieldsList();
+        setStatus('Заполнение: вводите значения — PDF обновляется сразу.');
+      } else {
+        setStatus('Конструктор: кликайте по странице, чтобы добавлять поля/изображения. Затем сохраняйте.');
+        if (pdfArrayBuffer) renderOriginal();
+      }
+    }
+
+    $('modeDesign').addEventListener('click', () => setAppMode('design'));
+    $('modeFill').addEventListener('click',   () => setAppMode('fill'));
+
+    // ===== loading / rendering =====
+    async function renderPageFromDoc(doc) {
+      const page = await doc.getPage(pageIndex+1);
+      const viewport = page.getViewport({ scale: canvasScale });
+      pdfCanvas.width = viewport.width;
+      pdfCanvas.height = viewport.height;
+      await page.render({ canvasContext: ctx, viewport }).promise;
+
+      const pageOrigViewport = page.getViewport({ scale: 1 });
+      pageSize.width = pageOrigViewport.width;
+      pageSize.height = pageOrigViewport.height;
+
+      // overlay size sync
+      $('canvasStack').style.width = pdfCanvas.width + 'px';
+      $('canvasStack').style.height = pdfCanvas.height + 'px';
+      overlay.style.width = pdfCanvas.width + 'px';
+      overlay.style.height = pdfCanvas.height + 'px';
+
+      // show only images for current page
+      for (const im of images) {
+        if (!im.el) continue;
+        im.el.style.display = (im.pageIndex === pageIndex) ? 'block' : 'none';
+      }
+    }
+
+    async function openInViewerFromBytes(bytes) {
+      const doc = await pdfjsLib.getDocument({ data: bytes }).promise;
+      pdfjsDoc = doc;
+      await renderPageFromDoc(pdfjsDoc);
+    }
+
+    async function renderOriginal() {
+      const doc = await pdfjsLib.getDocument({ data: cloneArrayBuffer(pdfArrayBuffer) }).promise;
+      pdfjsDoc = doc;
+      await renderPageFromDoc(pdfjsDoc);
+    }
+
+    async function loadFromArrayBuffer(abOriginal) {
+      const ab = cloneArrayBuffer(abOriginal);
+      pdfArrayBuffer = ab;
+
+      await renderOriginal();
+
+      fields.length = 0;
+      $('fieldsList').innerHTML = '';
+
+      await loadExistingFields();
+      if (modeApp === 'fill') renderExistingFieldsList();
+
+      setStatus(modeApp === 'fill'
+        ? 'PDF загружен. Заполнение: значения будут видны сразу.'
+        : 'PDF загружен. Конструктор активен: кликните по странице для добавления полей/изображений.'
+      );
+    }
+
+    $('file').addEventListener('change', async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const abOriginal = await file.arrayBuffer();
+      await loadFromArrayBuffer(abOriginal);
+    });
+
+    // ===== fill mode: list & inputs =====
+    function renderExistingFieldsList() {
+      const box = $('existingFields');
+      box.innerHTML = '';
+      if (!existingFieldsCache.length) {
+        box.innerHTML = '<div class="muted">Полей формы не найдено.</div>';
+        return;
+      }
+      for (const f of existingFieldsCache) {
+        const row = document.createElement('div');
+        row.className = 'field-item';
+        const id = 'inp_' + f.name;
+        row.innerHTML = `
+          <div style="font-weight:700;margin-bottom:6px;">${f.name} <span class="muted">(text)</span></div>
+          <input id="${id}" type="text" value="${f.value ?? ''}" />
+        `;
+        box.appendChild(row);
+
+        setTimeout(() => {
+          const el = $(id);
+          if (!el) return;
+          const handler = debounce(() => { f.value = el.value; refreshLivePreview(); }, 120);
+          el.addEventListener('input', handler);
+        }, 0);
+      }
+    }
+
+    async function loadExistingFields() {
+      existingFieldsCache = [];
+      try {
+        const ab = cloneArrayBuffer(pdfArrayBuffer);
+        const doc = await PDFLib.PDFDocument.load(ab, { updateMetadata: false });
+        const form = doc.getForm();
+        const fieldsAll = form.getFields();
+        for (const fld of fieldsAll) {
+          if (fld instanceof PDFLib.PDFTextField || (fld.constructor && /text/i.test(fld.constructor.name))) {
+            const name = fld.getName();
+            let value = '';
+            try { value = fld.getText() || ''; } catch(_) {}
+            existingFieldsCache.push({ name, type: 'text', value });
+          }
+        }
+      } catch (e) {
+        console.warn('Не удалось прочитать поля формы:', e);
+      }
+    }
+
+    // ===== constructor: add text fields by click =====
+    pdfCanvas.addEventListener('click', (evt) => {
+      if (modeApp !== 'design' || !pdfArrayBuffer) return;
+      if (evt.target !== pdfCanvas) return;
+      const rect = pdfCanvas.getBoundingClientRect();
+      const xCanvas = evt.clientX - rect.left;
+      const yCanvas = evt.clientY - rect.top;
+      const wCanvas = 200, hCanvas = 24;
+      const xPdf = xCanvas * (pageSize.width / pdfCanvas.width);
+      const yPdfTop = yCanvas * (pageSize.height / pdfCanvas.height);
+      const yPdf = pageSize.height - yPdfTop - (hCanvas * (pageSize.height / pdfCanvas.height));
+      const wPdf = wCanvas * (pageSize.width / pdfCanvas.width);
+      const hPdf = hCanvas * (pageSize.height / pdfCanvas.height);
+      const name = 'text_' + (fields.length + 1);
+      const f = { name, type: 'text', pageIndex, x: xPdf, y: yPdf, width: wPdf, height: hPdf, value: '' };
+      fields.push(f);
+      const el = document.createElement('div');
+      el.className = 'field-item';
+      el.innerHTML = `<strong>TEXT</strong> — ${f.name}
+        <small>стр.: ${f.pageIndex+1}, x: ${Math.round(f.x)}, y: ${Math.round(f.y)}, w: ${Math.round(f.width)}, h: ${Math.round(f.height)}</small>`;
+      $('fieldsList').appendChild(el);
+      ctx.save(); ctx.lineWidth = 2; ctx.strokeStyle = '#1e5ea4'; ctx.strokeRect(xCanvas, yCanvas, wCanvas, hCanvas); ctx.restore();
+      refreshLivePreview();
+    });
+
+    $('modeText').addEventListener('click', () => setStatus('Конструктор: добавляется текстовое поле'));
+    $('setValue').addEventListener('click', () => {
+      const name = $('fieldName').value.trim();
+      const value = $('fieldValue').value;
+      if (!name) { alert('Укажите имя поля'); return; }
+      const f = fields.find(x => x.name === name);
+      if (!f) { alert('Поле не найдено среди добавленных'); return; }
+      f.value = value;
+      setStatus('Установлено значение для ' + name);
+      refreshLivePreview();
+    });
+
+    // ===== images: upload, drag/resize =====
+    $('imgFile').addEventListener('change', async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => { addImageBox(reader.result); e.target.value=''; };
+      reader.readAsDataURL(file);
+    });
+    $('clearImages').addEventListener('click', () => { images.slice().forEach(removeImage); });
+
+    function addImageBox(dataURL) {
+      const id = uid();
+      const initW = Math.round(pdfCanvas.width * 0.3);
+      const initH = Math.round(initW * 0.6);
+      const x = 24, y = 24, w = initW, h = initH;
+
+      const el = document.createElement('div');
+      el.className = 'img-box';
+      el.style.left = x + 'px'; el.style.top = y + 'px';
+      el.style.width = w + 'px'; el.style.height = h + 'px';
+      el.dataset.id = id;
+      el.innerHTML = `
+        <div class="img-toolbar" style="display:none">
+          <button class="img-btn btn-del">✕</button>
+          <button class="img-btn btn-front">На верх</button>
+        </div>
+        <img draggable="false" src="${dataURL}" alt="img">
+        <div class="handle nw" data-h="nw"></div>
+        <div class="handle ne" data-h="ne"></div>
+        <div class="handle sw" data-h="sw"></div>
+        <div class="handle se" data-h="se"></div>
+      `;
+      overlay.appendChild(el);
+      const rec = { id, dataURL, pageIndex, x, y, w, h, el };
+      images.push(rec);
+      selectImage(rec);
+
+      el.addEventListener('mousedown', (ev) => {
+        if (ev.target.classList.contains('handle')) return;
+        ev.preventDefault();
+        const startX = ev.clientX, startY = ev.clientY;
+        const orig = { x: rec.x, y: rec.y };
+        dragState = { mode:'move', startX, startY, orig, rec };
+        document.addEventListener('mousemove', onDocMouseMove);
+        document.addEventListener('mouseup', onDocMouseUp, { once: true });
+      });
+      el.querySelectorAll('.handle').forEach(hn => hn.addEventListener('mousedown', (ev) => {
+        ev.preventDefault(); ev.stopPropagation();
+        const startX = ev.clientX, startY = ev.clientY;
+        const orig = { x: rec.x, y: rec.y, w: rec.w, h: rec.h, corner: hn.dataset.h };
+        dragState = { mode:'resize', startX, startY, orig, rec };
+        document.addEventListener('mousemove', onDocMouseMove);
+        document.addEventListener('mouseup', onDocMouseUp, { once: true });
+      }));
+      el.querySelector('.btn-del').addEventListener('click', (ev) => { ev.preventDefault(); removeImage(rec); });
+      el.querySelector('.btn-front').addEventListener('click', (ev) => { ev.preventDefault(); overlay.appendChild(rec.el); });
+      el.addEventListener('click', () => selectImage(rec));
+    }
+
+    function removeImage(rec) {
+      const idx = images.findIndex(i => i.id === rec.id);
+      if (idx >= 0) images.splice(idx, 1);
+      if (rec.el && rec.el.parentNode) rec.el.parentNode.removeChild(rec.el);
+      if (activeImg && activeImg.id === rec.id) activeImg = null;
+    }
+    function selectImage(rec) {
+      if (activeImg && activeImg.el) {
+        activeImg.el.classList.remove('selected');
+        const tb = activeImg.el.querySelector('.img-toolbar'); if (tb) tb.style.display = 'none';
+      }
+      activeImg = rec;
+      if (rec && rec.el) {
+        rec.el.classList.add('selected');
+        const tb = rec.el.querySelector('.img-toolbar'); if (tb) tb.style.display = 'flex';
+      }
+    }
+    function onDocMouseMove(ev) {
+      if (!dragState) return;
+      const { mode, rec, startX, startY, orig } = dragState;
+      const dx = ev.clientX - startX, dy = ev.clientY - startY;
+      if (mode === 'move') {
+        rec.x = clamp(orig.x + dx, 0, overlay.clientWidth - rec.w);
+        rec.y = clamp(orig.y + dy, 0, overlay.clientHeight - rec.h);
+      } else {
+        const c = orig.corner;
+        if (c === 'se') { rec.w = clamp(orig.w + dx, 16, overlay.clientWidth - orig.x); rec.h = clamp(orig.h + dy, 16, overlay.clientHeight - orig.y); }
+        if (c === 'sw') { rec.x = clamp(orig.x + dx, 0, orig.x + orig.w - 16); rec.w = clamp(orig.w - dx, 16, orig.x + orig.w); rec.h = clamp(orig.h + dy, 16, overlay.clientHeight - rec.y); }
+        if (c === 'ne') { rec.y = clamp(orig.y + dy, 0, orig.y + orig.h - 16); rec.h = clamp(orig.h - dy, 16, orig.y + orig.h); rec.w = clamp(orig.w + dx, 16, overlay.clientWidth - rec.x); }
+        if (c === 'nw') { rec.x = clamp(orig.x + dx, 0, orig.x + orig.w - 16); rec.y = clamp(orig.y + dy, 0, orig.y + orig.h - 16); rec.w = clamp(orig.w - dx, 16, orig.x + orig.w); rec.h = clamp(orig.h - dy, 16, orig.y + orig.h); }
+      }
+      applyImageRect(rec);
+    }
+    function onDocMouseUp() { dragState = null; document.removeEventListener('mousemove', onDocMouseMove); }
+    function clamp(v, min, max) { return Math.min(max, Math.max(min, v)); }
+    function applyImageRect(rec) {
+      if (!rec.el) return;
+      rec.el.style.left = rec.x + 'px'; rec.el.style.top = rec.y + 'px';
+      rec.el.style.width = rec.w + 'px'; rec.el.style.height = rec.h + 'px';
+    }
+
+    // ===== live preview (fields only) =====
+    const refreshLivePreview = debounce(async () => {
+      if (!pdfArrayBuffer) return;
+      try {
+        setSpin(true);
+        const ab = cloneArrayBuffer(pdfArrayBuffer);
+        const tmp = await PDFLib.PDFDocument.load(ab, { updateMetadata: false });
+        const form = tmp.getForm();
+        const pages = tmp.getPages();
+
+        if (modeApp === 'design') {
+          for (const f of fields) {
+            const page = pages[f.pageIndex];
+            if (!page) continue;
+            const tf = form.createTextField(f.name);
+            if (f.value != null) tf.setText(String(f.value));
+            try { tf.setBorderWidth(1); } catch(_) {}
+            tf.addToPage(page, { x: f.x, y: f.y, width: f.width, height: f.height });
+          }
+        } else {
+          for (const f of existingFieldsCache) {
+            try { const tf = form.getTextField(f.name); if (tf) tf.setText(String(f.value || '')); } catch (e) { console.warn('set', f.name, e); }
+          }
+        }
+
+        const bytes = await tmp.save();
+        await openInViewerFromBytes(bytes);
+      } catch (e) {
+        console.warn('Live preview error:', e);
+      } finally { setSpin(false); }
+    }, 120);
+
+    // ===== save: embed images; keep or remove fields =====
+    $('saveMode').addEventListener('click', () => { const keep = (modeApp === 'design'); buildPdf({ keepFields: keep }); });
+    $('saveAsForm').addEventListener('click', () => buildPdf({ keepFields: true }));
+    $('saveFlat').addEventListener('click', () => buildPdf({ keepFields: false }));
+
+    async function buildPdf({ keepFields }) {
+      if (!pdfArrayBuffer) { alert('Сначала загрузите PDF'); return; }
+      try {
+        const ab = cloneArrayBuffer(pdfArrayBuffer);
+        const doc = await PDFLib.PDFDocument.load(ab, { updateMetadata: false });
+        const form = doc.getForm();
+        const pages = doc.getPages();
+
+        // 1) поля
+        if (modeApp === 'design') {
+          for (const f of fields) {
+            const page = pages[f.pageIndex]; if (!page) continue;
+            const tf = form.createTextField(f.name);
+            if (f.value != null) tf.setText(String(f.value));
+            try { tf.setBorderWidth(1); } catch(_) {}
+            tf.addToPage(page, { x: f.x, y: f.y, width: f.width, height: f.height });
+          }
+        } else {
+          for (const f of existingFieldsCache) {
+            try { const tf = form.getTextField(f.name); if (tf) tf.setText(String(f.value || '')); } catch(_) {}
+          }
+        }
+
+        // 2) встраиваем ВСЕ изображения по их pageIndex
+        await embedAllImages(doc, pages);
+
+        if (keepFields) {
+          const bytes = await doc.save();
+          return downloadBytes(bytes, 'edited_with_form_and_images.pdf');
+        }
+
+        // 3) плоско: нарисовать текст полей и удалить виджеты + поля + очистить AcroForm
+        await drawFieldValuesAndStrip(doc, form, pages);
+
+        const bytes = await doc.save();
+        downloadBytes(bytes, 'edited_flat_images.pdf');
+      } catch (e) {
+        console.error(e);
+        alert('Ошибка при сохранении: ' + (e?.message || e));
+      }
+    }
+
+    async function embedAllImages(doc, pages) {
+      const dataURLtoBytes = (url) => {
+        const [head, data] = url.split(',');
+        const mime = head.substring(head.indexOf(':')+1, head.indexOf(';'));
+        const bin = atob(data);
+        const arr = new Uint8Array(bin.length);
+        for (let i=0;i<bin.length;i++) arr[i] = bin.charCodeAt(i);
+        return { bytes: arr, mime };
+      };
+      for (const im of images) {
+        const { bytes, mime } = dataURLtoBytes(im.dataURL);
+        let img; if (mime.includes('png')) img = await doc.embedPng(bytes); else img = await doc.embedJpg(bytes);
+        const { x, y, width, height } = canvasRectToPdfRect({ x: im.x, y: im.y, w: im.w, h: im.h });
+        const page = pages[im.pageIndex] || pages[0];
+        page.drawImage(img, { x, y, width, height });
+      }
+    }
+
+    function canvasRectToPdfRect({ x, y, w, h }) {
+      const px = pageSize.width / pdfCanvas.width;
+      const py = pageSize.height / pdfCanvas.height;
+      const xPdf = x * px;
+      const yPdf = pageSize.height - (y + h) * py;
+      const wPdf = w * px;
+      const hPdf = h * py;
+      return { x: xPdf, y: yPdf, width: wPdf, height: hPdf };
+    }
+
+    async function drawFieldValuesAndStrip(doc, form, pages) {
+      const { PDFName, PDFArray, PDFNull } = PDFLib;
+      const font = await doc.embedStandardFont(PDFLib.StandardFonts.Helvetica);
+      const fontSize = 12;
+      const pageByRef = new Map(pages.map(p => [p.ref, p]));
+
+      const fieldsAll = form.getFields();
+      // 3.1 draw text
+      for (const fld of fieldsAll) {
+        let textValue = '';
+        try { if (fld instanceof PDFLib.PDFTextField || (fld.constructor && /text/i.test(fld.constructor.name))) textValue = fld.getText() || ''; } catch(_) {}
+        const widgets = (typeof fld.getWidgets === 'function') ? fld.getWidgets() :
+                        (fld.acroField && typeof fld.acroField.getWidgets === 'function' ? fld.acroField.getWidgets() : []);
+        widgets.forEach(w => {
+          try {
+            const rect = w.getRectangle();
+            const pageRef = (typeof w.getP === 'function') ? w.getP() : (w.P ? w.P() : null);
+            const page = pageByRef.get(pageRef) || pages.find(p => p.ref === pageRef) || null;
+            if (!page) return;
+            if (textValue) {
+              const padX = 2;
+              const textY = rect.y + Math.max(0, (rect.height - fontSize) * 0.6);
+              page.drawText(String(textValue), { x: rect.x + padX, y: textY, size: fontSize, font });
+            }
+          } catch (e) { console.warn('draw text err', e); }
+        });
+      }
+
+      // 3.2 remove /Annots widgets
+      pages.forEach(page => {
+        try {
+          const annots = page.node.lookup(PDFName.of('Annots'));
+          if (annots && annots instanceof PDFArray) {
+            const kept = [];
+            for (let i=0, n=annots.size(); i<n; i++) {
+              const ref = annots.get(i);
+              const annot = annots.lookup(i);
+              const subtype = annot.lookup(PDFName.of('Subtype'));
+              if (subtype && subtype instanceof PDFName && String(subtype) === String(PDFName.of('Widget'))) {
+                // drop
+              } else {
+                kept.push(ref);
+              }
+            }
+            if (kept.length) {
+              const newArr = PDFArray.withContext(page.doc.context);
+              kept.forEach(r => newArr.push(r));
+              page.node.set(PDFName.of('Annots'), newArr);
+            } else {
+              page.node.delete(PDFName.of('Annots'));
+            }
+          }
+        } catch (e) { console.warn('strip annots err', e); }
+      });
+
+      // 3.3 remove fields (updates AcroForm.Fields)
+      try { for (const fld of fieldsAll) form.removeField(fld); } catch(_) {}
+
+      // 3.4 clear AcroForm if exists
+      try {
+        const acroRef = doc.catalog.get(PDFName.of('AcroForm'));
+        if (acroRef) {
+          const acro = doc.context.lookup(acroRef);
+          if (acro && typeof acro.set === 'function') {
+            acro.set(PDFName.of('Fields'), doc.context.obj([]));
+            acro.set(PDFName.of('NeedAppearances'), PDFNull);
+          }
+        }
+      } catch (e) { console.warn('acro cleanup err', e); }
+    }
+
+    // ===== misc =====
+    $('clearFillValues').addEventListener('click', () => {
+      if (!existingFieldsCache.length) return;
+      for (const f of existingFieldsCache) f.value = '';
+      renderExistingFieldsList();
+      refreshLivePreview();
+    });
+
+    // стартуем явно в режиме «Заполнение»
+    setAppMode('fill');
+  </script>
+</body>
+</html>

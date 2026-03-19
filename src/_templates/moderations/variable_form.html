@@ -1,0 +1,291 @@
+{% extends 'moderations/base.html' %}
+{% load i18n %}
+{% load static  %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<style>
+    /* Стили для попапа */
+#category-search {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+}
+
+#search-results {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+#search-results div {
+    padding: 8px;
+    cursor: pointer;
+}
+
+#search-results div:hover {
+    background-color: #eee;
+}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/hint/show-hint.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/hint/show-hint.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/hint/javascript-hint.min.js"></script>
+<link rel="stylesheet" type="text/css" href="lightbox_stylesheet.css">
+{% endblock head %}
+
+{% block content %}
+<div class="row page-titles mx-0">
+    <div class="col-sm-6 p-md-0">
+        <div class="welcome-text">
+            <h4>{{ blogs.name }}</h4>
+        </div>
+    </div>
+    <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'moderation:blog_settings' %}">{% trans "Новости" %}</a></li>
+            <li class="breadcrumb-item active">{% trans "Новость" %}</li>
+        </ol>
+    </div>
+</div>
+<div class="card">
+    <div class="card-body" >
+
+        <form method="post" class="requisites-info" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.media }}
+
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-xl-6 ">
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <h6 class="mb-2" style="width: max-content">{% trans "Название" %}</h6>
+                            </div>
+                            <div class="mb-3">
+                                {{ form.name }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <h6 class="mb-2" style="width: max-content">{% trans "Слаг" %}</h6>
+                            </div>
+                            <div class="mb-3">
+                                {{ form.slug }}
+                            </div>
+                        </div>
+                        <div class="row select-form" style="height: 110px;">
+                            <h6 class="mb-2" style="width: max-content">{% trans "Сайты" %}</h6>
+                            <div data-type="select-multiple" tabindex="0" role="combobox"
+                                 aria-autocomplete="list" aria-haspopup="true" aria-expanded="false"
+                                 style="position: relative;">
+                                {{ form.site }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-6 ">
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <h6 class="mb-2" style="width: max-content">{% trans "Тип фильтра" %}</h6>
+                            </div>
+                            <div class="mb-3">
+                                {{ form.type }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <h6 class="mb-2" style="width: max-content">{% trans "Тип фильтра" %}</h6>
+                            </div>
+                            <div class="mb-3">
+                                {{ form.variabletype }}
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <button type="submit" class="btn btn-primary">{% trans 'Сохранить' %}</button>
+
+                </div>
+            </div>
+        </form>
+        <h3>Атрибуты</h3>
+        <div id="atributes-container"></div>
+
+        <button id="add-atribute" type="button">+ Добавить атрибут</button>
+
+        <!-- Модальное окно -->
+        <div id="atribute-modal" style="display:none;">
+            <form id="atribute-form">
+                {% csrf_token %}
+                <input type="hidden" name="atribute_id" id="atribute-id">
+                <input type="text" name="name" placeholder="Название"><br>
+                <input type="text" name="slug" placeholder="URL"><br>
+                <textarea name="content" placeholder="Контент"></textarea><br>
+                <input type="file" name="image"><br>
+                <button type="submit">Сохранить</button>
+            </form>
+        </div>
+
+    </div><!--end card-->
+</div><!--end col-->
+
+<style>
+    textarea {
+        --tw-border-opacity: 1;
+        border-color: rgb(226 232 240 / var(--tw-border-opacity));
+        display: block;
+        width: 100%;
+        border-radius: .375rem;
+        border-width: 1px;
+        padding: .5rem 1rem;
+        font-size: .875rem;
+        font-weight: inherit;
+        line-height: inherit;
+        color: inherit;
+        margin: 0;
+        font-family: inherit;
+        resize: none;
+        height: 120px;
+    }
+    textarea:focus{
+        --tw-border-opacity: 1!important;
+        border-color: rgb(59 130 246 / var(--tw-border-opacity))!important;
+    }
+    .form-control[type="file"]:not(:disabled):not([readonly]) {
+        --tw-border-opacity: 1;
+        border-color: rgb(226 232 240 / var(--tw-border-opacity));
+        width: fit-content;
+        display: block;
+        border-radius: .375rem;
+        border-width: 1px;
+        font-size: .875rem;
+        height: auto!important;
+        padding: 5px 0px 5px 10px;
+    }
+    .django-ckeditor-widget {
+        width: 100%;
+    }
+    .cke_editor_id_description {
+        display: block !important;
+        background: #fff;
+        border: 0.0625rem solid #EEEEEE;
+        padding: 0.3125rem 1.25rem;
+        color: #6e6e6e;
+        border-radius: 0.5rem;
+        width: auto!important;
+    }
+    .choices__list--dropdown, .choices__list[aria-expanded] {
+        position: relative;
+        max-height: 120px;
+        overflow: auto;
+    }
+    .modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1040;
+        display: none;
+    }
+    .modal-backdrop.show {
+        display: block;
+    }
+
+
+</style>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const variableId = "{{ variable.id }}";
+      const csrfToken = "{{ csrf_token }}";
+
+      const urls = {
+        load: "{% url 'moderation:load_attributes' 0 %}".replace('0', variableId),
+        save: "{% url 'moderation:save_atribute' 0 %}".replace('0', variableId),
+        update: function(atributeId) {
+          return "{% url 'moderation:update_atribute' 0 0 %}".replace('/0/0/', `/${variableId}/${atributeId}/`);
+        },
+        delete: function(atributeId) {
+          return "{% url 'moderation:delete_atribute' 0 %}".replace('0', atributeId);
+        }
+      };
+
+      function loadAtributes() {
+        fetch(urls.load)
+          .then(res => res.json())
+          .then(data => {
+            document.getElementById('atributes-container').innerHTML = data.html;
+          });
+      }
+
+      loadAtributes();
+
+      // Добавление нового
+      document.getElementById('add-atribute').onclick = () => {
+        document.getElementById('atribute-id').value = '';
+        document.getElementById('atribute-modal').style.display = 'block';
+      };
+
+      // Отправка формы
+      document.getElementById('atribute-form').onsubmit = function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const atributeId = document.getElementById('atribute-id').value;
+
+        let url = atributeId ? urls.update(atributeId) : urls.save;
+
+        fetch(url, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-CSRFToken': csrfToken,
+          }
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            loadAtributes();
+            document.getElementById('atribute-modal').style.display = 'none';
+            this.reset();
+          } else {
+            alert('Ошибка: ' + JSON.stringify(data.errors));
+          }
+        });
+      };
+
+      // Делегируем обработку кликов по списку
+      document.getElementById('atributes-container').addEventListener('click', function(e) {
+        const id = e.target.dataset.id;
+        if (e.target.classList.contains('delete-atribute')) {
+          if (confirm("Удалить?")) {
+            fetch(urls.delete(id), {
+              method: 'POST',
+              headers: {
+                'X-CSRFToken': csrfToken,
+              }
+            }).then(() => loadAtributes());
+          }
+        }
+
+        if (e.target.classList.contains('edit-atribute')) {
+          // Пока просто вставим ID, можно расширить авто-заполнение позже
+          document.getElementById('atribute-id').value = id;
+          document.getElementById('atribute-modal').style.display = 'block';
+        }
+      });
+    });
+</script>
+
+{% endblock content %}

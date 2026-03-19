@@ -1,0 +1,70 @@
+{% extends 'products/base_profile.html' %}
+{% load static generals_tag shop_tags %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+{% block content %}
+
+
+    <h3 class="widget_title">Ваши закладки
+    </h3>
+    <div class="container">
+      <div class="row gy-40 bookmark-list">
+        {% for product in is_bookmarked %}
+        <div class="col-xl-4 col-lg-4 col-sm-6" data-product="{{product.id}}">
+          <div class="th-product product-grid">
+            <div class="product-img"><img style="height:200px" src="{% if product.image %}{{ product.image.url }}{% else %}{% static 'site/furbar/images/product_4_market.jpg' %}{% endif %}" alt="Product Image">
+              <div class="actions">
+                {% if not user.type == 2 %}
+                {% include 'products/include/bookmark_btn.html' %}
+                {% endif %}
+              </div>
+            </div>
+            <div class="product-content">
+              {% if not user.type == 2 %}
+              {% if product.quantity == 0 and product.order %}
+              {% include 'products/include/form_applications.html' %}
+              {% else %}
+              {% include 'products/include/cart_button.html' %}
+              {% endif %}
+              {% endif %}
+
+              {% if product.category %}
+              {% for category in product.category.all %}
+              <a href="{{ category.get_absolute_url }}" class="product-category">{{ category.name }}</a>
+              {% endfor %}
+              {% endif %}
+              <h3 class="product-title"><a href="{{ product.get_absolute_url }}">{{ product.name }}</a></h3>
+              {% if product.price %}
+              {% if valute != product.valute %}
+              {% if product.type == 1 %}
+              <span class="price">{% currency_conversion_for_products request product.price product.valute.id %} {{valute.icon_code}}</span>
+              {% else %}
+              <span class="price">{% currency_conversion_for_products request product.productsvariable_set.all.first.price product.valute.id %} {{valute.icon_code}}</span>
+              {% endif %}
+              {% else %}
+              {% if product.type == 1 %}
+              <span class="price">{{ product.price }} {{valute.icon_code}}</span>
+              {% else %}
+              <span class="price">{{ product.productsvariable_set.all.first.price }} {{valute.icon_code}}</span>
+              {% endif %}
+              {% endif %}
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+
+
+      </div>
+    </div>
+
+
+  {% include 'products/include/paginations.html' with items=is_bookmarked %}
+
+
+{% endblock content %}
+{% block footer %}{% endblock footer %}

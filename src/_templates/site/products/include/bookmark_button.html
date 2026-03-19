@@ -1,0 +1,13 @@
+{% if user.is_authenticated %}
+<div class="meta-action " id="bookmark_button_{{ product.id }}" data-product="{{ product.id }}" style="margin-right:10px">
+    {% if product in is_bookmarked %}
+    <button class="icon-btn bookmark" style="background-color: red; color: white;" type="button" data-type="bookmarkDelete" data-product="{{ product.id }}" >
+          <i class="far fa-heart"></i>
+    </button>
+    {% else %}
+    <button class="icon-btn bookmark" type="button" data-type="bookmarkAdd" data-product="{{ product.id }}" >
+        <i class="far fa-heart"></i>
+    </button>
+    {% endif %}
+</div>
+{% endif %}

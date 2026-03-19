@@ -1,0 +1,522 @@
+{% extends 'moderations/base.html' %}
+{% load generals_tag static i18n %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+{% endblock head %}
+{% block content %}
+<div class="row">
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a href="#home" data-bs-toggle="tab" aria-expanded="false" class="nav-link">
+                <span class="d-block d-sm-none"><i class="bx bx-home"></i></span>
+                <span class="d-none d-sm-block">SEO</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="#profile" data-bs-toggle="tab" aria-expanded="true" class="nav-link active">
+                <span class="d-block d-sm-none"><i class="bx bx-user"></i></span>
+                <span class="d-none d-sm-block">{% trans "Шаблон" %}</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="#messages" data-bs-toggle="tab" aria-expanded="false" class="nav-link">
+                <span class="d-block d-sm-none"><i class="ri-mail-line"></i></span>
+                <span class="d-none d-sm-block">{% trans "Контакты" %}</span>
+            </a>
+        </li>
+    </ul>
+    <div id="alert-container" class="position-fixed top-0 end-0 p-3" style="z-index: 1050;"></div>
+    <form method="post"  class="account__main-info" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="tab-content text-muted">
+            <div class="tab-pane" id="home">
+                <div class="row mb-2">
+                    <div class="col-sm-3">
+                        <h6 class="mb-0">{% trans 'Мета-заголовок' %}</h6>
+                    </div>
+                    <div class="col-sm-9 text-secondary">
+                        {{ form.title }}
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-sm-3">
+                        <h6 class="mb-0">{% trans 'Мета-описание' %}</h6>
+                    </div>
+                    <div class="col-sm-9 text-secondary">
+                        {{ form.metadescription }}
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-sm-3">
+                        <h6 class="mb-0">{% trans 'Мета-заголовок ссылки' %}</h6>
+                    </div>
+                    <div class="col-sm-9 text-secondary">
+                        {{ form.propertytitle }}
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-sm-3">
+                        <h6 class="mb-0">{% trans 'Мета-описание ссылки' %}</h6>
+                    </div>
+                    <div class="col-sm-9 text-secondary">
+                        {{ form.propertydescription }}
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-sm-3">
+                        <h6 class="mb-0">{% trans 'Превью' %}</h6>
+                    </div>
+                    <div class="col-sm-9 text-secondary">
+                        {% if homepage.previev %}
+                        <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                            {% if homepage.previev %}
+                            <img src="{{homepage.previev.url}}" alt="" style="max-height: 300px">
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                            <div style="height:300px; border: 0.0625rem solid #EEEEEE; border-radius:0.5rem;width: 500px;background: #fff;align-content: center;text-align: center;">
+                                <h1 style="transform: rotate(20deg); color: #ababab">{% trans 'Изображения нет' %}</h1>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {{ form.previev }}
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane show active" id="profile">
+                <div id="json-container">
+                    {% for item in jsontemplate %}
+                    <div class="json-fields">
+                        {% for key, field in item.fields.items %}
+                        <div class="json-field" data-key="{{ key }}">
+                            <div class="page-title-box mt-3">
+                                <h4 class="mb-0 fw-semibold">{{ key }}</h4>
+                                <ol class="breadcrumb mb-0">
+                                    <button type="button" class="btn btn-danger btn-sm remove-block">{% trans "Удалить" %}</button>
+                                </ol>
+                            </div>
+                            <!-- Поле "Ключ" -->
+                            <div class="row mb-2">
+                                <div class="col-sm-3"><h6 class="mb-0">{% trans "Ключ" %}</h6></div>
+                                <div class="col-sm-9 text-secondary">
+                                    <input type="text" name="{{ key }}_key" value="{{ key }}" placeholder="Key" class="form-control input-default">
+                                </div>
+                            </div>
+                            <!-- Поле "Значение" -->
+                            <div class="row mb-2">
+                                <div class="col-sm-3"><h6 class="mb-0">{% trans "Значение" %}</h6></div>
+                                <div class="col-sm-9 text-secondary">
+                                    <input type="text" name="{{ key }}_field" value="{{ field.field }}" placeholder="Field" class="form-control input-default">
+                                </div>
+                            </div>
+                            <!-- Поле "Тип" -->
+                            <div class="row mb-2">
+                                <div class="col-sm-3"><h6 class="mb-0">{% trans "Тип" %}</h6></div>
+                                <div class="col-sm-9 text-secondary">
+                                    <input type="text" name="{{ key }}_type" value="{{ field.type }}" placeholder="Type" class="form-control input-default">
+                                </div>
+                            </div>
+                            <!-- Поле "Выберите модель" (если type не "information") -->
+                            {% if field.type == "information" %}
+                            <div class="row mb-2">
+                                <div class="col-sm-3"><h6 class="mb-0">{% trans "Значение" %}</h6></div>
+                                <div class="col-sm-9 text-secondary">
+                                    <input type="text" name="{{ key }}_field" value="{{ field.field }}" placeholder="Field" class="form-control input-default">
+                                </div>
+                            </div>
+
+                            {% elif field.type == "media" %}
+                            <div class="row mb-2">
+                                <div class="col-sm-3"><h6 class="mb-0">{% trans "Файл" %}</h6></div>
+                                <div class="col-sm-9 text-secondary">
+                                    <input type="file" name="{{ key }}_file" class="form-control input-default">
+                                    {% if field.info %}
+                                    <div class="mt-2">
+                                        <p>{% trans "Текущее изображение" %}:</p>
+                                        <img src="{{ field.info }}" alt="Изображение" class="img-thumbnail" style="max-width: 200px;">
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% else %}
+
+                            <div class="row mb-2">
+                                <div class="col-sm-3"><h6 class="mb-0">{% trans "Выберите модель" %}</h6></div>
+                                <div class="col-sm-9 text-secondary">
+                                    <select class="form-control" name="{{ key }}_info" id="choices-multiple-remove-button" data-choices multiple>
+                                        <option value="">{% trans "Выберите" %}</option>
+                                        {% with model_data|get_item:field.type as model_objects %}
+                                        {% if model_objects %}
+                                        {% for obj in model_objects %}
+                                        <option value="{{ obj.id }}" {% if obj.id in field.info %}selected{% endif %}>{{ obj }}</option>
+                                        {% endfor %}
+                                        {% else %}
+                                        <option disabled>{% trans "Нет данных для выбора" %}</option>
+                                        {% endif %}
+                                        {% endwith %}
+                                    </select>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <hr>
+                    {% endfor %}
+                </div>
+                <!-- Кнопка добавления нового блока -->
+                <input type="hidden" id="json_data" name="json_data" value="">
+                <button type="button" id="add-block" class="btn btn-primary">{% trans "Добавить блок" %}</button>
+                <button type="submit" class="btn btn-success">{% trans "Сохранить" %}</button>
+                <!-- Alert (изначально скрыт) -->
+                <script>
+                    function showAlert(message, type = 'success') {
+                        const alertContainer = document.getElementById('alert-container');
+                        const alert = document.createElement('div');
+
+                        alert.className = `alert alert-${type} alert-dismissible fade show`;
+                        alert.setAttribute("role", "alert");
+                        alert.innerHTML = `
+                            ${message}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        `;
+
+                        alertContainer.appendChild(alert);
+
+                        setTimeout(() => {
+                            alert.classList.remove("show");
+                            setTimeout(() => {
+                                alert.remove();
+                                if (type === 'success') location.reload(); // Перезагрузка страницы
+                            }, 500);
+                        }, 3000);
+                    }
+
+                    document.querySelector('form').addEventListener('submit', function (event) {
+                        event.preventDefault();
+                        const jsonData = [];
+                        const formData = new FormData(this); // Передаём файлы
+
+                        document.querySelectorAll('.json-field').forEach(field => {
+                            const key = field.querySelector('input[name$="_key"]').value.trim();
+                            const fieldValue = field.querySelector('input[name$="_field"]').value.trim();
+                            const typeValue = field.querySelector('input[name$="_type"]').value.trim();
+                            const fileInput = field.querySelector('input[type="file"]');
+                            const select = field.querySelector('select');
+                            const infoValue = select ? [...select.selectedOptions].map(opt => opt.value) : [];
+                            const fieldObject = {
+                                field: fieldValue,
+                                info: infoValue,
+                                type: typeValue
+                            };
+                            // Если файл загружен, добавляем его в formData
+                            if (fileInput && fileInput.files.length > 0) {
+                                formData.append(`${key}_file`, fileInput.files[0]);
+                                fieldObject.info = `${key}_file`;  // Передаём ключ файла в JSON
+                            }
+                            jsonData.push({ [key]: fieldObject });
+                        });
+                        formData.append('json_data', JSON.stringify(jsonData));
+                        console.log("Отправляем JSON:", JSON.stringify(jsonData));
+                        console.log("Отправляем файлы:", formData);
+                        fetch(this.action, {
+                            method: 'POST',
+                            body: formData,  // Отправляем FormData, а не JSON
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log("Ответ сервера:", data);
+                            if (data.success) {
+                                showAlert("✅ Данные сохранены!", "success");
+                            } else {
+                                showAlert("❌ Ошибка: " + (data.error || "Неизвестная ошибка"), "danger");
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Ошибка запроса:", error);
+                            showAlert("❌ Ошибка сети: " + error, "danger");
+                        });
+                    });
+                </script>
+                <script>
+                    document.getElementById('add-block').addEventListener('click', function () {
+                        const container = document.getElementById('json-container');
+                        const newBlock = document.createElement('div');
+                        const uniqueKey = `new_${Date.now()}`;
+
+                        newBlock.classList.add('json-field');
+                        newBlock.dataset.key = uniqueKey;
+                        newBlock.innerHTML = `
+                            <div class="page-title-box mt-3">
+                                <h4 class="mb-0 fw-semibold">${uniqueKey}</h4>
+                                <ol class="breadcrumb mb-0">
+                                    <button type="button" class="btn btn-danger btn-sm remove-block">Удалить</button>
+                                </ol>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-sm-3"><h6 class="mb-0">Ключ</h6></div>
+                                <div class="col-sm-9 text-secondary">
+                                    <input type="text" name="${uniqueKey}_key" value="${uniqueKey}" class="form-control input-default">
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-sm-3"><h6 class="mb-0">Значение</h6></div>
+                                <div class="col-sm-9 text-secondary">
+                                    <input type="text" name="${uniqueKey}_field" class="form-control input-default">
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-sm-3"><h6 class="mb-0">Тип</h6></div>
+                                <div class="col-sm-9 text-secondary">
+                                    <input type="text" name="${uniqueKey}_type" class="form-control input-default">
+                                </div>
+                            </div>
+                        `;
+                        container.appendChild(newBlock);
+                    });
+
+                    // Удаление блока
+                    document.addEventListener('click', function (event) {
+                        if (event.target.classList.contains('remove-block')) {
+                            event.target.closest('.json-field').remove();
+                        }
+                    });
+                </script>
+            </div>
+        </div>
+    </form>
+    <div class="tab-content text-muted">
+        <div class="tab-pane" id="messages">
+            <div id="contacts-list" data-id="{{ contactpage.id }}">
+                <table class="table">
+                    <thead >
+                    <tr class="border-bottom-primary">
+                        <th scope="col">{% trans "Заголовок контакта" %}</th>
+                        <th scope="col">{% trans "Описание контакта" %}</th>
+                        <th scope="col">{% trans "Информация" %}</th>
+                        <th scope="col">{% trans "Тип контакта" %}</th>
+                        <th scope="col">{% trans "Изображение" %}</th>
+                        <th scope="col">{% trans "Действия" %}</th>
+                    </tr>
+                    </thead>
+                    <tbody class="list " id="employeeList">
+                    <tr>
+                        <form id="contact-form" data-contact-page-id="{{ contactpage.id }}">
+                            {% csrf_token %}
+                            <input type="hidden" id="contact-id" name="contact_id">
+                            <td><input type="text" name="title_contact" id="title_contact" placeholder="Название контакта"></td>
+                            <td><input type="text" name="description_contact" id="description_contact" placeholder="Описание контакта"></td>
+                            <td><input type="text" name="information_contact" id="information_contact" placeholder="Информация контакта"></td>
+                            <td>
+                                <select name="page_type" id="page_type">
+                                    <option value="" disabled selected>{% trans "Выберите тип контакта" %}</option>
+
+                                    <!-- Номера телефонов -->
+                                    <optgroup label="Номера телефонов">
+                                        <option value="phone_default">{% trans "Номер телефона по умолчанию" %}</option>
+                                        <option value="phone">{% trans "Остальные номера телефонов" %}</option>
+                                    </optgroup>
+
+                                    <!-- Электронная почта -->
+                                    <optgroup label="Электронная почта">
+                                        <option value="email_default">{% trans "Почта по умолчанию" %}</option>
+                                        <option value="email">{% trans "Остальные почты" %}</option>
+                                    </optgroup>
+
+                                    <!-- Адреса -->
+                                    <optgroup label="Адреса">
+                                        <option value="address_default">{% trans "Адрес по умолчанию" %}</option>
+                                        <option value="address">{% trans "Остальные адреса" %}</option>
+                                    </optgroup>
+
+                                    <!-- Карты -->
+                                    <optgroup label="Карты">
+                                        <option value="map_default">{% trans "Карта по умолчанию" %}</option>
+                                        <option value="map">{% trans "Остальные карты" %}</option>
+                                    </optgroup>
+
+                                    <!-- Социальные сети -->
+                                    <optgroup label="Социальные сети">
+                                        <option value="social_default">{% trans "Социальные сети по умолчанию" %}</option>
+                                        <option value="social">{% trans "Остальные социальные сети" %}</option>
+                                    </optgroup>
+
+                                    <!-- График -->
+                                    <optgroup label="График">
+                                        <option value="works">{% trans "Рабочие дни" %}</option>
+                                        <option value="weekend">{% trans "Выходные" %}</option>
+                                    </optgroup>
+                                </select>
+                            </td>
+                            <td>
+                                <input type="file" name="image" id="image">
+                            </td>
+                            <td>
+                                <button type="button" id="add-contact-btn" class="btn btn-primary">{% trans "Создать" %}</button>
+                                <button type="button" id="update-contact-btn" class="btn btn-success">{% trans "Изменить" %}</button>
+                            </td>
+                        </form>
+                    </tr>
+                    {% for contact in contactpage.contact_page.all %}
+                    <tr data-id="{{ contact.id }}">
+                        <td>{{ contact.title_contact }}</td>
+                        <td>{{ contact.description_contact }}</td>
+                        <td>{{ contact.information_contact }}</td>
+                        <td>{{ contact.page_type }}</td>
+                        <td>
+                            {% if contact.image %}
+                            <img src="{{ contact.image.url }}" alt="{{ contact.title_contact }}" width="50" height="50">
+                            {% else %}
+                            {% trans "Нет изображения" %}
+                            {% endif %}
+                        </td>
+                        <td>
+                            <button type="button" class="edit-contact" data-id="{{ contact.id }}">✏️</button>
+                            <button type="button" class="delete-contact" data-id="{{ contact.id }}">❌</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script>
+            $(document).ready(function () {
+                function showAlert(message, type = 'success') {
+                    const alertContainer = $("#alert-container");
+                    const alert = $(`<div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                                        ${message}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                     </div>`);
+                    alertContainer.append(alert);
+                    setTimeout(() => { alert.fadeOut(500, function () { $(this).remove(); }); }, 3000);
+                }
+
+                // ✅ Добавление контакта
+                $("#add-contact-btn").on("click", function (e) {
+                    e.preventDefault();
+                    let formData = new FormData($("#contact-form")[0]);
+                    let contactPageId = $("#contact-form").data("contact-page-id");
+                    formData.append('csrfmiddlewaretoken', $('input[name="csrfmiddlewaretoken"]').val());
+
+                    if (!contactPageId) {
+                        showAlert("Ошибка: contactPageId не определён!", "danger");
+                        return;
+                    }
+
+                    $("#loading-indicator").show();
+                    $.ajax({
+                        url: `/moderation/contact/${contactPageId}/add/`,
+                        type: "POST",
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function (data) {
+                            if (data.success) {
+                                showAlert("Контакт успешно добавлен!", "success");
+                                location.reload();
+                            } else {
+                                showAlert("Ошибка при добавлении контакта.", "danger");
+                            }
+                        },
+                        error: function (xhr) {
+                            showAlert("Произошла ошибка: " + xhr.responseText, "danger");
+                        },
+                        complete: function () {
+                            $("#loading-indicator").hide();
+                        }
+                    });
+                });
+
+                // ✅ Удаление контакта
+                $(document).on("click", ".delete-contact", function () {
+                    let contactId = $(this).data("id");
+                    if (!contactId) {
+                        showAlert("Ошибка: ID контакта не найден!", "danger");
+                        return;
+                    }
+
+                    if (!confirm("Вы уверены, что хотите удалить этот контакт?")) return;
+
+                    $("#loading-indicator").show();
+                    $.ajax({
+                        url: `/moderation/contact/${contactId}/delete/`,
+                        type: "POST",
+                        data: { csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val() },
+                        success: function (data) {
+                            if (data.success) {
+                                showAlert("Контакт удален!", "success");
+                                $(`tr[data-id="${contactId}"]`).fadeOut(500, function () { $(this).remove(); });
+                            } else {
+                                showAlert("Ошибка при удалении.", "danger");
+                            }
+                        },
+                        error: function (xhr) {
+                            showAlert("Ошибка: " + xhr.responseText, "danger");
+                        },
+                        complete: function () {
+                            $("#loading-indicator").hide();
+                        }
+                    });
+                });
+
+                // ✅ Редактирование контакта
+                $(document).on("click", ".edit-contact", function () {
+                    let contactId = $(this).data("id");
+                    let contactRow = $(`tr[data-id="${contactId}"]`);
+
+                    $("#contact-id").val(contactId);
+                    $("#title_contact").val(contactRow.find("td:eq(0)").text());
+                    $("#description_contact").val(contactRow.find("td:eq(1)").text());
+                    $("#information_contact").val(contactRow.find("td:eq(2)").text());
+                    $("#page_type").val(contactRow.find("td:eq(3)").text());
+                });
+
+                // ✅ Обновление контакта
+                $("#update-contact-btn").on("click", function (e) {
+                    e.preventDefault();
+                    let contactId = $("#contact-id").val();
+                    if (!contactId) {
+                        showAlert("Ошибка: не выбран контакт для обновления!", "danger");
+                        return;
+                    }
+
+                    let formData = new FormData($("#contact-form")[0]);
+                    formData.append('csrfmiddlewaretoken', $('input[name="csrfmiddlewaretoken"]').val());
+
+                    $("#loading-indicator").show();
+                    $.ajax({
+                        url: `/moderation/contact/${contactId}/update/`,
+                        type: "POST",
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function (data) {
+                            if (data.success) {
+                                showAlert("Контакт обновлен!", "success");
+                                location.reload();
+                            } else {
+                                showAlert("Ошибка при обновлении.", "danger");
+                            }
+                        },
+                        error: function (xhr) {
+                            showAlert("Ошибка: " + xhr.responseText, "danger");
+                        },
+                        complete: function () {
+                            $("#loading-indicator").hide();
+                        }
+                    });
+                });
+            });
+        </script>
+    </div>
+</div>
+{% endblock content %}

@@ -1,0 +1,216 @@
+{% extends 'moderations/base.html' %}
+{% load i18n %}
+{% load static  %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+    <link rel="stylesheet" href="{% static 'profile/css/font-awesome/css/all.min.css' %}">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+{% endblock head %}
+
+{% block content %}
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title" style="margin-right: 20px">{% trans 'Вакансии' %}</h4>
+        </div>
+        <div class="card-body">
+            <div >
+                <table class="table table-sm mb-2">
+                    <thead style="text-align: center;">
+                    <tr>
+                        <th>{% trans "Вакансия" %}</th>
+                        <th>{% trans "ФИО" %}</th>
+                        <th>{% trans "Email" %}</th>
+                        <th>{% trans "Телефон" %}</th>
+                        <th>{% trans "Сообщение" %}</th>
+                        <th>{% trans "Резюме" %}</th>
+                        <th>{% trans "Дата" %}</th>
+                    </tr>
+                    </thead>
+                    <tbody style="text-align: center;">
+                    {% for vacance in vacancesaplication %}
+                    <tr class="btn-reveal-trigger">
+
+                        <td class="py-2">{{ vacance.vacancy.title }}</td>
+                        <td class="py-2">{{ vacance.full_name }}</td>
+                        <td class="py-2">{{ vacance.email }}</td>
+                        <td class="py-2">{{ vacance.phone }}</td>
+                        <td class="py-2">{{ vacance.message }}</td>
+                        <td class="py-2">{{ vacance.resume }}</td>
+                        <td class="py-2">{{ vacance.create }}</td>
+
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% include 'moderations/include/paginations.html' with items=vacancesaplication %}
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="searchModalLabel">{% trans 'Поиск' %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="dateSearch" style="display: none;">
+                    <h5 class="mb-2" style="width: max-content">{% trans "Дата" %}</h5>
+                    <input type="date" id="searchDate" class="form-control" placeholder="{% trans 'Выберите дату' %}">
+                </div>
+
+                <div id="idSearchName" style="display: none;">
+                    <input type="text" id="searchInputName" class="form-control" placeholder="{% trans 'Введите название' %}">
+                </div>
+                <div id="categorySearch" style="display: none;">
+                    <select id="categorySelect" class="form-control">
+                        <option value="">{% trans 'Выберите категорию' %}</option>
+                        {% for category in categories %}
+                            <option value="{{ category.id }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans 'Закрыть' %}</button>
+                <button type="button" class="btn btn-primary" onclick="performSearch()">{% trans 'Поиск' %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .table{
+        width: 100%;
+    }
+    .card{
+        margin-top: 1.25rem;
+    }
+</style>
+<script>
+    function openSearch(type) {
+        const modalLabel = document.getElementById('searchModalLabel');
+        modalLabel.textContent = type === 'name' ? '{% trans "Поиск по названию" %}' :
+                             type === 'category' ? '{% trans "Поиск по категории" %}' :
+                             type === 'date' ? '{% trans "Поиск по дате" %}' : '';
+
+        document.getElementById('dateSearch').style.display = 'none';
+        document.getElementById('idSearchName').style.display = 'none';
+        document.getElementById('categorySearch').style.display = 'none';
+
+        switch (type) {
+            case 'date':
+                document.getElementById('dateSearch').style.display = 'block';
+                break;
+            case 'category':
+                document.getElementById('categorySearch').style.display = 'block';
+                break;
+            case 'name':
+                document.getElementById('idSearchName').style.display = 'block';
+                break;
+        }
+
+        $('#searchModal').modal('show');
+    }
+
+    function performSearch() {
+        const dateSearch = document.getElementById('searchDate').value;
+        const searchCategory = document.getElementById('categorySelect').value;
+        const searchName = document.getElementById('searchInputName').value;
+
+        // Формируем URL для запроса
+        const url = new URL(window.location.href);
+        if (dateSearch) {
+            url.searchParams.set('search_date', dateSearch);
+        } else if (searchCategory) {
+            url.searchParams.set('search_category', searchCategory);
+        } else if (searchName) {
+            url.searchParams.set('search_name', searchName);
+        }
+
+        console.log(url.toString()); // Проверяем, что URL сформирован правильно
+
+        // Перезагружаем страницу с новыми параметрами
+        window.location.href = url.toString();
+
+        // Закрыть модальное окно после выполнения поиска
+        $('#searchModal').modal('hide');
+    }
+</script>
+<script>
+    document.getElementById('checkAll').addEventListener('change', function() {
+        const checkboxes = document.querySelectorAll('input[name="vacances_ids"]');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+    });
+
+    function deleteSelected() {
+        const selectedIds = Array.from(document.querySelectorAll('input[name="vacances_ids"]:checked')).map(checkbox => checkbox.value);
+        if (selectedIds.length === 0) {
+            alert("{% trans 'Выберите хотя бы один элемент для удаления.' %}");
+            return;
+        }
+
+        if (confirm("{% trans 'Вы уверены, что хотите удалить выбранные элементы?' %}")) {
+            const csrfToken = '{{ csrf_token }}'; // Получаем CSRF-токен
+
+            fetch("{% url 'moderation:vacance_delete' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json', // Измените на 'application/json'
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    vacances_ids: selectedIds // Отправляем массив ID как JSON
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload(); // Перезагрузка страницы
+                } else {
+                    alert("{% trans 'Ошибка при удалении элементов.' %}");
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert("{% trans 'Ошибка при удалении элементов.' %}");
+            });
+        }
+    }
+
+    function deleteBlog(vacanceId) {
+        if (confirm("{% trans 'Вы уверены, что хотите удалить этот элемент?' %}")) {
+            const csrfToken = '{{ csrf_token }}'; // Получаем CSRF-токен
+
+            fetch("{% url 'moderation:vacance_delete' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json', // Изменяем на application/json
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    vacances_ids: [vacanceId] // Оборачиваем vacanceId в массив
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload(); // Перезагрузка страницы
+                } else {
+                    alert("{% trans 'Ошибка при удалении элемента.' %}");
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert("{% trans 'Ошибка при удалении элемента.' %}");
+            });
+        }
+    }
+</script>
+{% endblock content %}

@@ -1,0 +1,226 @@
+{% extends 'moderations/base.html' %}
+{% load static i18n shop_tags %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+{% block content %}
+<form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-2">
+            <!-- Фавикон -->
+            <div class="mb-3">
+                <img src="{% if settings.favicon %}{{settings.favicon.url}}{% else %}{% static 'site/moderations/assets/images/d.png' %}{% endif %}" style="height: auto; display: block; width: 185px; " alt="logo sm">
+
+                <label for="{{ form.favicon.id_for_label }}" class="form-label">Favicon</label>
+                <input type="file" name="{{ form.favicon.name }}" id="{{ form.favicon.id_for_label }}"
+                       class="form-control" accept=".png,.webp,.jpeg,.jpg,.svg,.ico">
+                {% if form.favicon.value %}
+                <small class="text-muted">{% trans "Текущий файл" %}: {{ form.favicon.value }}</small>
+                {% endif %}
+                {% for error in form.favicon.errors %}
+                <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="col-10">
+            <div class="row">
+                <div class="col-5">
+                    <!-- Логотип -->
+                    <div class="mb-3">
+                        <img src="{% if settings.logo %}{{settings.logo.url}}{% else %}{% static 'site/moderations/assets/images/logo_moder.png' %}{% endif %}" style="height: auto; display: block; width: 200px; " alt="logo sm">
+
+                        <label for="{{ form.logo.id_for_label }}" class="form-label">{% trans "Логотип" %}</label>
+                        <input type="file" name="{{ form.logo.name }}" id="{{ form.logo.id_for_label }}"
+                               class="form-control" accept=".png,.webp,.jpeg,.jpg,.svg">
+                        {% if form.logo.value %}
+                        <small class="text-muted">Текущий файл: {{ form.logo.value }}</small>
+                        {% endif %}
+                        {% for error in form.logo.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="col-3">
+
+                    <!-- Дополнительный логотип полный -->
+                    <div class="mb-3">
+                        <img src="{% if settings.logo_lg %}{{settings.logo_lg.url}}{% else %}{% static 'site/moderations/assets/images/sm_logo_moder.png' %}{% endif %}" style="height: auto; display: block; width: 200px; " alt="logo sm">
+
+                        <label for="{{ form.logo_lg.id_for_label }}" class="form-label">{% trans "Иконка мини логотип" %}</label>
+                        <input type="file" name="{{ form.logo_lg.name }}" id="{{ form.logo_lg.id_for_label }}"
+                               class="form-control" accept=".png,.webp,.jpeg,.jpg,.svg">
+                        {% if form.logo_lg.value %}
+                        <small class="text-muted">Текущий файл: {{ form.logo_lg.value }}</small>
+                        {% endif %}
+                        {% for error in form.logo_lg.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="col-4">
+
+
+                    <!-- Дополнительный логотип маленький -->
+                    <div class="mb-3">
+                        <img src="{% if settings.logo_sm %}{{settings.logo_sm.url}}{% else %}{% static 'site/moderations/assets/images/bm_logo_moder.png' %}{% endif %}" style="height: auto; display: block; width: 200px; " alt="logo sm">
+
+                        <label for="{{ form.logo_sm.id_for_label }}" class="form-label">{% trans "Горизонтальный логотип" %}</label>
+                        <input type="file" name="{{ form.logo_sm.name }}" id="{{ form.logo_sm.id_for_label }}"
+                               class="form-control" accept=".png,.webp,.jpeg,.jpg,.svg">
+                        {% if form.logo_sm.value %}
+                        <small class="text-muted">Текущий файл: {{ form.logo_sm.value }}</small>
+                        {% endif %}
+                        {% for error in form.logo_sm.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <!-- Логотип белый -->
+            <div class="row">
+                <div class="col-5">
+
+                    <div class="mb-3">
+                        <label for="{{ form.logo_white.id_for_label }}" class="form-label">{% trans "Логотип белый" %}</label>
+                        <input type="file" name="{{ form.logo_white.name }}" id="{{ form.logo_white.id_for_label }}"
+                               class="form-control" accept=".png,.webp,.jpeg,.jpg,.svg">
+                        {% if form.logo_white.value %}
+                        <small class="text-muted">{% trans "Текущий файл" %}: {{ form.logo_white.value }}</small>
+                        {% endif %}
+                        {% for error in form.logo_white.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="col-3">
+                    <!-- Дополнительный белый полный -->
+                    <div class="mb-3">
+                        <label for="{{ form.logo_white_lg.id_for_label }}" class="form-label">{% trans "Иконка мини логотип белый" %} </label>
+                        <input type="file" name="{{ form.logo_white_lg.name }}" id="{{ form.logo_white_lg.id_for_label }}"
+                               class="form-control" accept=".png,.webp,.jpeg,.jpg,.svg">
+                        {% if form.logo_white_lg.value %}
+                        <small class="text-muted">{% trans "Текущий файл" %}: {{ form.logo_white_lg.value }}</small>
+                        {% endif %}
+                        {% for error in form.logo_white_lg.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="col-4">
+                    <!-- Дополнительный логотип белый маленький -->
+                    <div class="mb-3">
+                        <label for="{{ form.logo_white_sm.id_for_label }}" class="form-label">{% trans "Горизонтальный логотип белый" %}</label>
+                        <input type="file" name="{{ form.logo_white_sm.name }}" id="{{ form.logo_white_sm.id_for_label }}"
+                               class="form-control" accept=".png,.webp,.jpeg,.jpg,.svg">
+                        {% if form.logo_white_sm.value %}
+                        <small class="text-muted">Текущий файл: {{ form.logo_white_sm.value }}</small>
+                        {% endif %}
+                        {% for error in form.logo_white_sm.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Название сайта -->
+    <div class="mb-3">
+        <label for="{{ form.name.id_for_label }}" class="form-label">{% trans "Название сайта" %}</label>
+        <input type="text" name="{{ form.name.name }}" id="{{ form.name.id_for_label }}"
+               class="form-control" value="{{ form.name.value|default_if_none:'' }}">
+        {% for error in form.name.errors %}
+        <div class="text-danger">{{ error }}</div>
+        {% endfor %}
+    </div>
+    <style>
+        .color-preview {
+            display: inline-block;
+            width: 40px;
+            height: 30px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-shadow: inset 0 0 4px rgba(0,0,0,0.1);
+        }
+    </style>
+
+    <div class="row ">
+        <div class="col-md-6">
+            <div class="row mb-4 align-items-center">
+                <!-- Подпись: Кнопка -->
+                <div class="col-md-3 text-end">
+                    <label for="{{ form.buttom.id_for_label }}" class="form-label fw-bold">{% trans "Цвет кнопки" %}</label>
+                </div>
+                <!-- Выбор цвета: Кнопка -->
+                <div class="col-md-9 d-flex align-items-center gap-3">
+                    <input type="color"
+                           name="{{ form.buttom.name }}"
+                           id="{{ form.buttom.id_for_label }}"
+                           class="form-control form-control-color"
+                           value="{{ form.buttom.value|default_if_none:'#000000' }}"
+                           oninput="document.getElementById('buttom-preview').style.backgroundColor = this.value;">
+                    <div id="buttom-preview"
+                         class="color-preview"
+                         style="background-color: {{ form.buttom.value|default_if_none:'#000000' }};"></div>
+                </div>
+                {% for error in form.buttom.errors %}
+                <div class="text-danger offset-md-3 col-md-9">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="col-md-6">
+
+            <div class="row mb-4 align-items-center">
+                <!-- Подпись: Сайдбар -->
+                <div class="col-md-3 text-end">
+                    <label for="{{ form.siddebar.id_for_label }}" class="form-label fw-bold">{% trans "Цвет сайдбара" %}</label>
+                </div>
+                <!-- Выбор цвета: Сайдбар -->
+                <div class="col-md-9 d-flex align-items-center gap-3">
+                    <input type="color"
+                           name="{{ form.siddebar.name }}"
+                           id="{{ form.siddebar.id_for_label }}"
+                           class="form-control form-control-color"
+                           value="{{ form.siddebar.value|default_if_none:'#ffffff' }}"
+                           oninput="document.getElementById('siddebar-preview').style.backgroundColor = this.value;">
+                    <div id="siddebar-preview"
+                         class="color-preview"
+                         style="background-color: {{ form.siddebar.value|default_if_none:'#ffffff' }};"></div>
+                </div>
+                {% for error in form.siddebar.errors %}
+                <div class="text-danger offset-md-3 col-md-9">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+
+
+    <button type="submit" class="btn btn-primary">{% trans "Сохранить настройки" %}</button>
+
+    <!-- MultiSelectField - Доступ -->
+    <div class="mb-3">
+    <label class="form-label">{% trans "Доступ" %}</label>
+    <div class="row">
+        {% for checkbox in form.types %}
+        <div class="col-12 col-md-3 mb-2">
+            <div class="form-check">
+                <label class="form-check-label" for="{{ checkbox.id_for_label }}">
+                    {{ checkbox.tag }} {{ checkbox.choice_label }}
+                </label>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% for error in form.types.errors %}
+    <div class="text-danger">{{ error }}</div>
+    {% endfor %}
+</div>
+
+
+
+</form>
+{% endblock content %}

@@ -1,0 +1,29 @@
+{% extends 'products/base.html' %}
+{% load static generals_tag %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+{% endblock head %}
+
+{% block content %}
+<div class="breadcumb-wrapper" data-bg-src="{% if blog.cover %}{{blog.cover.url}}{% endif %}">
+    <div class="container">
+        <div class="breadcumb-content">
+            <h1 class="breadcumb-title" style="color:#fff;">{{blog.name}}</h1>
+            <ul class="breadcumb-menu">
+                <li><a href="{% url 'webmain:home' %}"  style="color:#fff;">Главная</a></li>
+                <li  style="color:#fff;">{{blog.name}}</li>
+            </ul>
+        </div>
+    </div>
+</div>
+<section class="th-blog-wrapper blog-details space-top space-extra-bottom">
+    <div class="container">
+        {{blog.description|safe}}
+    </div>
+</section>
+
+{% endblock content %}

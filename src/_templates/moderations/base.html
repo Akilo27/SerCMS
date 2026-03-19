@@ -1,0 +1,1004 @@
+{% load static generals_tag user_tags i18n moder_tags %}
+{% user_has_manufacturer as has_manufacturer %}
+{% get_settings as settings %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Title Meta -->
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <title>{{ settings.name }} - {% block title %}{% endblock title %}</title>
+    <meta content="{% block description %}{% endblock description %}" name="description">
+    <meta property="og:title" content="{% block propertytitle %} {% endblock propertytitle %}">
+    <meta property="og:description" content="{% block propertydescription %}{% endblock propertydescription %}">
+    <meta property="og:image" content="{% block propertyimage %}{% endblock propertyimage %}">
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="{% if settings.favicon %}{{settings.favicon.url}}{% endif %}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css">
+
+    <!-- Vendor css (Require in all Page) -->
+    <link href="{% static 'site/moderations/assets/css/vendor.min.css' %}" rel="stylesheet" type="text/css" />
+
+    <!-- Icons css (Require in all Page) -->
+    <link href="{% static 'site/moderations/assets/css/icons.min.css' %}" rel="stylesheet" type="text/css" />
+
+    <!-- App css (Require in all Page) -->
+    <link href="{% static 'site/moderations/assets/css/app.min.css' %}" rel="stylesheet" type="text/css" />
+    <style type="text/css">
+        html[data-menu-size=sm-hover-active] .button-toggle-menu {
+            display: block!important;
+        }
+        .table-responsive {
+            height: 300px;
+        }
+        body{
+            pointer-events: visible !important;
+        }
+        @media (max-width: 768px) {
+  i.ri-menu-2-line.fs-24 {
+    font-size: 48px !important;
+}
+}
+
+    </style>
+    <!-- Theme Config js (Require in all Page) -->
+    <script src="{% static 'site/moderations/assets/js/config.min.js' %}"></script>
+    {% block head %} {% endblock head %}
+
+
+</head>
+<style>
+    @media (max-width: 768px) {
+      i.ri-menu-2-line.fs-24 {
+        font-size: 48px !important;
+      }
+    }
+</style>
+<body>
+
+<!-- START Wrapper -->
+<div class="wrapper">
+
+    <!-- ========== Topbar Start ========== -->
+    <header class="">
+        <div class="topbar">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <div class="d-flex align-items-center gap-2">
+                        <!-- Menu Toggle Button -->
+                        <div class="topbar-item">
+                            <button type="button" class="button-toggle-menu topbar-button">
+                                <i class="ri-menu-2-line fs-24"></i>
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <div class="d-flex align-items-center gap-1">
+                        <!-- Theme Color (Light/Dark) -->
+                        <div class="topbar-item">
+                            <button type="button" class="topbar-button" id="light-dark-mode">
+                                <i class="ri-moon-line fs-24 light-mode"></i>
+                                <i class="ri-sun-line fs-24 dark-mode"></i>
+                            </button>
+                        </div>
+                        {% get_current_language as LANGUAGE_CODE %}
+                        {% get_available_languages as LANGUAGES %}
+                        {% get_language_info_list for LANGUAGES as languages %}
+                        <div class="header-flex1">
+                            <!-- Форма выбора языка -->
+                            <form action="{% url 'set_language' %}" method="post" id="language-form1"
+                                  class="inline-select-wrapper1">
+                                {% csrf_token %}
+                                <input name="next" type="hidden" value="{{ redirect_to }}">
+                                <!-- Видимая часть -->
+                                <span class="display-select1" id="language-display1">
+                            {% for language in languages %}
+                            {% if language.code == LANGUAGE_CODE %}
+                                {% if LANGUAGE_CODE == 'en' %}
+                                <i class="flag-icon flag-icon-us"></i>
+                                {% elif LANGUAGE_CODE == 'tg' %}
+                                <i class="flag-icon flag-icon-tj"></i>
+                                {% elif LANGUAGE_CODE == 'kk' %}
+                                <i class="flag-icon flag-icon-kz"></i>
+                                {% else %}
+                                <i class="flag-icon flag-icon-{{ language.code|lower }}"></i>
+                                {% endif %}
+                            {% endif %}
+                            {% endfor %}
+                            </span>
+                                <!-- Прозрачный селект -->
+                                <select name="language" id="language-select1" class="transparent-select1"
+                                        onchange="this.form.submit()">
+                                    {% for language in languages %}
+                                    <option value="{{ language.code }}" {% if language.code == LANGUAGE_CODE %} selected {% endif %}>
+                                        {{ language.name_local }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </form>
+                            <script>
+                                // Обновление флага и названия языка после выбора нового значения
+                                document.getElementById("language-select1").addEventListener("change", function() {
+                                  var selectedOption = this.options[this.selectedIndex];
+                                  var newFlag = selectedOption.getAttribute("data-flag");
+                                  var newText = selectedOption.text;
+                                  document.getElementById("language-flag1").src = newFlag;
+                                  document.getElementById("language-text1").textContent = newText;
+                                });
+                            </script>
+                        </div>
+                        {% if not has_manufacturer %}
+                        <!-- Theme Color (Light/Dark) -->
+                        <div class="topbar-item">
+                            <a href="{% url 'chat:chat_list' %}" class="topbar-button" >
+                                <iconify-icon icon="solar:chat-dots-line-duotone" class="fs-24 align-middle"></iconify-icon>
+                            </a>
+                        </div>
+                        {% endif %}
+                        <!-- Category -->
+                        <div class="dropdown topbar-item d-none d-lg-flex">
+                            <button type="button" class="topbar-button" data-toggle="fullscreen">
+                                <i class="ri-fullscreen-line fs-24 fullscreen"></i>
+                                <i class="ri-fullscreen-exit-line fs-24 quit-fullscreen"></i>
+                            </button>
+                        </div>
+
+                        <!-- Notification -->
+                        <div class="dropdown topbar-item">
+                            <button type="button" class="topbar-button position-relative" id="page-header-notifications-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="ri-notification-3-line fs-24"></i>
+                                <span class="position-absolute topbar-badge fs-10 translate-middle badge bg-danger rounded-pill">3<span class="visually-hidden">unread messages</span></span>
+                            </button>
+                            <div class="dropdown-menu py-0 dropdown-lg dropdown-menu-end" aria-labelledby="page-header-notifications-dropdown">
+                                <div class="p-3 border-top-0 border-start-0 border-end-0 border-dashed border">
+                                    <div class="row align-items-center">
+                                        <div class="col">
+                                            <h6 class="m-0 fs-16 fw-semibold">{% trans "Уведомления" %}</h6>
+                                        </div>
+                                        <div class="col-auto">
+                                            <a href="javascript: void(0);" class="text-dark text-decoration-underline">
+                                                <small>{% trans "Очистить" %}</small>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div data-simplebar style="max-height: 280px;">
+                                    {% get_unread_notifications user as notifications %}
+                                    {% for notification in notifications %}
+                                    <!-- Item -->
+                                    <a href="javascript:void(0);" class="dropdown-item py-3 border-bottom text-wrap">
+                                        <div class="d-flex">
+                                            <div class="flex-shrink-0">
+                                                <img src="{% static 'site/moderations/assets/images/users/avatar-1.jpg' %}" class="img-fluid me-2 avatar-sm rounded-circle" alt="avatar-1" />
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <p class="mb-0"><span class="fw-medium">Josephine Thompson </span>commented on admin panel <span>" Wow 😍! this admin looks good and awesome design"</span></p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                    {% empty %}
+                                    <a href="javascript:void(0);" class="dropdown-item py-3 border-bottom text-wrap">
+                                        <div class="d-flex">
+                                            <div class="flex-grow-1">
+                                                <p class="mb-0">
+                                                    {% trans 'Нет уведомлений' %}.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                    {% endfor %}
+                                </div>
+                                <div class="text-center py-3">
+                                    <a href="{% url 'useraccount:notification' %}" class="btn btn-primary btn-sm">{% trans "Все уведомления" %} <i class="bx bx-right-arrow-alt ms-1"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        {% if not has_manufacturer %}
+                        <!-- Theme Setting -->
+                        <div class="topbar-item d-none d-md-flex">
+                            <a href="{% url 'moderation:settings_edit' %}" class="topbar-button" id="theme-settings-btn" >
+                                <i class="ri-settings-4-line fs-24"></i>
+                            </a>
+                        </div>
+                        <!-- Activity -->
+                        <div class="topbar-item d-none d-md-flex">
+                            <button type="button" class="topbar-button" id="theme-settings-btn" data-bs-toggle="offcanvas" data-bs-target="#theme-activity-offcanvas" aria-controls="theme-settings-offcanvas">
+                                <iconify-icon icon="solar:clock-circle-linear" class="fs-24 align-middle"></iconify-icon>
+                            </button>
+                        </div>
+                        {% endif %}
+                        <!-- User -->
+                        <div class="dropdown topbar-item">
+                            <a type="button" class="topbar-button" id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <span class="d-flex align-items-center">
+                                             <img class="rounded-circle" width="32" src="{{user.avatar.url}}" alt="avatar-3">
+                                        </span>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-end">
+                                <!-- item-->
+                                <h6 class="dropdown-header">{{user.username}}</h6>
+                                <a class="dropdown-item" href="{% url 'moderation:edit_profile' %}">
+                                    <i class="bx bx-user-circle text-muted fs-18 align-middle me-1"></i><span class="align-middle">{% trans "Профиль" %}</span>
+                                </a>
+
+                                <a class="dropdown-item" href="{#% url 'useraccount:logout' %#}">
+                                    <i class="bx bx-wallet text-muted fs-18 align-middle me-1"></i><span class="align-middle">{% trans "Баланс" %}</span>
+                                </a>
+
+                                <a class="dropdown-item" href="{#% url 'useraccount:logout' %#}">
+                                    <i class="bx bx-help-circle text-muted fs-18 align-middle me-1"></i><span class="align-middle">{% trans "Помощь" %}</span>
+                                </a>
+
+                                <div class="dropdown-divider my-1"></div>
+
+                                <a class="dropdown-item text-danger" href="{% url 'webmain:logout' %}">
+                                    <i class="bx bx-log-out fs-18 align-middle me-1"></i><span class="align-middle">{% trans "Выйти" %}</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Right Sidebar (Theme Settings) -->
+    <div>
+        <div class="offcanvas offcanvas-end border-0 rounded-start-4 overflow-hidden" tabindex="-1" id="theme-settings-offcanvas">
+            <div class="d-flex align-items-center bg-primary p-3 offcanvas-header">
+                <h5 class="text-white m-0">Theme Settings</h5>
+                <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+
+            <div class="offcanvas-body p-0">
+                <div data-simplebar class="h-100">
+                    <div class="p-3 settings-bar">
+
+                        <div>
+                            <h5 class="mb-3 font-16 fw-semibold">{% trans "Color Scheme" %}</h5>
+
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="data-bs-theme" id="layout-color-light" value="light">
+                                <label class="form-check-label" for="layout-color-light">Light</label>
+                            </div>
+
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="data-bs-theme" id="layout-color-dark" value="dark">
+                                <label class="form-check-label" for="layout-color-dark">Dark</label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h5 class="my-3 font-16 fw-semibold">Topbar Color</h5>
+
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="data-topbar-color" id="topbar-color-light" value="light">
+                                <label class="form-check-label" for="topbar-color-light">Light</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="data-topbar-color" id="topbar-color-dark" value="dark">
+                                <label class="form-check-label" for="topbar-color-dark">Dark</label>
+                            </div>
+                        </div>
+
+
+                        <div>
+                            <h5 class="my-3 font-16 fw-semibold">Menu Color</h5>
+
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="data-menu-color" id="leftbar-color-light" value="light">
+                                <label class="form-check-label" for="leftbar-color-light">
+                                    Light
+                                </label>
+                            </div>
+
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="data-menu-color" id="leftbar-color-dark" value="dark">
+                                <label class="form-check-label" for="leftbar-color-dark">
+                                    Dark
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h5 class="my-3 font-16 fw-semibold">Sidebar Size</h5>
+
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="data-menu-size" id="leftbar-size-default" value="default">
+                                <label class="form-check-label" for="leftbar-size-default">
+                                    Default
+                                </label>
+                            </div>
+
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="data-menu-size" id="leftbar-size-small" value="condensed">
+                                <label class="form-check-label" for="leftbar-size-small">
+                                    Condensed
+                                </label>
+                            </div>
+
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="data-menu-size" id="leftbar-hidden" value="hidden">
+                                <label class="form-check-label" for="leftbar-hidden">
+                                    Hidden
+                                </label>
+                            </div>
+
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="data-menu-size" id="leftbar-size-small-hover-active" value="sm-hover-active">
+                                <label class="form-check-label" for="leftbar-size-small-hover-active">
+                                    Small Hover Active
+                                </label>
+                            </div>
+
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="data-menu-size" id="leftbar-size-small-hover" value="sm-hover">
+                                <label class="form-check-label" for="leftbar-size-small-hover">
+                                    Small Hover
+                                </label>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="offcanvas-footer border-top p-3 text-center">
+                <div class="row">
+                    <div class="col">
+                        <button type="button" class="btn btn-danger w-100" id="reset-layout">Reset</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ========== Topbar End ========== -->
+
+    <!-- Activity Timeline -->
+    <div>
+        <div class="offcanvas offcanvas-end border-0" tabindex="-1" id="theme-activity-offcanvas" style="max-width: 450px; width: 100%;">
+            <div class="d-flex align-items-center bg-primary p-3 offcanvas-header">
+                <h5 class="text-white m-0 fw-semibold">Последние действия</h5>
+                <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body p-0">
+                <div data-simplebar class="h-100 p-4">
+                    <div class="position-relative ms-2">
+                        <span class="position-absolute start-0 top-0 border border-dashed h-100"></span>
+
+                        {% last_five_hr_changes request.user as logs %}
+                        {% for log in logs %}
+                        <div class="position-relative ps-4">
+                            <div class="mb-4">
+                        <span class="position-absolute start-0 avatar-sm translate-middle-x bg-primary d-inline-flex align-items-center justify-content-center rounded-circle text-light fs-20">
+                            <iconify-icon icon="iconamoon:edit-duotone"></iconify-icon>
+                        </span>
+                                <div class="ms-2">
+                                    <h5 class="mb-1 text-dark fw-semibold fs-15 lh-base">
+                                        Изменено поле: {{ log.field_name }}
+                                    </h5>
+                                    <p class="mb-0">
+                                        <span class="text-danger">«{{ log.old_value }}»</span> →
+                                        <span class="text-success">«{{ log.new_value }}»</span>
+                                    </p>
+                                    <p class="mb-0">
+                                        Объект: <span class="fw-medium">{{ log.content_object }}</span>
+                                    </p>
+                                    <h6 class="mt-2 text-muted">
+                                        {{ log.time_change|date:"l, H:i" }}
+                                    </h6>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="position-relative ps-4">
+                            <div class="mb-4">
+                        <span class="position-absolute start-0 avatar-sm translate-middle-x bg-warning d-inline-flex align-items-center justify-content-center rounded-circle text-light fs-20">
+                            <iconify-icon icon="iconamoon:info-duotone"></iconify-icon>
+                        </span>
+                                <div class="ms-2">
+                                    <h5 class="mb-0 text-dark fw-semibold fs-15 lh-base">{% trans "Нет изменений" %}</h5>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <a href="{% url 'moderation:hr_change_log' request.user.id %}" class="btn btn-outline-dark w-100">{% trans "Смотреть все" %}</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <!-- ========== App Menu Start ========== -->
+    <div class="main-nav">
+        <!-- Sidebar Logo -->
+        <div class="logo-box {{ settings.name }}">
+            <a href="{% url 'moderation:indevelopment' %}" class="logo-dark" >
+                <img src="{% if settings.logo_sm %}{{settings.logo_sm.url}}{% else %}{% static 'site/moderations/assets/images/logo-sm.png' %}{% endif %}" class="logo-sm" alt="logo sm">
+                <img src="{% if settings.logo_lg %}{{settings.logo_lg.url}}{% else %}{% static 'site/moderations/assets/images/unical-cms-fin2.png' %}{% endif %}" class="logo-lg" alt="logo dark">
+            </a>
+            <a href="{% url 'moderation:indevelopment' %}" class="logo-light">
+                <img src="{% if settings.logo_white_sm %}{{settings.logo_white_sm.url}}{% else %}{% static 'site/moderations/assets/images/logo-sm.png' %}{% endif %}" class="logo-sm" alt="logo sm">
+                <img src="{% if settings.logo_white_lg %}{{settings.logo_white_lg.url}}{% else %}{% static 'site/moderations/assets/images/unical-cms-fin2.png' %}{% endif %}" class="logo-lg" alt="logo light">
+            </a>
+        </div>
+
+        <!-- Menu Toggle Button (sm-hover) -->
+        <button type="button" class="button-sm-hover" aria-label="Show Full Sidebar">
+            <iconify-icon icon="solar:double-alt-arrow-right-bold-duotone" class="button-sm-hover-icon"></iconify-icon>
+        </button>
+
+        <div class="scrollbar" data-simplebar>
+            <ul class="navbar-nav" id="navbar-nav">
+                {% if  has_manufacturer %}
+                <li class="menu-title">{% trans "Основное" %}</li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'moderation:dashbord' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:widget-5-bold-duotone"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Статистика" %} </span>
+                    </a>
+                </li>
+                {% endif %}
+                {% if not has_manufacturer %}
+                <li class="menu-title">{% trans "Основное" %}</li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'moderation:dashbord' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:widget-5-bold-duotone"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Статистика" %} </span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'moderation:groups_list' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:user-speak-rounded-bold-duotone"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Группы" %} </span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link menu-arrow" href="#sidebarUsers" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarUsers">
+                        <span class="nav-icon"><iconify-icon icon="solar:users-group-two-rounded-bold-duotone"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Пользователи" %} </span>
+                    </a>
+                    <div class="collapse" id="sidebarUsers">
+                        <ul class="nav sub-navbar-nav">
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link" href="{% url 'moderation:worker_list' %}">{% trans "Сотрудники" %}</a>
+                            </li>
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link" href="{% url 'moderation:user_list' %}">{% trans "Клиенты" %}</a>
+                            </li>
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link" href="{% url 'moderation:clients_list' %}">{% trans "Пользователи" %}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'moderation:knowledge' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:info-circle-bold"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "База знаний" %} </span>
+                    </a>
+                </li>
+                {% endif %}
+
+                {% if not has_manufacturer %}
+                <li class="menu-title mt-2">{% trans "Каталог" %}</li>
+                <li class="nav-item">
+                    <a class="nav-link " href="{% url 'moderation:storages' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:home-bold"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Склады (Магазины)" %} </span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link " href="{% url 'moderation:manufacturers' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:buildings-bold-duotone"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Компании" %}</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link " href="{% url 'moderation:manufacturers' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:buildings-bold-duotone"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Бренды" %} </span>
+                    </a>
+                </li>
+                {% endif %}
+
+                {% if has_manufacturer %}
+                <li class="menu-title mt-2">{% trans "Каталог" %}</li>
+
+                <li class="nav-item">
+                    <a class="nav-link " href="{% url 'moderation:mymanufacturers' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:buildings-bold-duotone"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Компания" %}</span>
+                    </a>
+                </li>
+                <li class="nav-item d-none">
+                    <a class="nav-link " href="{% url 'moderation:manufacturers' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:users-group-two-rounded-bold-duotone"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Сотрудники" %}</span>
+                    </a>
+                </li>
+                {% endif %}
+                <li class="nav-item">
+                    <a class="nav-link " href="{% url 'moderation:products' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:cart-5-outline"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Товары" %} </span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link " href="{% url 'moderation:check' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:cart-5-outline"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Оффлайн покупки" %} </span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link " href="{% url 'moderation:product_expense_position' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:hand-money-outline"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Расходы" %} </span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link " href="{% url 'moderation:product_purchase_list' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:wallet-money-outline"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Закупки" %} </span>
+                    </a>
+                </li>
+                {% if not has_manufacturer %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'moderation:categorys_product_settings' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:bill-bold"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Категории" %} </span>
+                    </a>
+                </li>
+                {% endif %}
+                <li class="nav-item">
+                    <a class="nav-link " href="{% url 'moderation:orders' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:bag-smile-bold-duotone"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Покупки" %} </span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link " href="{% url 'moderation:applicationsproducts' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:notification-unread-lines-broken"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Заявки" %} </span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'moderation:complaints' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:confounded-square-bold"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Жалобы" %} </span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'moderation:reviews' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:stars-bold"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Отзывы" %} </span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'moderation:productcomments' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:chat-dots-linear"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Комментарии" %} </span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link " href="{% url 'moderation:faq_product' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:question-square-broken"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Вопросы" %} </span>
+                    </a>
+                </li>
+                {% if not has_manufacturer %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'moderation:variable' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:archive-check-linear"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Вариации" %} </span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'moderation:valute' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:hand-money-linear"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Валюта" %} </span>
+                    </a>
+                </li>
+                {% endif %}
+                <li class="menu-title mt-2">{% trans "CRM" %}</li>
+                {% if not has_manufacturer %}
+
+                <li class="nav-item">
+                    <a class="nav-link text-danger" href="{% url 'moderation:indevelopment' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:mailbox-bold-duotone"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Email" %} </span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link text-danger" href="{% url 'moderation:indevelopment' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:phone-calling-rounded-bold""></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Телефония" %} </span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link " href="{% url 'crm:leadlist' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:filter-bold-duotone"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Проекты" %} </span>
+                    </a>
+                </li>
+                {% endif %}
+                <li class="nav-item">
+                    <a class="nav-link " href="{% url 'moderation:hr_change_log' user.id %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:clipboard-check-bold"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Проделаные работы" %} </span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'moderation:schedule-list' user.id%}">
+                        <span class="nav-icon"><iconify-icon icon="solar:calendar-bold-duotone"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "График" %} </span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'crm:my_tasks' %}">
+                        <span class="nav-icon">
+                            <iconify-icon icon="solar:checklist-bold-duotone"></iconify-icon>
+                        </span>
+                        <span class="nav-text"> {% trans "Задачник" %} </span>
+                    </a>
+                </li>
+                {% if not has_manufacturer %}
+                <li class="menu-title mt-2">{% trans "Бухгалтерия" %}</li>
+
+                <li class="nav-item">
+                    <a class="nav-link " href="{% url 'moderation:statuspayment_list' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:ruble-bold"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Платежи" %} </span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'moderation:withdraw_all' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:hand-money-bold"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Запросы" %} </span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link " href="{% url 'moderation:asset_list' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:hand-money-bold"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Хоз.часть" %} </span>
+                    </a>
+                </li>
+                {% endif %}
+                <li class="menu-title mt-2">{% trans "KPI" %}</li>
+
+                <li class="nav-item">
+                    <a class="nav-link menu-arrow" href="#sidebarDepartament" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarDepartament">
+                        <span class="nav-icon"><iconify-icon icon="solar:users-group-two-rounded-bold-duotone"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Отделы" %} </span>
+                    </a>
+                    <div class="collapse" id="sidebarDepartament">
+                        <ul class="nav sub-navbar-nav">
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link" href="{% url 'moderation:worker_list' %}">{% trans "Сотрудники" %}</a>
+                            </li>
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link" href="{% url 'kpi:department_list' %}">{% trans "Отделы" %}</a>
+                            </li>
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link" href="{% url 'kpi:employee_positions_list' %}">{% trans "Должности" %}</a>
+                            </li>
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link" href="{% url 'kpi:change_list' %}">{% trans "Смены" %}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'moderation:lesson_list' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:square-academic-cap-2-outline"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Обучение" %}</span>
+                    </a>
+                </li>
+
+                {% if not has_manufacturer %}
+                <li class="nav-item">
+                    <a class="nav-link " href="{% url 'moderation:vacances' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:document-add-line-duotone"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Вакансии" %} </span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'moderation:vacances_aplication' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:call-medicine-rounded-line-duotone"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Заявки" %} </span>
+                    </a>
+                </li>
+                {% endif %}
+
+                <li class="menu-title mt-2">{% trans "Поддержка" %}</li>
+                {% if has_manufacturer %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'moderation:tickets' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:help-bold-duotone"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Тикеты" %} </span>
+                    </a>
+                </li>
+                {% endif %}
+                {% if not has_manufacturer %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'moderation:tickets' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:help-bold-duotone"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Тикеты" %} </span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'moderation:collaborations_list' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:chat-unread-bold"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Обращение" %} </span>
+                    </a>
+                </li>
+                <li class="menu-title mt-2">{% trans "Настройка" %}</li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'moderation:extended_site_list' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:shield-network-line-duotone"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Домены" %} </span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link text-warning" href="{% url 'moderation:indevelopment' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:hand-heart-line-duotone"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Програма лояльности" %} </span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link " href="{% url 'moderation:notifications_settings' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:streets-navigation-linear"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Уведомления" %} </span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'moderation:language_list' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:signpost-2-linear"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Языки" %} </span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link menu-arrow text-danger" href="#sidebarIntegrations" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarIntegrations">
+                        <span class="nav-icon"><iconify-icon icon="solar:repeat-bold"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Интеграции" %} </span>
+                    </a>
+                    <div class="collapse" id="sidebarIntegrations">
+                        <ul class="nav sub-navbar-nav">
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link  menu-arrow" href="attributes-list.html#sidebarItemDemoSubItem" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarItemDemoSubItem">
+                                    <span> {% trans "МаркетПлейсы" %} </span>
+                                </a>
+                                <div class="collapse" id="sidebarItemDemoSubItem">
+                                    <ul class="nav sub-navbar-nav">
+                                        <li class="sub-nav-item">
+                                            <a class="sub-nav-link" href="{% url 'moderation:indevelopment' %}">{% trans "Ozon" %}</a>
+                                        </li>
+                                        <li class="sub-nav-item">
+                                            <a class="sub-nav-link" href="{% url 'moderation:indevelopment' %}">{% trans "Wildberries" %}</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link  menu-arrow" href="#sidebarItemDemoSubItem2" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarItemDemoSubItem2">
+                                    <span> {% trans "Доставки" %} </span>
+                                </a>
+                                <div class="collapse" id="sidebarItemDemoSubItem2">
+                                    <ul class="nav sub-navbar-nav">
+                                        <li class="sub-nav-item">
+                                            <a class="sub-nav-link" href="{% url 'moderation:indevelopment' %}">{% trans "ПочтаРоссии" %}</a>
+                                        </li>
+                                        <li class="sub-nav-item">
+                                            <a class="sub-nav-link" href="{% url 'moderation:indevelopment' %}">{% trans "СДЭК" %}</a>
+                                        </li>
+                                        <li class="sub-nav-item">
+                                            <a class="sub-nav-link" href="{% url 'moderation:indevelopment' %}">{% trans "ЯндексДоставка" %}</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link  menu-arrow" href="#sidebarItemDemoSubItem3" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarItemDemoSubItem3">
+                                    <span> {% trans "Платежные системы" %} </span>
+                                </a>
+                                <div class="collapse" id="sidebarItemDemoSubItem3">
+                                    <ul class="nav sub-navbar-nav">
+                                        <li class="sub-nav-item">
+                                            <a class="sub-nav-link" href="{% url 'moderation:indevelopment' %}">{% trans "СберБанк" %}</a>
+                                        </li>
+                                        <li class="sub-nav-item">
+                                            <a class="sub-nav-link" href="{% url 'moderation:indevelopment' %}">{% trans "АльфвБанк" %}</a>
+                                        </li>
+                                        <li class="sub-nav-item">
+                                            <a class="sub-nav-link" href="{% url 'moderation:indevelopment' %}">{% trans "ТБанк" %}</a>
+                                        </li>
+                                        <li class="sub-nav-item">
+                                            <a class="sub-nav-link" href="{% url 'moderation:indevelopment' %}">{% trans "ЮМани" %}</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link  menu-arrow" href="#sidebarItemDemoSubItem4" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarItemDemoSubItem4">
+                                    <span> {% trans "Дополнительные" %} </span>
+                                </a>
+                                <div class="collapse" id="sidebarItemDemoSubItem4">
+                                    <ul class="nav sub-navbar-nav">
+                                        <li class="sub-nav-item">
+                                            <a class="sub-nav-link" href="{% url 'moderation:indevelopment' %}">{% trans "Dadata" %}</a>
+                                        </li>
+                                        <li class="sub-nav-item">
+                                            <a class="sub-nav-link" href="{% url 'moderation:indevelopment' %}">{% trans "YandexMap" %}</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link" href="{% url 'moderation:indevelopment' %}">{% trans "Вконтакте" %}</a>
+                            </li>
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link" href="{% url 'moderation:indevelopment' %}">{% trans "WhatsApp" %}</a>
+                            </li>
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link" href="{% url 'moderation:indevelopment' %}">{% trans "Telegram" %}</a>
+                            </li>
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link" href="{% url 'moderation:indevelopment' %}">{% trans "Телефония" %}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link menu-arrow" href="#sidebarBlog" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarBlog">
+                        <span class="nav-icon"><iconify-icon icon="solar:document-text-bold"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Блог (Новости)" %} </span>
+                    </a>
+                    <div class="collapse" id="sidebarBlog">
+                        <ul class="nav sub-navbar-nav">
+
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link" href="{% url 'moderation:blog_settings' %}">{% trans "Блог" %}</a>
+                            </li>
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link" href="{% url 'moderation:categorys_settings' %}">{% trans "Категории" %}</a>
+                            </li>
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link" href="{% url 'moderation:tags_settings' %}">{% trans "Теги" %}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'moderation:pages_settings' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:window-frame-bold"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Страницы" %} </span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'moderation:sponsorship_settings' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:banknote-2-bold"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Благотворительность" %} </span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'moderation:gallery_settings' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:album-line-duotone"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Галерея" %} </span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'moderation:service_settings' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:clipboard-list-linear"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Услуги" %} </span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'moderation:price_settings' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:checklist-minimalistic-outline"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Прайс" %} </span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'moderation:faq_settings' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:question-circle-bold-duotone"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "ЧаВо" %} </span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'moderation:documentation' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:info-circle-bold"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Документация" %} </span>
+                    </a>
+                </li>
+                {% endif %}
+
+                <li class="menu-title mt-2">{% trans "Личные" %}</li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'moderation:edit_profile' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:user-circle-bold-duotone"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Профиль" %} </span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'moderation:user_shift_list' user.id %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:user-circle-bold-duotone"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Смена" %} </span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link " href="{% url 'moderation:withdraw' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:card-send-bold-duotone"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Начисления" %} </span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'webmain:logout' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:logout-3-bold"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Выйти" %} </span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <!-- ========== App Menu End ========== -->
+    <!-- ==================================================== -->
+    <!-- Start right Content here -->
+    <!-- ==================================================== -->
+    <div class="page-content">
+        <!-- Start Container Fluid -->
+        <div class="container-fluid">
+            {% block content %}{% endblock content %}
+        </div>
+        <!-- End Container Fluid -->
+    </div>
+    <!-- ==================================================== -->
+    <!-- End Page Content -->
+    <!-- ==================================================== -->
+</div>
+<!-- END Wrapper -->
+{% block footertop %}{% endblock footertop %}
+<!-- Vendor Javascript (Require in all Page) -->
+<script src="{% static 'site/moderations/assets/js/vendor.js' %}"></script>
+<!-- App Javascript (Require in all Page) -->
+<script src="{% static 'site/moderations/assets/js/app.js' %}"></script>
+<!-- Vector Map Js -->
+<script src="{% static 'site/moderations/assets/vendor/jsvectormap/js/jsvectormap.min.js' %}"></script>
+<script src="{% static 'site/moderations/assets/vendor/jsvectormap/maps/world-merc.js' %}"></script>
+<script src="{% static 'site/moderations/assets/vendor/jsvectormap/maps/world.js' %}"></script>
+<script src="{% static 'site/moderations/assets/js/pages/agent-detail.js' %}"></script>
+{% block footerbottom %}{% endblock footerbottom %}
+</body>
+</html>

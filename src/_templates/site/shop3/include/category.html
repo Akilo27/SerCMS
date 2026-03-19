@@ -1,0 +1,101 @@
+{% load static shop_tags generals_tag %}
+{% block content %}
+{% get_categories_without_parent as categories %}
+<!-- Start of Sidebar -->
+<aside class="sidebar sidebar-switch-xl sticky-sidebar-wrapper left-sidebar sidebar-fixed">
+    <div class="sidebar-overlay"></div>
+    <a href="{% url 'webmain:home' %}#" class="sidebar-toggle"><i class="fas fa-chevron-right"></i></a>
+    <a href="{% url 'webmain:home' %}#" class="sidebar-close"><i class="close-icon"></i></a>
+    <div class="sidebar-content left-sidebar-content scrollable">
+        <div class="dropdown category-dropdown bg-white sticky-sidebar"
+             data-sticky-options="{'minWidth': 1199, 'padding': {'top': 0}, 'paddingOffsetTop': 0}">
+            <a href="{% url 'webmain:home' %}" class="sidebar-logo bg-white d-block after-none">
+                <img src="{% with request|get_settings as data %}{% if data.setting.logo %}{{ data.setting.logo.url }}{% else %}{% static 'site/moderations/assets/images/logo-dark.png' %}{% endif %}{% endwith %}" alt="logo" width="145" height="45" />
+            </a>
+            <h3 class="d-block text-dark font-weight-bolder dropdown-title pb-0 mb-0">Каталог</h3>
+            <div class="dropdown-box text-default">
+                <ul class="menu vertical-menu category-menu">
+                    {% for category in categories %}
+                    <li>
+                        <a href="{{ category.get_absolute_url }}" data-category-id="{{ category.id }}">
+                            {{category.name}}
+                            <span class="submenu-toggle-btn"></span>
+                        </a>
+                        {% if forloop.counter > 1 %}
+                        {% with offset=forloop.counter|add:"-1"|multiply:43 %}
+                        <ul class="megamenu type2" style="margin-top: -{{ offset }}px;">
+                            {% endwith %}
+                            {% else %}
+                            <ul class="megamenu type2" style=" margin-top: 10px; ">
+                                {% endif %}
+                                {% if category.children.all %}
+                                <ul class="megamenu type2">
+                                    <div class="row">
+                                        <div class="col-xl-8 mt-5">
+                                            <h4 class="menu-title">{{category.name}}</h4>
+                                            <hr class="divider" />
+                                            <ul>
+                                                {% for child in category.children.all %}
+                                                <li><a href="{{ product.get_absolute_url }}">{{ child.name }}</a></li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                        <div class="col-xl-4 mt-5">
+                                            <div class="menu-banner banner-fixed menu-banner3 d-none">
+                                                <figure>
+                                                    <img src="assets/images/menu/banner-3.jpg" alt="Menu Banner"
+                                                        width="235" height="461" />
+                                                </figure>
+                                                <div class="banner-content">
+                                                    <h4 class="banner-subtitle font-weight-normal text-white mb-1">
+                                                        Restroom</h4>
+                                                    <h3 class="banner-title font-weight-bolder text-white ls-normal">
+                                                        Furniture Sale
+                                                    </h3>
+                                                    <div class="banner-price-info text-white font-weight-normal ls-25">
+                                                        Up to
+                                                        <span class="text-secondary text-uppercase font-weight-bold">25%
+                                                            Off</span>
+                                                    </div>
+                                                    <a href="demo13-shop.html"
+                                                        class="btn btn-white btn-link btn-sm btn-slide-right btn-icon-right">
+                                                        Shop Now<i class="w-icon-long-arrow-right"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                                {% endif %}
+
+
+                                <div class="col-12">
+                                    <div class="banner banner-fixed menu-banner5 br-xs" style="background-color: #9F9888; height: 250px; background-image: url({% static 'site/wolmart/assets/images/banner/XXXL.webp' %}); " >
+                                        <div class="banner-content y-50">
+                                            <h4
+                                                    class="banner-subtitle font-weight-normal  text-capitalize">
+                                                Гарантия на каждый товар
+                                            </h4>
+                                            <h3
+                                                    class="banner-title font-weight-bolder text-capitalize  ls-normal">
+                                                Профессиональная консультация по выбору товара
+                                            </h3>
+                                        </div>
+                                    </div>
+                                </div>
+                    </li>
+                </ul>
+                </li>
+                {% endfor %}
+                </ul>
+            </div>
+
+        </div>
+    </div>
+</aside>
+{% endblock content %}
+
+{% block footer %}
+
+
+{% endblock footer %}

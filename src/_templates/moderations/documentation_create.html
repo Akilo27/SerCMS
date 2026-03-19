@@ -1,0 +1,94 @@
+{% extends 'moderations/base.html' %}
+{% load static %}
+{% load i18n %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+
+{% block content %}
+<div class="row page-titles mx-0">
+    <div class="col-sm-6 p-md-0">
+        <div class="welcome-text">
+            <h4>{{ documentation.name }}</h4>
+            <p class="mb-0">{{ description }}</p>
+        </div>
+    </div>
+    <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item active"><a>{% trans 'Документация' %}</a></li>
+        </ol>
+    </div>
+</div>
+<div class="card">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-xl-6">
+                <div class="reviews-content">
+                    <!-- Форма для создания документации -->
+                    <form id="documentationForm" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <h6 class="mb-2" style="width: max-content">{% trans "Название" %}</h6>
+                            </div>
+                            <div class="mb-3">
+                                {{ form.name }}
+                            </div>
+                        </div>
+                        <div class="row select-form mb-3">
+                                <h6 class="mb-2" style="width: max-content">{% trans "Тип" %}</h6>
+                                <div class="choices" data-type="select-multiple" tabindex="0" role="combobox"
+                                     aria-autocomplete="list" aria-haspopup="true" aria-expanded="false"
+                                     style="position: relative;">
+                                    {{ form.type }}
+                                </div>
+                            </div>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <h6 class="mb-2" style="width: max-content">{% trans "Описание" %}</h6>
+                            </div>
+                            <div class="mb-3">
+                                {{ form.description }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <h6 class="mb-2" style="width: max-content">{% trans "Файлы" %}</h6>
+                            </div>
+                            <div class="mb-3">
+                                {{ form.files }}
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-hover-dark">
+                            {% trans 'Сохранить документацию' %}
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div class="col-xl-6">
+                <div id="list-documentation">
+                    <div class="bootstrap-media" style="overflow: scroll">
+                        {% for media in documentation_files %}
+                            <div class="row mb-4" id="file-{{ media.id }}" style="margin-right: 0!important;margin-left: 0!important;">
+                                <div class="col-xl-7">
+                                    <img src="{% if media.file %}{{ media.file.url }}{% endif %}" alt="{{ media.file.name }}" style="max-height:200px; max-width: 100%" />
+                                </div>
+                                <div class="col-xl-5">
+                                    <h6>{{ media.file.name|slice:":-4" }}{{ media.file.name|slice:"-4:" }}</h6>
+                                    <button class="btn btn-danger btn-remove" data-id="{{ media.id }}" style="float: right">
+                                        {% trans 'Удалить' %}
+                                    </button>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% include 'moderations/include/paginations.html' with items=files_list %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

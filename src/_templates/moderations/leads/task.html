@@ -1,0 +1,193 @@
+{% extends 'moderations/base.html' %}
+{% load static  %}
+{% load i18n %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+{% block content %}
+<!-- Add Project -->
+<div class="container-xxl">
+
+    <!-- Start here.... -->
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex flex-wrap justify-content-between gap-3">
+<!--                        <div class="search-bar">-->
+<!--                            <span><i class="bx bx-search-alt"></i></span>-->
+<!--                            <input type="search" class="form-control" id="search" placeholder="Search task...">-->
+<!--                        </div>-->
+<!--                        <div>-->
+<!--                            <a href="apps-todo.html#!" class="btn btn-primary">-->
+<!--                                <i class="bx bx-plus me-1"></i>Create Task-->
+<!--                            </a>-->
+<!--                        </div>-->
+                    </div> <!-- end row -->
+                </div>
+                <div>
+                    <div class="table-centered">
+                        <table class="table text-nowrap mb-0">
+                            <thead class="bg-light bg-opacity-50">
+                            <tr>
+                                <th class="border-0 py-2">{% trans "Заголовок" %}</th>
+                                <th class="border-0 py-2">{% trans "Дата Создания" %}</th>
+                                <th class="border-0 py-2">{% trans "Срок Исполнения" %}</th>
+                                <th class="border-0 py-2">{% trans "Назначенный" %}</th>
+                                <th class="border-0 py-2">{% trans "Статус" %}</th>
+                                <th class="border-0 py-2">{% trans "Приоритет" %}</th>
+                            </tr>
+                            </thead> <!-- end thead-->
+                            <tbody>
+                            {% for task in tasks %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="form-check form-todo ps-4">
+                                            {{task.title}}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {{ task.created_at|date:"d.m.Y" }}
+                                    <small>{{ task.created_at|time:"H:i" }}</small>
+                                </td>
+
+                                <td>{{ task.due_date|date:"d.m.Y" }}<small> {{ task.due_date|time:"H:i" }}</small></td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        {% if task.lead.image %}
+                                        <img src="{{task.lead.image.url}}" alt="" class="avatar-xs rounded-circle me-2">
+                                        {% endif %}
+                                        <div>
+                                            <h5 class="fs-14 m-0 fw-normal">{{task.lead.name}}</h5>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <select class="form-select change-task-status" data-task-id="{{ task.id }}">
+                                        {% for value, label in task.TASK_TYPE_CHOICES %}
+                                        <option value="{{ value }}" {% if task.type == value %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td class="{% if task.priority == 'high' %}text-danger{% elif task.priority == 'medium' %}text-warning{% else %}text-success{% endif %}"><i class="bx bxs-circle me-1"></i>{{task.get_priority_display}}</td>
+                            </tr>
+                            {% endfor %}
+                            </tbody> <!-- end tbody -->
+                        </table> <!-- end table -->
+                    </div> <!-- table responsive -->
+                    <div class="align-items-center justify-content-between row g-0 text-center text-sm-start p-3 border-top">
+                        <div class="col-sm">
+                            <div class="text-muted">
+                            </div>
+                        </div>
+                        <div class="col-sm-auto mt-3 mt-sm-0">
+                            {% include 'moderations/include/paginations.html' with items=tasks %}
+
+                        </div>
+                    </div>
+                </div> <!-- end card body -->
+            </div> <!-- end card -->
+        </div> <!-- end col -->
+    </div> <!-- end row -->
+
+</div>
+<div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="searchModalLabel">{% trans 'Поиск' %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="idSearchName" style="display: none;">
+                    <input type="text" id="searchInputName" class="form-control" placeholder="{% trans 'Введите название' %}">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans 'Закрыть' %}</button>
+                <button type="button" class="btn btn-primary" onclick="performSearch()">{% trans 'Поиск' %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .table{
+        width: 100%;
+    }
+    .card{
+        margin-top: 1.25rem;
+    }
+</style>
+<script>
+    function openSearch(type) {
+        const modalLabel = document.getElementById('searchModalLabel');
+        modalLabel.textContent = type === 'name' ? '{% trans "Поиск по названию" %}' : '';
+
+        document.getElementById('idSearchName').style.display = 'none';
+
+        switch (type) {
+            case 'name':
+                document.getElementById('idSearchName').style.display = 'block';
+                break;
+        }
+
+        $('#searchModal').modal('show');
+    }
+
+    function performSearch() {
+        const searchName = document.getElementById('searchInputName').value;
+
+        // Формируем URL для запроса
+        const url = new URL(window.location.href);
+        if (searchName) {
+            url.searchParams.set('search_name', searchName);
+        }
+
+        console.log(url.toString()); // Проверяем, что URL сформирован правильно
+
+        // Перезагружаем страницу с новыми параметрами
+        window.location.href = url.toString();
+
+        // Закрыть модальное окно после выполнения поиска
+        $('#searchModal').modal('hide');
+    }
+</script>
+{% endblock content %}
+{% block footerbottom %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll('.change-task-status').forEach(select => {
+            select.addEventListener('change', function () {
+                const taskId = this.dataset.taskId;
+                const newStatus = this.value;
+
+                fetch("{% url 'crm:update_task_status' %}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "X-CSRFToken": "{{ csrf_token }}",
+                    },
+                    body: new URLSearchParams({
+                        task_id: taskId,
+                        new_status: newStatus
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log("Статус обновлён:", data.new_status);
+                    } else {
+                        alert("Ошибка: " + data.error);
+                    }
+                });
+            });
+        });
+    });
+</script>
+
+{% endblock footerbottom %}

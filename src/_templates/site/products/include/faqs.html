@@ -1,0 +1,75 @@
+<!-- Вопросы -->
+<div class="panel">
+    <div class="panel-body"  id="faq-list">
+        <div class="th-comments-wrap">
+            {% for faq in faqs %}
+            <ul class="comment-list">
+                <li class="th-comment-item">
+                    <div class="th-post-comment">
+                        <div class="comment-avater">
+                            <img src="{{ faq.user.avatar.url }}"
+                                 alt="Comment Author">
+                        </div>
+                        <div class="comment-content">
+                            <h3 class="name">{{ faq.user.username }}</h3>
+                            <p class="text">
+                                {{ faq.question }}
+                            </p>
+                        </div>
+                    </div>
+                    {% if faq.answer %}
+                    <ul class="children">
+                        <li class="th-comment-item">
+                            <div class="th-post-comment">
+                                <div class="comment-avater">
+                                    <img src="https://bootdey.com/img/Content/avatar/avatar2.png"
+                                         alt="Comment Author">
+                                </div>
+                                <div class="comment-content">
+                                    <h3 class="name">Администрация</h3>
+                                    <p class="text">
+                                        {{ faq.answer }}
+                                    </p>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                    {% endif %}
+                </li>
+
+            </ul>
+            <!-- Вопрос -->
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<div class="th-pagination text-center">
+    <ul>
+        {% if faqs.has_previous %}
+        <li>
+            <a href="?faqs_page={{ faqs.previous_page_number }}"  aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+        {% endif %}
+        {% for num in faqs.paginator.page_range %}
+        {% if faqs.number == num %}
+        <li>
+            <a href="#">{{ num }}</a>
+        </li>
+        {% else %}
+        <li>
+            <a href="?faqs_page={{ num }}">{{ num }}</a>
+        </li>
+        {% endif %}
+        {% endfor %}
+        {% if faqs.has_next %}
+        <li>
+            <a href="?faqs_page={{ faqs.next_page_number }}" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</div>
+<!-- Information Content End -->

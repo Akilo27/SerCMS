@@ -1,0 +1,445 @@
+{% extends 'moderations/base.html' %}
+{% load i18n %}
+{% load static  %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<link rel="stylesheet" href="{% static 'profile/css/font-awesome/css/all.min.css' %}">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+{% endblock head %}
+{% block content %}
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title" style="margin-right: 20px">{% trans 'Покупки' %}</h4>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <fieldset>
+                    {% if form.non_field_errors %}
+                    <div class="text-danger">{{ form.non_field_errors }}</div>
+                    {% endif %}
+                    <div class="row">
+                        <legend>Основная информация</legend>
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <label for="{{ form.type.id_for_label }}">{% trans "Тип оплаты" %}:</label>
+                                {{ form.type }}
+                                {{ form.type.errors }}
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <label for="{{ form.status.id_for_label }}">{% trans "Статус" %}:</label>
+                                {{ form.status }}
+                                {{ form.status.errors }}
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <label for="{{ form.phone_number.id_for_label }}">{% trans "Номер телефона" %}:</label>
+                                {{ form.phone_number }}
+                                {{ form.phone_number.errors }}
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <label for="{{ form.customer_email.id_for_label }}">{% trans "Адрес эл. почты" %}:</label>
+                                {{ form.customer_email }}
+                                {{ form.customer_email.errors }}
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <label for="{{ form.customer_name.id_for_label }}">{% trans "Имя" %}:</label>
+                                {{ form.customer_name }}
+                                {{ form.customer_name.errors }}
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <label for="{{ form.customer_surname.id_for_label }}">{% trans "Фамилия" %}:</label>
+                                {{ form.customer_surname }}
+                                {{ form.customer_surname.errors }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <legend>{% trans "Платеж" %}</legend>
+                        <div class="col-4">
+                            <div class="mb-3">
+                                <label for="{{ form.amount.id_for_label }}">{% trans "Сумма" %}:</label>
+                                {{ form.amount }}
+                                {{ form.amount.errors }}
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="mb-3">
+                                <label for="{{ form.delivery_price.id_for_label }}">{% trans "Сумма за доставку" %}:</label>
+                                {{ form.delivery_price }}
+                                {{ form.delivery_price.errors }}
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="mb-3">
+                                <label for="{{ form.all_amount.id_for_label }}">{% trans "Общая сумма" %}:</label>
+                                {{ form.all_amount }}
+                                {{ form.all_amount.errors }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <legend>{% trans "Информация об доставке" %}</legend>
+
+                        <div class="mb-3">
+                            <label for="{{ form.requires_delivery.id_for_label }}">{% trans "Требуется доставка" %}:</label>
+                            {{ form.requires_delivery }}
+                            {{ form.requires_delivery.errors }}
+                        </div>
+
+                        <div id="delivery-fields">  <!-- ОБЕРТКА -->
+                            <div class="col-4">
+                                <div class="mb-3">
+                                    <label for="{{ form.sflat.id_for_label }}">{% trans "Квартира" %}:</label>
+                                    {{ form.sflat }}
+                                    {{ form.sflat.errors }}
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="mb-3">
+                                    <label for="{{ form.sfloor.id_for_label }}">{% trans "Этаж" %}:</label>
+                                    {{ form.sfloor }}
+                                    {{ form.sfloor.errors }}
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="mb-3">
+                                    <label for="{{ form.porch.id_for_label }}">{% trans "Подъезд" %}:</label>
+                                    {{ form.porch }}
+                                    {{ form.porch.errors }}
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.user_comment.id_for_label }}">{% trans "Комментарий к доставке" %}:</label>
+                                {{ form.user_comment }}
+                                {{ form.user_comment.errors }}
+                            </div>
+                            <div class="mb-3">
+                                <label for="{{ form.delivery_address.id_for_label }}">{% trans "Адрес доставки" %}:</label>
+                                {{ form.delivery_address }}
+                                {{ form.delivery_address.errors }}
+                            </div>
+                            <div class="mb-3">
+                                <label for="{{ form.adress.id_for_label }}">{% trans "Адрес дома" %}:</label>
+                                {{ form.adress }}
+                                {{ form.adress.errors }}
+                            </div>
+                        </div>
+                    </div>
+
+                </fieldset>
+                <fieldset class="mt-4">
+                    <div class="d-flex">
+                        <legend>{% trans "Выбранные товары" %}</legend>
+                        <span id="amaunt-total"></span>
+                        <input type="text" name="selectproduct_id" id="selectproduct_id" class="form-control" >
+                        <button type="button" id="add-selectproduct" class="btn btn-primary mt-2">{% trans "Добавить" %}</button>
+                    </div>
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+
+
+
+                        </tbody>
+                    </table>
+                    {{ selectedproduct_formset.management_form }}
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th>{% trans "Товар" %}</th>
+                            <th>{% trans "Количество" %}</th>
+                            <th>{% trans "Сумма" %}</th>
+                            <th>{% trans "Статус продукта" %}</th>
+                            <th>{% trans "Удалить" %}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for subform in selectedproduct_formset %}
+                        <tr>
+                            <td class="d-flex">
+                                {% if subform.instance.product.image %}
+                                <img src="{{ subform.instance.product.image.url }}" alt="Product Image" style="max-height: 50px;">
+                                {% endif %}
+                                {{ subform.product.errors }}
+                                {{ subform.product }}
+                            </td>
+                            <td>
+                                {{ subform.quantity.errors }}
+                                {{ subform.quantity }}
+                            </td>
+                            <td>
+                                {{ subform.amount.errors }}
+                                {{ subform.amount }}
+                            </td>
+                            <td>
+                                {{ subform.status.errors }}
+                                {{ subform.status }}
+                            </td>
+                            <td>
+                                {{ subform.DELETE.errors }}
+                                {{ subform.DELETE }}
+                            </td>
+                        </tr>
+                        {% for hidden in subform.hidden_fields %}
+                        {{ hidden }}
+                        {% endfor %}
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </fieldset>
+                <button type="submit" class="btn btn-primary mt-3">{% trans "Сохранить" %}</button>
+                <a href="{% url 'moderation:orders' %}" class="btn btn-secondary mt-3">{% trans "Назад" %}</a>
+            </form>
+            <form id="add-product-form" class="d-none" data-order-id="{{ order.id }}">
+                {% csrf_token %}
+                <table>
+                    <tr>
+                        <td><input type="text" name="product_id" id="product_id" class="form-control" required></td>
+                        <td><input type="number" name="quantity" id="quantity" class="form-control" min="0" value="1"></td>
+                        <td><input type="number" name="amount" id="amount" class="form-control" step="0.01" value="1"></td>
+                        <td>
+                            <select name="status" id="status" class="form-control">
+                                <option value="1" selected>{% trans "В корзине" %}</option>
+                                <option value="2">{% trans "Оплачен" %}</option>
+                            </select>
+                        </td>
+                        <td><input type="checkbox" name="DELETE" id="DELETE" class="form-check-input"></td>
+                    </tr>
+                </table>
+                <button type="button" id="submit-product" class="btn btn-primary mt-2">{% trans "Добавить" %}</button>
+            </form>
+
+            <script>
+document.addEventListener("DOMContentLoaded", function () {
+    const addSelectProductBtn = document.getElementById("add-selectproduct");
+    const selectProductInput = document.getElementById("selectproduct_id");
+    const productIdInput = document.getElementById("product_id");
+    const submitProductBtn = document.getElementById("submit-product");
+
+    if (!addSelectProductBtn || !selectProductInput || !productIdInput || !submitProductBtn) {
+        console.error("Один из элементов не найден.");
+        return;
+    }
+
+    // Копирование и автосабмит
+    addSelectProductBtn.addEventListener("click", function () {
+        const selectedProductId = selectProductInput.value.trim();
+
+        if (!selectedProductId) {
+            alert("Введите ID товара для добавления.");
+            return;
+        }
+
+        productIdInput.value = selectedProductId;
+        submitProductBtn.click();
+    });
+
+    // Отправка формы
+    submitProductBtn.addEventListener("click", function () {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        const productId = document.getElementById('product_id').value;
+        const quantity = document.getElementById('quantity').value;
+        const amount = document.getElementById('amount').value;
+        const status = document.getElementById('status').value;
+        const deleted = document.getElementById('DELETE').checked;
+
+        if (deleted) {
+            alert("Продукт не будет добавлен, так как он отмечен как удалён.");
+            return;
+        }
+
+        const form = document.getElementById('add-product-form');
+        const orderId = form.dataset.orderId;
+
+        fetch("{% url 'moderation:add_selected_product' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-CSRFToken": csrfToken,
+            },
+            body: new URLSearchParams({
+                product_id: productId,
+                quantity: quantity,
+                amount: amount,
+                status: status,
+                order_id: orderId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // ✅ Обновить страницу
+                window.location.reload();
+            } else {
+                alert("Ошибка: " + (data.error || "Неизвестная ошибка"));
+            }
+        })
+        .catch(error => {
+            console.error("Ошибка при запросе:", error);
+        });
+    });
+});
+
+</script>
+<script>
+    function updateAmountTotal() {
+  let total = 0;
+  document.querySelectorAll('.amount-input.form-control').forEach(amountInput => {
+    const val = parseFloat(amountInput.value);
+    if (!isNaN(val)) total += val;
+  });
+  document.getElementById('amaunt-total').textContent = total.toFixed(2);
+
+  // Дублируем сумму в поле с id="id_amount"
+  const mainAmountField = document.getElementById('id_amount');
+  if (mainAmountField) {
+    mainAmountField.value = total.toFixed(2);
+  }
+}
+
+document.querySelectorAll('.quantity-input').forEach(input => {
+  input.addEventListener('input', () => {
+    const quantity = parseFloat(input.value);
+    const price = parseFloat(input.dataset.price);
+    if (isNaN(quantity) || quantity < 0 || isNaN(price)) return;
+
+    const amountId = input.id.replace('quantity', 'amount');
+    const amountInput = document.getElementById(amountId);
+    if (amountInput) {
+      let total = quantity > 1 ? price * quantity : price;
+      amountInput.value = total.toFixed(2);
+    }
+
+    updateAmountTotal();
+  });
+
+  // Инициализация суммы для каждого поля при загрузке
+  input.dispatchEvent(new Event('input'));
+});
+
+// Инициализация общей суммы при загрузке
+updateAmountTotal();
+
+</script>
+<script>
+document.querySelectorAll('.quantity-input').forEach(input => {
+  input.addEventListener('input', () => {
+    const quantity = parseFloat(input.value);
+    const price = parseFloat(input.dataset.price);
+
+    if (isNaN(quantity) || quantity < 0 || isNaN(price)) {
+      return;
+    }
+
+    // Заменяем 'quantity' в id на 'amount', чтобы найти соответствующее поле суммы
+    const amountId = input.id.replace('quantity', 'amount');
+    const amountInput = document.getElementById(amountId);
+
+    if (amountInput) {
+      let total;
+      if (quantity > 1) {
+        total = price * quantity;
+      } else {
+        total = price;
+      }
+      amountInput.value = total.toFixed(2);
+    }
+  });
+
+  // Инициализируем сумму при загрузке страницы
+  input.dispatchEvent(new Event('input'));
+});
+
+</script>
+
+
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('form').forEach(form => {
+            form.querySelectorAll('input, select, textarea').forEach(field => {
+                if (field.type === 'checkbox' || field.type === 'radio') {
+                    field.classList.add('form-check-input');
+                } else {
+                    field.classList.add('form-control');
+                }
+            });
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const checkbox = document.getElementById("id_requires_delivery");
+        const deliveryFields = document.getElementById("delivery-fields");
+        function toggleDeliveryFields() {
+            if (checkbox.checked) {
+                deliveryFields.style.display = "block";
+            } else {
+                deliveryFields.style.display = "none";
+            }
+        }
+        // Начальное состояние
+        toggleDeliveryFields();
+        // При изменении
+        checkbox.addEventListener("change", toggleDeliveryFields);
+    });
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const addSelectProductBtn = document.getElementById("add-selectproduct");
+    const selectProductInput = document.getElementById("selectproduct_id");
+    const productIdInput = document.getElementById("product_id");
+    const submitProductBtn = document.getElementById("submit-product");
+
+    if (!addSelectProductBtn || !selectProductInput || !productIdInput || !submitProductBtn) {
+        console.error("Один из элементов не найден.");
+        return;
+    }
+
+    addSelectProductBtn.addEventListener("click", function () {
+        const selectedProductId = selectProductInput.value.trim();
+
+        if (!selectedProductId) {
+            alert("Введите ID товара для добавления.");
+            return;
+        }
+
+        // Копируем значение в поле #product_id
+        productIdInput.value = selectedProductId;
+
+        // Триггерим клик по кнопке добавления
+        submitProductBtn.click();
+    });
+});
+</script>
+
+
+{% endblock content %}

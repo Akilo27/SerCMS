@@ -1,0 +1,196 @@
+{% extends 'site/products/base.html' %}
+{% load static generals_tag %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+{% endblock head %}
+
+{% block content %}
+<style>
+    span.title1.slideinup {
+    color: #54595f!important;
+}
+p.hero-text.slideinup {
+    color: #54595f!important;
+}
+
+</style>
+{% include 'site/products/include/slider.html' %}
+<section class="space-top" >
+
+</section>
+
+{#% include 'site/products/include/verticale_banner.html' %#}
+
+<section class="space-top" >
+</section>
+
+
+
+<section class="space-bottom">
+    <div class="container">
+        <div class="row flex-row-reverse">
+            <div class="col-xl-3 col-lg-4 col-md-6 mb-40 mb-lg-0">
+                <div class="offer-grid mega-hover" style="height: 100%; background-size: cover;    align-content: center; background-color: rgb(243, 238, 193);{% if settings.threeblock_image %}background-image: url({{settings.threeblock_image.url}}){%endif%}">
+                    <span class="h6 box-subtitle fs-16 "  style="color: #fff;">
+                    {{settings.fiveblock_title}}
+                </span>
+                    <h3 class="box-title " style="color: #fff;">
+                        {{settings.fiveblock_description}}
+                    </h3>
+                    <a href="{{settings.fiveblock_button_link}}" class="th-btn btn-sm style4">
+                        {{settings.fiveblock_button_title}}
+                        <i class="fas fa-chevrons-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="col-xl-9 col-lg-8 col-md-6">
+                <div class="row justify-content-lg-between justify-content-center align-items-center">
+                    <div class="col-md text-center text-md-start"><h2 class="sec-title mb-30">Рекомендуемые продукты</h2>
+                    </div>
+                    <div class="col-md-auto d-none d-lg-inline-block">
+                        <div class="sec-btn mb-35">
+                            <div class="icon-box">
+                                <button data-slider-prev="#productSlider7" class="slider-arrow default"><i
+                                        class="far fa-arrow-left"></i></button>
+                                <button data-slider-next="#productSlider7" class="slider-arrow default"><i
+                                        class="far fa-arrow-right"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="swiper th-slider has-shadow" id="productSlider7"
+                     data-slider-options='{"breakpoints":{"0":{"slidesPerView":1},"576":{"slidesPerView":"2"},"768":{"slidesPerView":"1"},"992":{"slidesPerView":"2"},"1200":{"slidesPerView":"3"}}}'>
+                    <div class="swiper-wrapper">
+                        {% for product in products %}
+                        <div class="swiper-slide">
+                            <div class="th-product product-grid" data-product="{{product.id}}">
+                                <div class="product-img">
+                                    <a href="{% url 'shop:products' product.slug %}">
+                                        <img style="height: 250px;width: auto; object-fit: cover;" src="{% if product.image %}{{ product.image.url }}{% else%}{% static 'site/furbar/images/product_4_market.jpg' %}{% endif %}" width="270" height="303" alt="product" />
+                                    </a>
+                                    <div class="actions">
+                                        {% include 'site/products/include/bookmark_btn.html'  %}
+                                    </div>
+                                </div>
+                                <div class="product-content" style="    margin-bottom: 15px;">
+                                    {% if not user.type == 2 %}
+                                    {% if product.quantity == 0 and product.order %}
+                                    {% include 'site/products/include/form_applications.html' %}
+                                    {% else %}
+                                    {% include 'site/products/include/cart_button.html' %}
+                                    {% endif %}
+                                    {% endif %}
+
+                                    <h3 class="product-title" style="padding-top: 10px;">
+                                        <a href="{% url 'shop:products' product.slug %}" style="    max-width: 100%;
+    text-decoration: none;
+    color: inherit;
+    white-space: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.5;
+    height: 3em;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    display: -webkit-box;">
+                                            {{ product.name }}
+                                        </a>
+                                    </h3>
+
+                                    {% if valute != product.valute %}
+                                    {% if product.type == 1 %}
+                                    <span class="price"  style="    color: #017D03;
+    font-weight: 600;
+    font-size: 20px;">{#% currency_conversion_for_products request product.price product.valute.id %#} {{valute.icon_code}} {% if product.typeofchoice == 2%} /{{product.weight}}гр  {% elif  product.typeofchoice == 3 or product.typeofchoice == 1 %} за уп.{% endif %}</span>
+                                    {% else %}
+                                    <span class="price" style="    color: #017D03;
+    font-weight: 600;
+    font-size: 20px;">{#% currency_conversion_for_products request product.productsvariable_set.all.first.price product.valute.id %#} {#{valute.icon_code}#} {#% if product.typeofchoice == 2%#} /{#{product.weight}#}гр  {#% elif  product.typeofchoice == 3 or product.typeofchoice == 1 %#} за уп.{#% endif %#}</span>
+                                    {% endif %}
+                                    {% else %}
+                                    {% if product.type == 1 %}
+                                    <span class="price" style="    color: #017D03;
+    font-weight: 600;
+    font-size: 20px;">{{ product.price }} {{valute.icon_code}} {% if product.typeofchoice == 2%} /{{product.weight}}гр  {% elif  product.typeofchoice == 3 or product.typeofchoice == 1 %} за уп.{% endif %}</span>
+                                    {% else %}
+                                    <span class="price" style="    color: #017D03;
+    font-weight: 600;
+    font-size: 20px;">{{ product.productsvariable_set.all.first.price }} {{valute.icon_code}} {% if product.typeofchoice == 2%} /{{product.weight}}гр  {% elif  product.typeofchoice == 3 or product.typeofchoice == 1 %} за уп.{% endif %}</span>
+                                    {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% if settings.manufacturers %}
+<div class="brand-sec2" data-bg-src="">
+    <div class="container th-container">
+        <div class="swiper th-slider" id="blogSlider1"
+             data-slider-options='{"breakpoints":{"0":{"slidesPerView":2},"576":{"slidesPerView":"2"},"768":{"slidesPerView":"3"},"992":{"slidesPerView":"4"},"1200":{"slidesPerView":"5"},"1400":{"slidesPerView":"6"}}}'>
+            <div class="swiper-wrapper">
+                {% include 'site/products/include/manufacturers.html' %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+<section class="space" id="blog-sec">
+    <div class="container">
+        <div class="row justify-content-lg-between justify-content-center align-items-center">
+            <div class="col-lg">
+                <h2 class="sec-title text-center text-lg-start">Новости</h2>
+            </div>
+            <div class="col-lg-auto d-none d-lg-block">
+                <div class="sec-btn">
+                    <a href="{% url 'webmain:blogs' %}" class="th-btn">Остальные новости
+                        <i class="fas fa-chevrons-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="row gy-4" style="margin-top: 50px;">
+            {% for simple_blog in simple_blogs %}
+            <div class="col-xl-4 col-md-6">
+                <div class="blog-grid">
+                    <div class="blog-img">
+                        <img src="/_media/{{simple_blog.cover}}" alt="blog image">
+                    </div>
+                    <div class="blog-content">
+                        <div class="blog-meta">
+
+                        </div>
+                        <h3 class="box-title">
+                            <a href="{% url 'webmain:blog' simple_blog.slug %}" style="    max-width: 100%;
+    white-space: normal;
+    -webkit-box-orient: vertical;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.6;
+    margin-bottom: 7px;">
+                                {{simple_blog.name}}
+                            </a>
+                        </h3>
+                        <a href="{% url 'webmain:blog' simple_blog.slug %}" class="th-btn btn-sm style4">
+                            Подробнее
+                            <i class="fas fa-chevrons-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock content %}

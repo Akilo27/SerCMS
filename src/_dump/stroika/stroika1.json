@@ -1,0 +1,409 @@
+[
+  {
+    "page": "home",
+    "fields": {
+      "slide_1_image": {
+        "field": "Сертифицированая компания",
+        "info": "/_media/jsontemplate/banner-bg-1.jpg",
+        "type": "media"
+      },
+      "slide_1_title": {
+        "field": "Сертифицированая компания",
+        "info": [],
+        "type": "information"
+      },
+      "slide_1_description": {
+        "field": "<strong>Приимущество</strong> перед другими компаниями",
+        "info": [],
+        "type": "information"
+      },
+      "slide_1_button": {
+        "field": "Посмотреть сертификат",
+        "info": [],
+        "type": "information"
+      },
+      "slide_1_button_link": {
+        "field": "#",
+        "info": [],
+        "type": "information"
+      },
+      "slide_2_image": {
+        "field": "Сертифицированая компания",
+        "info": "/_media/jsontemplate/banner-bg-2.jpg",
+        "type": "media"
+      },
+      "slide_2_title": {
+        "field": "Готовые проекты",
+        "info": [],
+        "type": "information"
+      },
+      "slide_2_description": {
+        "field": "<strong>Качественные</strong> проекты домов с готовыми расчетами",
+        "info": [],
+        "type": "information"
+      },
+      "slide_2_button": {
+        "field": "Посмотреть проекты",
+        "info": [],
+        "type": "information"
+      },
+      "slide_2_button_link": {
+        "field": "#",
+        "info": [],
+        "type": "information"
+      },
+      "slide_3_image": {
+        "field": "Сертифицированая компания",
+        "info": "/_media/jsontemplate/banner-bg-3.jpg",
+        "type": "media"
+      },
+      "slide_3_title": {
+        "field": "Професиональнные специалисты",
+        "info": [],
+        "type": "information"
+      },
+      "slide_3_description": {
+        "field": "<strong>Опытные</strong> рабочие, прошедшие обучение",
+        "info": [],
+        "type": "information"
+      },
+      "slide_3_button": {
+        "field": "Посмотреть услуги",
+        "info": [],
+        "type": "information"
+      },
+      "slide_3_button_link": {
+        "field": "#",
+        "info": [],
+        "type": "information"
+      },
+      "about_title": {
+        "field": "О нашей компании",
+        "info": [],
+        "type": "information"
+      },
+      "about_description": {
+        "field": "Construction — это компания по проектированию зданий с полным спектром услуг, придерживающаяся простой и уникальной философии проектирования и строительства. Мы считаем, что один проектировщик зданий возьмёт на себя всю работу — от концепции на бумаге до реализации на вашем участке. Потому что так вы сможете общаться и работать с одним человеком, делиться своими мыслями и идеями, чтобы воплотить их в жизнь в сотрудничестве.",
+        "info": [],
+        "type": "information"
+      },
+      "about_button": {
+        "field": "Заказать услугу",
+        "info": [],
+        "type": "information"
+      },
+      "about_button_link": {
+        "field": "#",
+        "info": [],
+        "type": "information"
+      },
+      "about_image": {
+        "field": "",
+        "info": "/_media/jsontemplate/about-bg.jpg",
+        "type": "media"
+      },
+      "about_info_title": {
+        "field": "Наша компания",
+        "info": [],
+        "type": "information"
+      },
+      "about_info_description": {
+        "field": "Одним из важных критериев нашей компании является ориентация на клиента. Заказывая наши услуги, вы можете быть уверены в качестве результата.",
+        "info": [],
+        "type": "information"
+      },
+      "about_info_titles_1": {
+        "field": "Удовлетворены клиенты",
+        "info": [],
+        "type": "information"
+      },
+      "about_info_count_1": {
+        "field": "600",
+        "info": [],
+        "type": "information"
+      },
+      "about_info_titles_2": {
+        "field": "Награды",
+        "info": [],
+        "type": "information"
+      },
+      "about_info_count_2": {
+        "field": "50",
+        "info": [],
+        "type": "information"
+      },
+      "about_info_titles_3": {
+        "field": "Многолетний опыт работы",
+        "info": [],
+        "type": "information"
+      },
+      "about_info_count_3": {
+        "field": "10",
+        "info": [],
+        "type": "information"
+      },
+      "about_info_titles_4": {
+        "field": "Реализованный проекты",
+        "info": [],
+        "type": "information"
+      },
+      "about_info_count_4": {
+        "field": "100",
+        "info": [],
+        "type": "information"
+      },
+      "service_title": {
+        "field": "Услуги",
+        "info": [],
+        "type": "information"
+      },
+      "services": {
+        "field": "",
+        "info": [
+          2,
+          1
+        ],
+        "type": "services"
+      },
+      "gallery_title": {
+        "field": "Галерея",
+        "info": [],
+        "type": "information"
+      },
+      "gallery": {
+        "field": "",
+        "info": [
+          2,
+          1
+        ],
+        "type": "gallery"
+      },
+      "gallery_button": {
+        "field": "Посмотреть все",
+        "info": [],
+        "type": "information"
+      },
+      "gallery_button_link": {
+        "field": "#",
+        "info": [],
+        "type": "information"
+      },
+      "advantage_title": {
+        "field": "Почему именно мы?",
+        "info": [],
+        "type": "information"
+      },
+      "advantage_description": {
+        "field": "Каждый цвет вызывает у каждого человека разные эмоции. Ваши эмоции по-прежнему зависят от вашего индивидуального жизненного опыта.",
+        "info": [],
+        "type": "information"
+      },
+      "advantage_title_1": {
+        "field": "Качественные материалы",
+        "info": [],
+        "type": "information"
+      },
+      "advantage_description_1": {
+        "field": "За 10 лет работы мы протестировали различные материалы и выбрали наиболее подходящие",
+        "info": [],
+        "type": "information"
+      },
+      "advantage_title_2": {
+        "field": "Современное строительство",
+        "info": [],
+        "type": "information"
+      },
+      "advantage_description_2": {
+        "field": "Выбирая нашу строительную компанию, вы выбираете передовые технологии и надёжность. Наш опыт и профессионализм гарантируют качество строительства",
+        "info": [],
+        "type": "information"
+      },
+      "advantage_image": {
+        "field": "",
+        "info": "/_media/jsontemplate/why-bg.jpg",
+        "type": "media"
+      },
+      "contact_title": {
+        "field": "У вас есть какие-нибудь вопросы?",
+        "info": [],
+        "type": "information"
+      },
+      "contact_description": {
+        "field": "Если у вас есть какие-либо вопросы или вы хотите заказать у нас услуги, пожалуйста, заполните форму справа. Наши менеджеры работают круглосуточно и перезвонят вам в течение дня.",
+        "info": [],
+        "type": "information"
+      },
+      "contact_image": {
+        "field": "",
+        "info": "/_media/jsontemplate/form-bg.jpg",
+        "type": "media"
+      }
+    }
+  },
+  {
+    "page": "about",
+    "fields": {
+      "about_title": {
+        "field": "О нашей компании",
+        "info": [],
+        "type": "information"
+      },
+      "about_description": {
+        "field": "Construction — это компания по проектированию зданий с полным спектром услуг, придерживающаяся простой и уникальной философии проектирования и строительства. Мы считаем, что один проектировщик зданий возьмёт на себя всю работу — от концепции на бумаге до реализации на вашем участке. Потому что так вы сможете общаться и работать с одним человеком, делиться своими мыслями и идеями, чтобы воплотить их в жизнь в сотрудничестве.",
+        "info": [],
+        "type": "information"
+      },
+      "about_button": {
+        "field": "Заказать услугу",
+        "info": [],
+        "type": "information"
+      },
+      "about_button_link": {
+        "field": "#",
+        "info": [],
+        "type": "information"
+      },
+      "about_image": {
+        "field": "",
+        "info": "/_media/jsontemplate/about-bg.jpg",
+        "type": "media"
+      },
+      "about_info_title": {
+        "field": "Наша компания",
+        "info": [],
+        "type": "information"
+      },
+      "about_info_description": {
+        "field": "Одним из важных критериев нашей компании является ориентация на клиента. Заказывая наши услуги, вы можете быть уверены в качестве результата.",
+        "info": [],
+        "type": "information"
+      },
+      "about_info_titles_1": {
+        "field": "Удовлетворены клиенты",
+        "info": [],
+        "type": "information"
+      },
+      "about_info_count_1": {
+        "field": "600",
+        "info": [],
+        "type": "information"
+      },
+      "about_info_titles_2": {
+        "field": "Награды",
+        "info": [],
+        "type": "information"
+      },
+      "about_info_count_2": {
+        "field": "50",
+        "info": [],
+        "type": "information"
+      },
+      "about_info_titles_3": {
+        "field": "Многолетний опыт работы",
+        "info": [],
+        "type": "information"
+      },
+      "about_info_count_3": {
+        "field": "10",
+        "info": [],
+        "type": "information"
+      },
+      "about_info_titles_4": {
+        "field": "Реализованный проекты",
+        "info": [],
+        "type": "information"
+      },
+      "about_info_count_4": {
+        "field": "100",
+        "info": [],
+        "type": "information"
+      },
+      "service_title": {
+        "field": "Услуги",
+        "info": [],
+        "type": "information"
+      },
+      "services": {
+        "field": "",
+        "info": [
+          2,
+          1
+        ],
+        "type": "services"
+      },
+      "gallery_title": {
+        "field": "Галерея",
+        "info": [],
+        "type": "information"
+      },
+      "gallery": {
+        "field": "",
+        "info": [
+          2,
+          1
+        ],
+        "type": "gallery"
+      },
+      "gallery_button": {
+        "field": "Посмотреть все",
+        "info": [],
+        "type": "information"
+      },
+      "gallery_button_link": {
+        "field": "#",
+        "info": [],
+        "type": "information"
+      },
+      "advantage_title": {
+        "field": "Почему именно мы?",
+        "info": [],
+        "type": "information"
+      },
+      "advantage_description": {
+        "field": "Каждый цвет вызывает у каждого человека разные эмоции. Ваши эмоции по-прежнему зависят от вашего индивидуального жизненного опыта.",
+        "info": [],
+        "type": "information"
+      },
+      "advantage_title_1": {
+        "field": "Качественные материалы",
+        "info": [],
+        "type": "information"
+      },
+      "advantage_description_1": {
+        "field": "За 10 лет работы мы протестировали различные материалы и выбрали наиболее подходящие",
+        "info": [],
+        "type": "information"
+      },
+      "advantage_title_2": {
+        "field": "Современное строительство",
+        "info": [],
+        "type": "information"
+      },
+      "advantage_description_2": {
+        "field": "Выбирая нашу строительную компанию, вы выбираете передовые технологии и надёжность. Наш опыт и профессионализм гарантируют качество строительства",
+        "info": [],
+        "type": "information"
+      },
+      "advantage_image": {
+        "field": "",
+        "info": "/_media/jsontemplate/why-bg.jpg",
+        "type": "media"
+      },
+      "contact_title": {
+        "field": "У вас есть какие-нибудь вопросы?",
+        "info": [],
+        "type": "information"
+      },
+      "contact_description": {
+        "field": "Если у вас есть какие-либо вопросы или вы хотите заказать у нас услуги, пожалуйста, заполните форму справа. Наши менеджеры работают круглосуточно и перезвонят вам в течение дня.",
+        "info": [],
+        "type": "information"
+      },
+      "contact_image": {
+        "field": "",
+        "info": "/_media/jsontemplate/form-bg.jpg",
+        "type": "media"
+      }
+    }
+  }
+]

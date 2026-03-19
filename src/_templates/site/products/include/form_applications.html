@@ -1,0 +1,49 @@
+
+
+<div class="meta-action" id="no_order_{{product.id}}" data-product="{{product.id}}">
+    {% if product in application_exists %}
+    <a class="th-btn" type="button" id="button_order_no">
+        <i class="fa fa-phone"></i>
+        Вы оставили заявку
+    </a>
+    {% else %}
+    <a class="th-btn" type="button" data-bs-toggle="modal" data-product="{{product.id}}" data-bs-target="#exampleApplications{{product.id}}">
+        <i class="fa fa-phone"></i>
+        Под заказ
+    </a>
+    <div class="modal fade" id="exampleApplications{{product.id}}" tabindex="-1" aria-labelledby="exampleApplications{{product.id}}" style="display: none;" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" data-product="{{product.id}}">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalCenterTitle">{{product.name}}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" data-applications="True" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form class="form-floating" id="application-form" data-product="{{product.id}}">
+                        <input type="hidden" id="csrf_token" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                        <input type="hidden" id="product_id" name="product_id" value="{{ product.id }}">
+
+                        <div class="form-floating mb-3">
+                            <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com">
+                            <label for="floatingInput">Электронная почта</label>
+                        </div>
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="phone" placeholder="Телефон">
+                            <label for="phone">Телефон</label>
+                        </div>
+                        <br>
+                        <div class="form-floating">
+                            <textarea class="form-control" placeholder="Комментарий" id="floatingTextarea"></textarea>
+                            <label for="floatingTextarea">Комментарий</label>
+                        </div>
+                        <div id="application-message" style="display: none;"></div>  <!-- Элемент для сообщений -->
+                        <div class="modal-footer">
+                            <button type="button" onclick="submitForm(this)" data-product="{{product.id}}" class="th-btn">Отправить</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>

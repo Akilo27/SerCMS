@@ -1,0 +1,81 @@
+{% extends 'site/shop4/base.html' %}
+{% load static generals_tag i18n %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+
+
+{% block content %}
+<main class="main">
+    <div class="page-content mb-8 mt-5">
+        <div class="container">
+            <div class="tab-vertical row gutter-lg">
+                {% include 'site/shop4/include/profile_menu.html' %}
+                <div class="tab-content" id="nav-tabContent">
+                    <div class="myaccount-content">
+                        <div class="shopping-wishlist-form table-responsive">
+                            <div class="card mb-3">
+                                <table class="table text-center">
+                                    <thead>
+                                    <tr>
+                                        <th class="product-thumb"> </th>
+                                        <th class="product-total-price">
+                                            {% trans 'Информация' %}
+                                        </th>
+                                        <th class="product-thumb">
+                                            {% trans 'Дата' %}
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for order in orders %}
+                                    <tr >
+                                        <td class="product-name">
+                                            <a class="action" href="{#% url 'shop:orderdetail' order.id %#}" >
+                                                <i class="pe-7s-piggy" style="top: 0; left:-5px;"></i>
+                                                {% if order.status == 1 %}<span class="new_ticket" data-bs-toggle="tooltip" data-bs-placement="top" title="Заявка не обработана">*</span>{% endif %}
+                                            </a>
+                                        </td>
+                                        <td>{% for product in order.selectedproduct.all %}{{ product.variety.products.name }}{% endfor %}</td>
+                                        <td><i class="pe-7s-date"></i> <span>{{ order.created_timestamp }}</span></td>
+                                    </tr>
+                                    {% endfor %}
+
+                                    </tbody>
+                                </table>
+
+                            </div>
+                            {% include 'site/shop4/include/paginations.html' with items=applications %}
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<style>
+    .new_ticket {
+        background: #f2a100;
+        height: 20px;
+        display: inline-flex;
+        width: 20px;
+        justify-content: center;
+        border-radius: 15px;
+        color: #fff;
+    }
+    i.pe-7s-piggy {
+        font-size: 24px;
+        position: relative;
+        top: 10px;
+    }
+    .card{
+        --bs-card-border-width:0;
+    }
+
+</style>
+{% endblock content %}

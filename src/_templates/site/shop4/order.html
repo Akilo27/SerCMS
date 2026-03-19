@@ -1,0 +1,175 @@
+{% extends 'site/shop4/base.html' %}
+{% load static shop_tags generals_tag i18n %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+
+{% block head %}
+
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+{% endblock head %}
+
+{% block content %}
+
+<main class="main">
+    <div class="page-content mb-8 mt-5">
+        <div class="container">
+            <div class="tab-vertical row gutter-lg">
+                {% include 'site/shop4/include/profile_menu.html' %}
+                <div class="tab-content" id="nav-tabContent">
+                    {% for order in orders %}
+
+
+                    <div class="col-lg-12">
+                        <div class="card" style="margin-bottom:20px;">
+                            <div class="card-body p-4">
+                                <div class="row">
+                                    <div class="col-lg-8" id="list-order-product">
+                                        {% for selected in order.selectedproduct.all %}
+                                        <div class="card mb-3">
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="d-flex flex-row align-items-center">
+                                                            <div style="margin-right: 40px;">
+                                                                <img src="{% if selected.product.image %}{{ selected.product.image.url }}{% else %}{% static 'site/furbar/images/nophotoyeti.jpg' %}{% endif %}" class="img-fluid rounded-3" alt="Shopping item" style="width: 105px;">
+                                                            </div>
+                                                            <div class="ms-3">
+                                                                <h5 data-link="{% url 'shop:products' selected.product.slug %}">{{ selected.product.name }}</h5>
+                                                                <p class="small mb-0">
+                                                                    {% if valute != selected.product.valute %}
+                                                                    <span data-product="{{ selected.id }}" data-price="{{ selected.product.price }}">{% currency_conversion_for_products request selected.product.price selected.product.valute.id %} {{valute.icon_code}}</span>
+                                                                    {% else %}
+                                                                    <span data-product="{{ selected.id }}" data-price="{{ selected.product.price }}">{{ selected.product.price }} {{valute.icon_code}}</span>
+                                                                    {% endif %}
+                                                                    - {% trans 'Сумма' %}: <span data-product="{{ selected.id }}" data-amount="{{ selected.amount }}">{% currency_conversion_for_products request selected.amount selected.product.valute.id %} {{valute.icon_code}}</span>
+
+                                                                </p>
+                                                                <br>
+                                                                <a href="{% url 'shop:orderdetail' selected.id %}" class="btn btn-primary btn-sm" style="ine-height: 30px;">
+                                                                    <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+                                                                   {% trans 'Подробнее о покупке' %}
+                                                                </a>
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="card btn-primary text-white rounded-3 ">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                                    <h5 class="mb-0">{% trans 'Детали заказа' %}</h5>
+                                                    <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/avatar-6.webp"
+                                                         class="img-fluid rounded-3" style="width: 45px;" alt="Avatar">
+                                                </div>
+                                                <hr class="my-4">
+                                                <div class="d-flex justify-content-between">
+                                                    <p class="mb-2">{% trans 'Товаров' %}</p>
+                                                    <p class="mb-2" >{{order.selectedproduct.count}}</p>
+                                                </div>
+                                                <div class="d-flex justify-content-between">
+                                                    <p class="mb-2">{% trans 'Статус оплаты' %}</p>
+                                                    <p class="mb-2" >{{order.get_type_display}}</p>
+                                                </div>
+                                                <div class="d-flex justify-content-between">
+                                                    <p class="mb-2">{% trans 'Статус Доставки' %}</p>
+                                                    <p class="mb-2" >{{order.get_status_display}}</p>
+                                                </div>
+                                                <div class="d-flex justify-content-between">
+                                                    <p class="mb-2">{% trans 'Адрес доставки' %}</p>
+                                                    <p class="mb-2" >{{order.delivery_address}}</p>
+                                                </div>
+                                                <div class="d-flex justify-content-between">
+                                                    <p class="mb-2">{% trans 'ИТОГО' %}</p>
+                                                    <p class="mb-2" >{% currency_conversion request order.all_amount %} {{valute.icon_code}}</p>
+                                                </div>
+                                                <a href="{{order.purchase_url}}" data-mdb-button-init data-mdb-ripple-init class="btn btn-dark btn-block btn-lg">
+                                                    <div class="d-flex justify-content-between">
+
+                                    <span>
+                                                    {% if order.type == 1 %}
+                                                    {% trans 'Оплатить' %} <i class="fas fa-long-arrow-alt-right ms-2"></i>
+                                                    {% else %}
+                                                    {% trans 'Оплачено' %}
+                                                    {% endif %}
+                                                    </span>
+                                                    </div>
+                                                </a>
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<style>
+    /*.btn {*/
+    /*    border: none;*/
+    /*    background-color: #336699;*/
+    /*    text-transform: uppercase;*/
+    /*    font-family: "Nunito Sans", sans-serif;*/
+    /*    font-weight: 600;*/
+    /*    padding: 20px 40px;*/
+    /*    line-height: 1;*/
+    /*    color: #fff;*/
+    /*    font-size: 13px;*/
+    /*}*/
+    /*.btn:hover{*/
+    /*    border: none;*/
+    /*    background-color: #1f2226;*/
+    /*    text-transform: uppercase;*/
+    /*    font-family: "Nunito Sans", sans-serif;*/
+    /*    font-weight: 600;*/
+    /*    padding: 20px 40px;*/
+    /*    line-height: 1;*/
+    /*    color: #fff;*/
+    /*    font-size: 13px;*/
+    /*}*/
+
+    .active>.page-link, .page-link.active{
+        background-color: #336699;
+        border: 1px solid #336699;
+        border-radius: 5px;
+        color: #d5d5d5;
+        display: inline-block;
+        font-size: 18px;
+        font-weight: 700;
+        height: 40px;
+        line-height: 33px;
+        transition: 0.3s;
+        -webkit-transition: 0.3s;
+        -moz-transition: 0.3s;
+        -ms-transition: 0.3s;
+        -o-transition: 0.3s;
+        text-align: center;
+        width: 40px;
+    }
+    .mb-2{
+        font-family: "Nunito Sans", sans-serif;
+        line-height: 28px;
+        margin-bottom: 6px;
+        color:#000;
+    }
+
+
+</style>
+{% endblock content %}

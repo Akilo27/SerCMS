@@ -1,0 +1,176 @@
+{% extends "admin/base_site.html" %}
+{% block extrastyle %}
+{{ block.super }}
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
+{{ media }}
+{% endblock %}
+
+
+
+{% if not is_popup %}
+
+{% endif %}
+
+{% block content_title %} {{ opts.verbose_name_plural|capfirst }} {% endblock %}
+
+{% block content %}
+
+<div class="col-4 col-lg-4">
+    <div class="card">
+        <div class="card-body justify-content-between align-items-center">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4>Загрузка CSV-файла</h4>
+                <a href="https://docs.google.com/spreadsheets/d/1S3uK0BWfnsA6BiDOdMo8154-U4YtW_PUdeReVv_h6js/edit?usp=sharing" previewlistener="true" target="_blank">Образец CSV-файла</a>
+            </div>
+            <form method="post" enctype="multipart/form-data">
+                <br>
+                <select name="import_type">
+                    <option value="products">Товары</option>
+                    <option value="categories">Категории товаров</option>
+                    <option value="variable">Вариации</option>
+                    <option value="manufacturers">Производители</option>
+                    <option value="blogs">Статьи</option>
+                    <option value="categorys">Категории статей</option>
+                    <option value="seo">SEO</option>
+                    <option value="banner">Баннер</option>
+                    <option value="settingsglobale">Настройки</option>
+                </select>
+                <br>
+                {% csrf_token %}
+                <br>
+                {{ form.csv_file }}
+                <br>
+                <br>
+                <button type="submit" class="btn btn-info form-control">Загрузить</button>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="col-8 col-lg-8">
+    <div class="card">
+        <div class="card-body">
+            <h4>История</h4>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">Тип</th>
+                    <th scope="col">Дата</th>
+                    <th scope="col">Статус</th>
+                    <th scope="col">Количество</th>
+                    <th scope="col">Удачных</th>
+                    <th scope="col">Создано/Обновлено</th>
+                    <th scope="col">Пауза</th>
+                    <th scope="col">Удаление</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for item in import_csv %}
+                <tr>
+                    <td>{{ item.get_type_display }}</td>
+                    <td>{{ item.create|date:"d.m.Y" }}</td>
+                    <td>{% if item.status %}Закончен{% else %}Не закончен{% endif %}</td>
+
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.passed }}</td>
+                    <td>{{ item.added_element }}/{{ item.upload_element }}</td>
+                    <td>
+                        <a href="#" class="btn btn-success">Остановить</a>
+                    </td>
+                    <td>
+                        {% if item.status %}
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#exampleModal{{item.id}}">Удалить</button>
+                        {% else %}
+                         <a href="#" class="btn btn-secondary" style="cursor: not-allowed;">Удалить</a>
+                        {% endif %}
+                    </td>
+                </tr>
+
+
+<!-- Modal -->
+
+                {% endfor %}
+
+                </tbody>
+            </table>
+            <ul class="pagination pagination-sm m-0 float-right">
+                {% if import_csv.has_previous %}
+                <li class="page-item previous ">
+                    <a class="page-link" href="?page={{ import_csv.previous_page_number }}" data-dt-idx="0" tabindex="0" previewlistener="true">«</a>
+                </li>
+                {% endif %}
+
+
+                {% for i in import_csv.paginator.page_range %}
+                {% if import_csv.number == i %}
+                <li class="page-item active">
+                    <a class="page-link" href="#">{{ i }}</a>
+                </li>
+                {% elif i > import_csv.number|add:'-2' and i < import_csv.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                </li>
+                {% endif %}
+                {% endfor %}
+
+                {% if import_csv.has_next %}
+                <li class="page-item next disabled">
+                    <a class="page-link" href="?page={{ import_csv.paginator.num_pages }}" data-dt-idx="7" tabindex="0">»</a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</div>
+ {% for item in import_csv %}
+<div class="modal fade" id="exampleModal{{item.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Удалить импорт ?</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            Будут также удалены все продукты связанные с ним
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-success" data-bs-dismiss="modal">Нет,я передумал</button>
+                            <a href="#" class="btn btn-danger">Удалить</a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+{% endfor %}
+
+
+
+<style>
+    .dark-mode .content-wrapper {
+        background-color: #454d55;
+        margin-left: 0px !important;
+        color: #fff;
+    }
+    aside#jazzy-sidebar {
+        display: none;
+    }
+    nav#jazzy-navbar {
+        margin-left: 0px !important;
+    }
+    footer.main-footer {
+        margin-left: 0px !important;
+    }
+    i.fas.fa-bars {
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block extrajs %}
+{{  block.super }}
+{% endblock %}
+
+
+

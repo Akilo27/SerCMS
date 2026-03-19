@@ -1,0 +1,81 @@
+{% load static generals_tag l10n %}
+
+<div class="th-comments-wrap">
+    <ul class="comment-list">
+        {% if reviews and reviews|length > 0 %}
+        {% for review in reviews %}
+        <li class="review th-comment-item">
+            <div class="th-post-comment">
+                <div class="comment-avater">
+                    <img src="{{ review.author.avatar.url }}" alt="Comment Author">
+                </div>
+                <div class="comment-content">
+                    <h4 class="name">{{ review.author.username }}</h4>
+                    <div class="star-rating" role="img" aria-label="Rated 5.00 out of 5">
+                        <span style="width:
+                        {% if review.starvalue == 1 %}
+                        20%
+                        {% elif review.starvalue == 2 %}
+                        40%
+                        {% elif review.starvalue == 3 %}
+                        60%
+                        {% elif review.starvalue == 4 %}
+                        80%
+                        {% else %}
+                        100%
+                        {% endif %}">
+                            Оценка
+                            <strong class="rating">
+                                5.00
+                            </strong> out of 5 based on
+                            <span class="rating">
+                                1
+                            </span>
+                            customer rating
+                        </span>
+                    </div>
+                    <p class="text">
+
+                        {{ review.text }}
+                    </p>
+                </div>
+            </div>
+        </li>
+        {% endfor %}
+        {% else %}
+        <div class="review" style=" height: 300px;">
+            <p>Нет отзывов.</p>
+        </div>
+        {% endif %}
+    </ul>
+</div>
+
+<div class="th-pagination text-center">
+    <ul>
+        {% if reviews.has_previous %}
+        <li>
+            <a href="?reviews_page={{ reviews.previous_page_number }}" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+        {% endif %}
+        {% for num in reviews.paginator.page_range %}
+        {% if reviews.number == num %}
+        <li>
+            <a href="#">{{ num }}</a>
+        </li>
+        {% else %}
+        <li>
+            <a href="?reviews_page={{ num }}">{{ num }}</a>
+        </li>
+        {% endif %}
+        {% endfor %}
+        {% if reviews.has_next %}
+        <li>
+            <a href="?reviews_page={{ reviews.next_page_number }}" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</div>

@@ -1,0 +1,22 @@
+{% load static generals_tag i18n %}
+{% render_subscription_form as subscription_form_context %}
+
+<div class="footer-top-newsletter">
+    <div class="container z-index-common">
+        <div class="newsletter-wrap">
+            <div class="newsletter-content">
+                <div class="email-icon">
+                    <img src="{% static 'site/frutin/img/icon/email_2.svg' %}" alt="Icon">
+                </div>
+                <h4 class="newsletter-title">{% trans 'Подпишитесь, чтобы быть в курсе новостей.' %}</h4>
+            </div>
+            <form class="newsletter-form" method="post" action="{% url 'moderation:subscribe' %}" >
+                <div class="form-group">
+                    <input type="hidden" name="csrfmiddlewaretoken" value="{{ subscription_form_context.csrf_token }}">
+                    {{ subscription_form_context.form.email }}
+                </div>
+                <button type="submit" class="th-btn">{% trans 'Подписаться.' %}</button>
+            </form>
+        </div>
+    </div>
+</div>

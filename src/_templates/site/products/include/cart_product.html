@@ -1,0 +1,45 @@
+{% load static generals_tag %}
+{% get_user_cart_products request as cart_products %}
+
+<div class="sidemenu-wrapper sidemenu-cart d-none d-lg-block" id="cart_product" >
+    <div class="sidemenu-content">
+        <button class="closeButton sideMenuCls"><i class="far fa-times"></i></button>
+        <div class="widget woocommerce widget_shopping_cart" id="cart_product_canvas">
+            <h3 class="widget_title">Продукты в корзине</h3>
+            <div class="widget_shopping_cart_content">
+                <ul class="woocommerce-mini-cart cart_list product_list_widget" >
+                    {% for product in cart_products.0 %}
+
+                    <li class="woocommerce-mini-cart-item mini_cart_item">
+
+                        <a href="{% url 'shop:products' product.product.slug %}">
+                            <img src="{% if product.product.image %}{{ product.product.image.url }}{% else %}{% static 'site/image.jpg' %}{% endif %}" alt="Cart Image">
+                             {{ product.product.name|safe }}
+                        </a>
+                        <span class="quantity">{{ product.quantity }} ×
+                            <span class="woocommerce-Price-amount amount">
+                                <span class="woocommerce-Price-currencySymbol">{% currency_conversion_for_products request product.amount product.product.valute.id %}</span>
+                                {% currency_conversion_for_products request product.product.price  product.product.valute.id %}
+                            </span>
+                        </span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <p class="woocommerce-mini-cart__total total">
+                    <strong>Сумма :</strong>
+                    <span class="woocommerce-Price-amount amount">
+                        <span  class="woocommerce-Price-currencySymbol">{% currency_conversion request cart_products.1 %}</span>
+                         {{cart_products.4 }}
+                    </span>
+
+                </p>
+                <p class="woocommerce-mini-cart__buttons buttons">
+                    <a href="{% url 'shop:my_cart' %}" class="th-btn wc-forward">
+                        Корзина
+                    </a>
+                    <a href="{% url 'payment:checkout' %}" class="th-btn checkout wc-forward">Оформить</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

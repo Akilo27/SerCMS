@@ -1,0 +1,244 @@
+{% extends 'site/stroitel1/base.html' %}
+{% load static generals_tag  shop_tags %}
+{% block title %}{{ homepage.title }}{% endblock title %}
+{% block description %}{{ homepage.metadescription }}{% endblock description %}
+{% block propertytitle %}{{ homepage.propertytitle }}{% endblock propertytitle %}
+{% block propertydescription %}{{ homepage.propertydescription }}{% endblock propertydescription %}
+{% block propertyimage %}{% if homepage.previev %}{{ homepage.previev.url }}{% endif %}{% endblock propertyimage %}
+{% block head %}
+<style>
+    .services-thumb {
+    height: 200px;
+}
+</style>
+{% endblock head %}
+
+{% block content %}
+<section class="s-banner">
+	<div class="swiper banner-swiper">
+		<div class="swiper-wrapper">
+			<div class="swiper-slide" style="background-image: url({{ json_fields.slide_1_image.info }})">
+				<div class="banner-content">
+					<div class="banner-subtitle wow fadeIn" data-wow-delay="0.1s">{{ json_fields.slide_1_title.field }}</div>
+					<h2 class="banner-title wow fadeIn" data-wow-delay="0.2s">
+						{{ json_fields.slide_1_description.field|safe }}
+					</h2>
+					<a href="{{ json_fields.slide_1_button_link.field }}" class="banner-btn def-btn anchor-link wow fadeIn" data-wow-delay="0.3s">{{ json_fields.slide_1_button.field }}</a>
+				</div>
+			</div>
+			<div class="swiper-slide" style="background-image: url({{ json_fields.slide_2_image.info }})">
+				<div class="banner-content">
+					<div class="banner-subtitle wow fadeIn" data-wow-delay="0.1s">{{ json_fields.slide_2_title.field }}</div>
+					<h2 class="banner-title wow fadeIn" data-wow-delay="0.2s">
+						{{ json_fields.slide_2_description.field|safe }}
+					</h2>
+					<a href="{{ json_fields.slide_2_button_link.field }}" class="banner-btn def-btn anchor-link wow fadeIn" data-wow-delay="0.3s">{{ json_fields.slide_2_button.field }}</a>
+				</div>
+			</div>
+			<div class="swiper-slide" style="background-image: url({{ json_fields.slide_3_image.info }})">
+				<div class="banner-content">
+					<div class="banner-subtitle wow fadeIn" data-wow-delay="0.1s">{{ json_fields.slide_3_title.field }}</div>
+					<h2 class="banner-title wow fadeIn" data-wow-delay="0.2s">
+						{{ json_fields.slide_3_description.field|safe }}
+					</h2>
+					<a href="{{ json_fields.slide_3_button_link.field }}" class="banner-btn def-btn anchor-link wow fadeIn" data-wow-delay="0.3s">{{ json_fields.slide_3_button.field }}</a>
+				</div>
+			</div>
+		</div>
+		<div class="swiper-pagination wow fadeInUp" data-wow-delay="0.5s"></div>
+		<div class="container">
+			<div class="swiper-button-prev"></div>
+			<div class="swiper-button-next"></div>
+		</div>
+	</div>
+</section>
+
+<section class="s-about" id="s-about">
+	<div class="container">
+
+		<div class="about-row">
+			<div class="about-left">
+				<h2 class="def-title wow fadeInLeft" data-wow-delay="0.2s">{{ json_fields.about_title.field }}</h2>
+				<div class="def-desc wow fadeInLeft" data-wow-delay="0.3s">
+					{{ json_fields.about_description.field|safe }}
+				</div>
+				<a href="{{ json_fields.about_button_link.field }}" class="def-btn anchor-link wow fadeInLeft" data-wow-delay="0.4s">{{ json_fields.about_button.field }}</a>
+			</div>
+
+			<div class="about-right">
+				<img src="{{ json_fields.about_image.info }}" alt="О нас" class="wow fadeIn" data-wow-delay="0.5s">
+			</div>
+		</div>
+
+	</div>
+</section>
+
+
+<section class="s-numbers">
+	<div class="container">
+		<div class="numbers-row num-scroll">
+
+			<div class="numbers-left">
+				<h2 class="def-title color-white wow fadeInLeft" data-wow-delay="0.2s">
+					{{ json_fields.about_info_title.field }}
+				</h2>
+				<div class="def-desc wow fadeInLeft" data-wow-delay="0.3s">
+					{{ json_fields.about_info_description.field|safe }}
+				</div>
+			</div>
+
+			<div class="numbers-right">
+				<div class="numbers-item">
+					<div class="numbers-num num-js" data-count="{{ json_fields.about_info_count_1.field }}">0</div>
+					<div class="numbers-desc">
+						{{ json_fields.about_info_titles_1.field }}
+					</div>
+				</div>
+				<div class="numbers-item">
+					<div class="numbers-num num-js" data-count="{{ json_fields.about_info_count_2.field }}">0</div>
+					<div class="numbers-desc">
+						{{ json_fields.about_info_titles_2.field }}
+					</div>
+				</div>
+				<div class="numbers-item">
+					<div class="numbers-num num-js" data-count="{{ json_fields.about_info_count_3.field }}">0</div>
+					<div class="numbers-desc">
+						{{ json_fields.about_info_titles_3.field }}
+					</div>
+				</div>
+				<div class="numbers-item">
+					<div class="numbers-num num-js" data-count="{{ json_fields.about_info_count_4.field }}">0</div>
+					<div class="numbers-desc">
+						{{ json_fields.about_info_titles_4.field }}
+					</div>
+				</div>
+			</div>
+
+		</div>
+	</div>
+</section>
+
+<section class="s-services" id="s-services">
+	<div class="container">
+		<h2 class="center-title wow fadeIn" data-wow-delay="0.1s">{{ json_fields.service_title.field }}</h2>
+
+		<div class="services-row">
+			{% for service in services %}
+			<div class="services-item wow fadeIn" data-wow-delay="0.1s">
+				<div class="services-thumb">
+					<img src="{% if service.image %}{{service.image.url}}{% else %}{% static 'site/stroitel1/images/service-3.jpg' %}{% endif %}" alt="Construction of houses">
+				</div>
+				<div class="services-body">
+					<h4 class="services-title">{{service.name}}</h4>
+					<div class="services-desc">
+						{{service.description|truncatechars:150|safe}}
+					</div>
+					<a href="{{service.get_absolute_url}}" data-effect="mfp-zoom-in" class="def-btn services-btn">Посмотреть</a>
+				</div>
+			</div>
+			{% endfor %}
+		</div>
+	</div>
+</section>
+
+<section class="s-gallery" id="s-gallery">
+	<div class="container">
+		<h2 class="center-title wow fadeIn" data-wow-delay="0.1s">{{ json_fields.gallery_title.field }}</h2>
+
+		<div class="gallery-wrap">
+{% for image in gallery %}
+
+			<a href="{{image.get_absolute_url}}" class="gallery-item wow fadeIn" data-effect="mfp-zoom-in" data-wow-delay="0.2s">
+				<span class="gallery-border"></span>
+				<img src="{{image.image.url}}" alt="Image 1">
+			</a>
+{% endfor %}
+
+		</div>
+
+		<div class="gallery-btn">
+			<a href="{{ json_fields.gallery_button_link.field }}" class="def-btn wow fadeInUp" data-wow-delay="0.2s">{{ json_fields.gallery_button.field }}</a>
+		</div>
+
+	</div>
+</section>
+
+<section class="s-why" id="s-why">
+	<div class="container">
+		<div class="why-row">
+
+			<div class="why-left">
+				<h2 class="def-title wow fadeInLeft" data-wow-delay="0.1s">{{ json_fields.advantage_title.field }}</h2>
+				<div class="def-desc wow fadeInLeft" data-wow-delay="0.2s">
+					{{ json_fields.advantage_description.field }}
+				</div>
+
+				<div class="why-features">
+
+					<div class="why-features-item">
+						<div class="why-features-icon wow fadeInLeft" data-wow-delay="0.3s">
+							<img src="{% static 'site/stroitel1/images/check-mark.svg' %}" alt="Check mark">
+						</div>
+
+						<div class="why-features-right">
+							<div class="why-features-title wow fadeInRight" data-wow-delay="0.4s">{{ json_fields.advantage_title_1.field }}</div>
+							<div class="why-features-desc wow fadeInRight" data-wow-delay="0.5s">
+								{{ json_fields.advantage_description_1.field }}
+							</div>
+						</div>
+					</div>
+
+					<div class="why-features-item">
+						<div class="why-features-icon wow fadeInLeft" data-wow-delay="0.3s">
+							<img src="{% static 'site/stroitel1/images/check-mark.svg' %}" alt="Check mark">
+						</div>
+
+						<div class="why-features-right">
+							<div class="why-features-title wow fadeInRight" data-wow-delay="0.4s">{{ json_fields.advantage_title_2.field }}</div>
+							<div class="why-features-desc wow fadeInRight" data-wow-delay="0.5s">
+								{{ json_fields.advantage_description_2.field }}
+							</div>
+						</div>
+					</div>
+
+				</div>
+			</div>
+
+			<div class="why-right">
+				<img src="{{ json_fields.advantage_image.info }}" alt="{{ json_fields.advantage_title.field }}" class="wow fadeIn" data-wow-delay="0.6s">
+			</div>
+
+		</div>
+	</div>
+</section>
+
+<section class="s-form" id="s-contact">
+	<div class="container">
+		<div class="form-row">
+
+			<div class="form-left">
+				<h2 class="def-title">{{ json_fields.contact_title.field }}</h2>
+				<div class="def-desc">
+					{{ json_fields.contact_description.field }}
+				</div>
+				<div class="form-image">
+					<img src="{{ json_fields.contact_image.info }}" alt="Feedback form">
+				</div>
+			</div>
+
+			<div class="form-right">
+				<form>
+					<input type="text" placeholder="Your name*" required>
+					<input type="text" placeholder="Your phone*" required>
+					<input type="text" placeholder="Your email">
+					<textarea cols="30" rows="5" placeholder="Comment"></textarea>
+					<button class="def-btn form-button">Send</button>
+				</form>
+			</div>
+
+		</div>
+	</div>
+</section>
+
+
+{% endblock content %}

@@ -1,0 +1,122 @@
+2025-06-28 19:17:48,662 django.utils.autoreload INFO     Watching for file changes with StatReloader
+2025-06-28 19:17:48,728 silk.profiling.profiler WARNING  Cannot execute silk_profile as silk is not installed correctly.
+2025-06-28 19:17:51,862 django.request ERROR    Internal Server Error: /
+Traceback (most recent call last):
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/utils/deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/contrib/sites/middleware.py", line 12, in process_request
+    request.site = get_current_site(request)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/contrib/sites/shortcuts.py", line 16, in get_current_site
+    return Site.objects.get_current(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/contrib/sites/models.py", line 59, in get_current
+    return self._get_site_by_id(site_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/contrib/sites/models.py", line 30, in _get_site_by_id
+    site = self.get(pk=site_id)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/db/models/query.py", line 633, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/db/models/query.py", line 380, in __len__
+    self._fetch_all()
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/db/models/query.py", line 1881, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 1549, in execute_sql
+    sql, params = self.as_sql()
+                  ^^^^^^^^^^^^^
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 736, in as_sql
+    extra_select, order_by, group_by = self.pre_sql_setup(
+                                       ^^^^^^^^^^^^^^^^^^^
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 84, in pre_sql_setup
+    self.setup_query(with_col_aliases=with_col_aliases)
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 73, in setup_query
+    self.select, self.klass_info, self.annotation_col_map = self.get_select(
+                                                            ^^^^^^^^^^^^^^^^
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 296, in get_select
+    sql, params = self.compile(col)
+                  ^^^^^^^^^^^^^^^^^
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 546, in compile
+    sql, params = node.as_sql(self, self.connection)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/db/models/expressions.py", line 1133, in as_sql
+    sql = ".".join(map(compiler.quote_name_unless_alias, identifiers))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 537, in quote_name_unless_alias
+    r = self.connection.ops.quote_name(name)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/db/backends/dummy/base.py", line 20, in complain
+    raise ImproperlyConfigured(
+django.core.exceptions.ImproperlyConfigured: settings.DATABASES is improperly configured. Please supply the ENGINE value. Check settings documentation for more details.
+2025-06-28 19:17:56,029 django.request ERROR    Internal Server Error: /applications/
+Traceback (most recent call last):
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/utils/deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/contrib/sites/middleware.py", line 12, in process_request
+    request.site = get_current_site(request)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/contrib/sites/shortcuts.py", line 16, in get_current_site
+    return Site.objects.get_current(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/contrib/sites/models.py", line 59, in get_current
+    return self._get_site_by_id(site_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/contrib/sites/models.py", line 30, in _get_site_by_id
+    site = self.get(pk=site_id)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/db/models/query.py", line 633, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/db/models/query.py", line 380, in __len__
+    self._fetch_all()
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/db/models/query.py", line 1881, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 1549, in execute_sql
+    sql, params = self.as_sql()
+                  ^^^^^^^^^^^^^
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 736, in as_sql
+    extra_select, order_by, group_by = self.pre_sql_setup(
+                                       ^^^^^^^^^^^^^^^^^^^
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 84, in pre_sql_setup
+    self.setup_query(with_col_aliases=with_col_aliases)
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 73, in setup_query
+    self.select, self.klass_info, self.annotation_col_map = self.get_select(
+                                                            ^^^^^^^^^^^^^^^^
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 296, in get_select
+    sql, params = self.compile(col)
+                  ^^^^^^^^^^^^^^^^^
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 546, in compile
+    sql, params = node.as_sql(self, self.connection)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/db/models/expressions.py", line 1133, in as_sql
+    sql = ".".join(map(compiler.quote_name_unless_alias, identifiers))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 537, in quote_name_unless_alias
+    r = self.connection.ops.quote_name(name)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/akilo/PycharmProjects/unicalCMS/.env/lib/python3.12/site-packages/django/db/backends/dummy/base.py", line 20, in complain
+    raise ImproperlyConfigured(
+django.core.exceptions.ImproperlyConfigured: settings.DATABASES is improperly configured. Please supply the ENGINE value. Check settings documentation for more details.

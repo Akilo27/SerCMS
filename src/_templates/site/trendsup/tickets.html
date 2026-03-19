@@ -1,0 +1,195 @@
+{% extends 'site/trendsup/base.html' %}
+{% load static generals_tag i18n %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+
+{% endblock head %}
+{% block content %}
+
+<main class="main">
+    <div class="page-content mb-8 mt-5">
+        <div class="container">
+            <div class="tab-vertical row gutter-lg">
+                <div class="col-xxl-3 col-lg-3">
+                    <aside class="sidebar-area">
+
+                        <div class="widget widget_categories widget-profile">
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <div class="profile-avatar">
+                                    {# порядок проверок: Profile.avatar -> user.avatar -> user.image -> дефолт #}
+                                    {% if user.profile.avatar %}
+                                    <img src="{{ user.profile.avatar.url }}" alt="{{ user.get_full_name|default:user.username }}">
+                                    {% elif user.avatar %}
+                                    <img src="{{ user.avatar.url }}" alt="{{ user.get_full_name|default:user.username }}">
+                                    {% elif user.image %}
+                                    <img src="{{ user.image.url }}" alt="{{ user.get_full_name|default:user.username }}">
+                                    {% else %}
+                                    <img src="{% static 'img/default-avatar.png' %}" alt="avatar">
+                                    {% endif %}
+                                </div>
+
+                                <div class="profile-meta">
+                                    {% if user.last_name or user.first_name %}
+                                    <h6 class="mb-0">{{ user.last_name }} {{ user.first_name }}</h6>
+                                    {% elif user.get_full_name %}
+                                    <h6 class="mb-0">{{ user.get_full_name }}</h6>
+                                    {% else %}
+                                    <h6 class="mb-0">{{ user.username }}</h6>
+                                    {% endif %}
+                                    <div class="text-muted">@{{ user.username }}</div>
+                                </div>
+                            </div>
+                            {% include 'site/trendsup/include/profile_menu.html' %}
+                        </div>
+                    </aside>
+                </div>
+                <div class="col-xxl-9 col-lg-9">
+                    <div style="text-align: center; margin-bottom: 15px;">
+
+                        <a href="{% url 'useraccount:ticket_create' %}" class="btn btn-primary btn-hover-dark btn-margin" previewlistener="true" style="
+    background: #d14a40;
+    margin-bottom: 15px;
+    border: 0;
+    border-radius: 10px;
+"> <i class="fa fa-plus"></i>{% trans "Новое обращение в поддержку" %} </a>
+                    </div>
+
+                    <div class="shopping-wishlist-form table-responsive">
+                        <div class="card mb-3">
+                            <table class="table text-center">
+                                <thead>
+                                <tr>
+                                    <th class="product-thumb"> </th>
+                                    <th class="product-total-price">
+                                        {% trans "Информация" %}
+                                    </th>
+                                    <th class="product-thumb">
+                                        {% trans "Дата" %}
+                                    </th>
+                                    <th class="product-action">{% trans "Удалить" %}</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for ticket in tickets %}
+                                <tr >
+                                    <td class="product-name">
+                                        <a class="action" href="{% url 'useraccount:ticket_message' ticket.pk %}" >
+                                            <i class="pe-7s-mail"></i>
+                                            <span >{% trans "Подробнее" %}</span>
+                                        </a>
+                                    </td>
+                                    <td class="product-name">{{ ticket.themas }}</td>
+                                    <td class="product-name"><i class="pe-7s-date"></i> <span>{{ ticket.date }}</span></td>
+                                    <td class="product-name">
+                                        <button  type="submit" class="remove" onclick="deleteTicket('{{ ticket.id }}')" style="
+    color: #fff;
+    background: #dcb996;
+    /* margin: 15px; */
+    padding: 5px 10px;
+    border: 0;
+    border-radius: 10px;
+">
+                                            <i class="fa fa-window-close"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+
+                                </tbody>
+                            </table>
+
+                        </div>
+                        {#% include 'site/shop5/include/paginations.html' with items=ticket_comments %#}
+
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock content %}
+{% block bottomfooter %}
+
+<script>
+    document.getElementById('checkAll').addEventListener('change', function() {
+        const checkboxes = document.querySelectorAll('input[name="ticket_ids"]');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+    });
+
+    function deleteSelected() {
+        const selectedIds = Array.from(document.querySelectorAll('input[name="ticket_ids"]:checked')).map(checkbox => checkbox.value);
+        if (selectedIds.length === 0) {
+            alert("{% trans 'Выберите хотя бы один элемент для удаления.' %}");
+            return;
+        }
+
+        if (confirm("{% trans 'Вы уверены, что хотите удалить выбранные элементы?' %}")) {
+            const csrfToken = '{{ csrf_token }}'; // Получаем CSRF-токен
+
+            fetch("{% url 'moderation:ticket_delete' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    ticket_ids: selectedIds
+                })
+            })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        alert("{% trans 'Ошибка при удалении элементов.' %}");
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    alert("{% trans 'Ошибка при удалении элементов.' %}");
+                });
+        }
+    }
+
+    function deleteTicket(ticketId) {
+        if (confirm("{% trans 'Вы уверены, что хотите удалить этот элемент?' %}")) {
+            const csrfToken = '{{ csrf_token }}';
+
+            fetch("{% url 'moderation:ticket_delete' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    ticket_ids: [ticketId]
+                })
+            })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        alert("{% trans 'Ошибка при удалении элемента.' %}");
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    alert("{% trans 'Ошибка при удалении элемента.' %}");
+                });
+        }
+    }
+
+    function filterForMe() {
+        const url = new URL(window.location.href);
+        url.searchParams.set('for_me', '1');
+        window.location.href = url.toString();
+    }
+</script>
+{% endblock bottomfooter %}

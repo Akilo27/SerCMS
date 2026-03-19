@@ -1,0 +1,47 @@
+{% extends 'site/trendsup/base.html' %}
+{% load static generals_tag %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+
+{% block content %}
+<main class="main">
+    <!-- Start of Page Header -->
+    <div class="page-header">
+        <div class="container">
+            <h4 class="page-title mb-0">{{blog.name}}</h4>
+        </div>
+    </div>
+    <!-- End of Page Header -->
+
+
+    <!-- Start of Page Content -->
+    <div class="page-content mb-8">
+        <div class="container">
+            <div class="row gutter-lg">
+                <div class="main-content post-single-content">
+                    <div class="post post-grid post-single">
+                        <figure class="post-media br-sm">
+                            <img src="{% if blog.cover %}{{ blog.cover.url }}{% endif %}" alt="Blog" width="930" height="500"/>
+                        </figure>
+                        <div class="post-details">
+                            <div class="post-meta">
+
+                                - <a href="{{ blog.create }}" class="post-date">{{ blog.create }}</a>
+                            </div>
+                            <div class="post-content">
+                                <p>{{ pageinformation|safe }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End Post -->
+                </div>
+                <!-- End of Main Content -->
+            </div>
+        </div>
+    </div>
+    <!-- End of Page Content -->
+</main>
+{% endblock content %}

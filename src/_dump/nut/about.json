@@ -1,0 +1,373 @@
+[
+  {
+    "page": "about",
+    "fields": {
+      "about_1_image": {
+        "field": "",
+        "info": "/_static/site/frutin/img/hero/kedr.png",
+        "type": "media"
+      },
+      "about_2_image": {
+        "field": "",
+        "info": "/_static/site/frutin/img/hero/mango.png",
+        "type": "media"
+      },
+      "about_title_small": {
+        "field": "О нас",
+        "info": [],
+        "type": "information"
+      },
+      "about_title": {
+        "field": "Правильное питание: начните с органических продуктов",
+        "info": [],
+        "type": "information"
+      },
+      "about_description": {
+        "field": "Органические продукты производятся в рамках системы земледелия, которая исключает использование синтетических пестицидов, гербицидов, генетически модифицированных организмов (ГМО) и искусственных удобрений. Вместо этого фермеры, занимающиеся органическим земледелием, полагаются на естественные методы, такие как севооборот, компостирование и биологическая борьба с вредителями.",
+        "info": [],
+        "type": "information"
+      },
+      "about_years": {
+        "field": "21",
+        "info": [],
+        "type": "information"
+      },
+      "about_years_title": {
+        "field": "Лет работы",
+        "info": [],
+        "type": "information"
+      },
+      "about_small_image_1": {
+        "field": "",
+        "info": "/_static/site/frutin/img/hero/inzhir.png",
+        "type": "media"
+      },
+      "about_small_title_1": {
+        "field": "Лидер сельского хозяйства",
+        "info": [],
+        "type": "information"
+      },
+      "about_small_image_2": {
+        "field": "",
+        "info": "/_static/site/frutin/img/hero/kashtan.png",
+        "type": "media"
+      },
+      "about_small_title_2": {
+        "field": "Умные органические решенияs",
+        "info": [],
+        "type": "information"
+      },
+      "about_button_title": {
+        "field": "Узнать больше",
+        "info": [],
+        "type": "information"
+      },
+      "about_button_link": {
+        "field": "/contacts",
+        "info": [],
+        "type": "information"
+      },
+      "step_title_small": {
+        "field": "Как мы производим качественные продукты питания",
+        "info": [],
+        "type": "information"
+      },
+      "step_title": {
+        "field": "Как мы это делаем?",
+        "info": [],
+        "type": "information"
+      },
+      "step_image_1": {
+        "field": "",
+        "info": "/_static/site/frutin/img/hero/assorti.png",
+        "type": "media"
+      },
+      "step_title_small_1": {
+        "field": "Шаг - 01",
+        "info": [],
+        "type": "information"
+      },
+      "step_title_1": {
+        "field": "Закупка и Контроль Качества\n",
+        "info": [],
+        "type": "information"
+      },
+      "step_description_1": {
+        "field": "Прямые контракты с поставщиками: Работа напрямую с фермерскими хозяйствами, плантациями и производителями в странах происхождения (например, орехи — Чили/США, финики — Иран/Тунис, чай — Цейлон/Индия/Китай). Это сокращает цепочку посредников и гарантирует свежесть.\n\n",
+        "info": [],
+        "type": "information"
+      },
+      "step_image_2": {
+        "field": "",
+        "info": "/_static/site/frutin/img/hero/brazilia.png",
+        "type": "media"
+      },
+      "step_title_small_2": {
+        "field": "Шаг - 02",
+        "info": [],
+        "type": "information"
+      },
+      "step_title_2": {
+        "field": "Создание Уникального Ассортимента\n",
+        "info": [],
+        "type": "information"
+      },
+      "step_description_2": {
+        "field": "Разработка авторских смесей: Создание уникальных миксов (например, \"Энергия утра\" — миндаль, клюква, темный шоколад; \"Восточный базар\" — финики, грецкий орех, имбирь).\n\n",
+        "info": [],
+        "type": "information"
+      },
+      "step_image_3": {
+        "field": "",
+        "info": "/_static/site/frutin/img/hero/cheresnya.png",
+        "type": "media"
+      },
+      "step_title_small_3": {
+        "field": "Шаг - 03",
+        "info": [],
+        "type": "information"
+      },
+      "step_title_3": {
+        "field": "Эффективная Упаковка и Логистика\n",
+        "info": [],
+        "type": "information"
+      },
+      "step_description_3": {
+        "field": "Оптимизированная логистика: Организация поставок морским и авиационным транспортом. Соблюдение температурного режима при перевозке. Налаживание работы с курьерскими службами и собственной службой доставки для быстрой отправки заказов.\n\n",
+        "info": [],
+        "type": "information"
+      },
+      "step_image_4": {
+        "field": "",
+        "info": "/_static/site/frutin/img/hero/dzhjekfrut.png",
+        "type": "media"
+      },
+      "step_title_small_4": {
+        "field": "Шаг - 04",
+        "info": [],
+        "type": "information"
+      },
+      "step_title_4": {
+        "field": "Продвижение и Образование Клиентов",
+        "info": [],
+        "type": "information"
+      },
+      "step_description_4": {
+        "field": "Контент-маркетинг и экспертность: Ведение блога и соцсетей с рецептами (полезные завтраки, смузи, выпечка), гайдами по выбору чая, статьями о пользе продуктов. Проведение дегустаций, онлайн-мастер-классов (например, \"Как правильно заваривать чай Пуэр\" или \"Готовим полезные сладости дома\").\n\n",
+        "info": [],
+        "type": "information"
+      },
+      "counter_1": {
+        "field": "15663",
+        "info": [],
+        "type": "information"
+      },
+      "counter_title_1": {
+        "field": "Оптовых продаж",
+        "info": [],
+        "type": "information"
+      },
+      "counter_2": {
+        "field": "356",
+        "info": [],
+        "type": "information"
+      },
+      "counter_title_2": {
+        "field": "Численность сотрудников",
+        "info": [],
+        "type": "information"
+      },
+      "counter_3": {
+        "field": "2365",
+        "info": [],
+        "type": "information"
+      },
+      "counter_title_3": {
+        "field": "Довольных заказчиков",
+        "info": [],
+        "type": "information"
+      },
+      "counter_4": {
+        "field": "156",
+        "info": [],
+        "type": "information"
+      },
+      "counter_title_4": {
+        "field": "Наград и льгот",
+        "info": [],
+        "type": "information"
+      },
+      "benefit_title_small": {
+        "field": "Почему выбирают нас",
+        "info": [],
+        "type": "information"
+      },
+      "benefit_title": {
+        "field": "Питайте свое тело чистой органической пищей!",
+        "info": [],
+        "type": "information"
+      },
+      "benefit_description": {
+        "field": "Правительства устанавливают правила, гарантирующие, что продукты, маркированные как органические, соответствуют определённым стандартам. Регулярные проверки и аудиты проводятся для поддержания целостности маркировки «органический».\n\n",
+        "info": [],
+        "type": "information"
+      },
+      "benefit_step_image_1": {
+        "field": "",
+        "info": "/_static/site/frutin/img/icon/choose_feature_1.svg",
+        "type": "media"
+      },
+      "benefit_step_1_title": {
+        "field": "100% органически чистое",
+        "info": [],
+        "type": "information"
+      },
+      "benefit_step_1_description": {
+        "field": "Наша продукция сертифицирована авторитетными органическими организациями..",
+        "info": [],
+        "type": "information"
+      },
+      "benefit_step_image_2": {
+        "field": "",
+        "info": "/_static/site/frutin/img/icon/choose_feature_2.svg",
+        "type": "media"
+      },
+      "benefit_step_2_title": {
+        "field": "Свежие продукты",
+        "info": [],
+        "type": "information"
+      },
+      "benefit_step_2_description": {
+        "field": "Наша продукция сертифицирована авторитетными органическими организациями..",
+        "info": [],
+        "type": "information"
+      },
+      "benefit_step_image_3": {
+        "field": "",
+        "info": "/_static/site/frutin/img/icon/choose_feature_3.svg",
+        "type": "media"
+      },
+      "benefit_step_3_title": {
+        "field": "Биодинамическая пища",
+        "info": [],
+        "type": "information"
+      },
+      "benefit_step_3_description": {
+        "field": "Наша продукция сертифицирована авторитетными органическими организациями.",
+        "info": [],
+        "type": "information"
+      },
+      "benefit_step_image_4": {
+        "field": "",
+        "info": "/_static/site/frutin/img/icon/choose_feature_4.svg",
+        "type": "media"
+      },
+      "benefit_step_4_title": {
+        "field": "Биодинамическая пища",
+        "info": [],
+        "type": "information"
+      },
+      "benefit_step_4_description": {
+        "field": "Наша продукция сертифицирована авторитетными органическими организациями.",
+        "info": [],
+        "type": "information"
+      },
+      "benefit_image": {
+        "field": "",
+        "info": "/_static/site/frutin/img/normal/why_1_1.png",
+        "type": "media"
+      },
+      "reviews_banner_image_1": {
+        "field": "",
+        "info": "/_static/site/frutin/img/hero/smes.png",
+        "type": "media"
+      },
+      "reviews_banner_title_1": {
+        "field": "Отзывы",
+        "info": [],
+        "type": "information"
+      },
+      "reviews_banner_title_1": {
+        "field": "Отзывы наших заказчиков\n",
+        "info": [],
+        "type": "information"
+      },
+      "reviews_image_1": {
+        "field": "",
+        "info": "/_static/site/frutin/img/testimonial/testi_3_1.jpg",
+        "type": "media"
+      },
+      "reviews_title_1": {
+        "field": "Еда отличного качества ",
+        "info": [],
+        "type": "information"
+      },
+      "reviews_description_1": {
+        "field": "Органические продукты питания сертифицируются регулирующими органами, чтобы гарантировать их соответствие определенным органическим стандартам ",
+        "info": [],
+        "type": "information"
+      },
+      "reviews_name_1": {
+        "field": "Alex Hamilton",
+        "info": [],
+        "type": "information"
+      },
+      "reviews_status_1": {
+        "field": "Доктор",
+        "info": [],
+        "type": "information"
+      },
+      "reviews_image_2": {
+        "field": "",
+        "info": "/_static/site/frutin/img/testimonial/testi_3_2.jpg",
+        "type": "media"
+      },
+      "reviews_title_2": {
+        "field": "Свежие органические продукты ",
+        "info": [],
+        "type": "information"
+      },
+      "reviews_description_2": {
+        "field": "Органические продукты питания сертифицируются регулирующими органами, чтобы гарантировать их соответствие определенным органическим стандартам ",
+        "info": [],
+        "type": "information"
+      },
+      "reviews_name_2": {
+        "field": "Jasemin Jui",
+        "info": [],
+        "type": "information"
+      },
+      "reviews_status_2": {
+        "field": "Консультант",
+        "info": [],
+        "type": "information"
+      },
+      "reviews_image_3": {
+        "field": "",
+        "info": "/_static/site/frutin/img/testimonial/testi_3_3.jpg",
+        "type": "media"
+      },
+      "reviews_title_3": {
+        "field": "100% органические продукты ",
+        "info": [],
+        "type": "information"
+      },
+      "reviews_description_3": {
+        "field": "Органические продукты питания сертифицируются регулирующими органами, чтобы гарантировать их соответствие определенным органическим стандартам ",
+        "info": [],
+        "type": "information"
+      },
+      "reviews_name_3": {
+        "field": "Martin Danial",
+        "info": [],
+        "type": "information"
+      },
+      "reviews_status_3": {
+        "field": "Доктор",
+        "info": [],
+        "type": "information"
+      }
+
+    }
+  }
+]

@@ -1,0 +1,28 @@
+{% extends 'moderations/base.html' %}
+{% load i18n %}
+{% load static  %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+
+{% endblock head %}
+
+{% block content %}
+<h1>{% trans "Редактирование переводов для языка" %}: {{ code }}</h1>
+
+<form method="post">
+  {% csrf_token %}
+  <textarea name="content" style="width: 100%; height: 600px; font-family: monospace;">{{ content }}</textarea>
+  <br><br>
+  <button type="submit">{% trans "Сохранить" %}</button>
+  <a href="{% url 'moderation:language_list' %}">{% trans "Назад к списку языков" %}</a>
+</form>
+
+{% for message in messages %}
+  <p style="color: green;">{{ message }}</p>
+{% endfor %}
+
+{% endblock content %}

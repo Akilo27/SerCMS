@@ -1,0 +1,153 @@
+{% extends 'moderations/base.html' %}
+{% load i18n %}
+{% load static %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+{% endblock head %}
+
+{% block content %}
+<div class="row page-titles mx-0">
+    <div class="col-sm-6 p-md-0">
+        <div class="welcome-text">
+            <h4>{% trans "Настройка SEO" %}</h4>
+        </div>
+    </div>
+    <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'moderation:seo_settings' %}">{% trans "Список SEO" %}</a></li>
+            <li class="breadcrumb-item active">{% trans "Настройка SEO" %}</li>
+        </ol>
+    </div>
+</div>
+    <div class="card">
+        <div class="card-body" >
+
+            <form method="post" class="requisites-info" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-xl-12">
+                            <div class="row select-form" style="height: 110px;">
+                                <h6 class="mb-2" style="width: max-content">{% trans "Тип страницы" %}</h6>
+                                <div class="choices" data-type="select-multiple" tabindex="0" role="combobox"
+                                     aria-autocomplete="list" aria-haspopup="true" aria-expanded="false"
+                                     style="position: relative;">
+                                    {{ form.pagetype }}
+                                </div>
+                            </div>
+                        </div>
+                        <hr class="mb-4 mt-4">
+                        <div class="col-xl-6 ">
+                            <div class="row">
+                                <div class="mb-3">
+                                    <h6 class="mb-2">{% trans "Превью" %}</h6>
+                                </div>
+                                {% if seo.previev %}
+                                <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                                    {% if seo.previev %}
+                                    <img src="{{seo.previev.url}}" alt="" style="max-height: 300px; max-width: 95%">
+                                    {% endif %}
+                                </div>
+                                {% else %}
+                                    <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                                        <div style="height:300px; border: 0.0625rem solid #EEEEEE; border-radius:0.5rem;width:80%;background: #fff;align-content: center;text-align: center;">
+                                            <h1 style="transform: rotate(20deg); color: #ababab">{% trans "Изображения нет" %}</h1>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                <div class="mb-3 single-form">
+                                    {{ form.previev }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-6 ">
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <h6 class="mb-2" style="width: max-content">{% trans "Мета-заголовок" %}</h6>
+                                </div>
+                                <div class="mb-3">
+                                    {{ form.title }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <h6 class="mb-2" style="width: max-content">{% trans "Мета-описание" %}</h6>
+                                </div>
+                                <div class="mb-3">
+                                    {{ form.description|safe }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-12 mt-4">
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <h6 class="mb-2" style="width: max-content">{% trans "Мета-заголовок ссылки" %}</h6>
+                                </div>
+                                <div class="mb-3">
+                                    {{ form.propertytitle }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <h6 class="mb-2" style="width: max-content">{% trans "Мета-описание ссылки" %}</h6>
+                                </div>
+                                <div class="mb-3">
+                                    {{ form.propertydescription|safe }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12 form-btn">
+                                <button type="submit"
+                                        class="btn btn-success"
+                                        style=" margin-top: 10px; width: 150px">
+                                    {% trans "Сохранить" %}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+        </div><!--end card-->
+    </div><!--end col-->
+<style>
+    textarea {
+        --tw-border-opacity: 1;
+        border-color: rgb(226 232 240 / var(--tw-border-opacity));
+        display: block;
+        width: 100%;
+        border-radius: .375rem;
+        border-width: 1px;
+        padding: .5rem 1rem;
+        font-size: .875rem;
+        font-weight: inherit;
+        line-height: inherit;
+        color: inherit;
+        margin: 0;
+        font-family: inherit;
+        resize: none;
+        height: 120px;
+    }
+    textarea:focus{
+        --tw-border-opacity: 1!important;
+        border-color: rgb(59 130 246 / var(--tw-border-opacity))!important;
+    }
+    .form-control[type="file"]:not(:disabled):not([readonly]) {
+        --tw-border-opacity: 1;
+        border-color: rgb(226 232 240 / var(--tw-border-opacity));
+        width: fit-content;
+        display: block;
+        border-radius: .375rem;
+        border-width: 1px;
+        font-size: .875rem;
+        height: auto!important;
+        padding: 5px 0px 5px 10px;
+    }
+</style>
+{% endblock content %}

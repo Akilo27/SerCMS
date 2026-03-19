@@ -1,0 +1,228 @@
+{% extends 'site/shop6/base.html' %}
+{% load static generals_tag %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<style>
+  input#profile-email {
+
+    display: block;
+    width: 100%;
+    min-height: 4.7rem;
+    padding: 0.85rem 2rem;
+    border: 1px solid #eee;
+    font-size: 1.4rem;
+    font-family: Poppins, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+    color: #999;
+    background-color: transparent;
+    border-radius: 0;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    outline: 0;
+
+  }
+.tab-vertical .tab-content {
+    border-top: 0px solid #eee!important;
+}
+</style>
+<link href="https://cdn.jsdelivr.net/npm/suggestions-jquery@latest/dist/css/suggestions.min.css" rel="stylesheet">
+
+{% endblock head %}
+{% block content %}
+<main class="main">
+  <div class="page-content mb-8 mt-5">
+    <div class="container">
+      <div class="tab-vertical row gutter-lg">
+        {% include 'site/shop6/include/profile_menu.html' %}
+        <div class="tab-content" id="nav-tabContent">
+
+          <form method="post"  class="account__main-info" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row">
+              <div class="col-sm-3">
+                <div class="myaccount-content" id="avatar-load">
+                  <h3>Мой профиль</h3>
+                  <img src="{{ user.avatar.url }}" style="height: 150px;margin-bottom: 20px;">
+                </div>
+              </div>
+              <div class="col-sm-9 text-secondary ">
+                <div class="row d-none">
+                  <div class="col-sm-3">
+                    <h6 class="mb-0">Аватарка</h6>
+                  </div>
+                  <div class="col-sm-9 text-secondary">
+                    {{ form.avatar }}
+                  </div>
+                </div>
+                <div class="row mt-8">
+                  <div class="col-sm-3">
+                    <h6 class="mb-0">Логин</h6>
+                  </div>
+                  <div class="col-sm-9 text-secondary">
+                    {{ form.username }}
+                  </div>
+                </div>
+                <hr>
+                <div class="row">
+                  <div class="col-sm-3">
+                    <h6 class="mb-0">Email</h6>
+                  </div>
+                  <div class="col-sm-9 text-secondary">
+                    {{ form.email }}
+                  </div>
+                </div>
+                <hr>
+                <div class="row">
+                  <div class="col-sm-3">
+                    <h6 class="mb-0">Телефон</h6>
+                  </div>
+                  <div class="col-sm-9 text-secondary">
+                    {{ form.phone }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <hr>
+            Публичная информация
+            <hr>
+            <div class="row">
+              <div class="col-sm-3">
+                <h6 class="mb-0">Город</h6>
+              </div>
+              <div class="col-sm-9 text-secondary">
+                {{ form.city }}
+              </div>
+            </div>
+            <hr>
+            <div class="row">
+              <div class="col-sm-3">
+                <h6 class="mb-0">Дата рождения</h6>
+              </div>
+              <div class="col-sm-9 text-secondary">
+                {{ form.birthday }}
+              </div>
+            </div>
+
+            <hr>
+            <div class="row">
+              <div class="col-sm-3">
+                <h6 class="mb-0">Пол</h6>
+              </div>
+              <div class="col-sm-9 text-secondary">
+                {{ form.gender }}
+              </div>
+            </div>
+            <hr>
+            <div class="row">
+              <div class="col-sm-12">
+                <button type="submit" class="btn btn-info">
+                  Сохранить
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock content %}
+
+{% block footertop %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const avatarLoad = document.getElementById("avatar-load");
+    const avatarInput = document.getElementById("id_avatar");
+
+    if (avatarLoad && avatarInput) {
+      avatarLoad.style.cursor = "pointer";
+
+      // При клике на блок — открываем input type="file"
+      avatarLoad.addEventListener("click", function () {
+        avatarInput.click();
+      });
+
+      // При выборе файла — обновляем <img> внутри avatar-load
+      avatarInput.addEventListener("change", function () {
+        const file = avatarInput.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            const img = avatarLoad.querySelector("img");
+            if (img) {
+              img.src = e.target.result;
+            }
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    }
+  });
+</script>
+
+<script>
+  window.addEventListener('load', function() {
+      // Инициализация маски для телефона
+      var element = document.getElementById('id_phone');
+      var maskOptions = {
+          mask: '+7(000)000-00-00',
+          lazy: false
+      }
+      var mask = new IMask(element, maskOptions);
+      // Инициализация маски для email
+      var maskOptions2 = {
+          mask: function (value) {
+              if(/^[a-z0-9_\.-]+$/.test(value))
+                  return true;
+              if(/^[a-z0-9_\.-]+@$/.test(value))
+                  return true;
+              if(/^[a-z0-9_\.-]+@[a-z0-9-]+$/.test(value))
+                  return true;
+              if(/^[a-z0-9_\.-]+@[a-z0-9-]+\.$/.test(value))
+                  return true;
+              if(/^[a-z0-9_\.-]+@[a-z0-9-]+\.[a-z]{1,4}$/.test(value))
+                  return true;
+              if(/^[a-z0-9_\.-]+@[a-z0-9-]+\.[a-z]{1,4}\.$/.test(value))
+                  return true;
+              if(/^[a-z0-9_\.-]+@[a-z0-9-]+\.[a-z]{1,4}\.[a-z]{1,4}$/.test(value))
+                  return true;
+              return false;
+          },
+          lazy: false
+      }
+      var emailElement = document.getElementById('id_email');
+      if (emailElement) {
+          var mask2 = new IMask(emailElement, maskOptions2);
+      }
+  });
+</script>
+<script src="{% static 'site/js/imask.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/suggestions-jquery@latest/dist/js/jquery.suggestions.min.js"></script>
+<script>
+  var api_key = '7fd18aaabd7d53ffa4846e4521c1f736c13490eb';
+  function formatCity(suggestion) {
+      var address = suggestion.data;
+      if (address.city_with_type === address.region_with_type) {
+          return address.settlement_with_type || "";
+      } else {
+          return address.city_with_type || "";
+      }
+  }
+  var $city = $('#id_city');
+  // город
+  $city.suggestions({
+      token: api_key,
+      type: 'ADDRESS',
+      hint: false,
+      bounds: "city-settlement",
+      formatSelected: formatCity
+  });
+</script>
+
+{% endblock footertop %}

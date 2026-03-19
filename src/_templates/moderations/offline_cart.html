@@ -1,0 +1,1136 @@
+{% extends 'moderations/base.html' %}
+{% load static generals_tag shop_tags %}
+{% load tz %}
+{% load i18n %}
+
+{% now "Y-m-d H:i:s" as current_time %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<style>
+    .cart-position {
+    position: relative;
+    height: 100%;
+    padding-bottom: 70px; /* Место для кнопки */
+}
+
+.checkout-button-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 15px;
+    background: white;
+    border-top: 1px solid #eee;
+    z-index: 10;
+}
+
+/* Обновляем стили для контейнера корзины */
+.dropdown-box {
+    position: relative;
+    height: 100%;
+    padding-bottom: 70px; /* Чтобы контент не заезжал под кнопку */
+}
+
+.products {
+    max-height: calc(60vh - 70px) !important; /* Учитываем высоту кнопки */
+    height: calc(40vh - 70px) !important;
+}
+    .square-image-container {
+    display: block;
+    position: relative;
+    width: 100%;
+    padding-bottom: 100%; /* Квадрат через padding */
+    overflow: hidden;
+    background-color: #f8f9fa;
+}
+
+.square-image-container img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 90%;
+    max-height: 90%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+}
+
+    /* Анимации и стили для корзины */
+    .cart-notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1060;
+        min-width: 300px;
+        opacity: 0;
+        transform: translateY(-20px);
+        transition: all 0.5s ease;
+    }
+
+    .cart-notification.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .product-item {
+        transition: all 0.3s ease;
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .product-item.hiding {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    .product-card {
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .product-card.adding-to-cart {
+        animation: pulse 0.5s ease;
+    }
+
+    .product-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+    }
+
+    .cart-item-adding {
+        animation: slideIn 0.5s ease forwards;
+    }
+
+    .cart-item-removing {
+        animation: slideOut 0.5s ease forwards;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(0.95); }
+        100% { transform: scale(1); }
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes slideOut {
+        from {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        to {
+            opacity: 0;
+            transform: translateX(50px);
+        }
+    }
+
+    .fly-to-cart {
+        position: fixed;
+        z-index: 1050;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background-size: cover;
+        animation: flyToCart 1s ease forwards;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    @keyframes flyToCart {
+        0% {
+            opacity: 1;
+            transform: scale(1);
+        }
+        20% {
+            opacity: 0.8;
+            transform: scale(0.8) translateY(-20px);
+        }
+        100% {
+            opacity: 0;
+            transform: scale(0.3) translate(var(--end-x), var(--end-y));
+        }
+    }
+
+    .cart-badge {
+        transition: all 0.3s ease;
+    }
+
+    .cart-badge.pulse {
+        animation: badgePulse 0.6s ease;
+    }
+
+    @keyframes badgePulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.3); }
+        100% { transform: scale(1); }
+    }
+
+
+    .modal-content {
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .modal-header {
+        border-bottom: 2px solid #f8f9fa;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 12px 12px 0 0;
+    }
+
+    .modal-title {
+        font-weight: 600;
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: #495057;
+    }
+
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+
+    #confirmOrder {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        font-weight: 600;
+    }
+
+    #confirmOrder:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+</style>
+{% endblock head %}
+
+{% block content %}
+
+    <div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title" style="margin-right: 20px">{% trans "Все продукты" %}</h4>
+            </div>
+            <div class="card-body">
+                <div class="row " >
+                    <div class=" col-9" style="height: calc(100vh - 200px);     overflow-x: scroll;">
+                        <div class="row" id="products-container">
+                            {% for product in products %}
+                            <div class="col-3 mb-4 product-item" data-variale="{{product.variable_json}}" id="product-{{ product.id }}" data-product-id="{{ product.id }}">
+                                <div class="card product-card shadow-sm h-100">
+                                    <a href="{{ product.get_absolute_url }}" class="square-image-container">
+                                        {% if product.image %}
+                                        <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                                        {% else %}
+                                        <img src="{% static 'images/placeholder.png' %}" class="card-img-top" alt="Нет изображения">
+                                        {% endif %}
+                                    </a>
+                                    <div class="card-body d-flex flex-column">
+                                        <h5 class="card-title">
+                                            <a href="{{ product.get_absolute_url }}" class="text-decoration-none text-dark">{{ product.name }}</a>
+                                        </h5>
+                                        <p class="card-text flex-grow-1">{{ product.description|truncatechars:80 }}</p>
+                                        {% for pid, variable in products_with_variable.items %}
+                                        {% if pid == product.id %}
+                                        <div class="product-variable" data-variale="{{product.variable_json}}">
+                                            {% for variable, attributes in attributes_by_variable.items %}
+                                            <div class="product-variable-group mb-2">
+                                                <span class="attribute-item">
+                                                    {% if variable.type == 2 %}
+                                                    <div class="product-color">
+                                                        <span class="label" id="{{ variable.slug }}">{{ variable.name }}:</span>
+                                                        <ul>
+                                                            {% for attribute in attributes %}
+                                                            <li>
+                                                                <input type="radio" name="{{ variable.slug }}_{{ attribute.id }}"
+                                                                       id="attribute_{{ attribute.id }}">
+                                                                <label for="attribute_{{ attribute.id }}">
+                                                                <span style="border-color: #6c757d !important;
+                                                                {% if attribute.image %}
+                                                                background: url('{{attribute.image.url}}');
+                                                                {% else %}
+                                                                {{attribute.content}}
+                                                                {% endif %}
+                                                                "></span>
+                                                                {{ attribute.name }}
+                                                                </label>
+                                                            </li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                    </div>
+                                                    {% elif variable.type == 1 %}
+                                                    <select class="form-select" name="atribute_{{variable.slug}}">  <!-- Используем name="atribute" для отправки в GET -->
+                                                        <!-- Добавляем опцию "Без фильтров" -->
+                                                        <option value="">{% trans "Без фильтров" %}</option>
+                                                        {% for atribute in variable.atribute_set.all %}
+                                                        <option value="{{ atribute.id }}"
+                                                                {% if atribute.id|stringformat:"s" in selected_attributes.values %} selected {% endif %}>  <!-- Устанавливаем selected -->
+                                                        {{ atribute.name }}
+                                                        </option>
+                                                        {% endfor %}
+                                                    </select>
+                                                    {% endif %}
+                                                    {% if attr_data.price %}
+                                                    <small class="text-muted">(+{{ attr_data.price }})</small>
+                                                    {% endif %}
+                                                </span>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                        {%endif %}
+                                        {% endfor %}
+                                        {% if product.price %}
+                                        <div class="mt-3">
+                                            <h4 class="text-primary mb-0">
+                                                {% if valute != product.valute %}
+                                                {% if product.type == 1 %}
+                                                {% currency_conversion_for_products request product.price product.valute.id %} {{ valute.icon_code }}
+                                                {% else %}
+                                                {% currency_conversion_for_products request product.productsvariable_set.all.first.price product.valute.id %} {{ valute.icon_code }}
+                                                {% endif %}
+                                                {% else %}
+                                                {% if product.type == 1 %}
+                                                {{ product.price }} {{ valute.icon_code }}
+                                                {% else %}
+                                                {{ product.productsvariable_set.all.first.price }} {{ valute.icon_code }}
+                                                {% endif %}
+                                                {% endif %}
+                                            </h4>
+                                        </div>
+                                        {% endif %}
+                                        {% if product.slug in cart_products_slugs %}
+                                        <!-- Товар уже в корзине -->
+                                        <button class="btn btn-secondary mt-2" disabled>
+                                            <i class="fas fa-check-circle me-2"></i>{% trans "В корзине" %}
+                                        </button>
+                                        {% else %}
+                                        <!-- Кнопка добавления -->
+                                        <button class="btn btn-success mt-2 add-to-cart-btn"
+                                                data-product-id="{{ product.id }}"
+                                                data-product-slug="{{ product.slug }}"
+                                                data-product-name="{{ product.name }}"
+                                                data-product-price="{% if valute != product.valute %}{% if product.type == 1 %}{% currency_conversion_for_products request product.price product.valute.id %}{% else %}{% currency_conversion_for_products request product.productsvariable_set.all.first.price product.valute.id %}{% endif %}{% else %}{% if product.type == 1 %}{{ product.price }}{% else %}{{ product.productsvariable_set.all.first.price }}{% endif %}{% endif %}"
+                                                data-product-image="{% if product.image %}{{ product.image.url }}{% else %}{% static 'images/placeholder.png' %}{% endif %}"
+                                                style="width: 100%;">
+                                            <i class="fas fa-shopping-cart me-2"></i>{% trans "В корзину" %}
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <h4 class="card-title">{% trans "Выбранные продукты" %}</h4>
+                        <div class="cart-position" style="position: relative;height: calc(100vh - 200px);">
+                            {% include 'moderations/iframe/cart_product.html' %}
+
+                            <!-- Кнопка оформления -->
+                            <div class="checkout-button-container" style="position: absolute; bottom: 0; left: 0; right: 0; padding: 15px; background: white; border-top: 1px solid #eee;">
+                                <button class="btn btn-primary w-100" style="padding: 12px; font-weight: bold;" id="order-checout">
+                                    {% trans "Оформить заказ" %}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Модальное окно подтверждения заказа -->
+<div class="modal fade" id="orderModal" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="orderModalLabel">{% trans "Подтверждение заказа" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0"><i class="fas fa-clock me-2"></i>{% trans "Время заказа" %}</h6>
+                            </div>
+                            <div class="card-body text-center">
+                                <h3 id="current-time" class="text-primary mb-0">{{ current_time|date:"H:i" }}</h3>
+                                <small class="text-muted">{{ current_time|date:"d.m.Y" }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0"><i class="fas fa-shopping-cart me-2"></i>{% trans "Итого товаров" %}</h6>
+                            </div>
+                            <div class="card-body text-center">
+                                <h3 id="total-items" class="text-success mb-0">0</h3>
+                                <small class="text-muted">{% trans "шт. в заказе" %}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0"><i class="fas fa-list me-2"></i>{% trans "Состав заказа" %}</h6>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>{% trans "Товар" %}</th>
+                                        <th>{% trans "Количество" %}</th>
+                                        <th>{% trans "Цена" %}</th>
+                                        <th>{% trans "Сумма" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="order-items-list">
+                                    <!-- Сюда будут добавляться товары -->
+                                </tbody>
+                                <tfoot>
+                                    <tr class="table-primary">
+                                        <td colspan="3" class="text-end fw-bold">{% trans "Общая сумма" %}:</td>
+                                        <td class="fw-bold" id="order-total-amount">0 {{ valute.icon_code }}</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Отмена" %}</button>
+                <button type="button" class="btn btn-primary" id="confirmOrder">{% trans "Подтвердить заказ" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="paymentPendingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title">{% trans "Ожидание оплаты" %}</h5>
+            </div>
+            <div class="modal-body text-center">
+                <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                    <span class="visually-hidden">{% trans "Загрузка" %}...</span>
+                </div>
+                <p>{% trans "Ожидаем подтверждения оплаты" %}...</p>
+                <p class="text-muted small">{% trans "Проверяем статус каждые 3 секунды" %}</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Отменить" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно успешной оплаты -->
+<div class="modal fade" id="paymentSuccessModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">{% trans "Оплата прошла успешно" %}!</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <i class="fas fa-check-circle text-success mb-3" style="font-size: 3rem;"></i>
+                <h4>{% trans "Спасибо за покупку" %}!</h4>
+                <p>Ваш заказ №<span id="paidOrderNumber"></span> {% trans "успешно оплачен" %}.</p>
+                <p>{% trans "С вами свяжутся для подтверждения заказа" %}.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-bs-dismiss="modal">{% trans "OK" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно ошибки оплаты -->
+<div class="modal fade" id="paymentErrorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">{% trans "Ошибка оплаты" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <i class="fas fa-exclamation-circle text-danger mb-3" style="font-size: 3rem;"></i>
+                <p id="paymentErrorText">{% trans "Произошла ошибка при обработке оплаты" %}.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Закрыть" %}</button>
+                <button type="button" class="btn btn-primary" id="retryPayment">{% trans "Попробовать снова" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Скрипт для обработки добавления в корзину -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Инициализация - скрываем товары, которые уже в корзине
+        initializeCartProducts();
+
+        // Функция для обновления обработчиков событий
+    function updateEventHandlers() {
+        document.querySelectorAll('.add-to-cart-btn').forEach(function(button) {
+            button.addEventListener('click', function(e) {
+                const productId = this.getAttribute('data-product-id');
+                const productSlug = this.getAttribute('data-product-slug');
+                const productName = this.getAttribute('data-product-name');
+                const productPrice = this.getAttribute('data-product-price');
+                const productImage = this.getAttribute('data-product-image');
+                const productElement = document.getElementById('product-' + productId);
+                const cardElement = productElement.querySelector('.product-card');
+                updateCartTotal(productPrice)
+                // Анимация клика
+                cardElement.classList.add('adding-to-cart');
+
+                // Создаем летающий элемент
+                createFlyingImage(e, productImage, productSlug);
+
+                const formData = new FormData();
+
+                // Собираем выбранные атрибуты для этого конкретного товара
+                const selectedAttributes = [];
+                const productVariableElement = productElement.querySelector('.product-variable');
+
+                if (productVariableElement) {
+                    productVariableElement.querySelectorAll('.attribute-radio:checked').forEach(function(radio) {
+                        selectedAttributes.push(radio.value);
+                    });
+
+                    // Получаем вариации дКля этого конкретного товара
+                    let productVariables = [];
+                    try {
+                        productVariables = JSON.parse(productVariableElement.getAttribute('data-variable') || '[]');
+                    } catch (e) {
+                        console.error('Error parsing product variables:', e);
+                    }
+
+                    const matchingVariation = productVariables.find(function(variation) {
+                        const variationAttrs = variation.attributes.split(',').map(attr => attr.trim());
+                        return selectedAttributes.every(attr => variationAttrs.includes(attr));
+                    });
+                    const variationSlug = matchingVariation ? matchingVariation.slug : '';
+                    formData.append('variation_slug', variationSlug);
+                }
+
+                formData.append('product_id', productId);
+                formData.append('quantity', 1);
+
+                fetch("{% url 'shop:add_to_cart' %}", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Показываем уведомление о добавлении в корзину
+                        showNotification('Товар добавлен в корзину!', 'success');
+
+                        // Обновляем кнопку на "В корзине"
+                        setTimeout(() => {
+                            button.innerHTML = '<i class="fas fa-check-circle me-2"></i>В корзине';
+                            button.classList.remove('btn-success');
+                            button.classList.add('btn-secondary');
+                            button.disabled = true;
+                            cardElement.classList.remove('adding-to-cart');
+                        }, 800);
+
+                        // Добавляем товар в корзину (визуально)
+                        addProductToCartDisplay(productSlug, productName, productPrice, productImage, data.new_quantity || 1);
+
+                        // Обновляем счетчик корзины
+                        updateCartCounter(1);
+
+                        // Обновляем общую сумму корзины
+
+                        // Показываем блок с общей суммой, если он был скрыт
+                        document.querySelector('.cart-total').style.display = 'block';
+                        document.querySelector('.cart-empty').style.display = 'none';
+
+                        // Плавно скрываем товар через некоторое время
+                        setTimeout(() => {
+                            if (productElement) {
+                                productElement.style.opacity = '0';
+                                productElement.style.transform = 'translateY(-20px)';
+                                productElement.style.transition = 'all 0.5s ease';
+                                setTimeout(() => {
+                                    productElement.style.display = 'none';
+                                    reorganizeProductGrid();
+                                }, 500);
+                            }
+                        }, 1000);
+                    } else {
+                        console.error('Ошибка:', data.message);
+                        showNotification('Ошибка при добавлении товара', 'error');
+                        cardElement.classList.remove('adding-to-cart');
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    showNotification('Ошибка при добавлении товара', 'error');
+                    cardElement.classList.remove('adding-to-cart');
+                });
+            });
+        });
+    }
+
+        // Создание летающего изображения товара
+        function createFlyingImage(event, imageUrl, productSlug) {
+            const flyingImage = document.createElement('div');
+            flyingImage.className = 'fly-to-cart';
+            flyingImage.style.backgroundImage = `url(${imageUrl})`;
+            flyingImage.style.backgroundPosition = 'center';
+            flyingImage.style.backgroundSize = 'cover';
+
+            // Позиционируем относительно клика
+            const rect = event.target.getBoundingClientRect();
+            const startX = rect.left + rect.width / 2 - 30;
+            const startY = rect.top + rect.height / 2 - 30;
+
+            // Конечная позиция (корзина)
+            const cartElement = document.getElementById('cart_product');
+            const cartRect = cartElement.getBoundingClientRect();
+            const endX = cartRect.left + cartRect.width / 2 - 15;
+            const endY = cartRect.top + cartRect.height / 2 - 15;
+
+            flyingImage.style.left = `${startX}px`;
+            flyingImage.style.top = `${startY}px`;
+            flyingImage.style.setProperty('--end-x', `${endX - startX}px`);
+            flyingImage.style.setProperty('--end-y', `${endY - startY}px`);
+
+            document.body.appendChild(flyingImage);
+
+            // Удаляем элемент после анимации
+            setTimeout(() => {
+                if (flyingImage.parentNode) {
+                    flyingImage.parentNode.removeChild(flyingImage);
+                }
+            }, 1000);
+        }
+
+        // Функция для инициализации - скрываем товары, которые уже в корзине
+        function initializeCartProducts() {
+            const productsInCart = [
+                {% for item in cart_products.0 %}
+                    '{{ item.product.id }}'{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ];
+
+            // Скрываем товары, которые уже в корзине
+            productsInCart.forEach(productId => {
+                const productElement = document.getElementById('product-' + productId);
+                if (productElement) {
+                    productElement.style.display = 'none';
+                }
+            });
+
+            // Перестраиваем сетку
+            reorganizeProductGrid();
+        }
+
+        // Функция для реорганизации сетки товаров
+        function reorganizeProductGrid() {
+            const productsContainer = document.getElementById('products-container');
+            const visibleProducts = Array.from(productsContainer.querySelectorAll('.product-item:not([style*="display: none"])'));
+
+            // Создаем временный контейнер для перестановки
+            const tempContainer = document.createElement('div');
+            tempContainer.style.display = 'none';
+            document.body.appendChild(tempContainer);
+
+            // Переносим видимые товары во временный контейнер
+            visibleProducts.forEach(item => {
+                tempContainer.appendChild(item);
+            });
+
+            // Очищаем основной контейнер
+            productsContainer.innerHTML = '';
+
+            // Добавляем товары обратно в правильном порядке
+            while (tempContainer.firstChild) {
+                productsContainer.appendChild(tempContainer.firstChild);
+            }
+
+            // Удаляем временный контейнер
+            document.body.removeChild(tempContainer);
+
+            // Обновляем обработчики событий
+        }
+
+        // Функция для добавления товара в визуальное отображение корзины
+        // Функция для добавления товара в визуальное отображение корзины
+        function addProductToCartDisplay(slug, name, price, image, quantity, productPrice) {
+            const cartContainer = document.getElementById('cart_product_canvas');
+            const cartEmpty = document.querySelector('.cart-empty');
+            const cartTotal = document.querySelector('.cart-total');
+
+            // Если корзина была пуста, скрываем сообщение о пустой корзине
+            if (cartEmpty.style.display !== 'none') {
+                cartEmpty.style.display = 'none';
+                cartTotal.style.display = 'block';
+            }
+
+            // Проверяем, есть ли уже такой товар в корзине
+            const existingItem = document.getElementById(`cart-product-${slug}`);
+
+            if (existingItem) {
+                // Обновляем количество существующего товара
+                const quantitySpan = existingItem.querySelector('.product-quantity');
+                const currentQuantity = parseInt(quantitySpan.textContent, 10);
+                quantitySpan.textContent = currentQuantity + 1;
+                existingItem.classList.add('cart-item-adding');
+                setTimeout(() => existingItem.classList.remove('cart-item-adding'), 500);
+
+                // Немедленно обновляем общую сумму
+            } else {
+                // Создаем элемент товара для корзины
+                const productHtml = `
+                    <div class="product product-cart cart-item-adding" id="cart-product-${slug}">
+                        <figure class="product-media">
+                            <a href="/products/${slug}/">
+                                <img src="${image}" alt="${name}" style="height: 84px!important;"/>
+                            </a>
+                        </figure>
+                        <div class="product-detail">
+                            <a href="/products/${slug}/" class="product-name">${name}</a>
+                            <div class="price-box">
+                                <div class="quantity-controls">
+                                    <button class="decrement" data-product-slug="${slug}">-</button>
+                                    <span class="product-quantity">${quantity}</span>
+                                    <button class="increment" data-product-slug="${slug}">+</button>
+                                </div>
+                                <span class="product-price">${price} {{ valute.icon_code }}</span>
+                            </div>
+                            <div class="remove-item" data-product-slug="${slug}">Удалить</div>
+                        </div>
+                    </div>
+                `;
+
+                // Добавляем товар в корзину
+                cartContainer.insertAdjacentHTML('afterbegin', productHtml);
+
+                // Немедленно обновляем общую сумму
+
+                // Обновляем обработчики событий для новой кнопки
+                attachCartEventHandlers();
+            }
+
+            // Анимируем badge корзины
+            const cartBadge = document.getElementById('cart-count');
+            if (cartBadge) {
+                cartBadge.classList.add('pulse');
+                setTimeout(() => cartBadge.classList.remove('pulse'), 600);
+            }
+        }
+
+
+
+        // Функция для обновления счетчика корзины
+        function updateCartCounter(change) {
+            const cartCount = document.getElementById('cart-count');
+            if (cartCount) {
+                let count = parseInt(cartCount.textContent, 10) || 0;
+                count += change;
+                cartCount.textContent = count;
+            }
+        }
+
+        // Функция для обновления общей суммы корзины
+        function updateCartTotal(newTotal) {
+            console.log(newTotal)
+            const totalElement = document.getElementById('cart-total-amount');
+            if (totalElement) {
+                totalElement.textContent = parseInt(newTotal);
+            }
+        }
+
+        // Функция для показа уведомлений
+        function showNotification(message, type = 'success') {
+            // Создаем элемент уведомления
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show cart-notification`;
+            notification.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            // Добавляем уведомление на страницу
+            document.body.appendChild(notification);
+
+            // Показываем с анимацией
+            setTimeout(() => notification.classList.add('show'), 10);
+
+            // Автоматически скрываем уведомление через 3 секунды
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 500);
+            }, 3000);
+        }
+
+        // Функция для привязки обработчиков событий корзины
+        function attachCartEventHandlers() {
+            // Обработчики для кнопок увеличения/уменьшения количества
+            document.querySelectorAll('.increment, .decrement').forEach(button => {
+                button.addEventListener('click', function() {
+                    const slug = this.getAttribute('data-product-slug');
+                    const isIncrement = this.classList.contains('increment');
+                    const quantitySpan = this.parentElement.querySelector('.product-quantity');
+
+                    let quantity = parseInt(quantitySpan.textContent, 10);
+                    quantity = isIncrement ? quantity + 1 : quantity - 1;
+
+                    if (quantity < 1) return;
+
+                    quantitySpan.textContent = quantity;
+
+                    // Здесь можно добавить вызов API для обновления количества на сервере
+                });
+            });
+
+            // Обработчики для кнопок удаления
+            document.querySelectorAll('.remove-item').forEach(button => {
+                button.addEventListener('click', function() {
+                    const slug = this.getAttribute('data-product-slug');
+                    const cartItem = document.getElementById(`cart-product-${slug}`);
+
+                    if (cartItem) {
+                        cartItem.classList.add('cart-item-removing');
+                        setTimeout(() => {
+                            if (cartItem.parentNode) {
+                                cartItem.parentNode.removeChild(cartItem);
+
+                                // Проверяем, пуста ли корзина
+                                const cartContainer = document.getElementById('cart_product_canvas');
+                                if (cartContainer.children.length === 0) {
+                                    document.querySelector('.cart-total').style.display = 'none';
+                                    document.querySelector('.cart-empty').style.display = 'block';
+                                }
+                            }
+                        }, 500);
+
+                        // Обновляем счетчик корзины
+                        updateCartCounter(-1);
+                    }
+                });
+            });
+        }
+
+        // Инициализация обработчиков событий
+        updateEventHandlers();
+        attachCartEventHandlers();
+    });
+
+        // Функция для реорганизации сетки товаров с правильным смещением
+    function reorganizeProductGrid() {
+        const productsContainer = document.getElementById('products-container');
+        const visibleProducts = Array.from(productsContainer.querySelectorAll('.product-item:not([style*="display: none"])'));
+
+        // Очищаем контейнер
+        productsContainer.innerHTML = '';
+
+        // Создаем строки по 4 товара в каждой (так как у вас col-3)
+        for (let i = 0; i < visibleProducts.length; i += 4) {
+            const row = document.createElement('div');
+            row.className = 'row';
+
+            // Добавляем до 4 товаров в строку
+            for (let j = 0; j < 4; j++) {
+                if (i + j < visibleProducts.length) {
+                    const col = document.createElement('div');
+                    col.className = 'col-3 mb-4';
+                    col.appendChild(visibleProducts[i + j]);
+                    row.appendChild(col);
+                }
+            }
+
+            productsContainer.appendChild(row);
+        }
+
+        // Обновляем обработчики событий
+        updateEventHandlers();
+    }
+
+
+
+</script>
+
+<script>
+    document.querySelectorAll('.attribute-radio').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+        // Собираем все выбранные атрибуты
+        let selectedAttributes = [];
+
+        document.querySelectorAll('.attribute-radio:checked').forEach(function(checkedRadio) {
+            selectedAttributes.push(checkedRadio.value);
+        });
+
+        // Получаем данные вариаций из атрибута data-variable
+        let productVariables = JSON.parse(document.querySelector('.product-variable').getAttribute('data-variale'));
+
+        // Ищем совпадение среди вариаций по атрибутам
+        let selectedVariation = productVariables.find(function(variation) {
+            let variationAttributes = variation.attributes.split(',').map(item => item.trim());
+            return selectedAttributes.every(attribute => variationAttributes.includes(attribute));
+        });
+
+        // Если найдена соответствующая вариация
+        if (selectedVariation) {
+            // Обновляем цену
+            document.querySelector('.sale-price').textContent = `${selectedVariation.price} ₽`;
+
+            // Обновляем скрытое поле с выбранным вариантом
+            document.querySelector('input[name="variation_slug"]').value = selectedVariation.slug;
+
+            // Обновляем блок с информацией о варианте
+            document.querySelector('.product-variable-info').innerHTML = `
+                <p>Цена: ${selectedVariation.price} ₽</p>
+                <p>Количество: ${selectedVariation.quantity}</p>
+                <p>Атрибуты: ${selectedVariation.attributes}</p>
+            `;
+        } else {
+            // Если нет совпадений, очищаем блок
+            document.querySelector('.product-variable-info').innerHTML = '<p>Выберите вариацию.</p>';
+        }
+    });
+});
+
+
+
+// Обновляем обработчик кнопки оформления заказа
+document.getElementById('order-checout').addEventListener('click', function() {
+    const cartContainer = document.getElementById('cart_product_canvas');
+    if (cartContainer.children.length === 0) {
+        showNotification('Корзина пуста!', 'error');
+        return;
+    }
+
+    // Обновляем время
+    updateCurrentTime();
+
+    // Заполняем информацию о заказе
+    fillOrderInfo();
+
+    // Показываем модальное окно
+    const orderModal = new bootstrap.Modal(document.getElementById('orderModal'));
+    orderModal.show();
+});
+
+// Функция для обновления текущего времени
+function updateCurrentTime() {
+    const now = new Date();
+    const timeString = now.toLocaleTimeString('ru-RU', {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    const dateString = now.toLocaleDateString('ru-RU');
+
+    document.getElementById('current-time').textContent = timeString;
+    document.getElementById('current-time').nextElementSibling.textContent = dateString;
+}
+
+// Функция для заполнения информации о заказе
+function fillOrderInfo() {
+    const cartContainer = document.getElementById('cart_product_canvas');
+    const orderItemsList = document.getElementById('order-items-list');
+    const totalItemsElement = document.getElementById('total-items');
+    const orderTotalAmountElement = document.getElementById('order-total-amount');
+
+    // Очищаем список
+    orderItemsList.innerHTML = '';
+
+    let totalItems = 0;
+    let totalAmount = 0;
+
+    // Перебираем товары в корзине
+    cartContainer.querySelectorAll('.product.product-cart').forEach(item => {
+        const name = item.querySelector('.product-name').textContent;
+        const quantity = parseInt(item.querySelector('.product-quantity').textContent, 10);
+        const priceText = item.querySelector('.product-price').textContent;
+        const price = parseFloat(priceText.replace(/[^\d.,]/g, '').replace(',', '.'));
+        const sum = price * quantity;
+
+        totalItems += quantity;
+        totalAmount += sum;
+
+        // Добавляем товар в таблицу
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${name}</td>
+            <td>${quantity} шт.</td>
+            <td>${price} {{ valute.icon_code }}</td>
+            <td>${sum.toFixed(2)} {{ valute.icon_code }}</td>
+        `;
+        orderItemsList.appendChild(row);
+    });
+
+    // Обновляем итоги
+    totalItemsElement.textContent = totalItems;
+    orderTotalAmountElement.textContent = `${totalAmount.toFixed(2)} {{ valute.icon_code }}`;
+}
+
+// Обновляем время каждую минуту
+setInterval(updateCurrentTime, 60000);
+
+// Подтверждение заказа (упрощенная версия)
+document.getElementById('confirmOrder').addEventListener('click', function() {
+    const cartContainer = document.getElementById('cart_product_canvas');
+
+    // Собираем данные о заказе
+    const orderData = {
+        order_time: new Date().toISOString(),
+        total_items: parseInt(document.getElementById('total-items').textContent, 10),
+        total_amount: parseFloat(document.getElementById('order-total-amount').textContent),
+        items: []
+    };
+
+    // Собираем информацию о товарах
+    cartContainer.querySelectorAll('.product.product-cart').forEach(item => {
+        const slug = item.id.replace('cart-product-', '');
+        const name = item.querySelector('.product-name').textContent;
+        const quantity = parseInt(item.querySelector('.product-quantity').textContent, 10);
+        const priceText = item.querySelector('.product-price').textContent;
+        const price = parseFloat(priceText.replace(/[^\d.,]/g, '').replace(',', '.'));
+
+        orderData.items.push({
+            slug: slug,
+            name: name,
+            quantity: quantity,
+            price: price
+        });
+    });
+
+    // Отправляем заказ
+    fetch("{% url 'moderation:create_order' %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify(orderData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Закрываем окно оформления
+            const orderModal = bootstrap.Modal.getInstance(document.getElementById('orderModal'));
+            orderModal.hide();
+
+            // Показываем окно ожидания оплаты
+            const waitingModalEl = document.getElementById('paymentPendingModal');
+            const waitingModal = new bootstrap.Modal(waitingModalEl);
+            waitingModal.show();
+
+            // Запускаем проверку статуса оплаты
+            checkOrderPaymentStatus(data.order_id,
+                (paymentData) => {
+                    // Оплата прошла
+                    waitingModal.hide();
+                    showPaymentSuccess(paymentData.order_number);
+                },
+                (errorData) => {
+                    // Ошибка оплаты
+                    waitingModal.hide();
+                    showPaymentError(errorData.message || 'Ошибка при оплате');
+                }
+            );
+        } else {
+            showNotification(data.message || 'Ошибка при оформлении заказа', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Ошибка при оформлении заказа', 'error');
+    });
+});
+
+
+// Переключение полей доставки
+document.getElementById('requires_delivery').addEventListener('change', function() {
+    const deliveryFields = document.getElementById('deliveryFields');
+    deliveryFields.style.display = this.checked ? 'block' : 'none';
+});
+
+// Функция очистки корзины
+function clearCart() {
+    const cartContainer = document.getElementById('cart_product_canvas');
+    cartContainer.innerHTML = '';
+
+    // Показываем сообщение о пустой корзине
+    document.querySelector('.cart-total').style.display = 'none';
+    document.querySelector('.cart-empty').style.display = 'block';
+
+    // Обновляем счетчик корзины
+    document.getElementById('cart-count').textContent = '0';
+
+    // Показываем все скрытые товары
+    document.querySelectorAll('.product-item').forEach(item => {
+        item.style.display = 'block';
+    });
+
+    // Перестраиваем сетку
+    reorganizeProductGrid();
+}
+
+
+function checkOrderPaymentStatus(orderId, onSuccess, onError) {
+    fetch(`{% url 'moderation:check_payment_status' %}`.replace('0', orderId), {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'paid') {
+            onSuccess(data);
+        } else if (data.status === 'error') {
+            onError(data);
+        } else {
+            // Статус еще не оплачен, повторяем через 3 секунды
+            setTimeout(() => checkOrderPaymentStatus(orderId, onSuccess, onError), 3000);
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка проверки статуса оплаты:', error);
+        // Можно повторять или показывать ошибку
+        setTimeout(() => checkOrderPaymentStatus(orderId, onSuccess, onError), 3000);
+    });
+}
+</script>
+{% endblock content %}

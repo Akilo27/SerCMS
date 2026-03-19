@@ -1,0 +1,168 @@
+{% extends 'site/trendsup/base.html' %}
+{% load static generals_tag i18n %}
+{% block title %}{{ seo_title }}{% endblock %}
+{% block description %}{{ seo_description }}{% endblock %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }}{% endif %}{% endblock %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock %}
+
+{% block content %}
+<main class="main">
+  <div class="page-content py-4">
+    <div class="container">
+
+      <style>
+        .thumb-64{ width:64px; height:64px; }
+        @media (max-width:480px){ .thumb-64{ width:56px; height:56px; } }
+        .line-clamp-2{
+          display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+        }
+        .compare-table-wrap{ overflow-x:auto; }
+        .table-compare{ border-collapse:separate; border-spacing:0; }
+        .table-compare th, .table-compare td{ vertical-align:middle; }
+        .table-compare .attr-col{ position: sticky; left: 0; z-index: 2; background: #fff; }
+        .table-compare thead .attr-col{ z-index: 3; }
+        .value-badge{ display:inline-block; margin-bottom:.25rem; }
+      </style>
+
+      {% if compare_products %}
+      <div class="row g-4">
+        <section class="col-12">
+          <div class="compare-table-wrap">
+            <table class="table table-bordered align-middle table-compare" id="compare-table">
+              <thead class="table-light">
+                <tr>
+                  <th class="attr-col" style="min-width:220px; width:240px;">
+                    {% trans 'Вариация' %}
+                  </th>
+                  {% for p in compare_products %}
+                    <th style="min-width: 260px; width: 260px;" data-prod="{{ p.id }}">
+                      <div class="d-flex gap-2 align-items-start">
+                        <div class="thumb-64 rounded bg-light d-flex align-items-center justify-content-center overflow-hidden">
+                          {% if p.image %}
+                            <img src="{{ p.image.url }}" alt="{{ p.name }}" class="img-fluid h-100 w-100 object-fit-contain">
+                          {% endif %}
+                        </div>
+                        <div class="flex-grow-1 min-w-0">
+                          <div class="fw-semibold line-clamp-2">{{ p.name }}</div>
+                          <div class="text-primary fw-semibold small mt-1">
+                            {{ p.price }} {{ p.valute }}
+                          </div>
+                        </div>
+                      </div>
+                      <div class="text-end mt-2">
+                        <button type="button"
+                                class="btn btn-outline-danger btn-sm remove-compare"
+                                data-url="{% url 'shop:compare_aremove' product_id=p.id %}"
+                                data-id="{{ p.id }}">
+                          {% trans 'Удалить' %}
+                        </button>
+                      </div>
+                    </th>
+                  {% endfor %}
+                </tr>
+              </thead>
+
+              <tbody>
+                {# ГРУППИРУЕМ СТРОКИ МАТРИЦЫ ПО НАЗВАНИЮ ВАРИАЦИИ #}
+                {% regroup compare_rows by variable as groups %}
+                {% for g in groups %}
+                  {# ОДНА СТРОКА НА ВАРИАЦИЮ: слева — имя вариации, справа — по каждому товару ТОЛЬКО НЕПУСТЫЕ значения её атрибутов #}
+                  <tr class="var-row">
+                    <td class="attr-col fw-semibold">{{ g.grouper }}</td>
+
+                    {% for p in compare_products %}
+                      <td class="var-cell">
+                        {# Собираем все значения атрибутов этой вариации для товара p и печатаем только непустые #}
+                        {% for item in g.list %}
+                          {% if item.type == 'attr' %}
+                            {% with v=item.values|get_item:p.id %}
+                              {% if v and v != "—" %}
+                                <span class="value-badge">{{ v }}</span><br>
+                              {% endif %}
+                            {% endwith %}
+                          {% endif %}
+                        {% endfor %}
+                      </td>
+                    {% endfor %}
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      {% else %}
+        <div class="alert alert-info mb-0">
+          {% trans 'Вы не добавили товары для сравнения.' %}
+        </div>
+      {% endif %}
+
+      <script>
+      (function(){
+        // Удаление товара из сравнения (убираем колонку)
+        function getCookie(name){
+          let v=null;
+          if(document.cookie && document.cookie!==''){
+            const cookies=document.cookie.split(';');
+            for(let c of cookies){
+              c=c.trim();
+              if(c.substring(0,name.length+1)===(name+'=')){
+                v=decodeURIComponent(c.substring(name.length+1)); break;
+              }
+            }
+          }
+          return v;
+        }
+        const csrftoken=getCookie('csrftoken');
+
+        document.addEventListener('click', function(e){
+          const btn=e.target.closest('.remove-compare'); if(!btn) return;
+          const url=btn.dataset.url, prodId=btn.dataset.id; if(!url||!prodId) return;
+          btn.disabled=true;
+          fetch(url,{method:'POST',headers:{'X-CSRFToken':csrftoken,'X-Requested-With':'XMLHttpRequest'}})
+          .then(r=>r.json())
+          .then(data=>{
+            // найти индекс удаляемой колонки
+            const headerRow=document.querySelector('#compare-table thead tr'); if(!headerRow) return;
+            const ths=Array.from(headerRow.children);
+            let colIndex=-1;
+            for(let i=0;i<ths.length;i++){ if(ths[i].dataset && ths[i].dataset.prod===prodId){ colIndex=i; break; } }
+            if(colIndex===-1) return;
+
+            // удалить заголовок и ячейки
+            ths[colIndex].remove();
+            document.querySelectorAll('#compare-table tbody tr').forEach(tr=>{
+              if(tr.children[colIndex]) tr.children[colIndex].remove();
+            });
+
+            // после удаления — спрятать строки, где в var-cell всё пусто
+            hideEmptyRows();
+
+            // обновить счётчик, если есть
+            const badge=document.querySelector('[data-compare-count]');
+            if(badge && typeof data.count!=='undefined'){ badge.textContent=data.count; }
+          })
+          .catch(console.error)
+          .finally(()=>{ btn.disabled=false; });
+        });
+
+        // Скрываем строки, где у всех товаров по этой вариации пусто (нет ни одного значения)
+        function hideEmptyRows(){
+          document.querySelectorAll('#compare-table tbody tr.var-row').forEach(tr=>{
+            const cells=Array.from(tr.querySelectorAll('.var-cell'));
+            const hasAny=cells.some(td => td.textContent.trim()!=='');
+            tr.style.display = hasAny ? '' : 'none';
+          });
+        }
+
+        // Первичная очистка пустых строк после рендера
+        hideEmptyRows();
+      })();
+      </script>
+
+    </div>
+  </div>
+</main>
+{% endblock content %}

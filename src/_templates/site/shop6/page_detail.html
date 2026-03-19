@@ -1,0 +1,44 @@
+{% extends 'wolmart/base.html' %}
+{% load static generals_tag %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+
+{% block content %}
+
+  <main class="main-content">
+    <!--== Start Page Header Area Wrapper ==-->
+    <div class="page-header-area" style="background-image: url({% static 'site/wolmart/podlozhka.jpg'%});">
+      <div class="container pt--0 pb--0">
+        <div class="row">
+          <div class="col-12">
+            <div class="page-header-content">
+              <h2 class="title" style="display: flex;; text-transform: uppercase; color: white;     margin-top: 55px;">{{ seo_title }}</h2>
+              <nav class="breadcrumb-area">
+                <ul class="breadcrumb">
+                  <li><a href="{% url 'webmain:home' %}">Главная</a></li>
+                  <li class="breadcrumb-sep" style="display: block; color: white;">// {{ seo_title }}</li>
+                  <li></li>
+                </ul>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--== End Page Header Area Wrapper ==-->
+
+    <!--== Start Area Wrapper ==-->
+    <section class="blog-details-area">
+      <div class="container">
+        <div class="row flex-md-row-reverse justify-content-between">
+            <p>{{ pageinformation|safe }}</p>
+        </div>
+      </div>
+    </section>
+    <!--== End Area Wrapper ==-->
+  </main>
+
+{% endblock content %}

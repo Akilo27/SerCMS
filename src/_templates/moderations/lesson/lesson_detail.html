@@ -1,0 +1,264 @@
+{% extends 'moderations/base.html' %}
+{% load i18n %}
+{% load static moder_tags %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<style>
+    .lesson-header {
+      background-size: cover;  /* Покрытие всего контейнера изображением */
+      background-position: center center;  /* Центрируем изображение */
+      height: 280px;  /* Фиксированная высота шапки */
+      color: white;  /* Цвет текста внутри шапки */
+      padding: 20px;
+    }
+
+    .lesson-header h1 {
+      font-size: 2.5rem;  /* Размер шрифта для заголовка */
+    }
+
+    .lesson-header p {
+      font-size: 1.25rem;  /* Размер шрифта для описания */
+    }
+
+    .lesson-header img {
+      width: 100%;
+      max-width: 200px;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+
+    /* Альтернативный фон, если нет изображения обложки */
+    .lesson-header {
+      background-color: #f0f0f0; /* Если нет обложки, фон будет серым */
+    }
+      .icon-group {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .icon-item {
+      text-align: center;
+    }
+
+    .icon-item i {
+      font-size: 24px;
+      margin-bottom: 5px;
+    }
+
+    .icon-item span {
+      font-size: 16px;
+      display: block;
+    }
+
+    /* Делаем колонки с иконками отзывчивыми */
+    @media (max-width: 768px) {
+      .icon-group {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .icon-item {
+        margin-bottom: 15px;
+      }
+    }
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+{% endblock head %}
+
+{% block content %}
+<div class=" my-5">
+    <!-- Заголовок урока -->
+
+
+    <!-- Материалы урока -->
+    <div class="mt-4">
+        <div class="card">
+            <div class="card-header lesson-header" style="background-image:linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),  {% if lesson.cover %}url('{{ lesson.cover.url }}'){% else %}url('/static/default_cover.png'){% endif %};">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h1 class="display-4 text-white">{{ lesson.name }}</h1>
+                    </div>
+                    <div class="col-md-4">
+                        <img src="{% if lesson.cover %}{{ lesson.image.url }}{% else %}/static/default_cover.png{% endif %}" alt="Обложка урока" class="img-fluid rounded">
+                    </div>
+                </div>
+
+                <!-- Иконки и количество файлов, тестов, видео и время -->
+                <div class="card-body text-white d-flex justify-content-end align-items-center">
+                    <div class="icon-group">
+                        <div class="icon-item" title="Количество файлов">
+                            <i class="fas fa-file-alt"></i>
+                            <span>{{ lesson.quantity_files }}</span>
+                        </div>
+                        <div class="icon-item" title="Количество тестов">
+                            <i class="fas fa-pencil-alt"></i>
+                            <span>{{ lesson.quantity_tests }}</span>
+                        </div>
+                        <div class="icon-item" title="Количество видео">
+                            <i class="fas fa-video"></i>
+                            <span>{{ lesson.quantity_video }}</span>
+                        </div>
+                        <div class="icon-item" title="Длительность">
+                            <i class="fas fa-clock"></i>
+                            <span>{{ lesson.time }} мин.</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary mt-4" id="start-test" style=" position: absolute; top: 0; ">{% trans "Пройти тест" %}</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% if materials %}
+                    <!-- Если есть материалы, разделяем на две колонки -->
+                    <div class="col-md-6"  id="lesson-materials">
+                        {% for material in materials %}
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ material.display_name }}</h5>
+                                <p class="card-text">
+                                    Размер: {{ material.size|filesizeformat }}
+                                </p>
+                                <a href="{{ material.file.url }}" class="btn btn-primary" target="_blank">{% trans "Скачать" %}</a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="col-md-6"  id="lesson-description">
+                        <h5>{% trans "Описание урока" %}</h5>
+                        <p>{{ lesson.description|safe }}</p>
+                    </div>
+                    {% else %}
+                    <!-- Если материалов нет, показываем только описание -->
+                    <div class="col-12" id="lesson-description">
+                        <div class="alert alert-info" role="alert">
+                            {% trans "Нет материалов для этого урока" %}.
+                        </div>
+                        <h5>{% trans "Описание урока" %}:</h5>
+                        <p>{{ lesson.description|safe }}</p>
+                    </div>
+                    {% endif %}
+                    <div class="col-6" id="lesson-test"  style="display: none;">
+                        <form >
+                            {% csrf_token %}
+                            <div class="row">
+                                {% for question in questions %}
+                                <div class="col-12 mb-3">
+                                    <h5>{{ question.question }}</h5>
+                                    <ul class="list-unstyled">
+                                        {% for answer in question.answers %}
+                                        <li>
+                                            <label>
+                                                <!-- Используем forloop.counter для уникальности имени -->
+                                                <input type="radio" name="question_{{ question.id }}_{{ forloop.counter }}" value="{{ answer.id }}">
+                                                {{ answer.answer }}
+                                            </label>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                {% empty %}
+                                <div class="col-12">
+                                    <div class="alert alert-info" role="alert">
+                                        {% trans "Тесты не найдены" %}.
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <button type="submit" class="btn btn-primary mt-3">{% trans "Отправить ответы" %}</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<script>
+    // Получаем элементы, которые будут меняться
+    const startTestButton = document.getElementById('start-test');
+    const lessonMaterials = document.getElementById('lesson-materials');
+    const lessonDescription = document.getElementById('lesson-description');
+    const lessonTest = document.getElementById('lesson-test');
+
+    // Обработчик нажатия на кнопку "Пройти тест"
+    startTestButton.addEventListener('click', function() {
+      // Скрыть материалы
+      lessonMaterials.style.display = 'none';
+
+      // Если описание урока в col-12, меняем на col-6
+      if (lessonDescription.classList.contains('col-12')) {
+        lessonDescription.classList.remove('col-12');
+        lessonDescription.classList.add('col-6');
+      }
+
+      // Показать тест
+      lessonTest.style.display = 'block';
+    });
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.querySelector('form');
+
+    form.addEventListener("submit", function (event) {
+        event.preventDefault(); // Отменяем стандартное поведение формы
+
+        const answers = {};
+
+        // Собираем все выбранные ответы
+        const radios = document.querySelectorAll('input[type="radio"]:checked');
+        radios.forEach(function (radio) {
+            const questionId = radio.name.split('_')[1]; // Получаем id вопроса из имени поля
+            answers[questionId] = radio.value; // Сохраняем выбранный ответ
+        });
+
+        // Делаем AJAX запрос
+        fetch(`/submit_test_result/${lesson_id}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({ answers: answers })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(`Результаты: ${data.score}% (${data.correct_answers} из ${data.total_questions})`);
+                // Можно добавить редирект на страницу результатов или перезагрузить страницу
+            } else {
+                alert("Произошла ошибка: " + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            alert("Что-то пошло не так.");
+        });
+    });
+});
+
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% endblock content %}

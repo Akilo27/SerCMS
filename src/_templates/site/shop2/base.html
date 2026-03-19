@@ -1,0 +1,965 @@
+{% load static generals_tag i18n shop_tags %}
+{% load humanize %}
+
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+
+    <title>{% with request|get_settings as data %} {% if data %}{{ data.setting.name }}{% endif %}{% endwith %} - {% block title %}{% endblock title %}</title>
+
+    <meta name="keywords" content="Marketplace ecommerce responsive HTML5 Template" />
+    <meta name="description"
+          content="Wolmart is powerful marketplace &amp; ecommerce responsive Html5 Template.">
+    <meta name="author" content="D-THEMES">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png' %}" href="/_media/{% with request|get_settings as settings %}{% if settings.favicon %}{{ settings.favicon }}{% endif %}{% endwith %}">
+
+    {% with request|get_settings as data %} {% if data %}{{ data.setting.yandex_metrica|safe }}{% endif %}{% endwith %}
+    {% with request|get_settings as data %}{% if data.setting.google_analitic %}{{ data.setting.google_analitic|safe }}{% endif %}{% endwith %}
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+
+    <meta content="{% block description %}{% endblock description %}" name="description">
+    <meta property="og:title" content="{% block propertytitle %} {% endblock propertytitle %}">
+    <meta property="og:description" content="{% block propertydescription %}{% endblock propertydescription %}">
+    <meta property="og:image" content="{% block propertyimage %}{% endblock propertyimage %}">
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="{% with request|get_settings as data %} {% if data %}{% if data.setting.favicon %}{{ data.setting.favicon.url }}{% endif %}{% endif %}{% endwith %}" />
+    <!-- Analitic link -->
+
+    <!-- WebFont.js -->
+    <script>
+        WebFontConfig = {
+            google: { families: ['Poppins:400,600,500,700,800', 'Zeyada: 400'] }
+        };
+        (function (d) {
+            var wf = d.createElement('script'), s = d.scripts[0];
+            wf.src = "{% static 'site/wolmart/assets/js/webfont.js' %}";
+            wf.async = true;
+            s.parentNode.insertBefore(wf, s);
+        })(document);
+    </script>
+
+    <link rel="preload" href="{% static 'site/wolmart/assets/vendor/fontawesome-free/webfonts/fa-regular-400.woff2' %}" as="font" type="font/woff2"
+          crossorigin="anonymous">
+    <link rel="preload" href="{% static 'site/wolmart/assets/vendor/fontawesome-free/webfonts/fa-solid-900.woff2' %}" as="font" type="font/woff2"
+          crossorigin="anonymous">
+    <link rel="preload" href="{% static 'site/wolmart/assets/vendor/fontawesome-free/webfonts/fa-brands-400.woff2' %}" as="font" type="font/woff2"
+          crossorigin="anonymous">
+    <link rel="preload" href="{% static 'site/wolmart/assets/fonts/wolmart.woff@png09e' %}" as="font" type="font/woff" crossorigin="anonymous">
+
+    <!-- Vendor CSS -->
+    <link rel="stylesheet" type="text/css" href="{% static 'site/wolmart/assets/vendor/fontawesome-free/css/all.min.css' %}">
+    <!-- Plugins CSS -->
+    <link rel="stylesheet" href="{% static 'site/wolmart/assets/vendor/swiper/swiper-bundle.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'site/wolmart/assets/vendor/animate/animate.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'site/wolmart/assets/vendor/magnific-popup/magnific-popup.min.css' %}">
+
+    <!-- Default CSS -->
+    <link rel="stylesheet" type="text/css" href="{% static 'site/wolmart/assets/css/demo3.min.css' %}">
+<style>
+ul {
+    list-style-type: none !important;
+    padding-left: 1.5em;
+}
+.form-control {
+    background: none !important;
+    }
+.btn-primary, .btn-primary:hover , .btn-primary:focus, .btn-primary:active {
+    color: #fff;
+    border-color: #74BBC6 !important;
+    background-color: #74BBC6 !important;
+    }
+    a:hover, a:active {
+    color: #74BBC6 !important;
+    }
+    .btn-primary.btn-link {
+        color: #74BBC6 !important;
+    }
+
+    @media (max-width: 768px) {
+
+
+        .header-left {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+        .logo-img {
+            width: 75px !important;
+            height: 100px !important;
+        }
+
+        .welcome-msg {
+            font-size: 24px !important;
+        }
+
+        /* Меню */
+        .menu > li > a {
+            font-size: 14px !important;
+            padding: 10px 15px;
+        }
+
+        /* Header top и middle */
+        .header-top, .header-middle {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Корректировка фиксированных элементов */
+        #custom-alert {
+            width: 90%;
+            font-size: 14px;
+            padding: 10px;
+        }
+
+        /* Мобильное меню */
+        .mobile-menu-wrapper {
+            width: 100%;
+        }
+
+        /* Убираем фиксированные ширины и paddings, делаем блоки гибкими */
+        .page-wrapper {
+            padding: 10px;
+        }
+
+        /* Кнопки поиска и иконки */
+        .btn-search, .w-icon-search, .w-icon-cart, .w-icon-home, .w-icon-category, .w-icon-account {
+            font-size: 20px !important;
+        }
+
+        /* Кнопки и ссылки */
+        .sticky-footer {
+            height: auto;
+            padding: 10px 0;
+            font-size: 14px;
+        }
+
+        /* Корректировка меню */
+        .header-flex1 {
+            flex-direction: column;
+            height: auto;
+            padding: 10px 0;
+        }
+
+        /* Поля поиска */
+        #search-input, #search-input-1 {
+            width: 100%;
+            font-size: 14px;
+            padding: 8px;
+        }
+
+        .mob-row {
+        display: flex;
+        flex-wrap: wrap;
+        flex-direction: row;
+        }
+        .mob {
+            width: 40% !important;
+            margin-left: 5%;
+        }
+
+        .mob-header {
+            display: flex !important;
+            flex-direction: row !important;
+        }
+        .left_header_mob {
+            justify-content: flex-start !important;
+        }
+
+
+    }
+    .page-link {
+        color: black;
+    }
+    .footer a:hover {
+        color: white !important;
+        text-decoration: underline;
+    }
+
+    .nav-menu {
+        padding-left: 0 !important;
+    }
+    .footer-link {
+            padding-left: 0 !important;
+
+    }
+
+</style>
+{% block head %}
+{% endblock head %}
+
+</head>
+
+<body class="home">
+<p class="form-message"></p>
+
+{% if messages %}
+<div style="display:none;  width: 500px;
+        text-align: center;
+        position: fixed;
+        top: 200px;
+        padding: 10px 20px;
+        background-color: #5cb85c;
+        color: #fff;
+        border-radius: 5px;
+        z-index: 1000;
+        left: 50%;
+        transform: translateX(-50%);
+        opacity:0; transition: opacity 0.5s ease;" id="message-box">
+    {% for message in messages %}
+    {{ message }}
+    {% endfor %}
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("Страница загружена, скрипт начал работу");  // Проверка в консоли
+        var messageBox = document.getElementById("message-box");
+        if (messageBox) {
+            messageBox.style.display = "block";
+            setTimeout(function() {
+                messageBox.style.opacity = "1";
+            }, 500);
+
+            // Скрываем через 5 секунд
+            setTimeout(function() {
+                messageBox.style.opacity = "0";
+                setTimeout(function() {
+                    messageBox.style.display = "none";
+                }, 500);  // Даем время для завершения анимации
+            }, 5000);  // Время показа сообщения
+        }
+    });
+</script>
+{% endif %}
+
+<style>
+    .menu > li > a{
+    font-weight: 400;
+    font-size: 16px;
+    }
+    .header-top{
+    background: white;
+    text-transform: unset !important;
+    }
+    .header-middle{
+    background: #74BBC6;
+    }
+    .dropdown > a::after {
+    content: '';
+    }
+</style>
+
+
+<div id="custom-alert" style="display:none;  width: 500px;
+    text-align: center;
+    position: fixed;
+    top: 200px;
+    padding: 10px 20px;
+    background-color: #5cb85c;
+    color: #fff;
+    border-radius: 5px;
+    z-index: 1000;
+    left: 50%;
+    transform: translateX(-50%);
+ opacity:0; transition: opacity 0.5s ease;">
+    Товар добавлен в корзину!
+</div>
+<div class="page-wrapper">
+
+    <header class="header header-border" style="margin-bottom: 15px;">
+        <div class="header-top">
+            <div class="container">
+                <div class="header-left">
+<!--                    <p class="welcome-msg" style="font-size: 53px; color: #74BBC6; font-weight: 600;">-->
+<!--                        {% with request|get_settings as data %} {% if data %}{{ data.setting.logo }}{% endif %}{% endwith %}-->
+<!--                    </p>-->
+                    <img class="logo-img" style="width: 100px;height: 127px;" src="{% with request|get_settings as data %}{% if data.setting.logo %}{{ data.setting.logo.url }}{% else %}{% static 'site/moderations/assets/images/logo-dark.png' %}{% endif %}{% endwith %}" alt="logo" width="145" height="20px" />
+                </div>
+
+                <nav class="main-nav">
+                    <ul class="menu " style="margin-left: 50px;">
+                        <li class="{% if request.path|default_if_none:''|slice:':7' == '/about/' %} active {% endif %}">
+                            <a href="{% url 'webmain:about' %}" style="text-transform: unset;" >Информация для клиента</a>
+                        </li>
+                        <li class="{% if request.path|default_if_none:''|slice:':7' == '/blogs/' %} active {% endif %}">
+                            <a href="{% url 'webmain:blogs' %}"  >Новости</a>
+                        </li>
+                        <li class="{% if request.path|default_if_none:'' == '/' %} active {% endif %}">
+                            {% if user.is_authenticated%}
+                            <a href="{% url 'shop:purchased_products_list' %}">Акции</a>
+                            {% endif %}
+                            {% if not user.is_authenticated %}
+                            <a href="{% url 'webmain:login' %}">Акции</a>
+                            {% endif %}
+                        </li>
+                        <li class="{% if request.path|default_if_none:''|slice:':10' == '/contacts/' %} active {% endif %}">
+                            <a href="{% url 'webmain:contacts' %}">Контакты</a>
+                        </li>
+                    </ul>
+                </nav>
+                <div class="header-right">
+
+                    <style>
+                        /* Контейнер для всего блока — гарантируем выравнивание по центру и фиксированную высоту */
+                        .header-flex1 {
+                          display: flex;
+                          align-items: center;
+                          height: 50px; /* скорректируй по необходимости */
+                          margin: 0;
+                          padding: 0;
+                        }
+                        /* Обёртка для формы выбора языка */
+                        .inline-select-wrapper1 {
+                          position: relative;
+                          display: flex;
+                          align-items: center;
+                          margin: 0;
+                          padding: 0;
+                        }
+                        /* Видимая часть выбора языка */
+                        .display-select1 {
+                          display: flex;
+                          align-items: center;
+                          margin: 0;
+                          padding: 0;
+                        }
+                        /* Стили для флага — устанавливаем высоту и отступ справа */
+                        .flag-icon1 {
+                          display: inline-block;
+                          vertical-align: middle;
+                          margin-right: 4px;
+                          height: 16px;  /* подбери нужное значение */
+                        }
+                        /* Стили для текста языка — фиксированный line-height поможет выровнять по центру */
+                        #language-text1 {
+                          display: inline-block;
+                          vertical-align: middle;
+                          line-height: 16px;
+                          margin: 0;
+                          padding: 0;
+                        }
+                        /* Разделитель между языком и валютой */
+                        .separator1 {
+                          display: inline-flex;
+                          align-items: center;
+                          margin: 0 8px;
+                        }
+                        /* Блок для выбора валюты — сброс отступов и выравнивание по центру */
+                        .dropdown1 {
+                          display: flex;
+                          align-items: center;
+                          margin: 0;
+                          padding: 0;
+                        }
+                        /* Прозрачный селект занимает всю область обертки */
+                        .transparent-select1 {
+                          position: absolute;
+                          top: 0;
+                          left: 0;
+                          width: 100%;
+                          height: 100%;
+                          opacity: 0;
+                          cursor: pointer;
+                        }
+                        /* Сброс возможных внутренних отступов у всех дочерних элементов в блоке валюты */
+                        .dropdown1 * {
+                          margin: 0;
+                          padding: 0;
+                          box-sizing: border-box;
+                        }
+                        .container-footer,
+                        .container-footer * {
+                            color: white !important;
+                        }
+                        .remove-item,
+                        .cart-dropdown .product-price {
+                            color: #74BBC6 !important;
+                        }
+                        .cart-dropdown .cart-action .btn-dark:hover, .cart-dropdown .cart-action .btn-dark:active, .cart-dropdown .cart-action .btn-dark:focus {
+                        background: #74BBC6;
+                        border: 2px solid #74BBC6;
+                        }
+
+                        .container {
+                            max-width: 1500 !important;
+                        }
+                    </style>
+
+
+                 <div class="header-call d-xs-show d-lg-flex align-items-center" style="position: static;">
+                    <div class="call-info d-lg-show">
+                        <a href="tel:{% for phone in phones %}{{ phone.information_contact }}{% empty %}Нет данных для отображения{% endfor %}" class="phone-number font-weight-bolder ls-50">
+                            {% with request|get_settings as setting %}
+                            {% if setting %}
+                            {% with setting.settings as settings %}
+                            {% if setting.phone_default %}
+                            <div style=" font-weight: 400; font-size: 20px;">
+                                {{ setting.phone_default.information_contact }}
+                            </div>
+                            {% endif %}
+                            {% endwith %}
+                            {% endif %}
+                            {% endwith %}
+                        </a>
+                    </div>
+                </div>
+
+                </div>
+            </div>
+        </div>
+        <!-- End of Header Top -->
+
+        <div class="header-middle">
+            <div class="container mob-header">
+                <div class="header-left left_header_mob mr-md-4">
+
+                    {% include 'site/shop2/include/category.html' %}
+                    <form method="get" action="{% url 'webmain:search' %}" class="header-search hs-expanded hs-round d-none d-md-flex input-wrapper" style="border-radius: 8px;border: 3px solid white;margin-left: 0; flex:0.5;">
+                        <input id="search-input" name="q" type="text" class="form-control" value="{{ query }}" placeholder="ПОИСК ПО НАИМЕНОВАНИЮ И АРТИКУЛУ " aria-describedby="button-addon2" style="font-size:14px; color: white;border: 0; margin-right: 0px;" />
+                        <button class="btn btn-search" type="submit" id="button-addon2" data-bs-toggle="offcanvas" data-bs-target="#AsideOffcanvasSearch" style="color: white;;border: 0;margin-right: 0px; background: none;" aria-controls="AsideOffcanvasSearch"><i class="w-icon-search"></i>
+                        </button>
+                    </form>
+                </div>
+                <div class="header-right ml-4">
+
+                    {% if user.is_authenticated %}
+
+                    <div class="shopping-cart cart-dropdown cart-offcanvas mr-0 mr-lg-2 d-none" style="position: relative;">
+
+                        <a style="cursor: pointer;" class=" label-down link" href="{% url 'shop:bookmark_list' %}">
+                            <i class="w-icon-heart"></i>
+                            <sup class="cart-count" id="bookmark-count">{% get_likes_count request.user %}</sup>
+                            <span class="cart-label">Избранное</span>
+                        </a>
+
+                    </div>
+                    {% endif %}
+                    <div class="shopping-cart dropdown cart-dropdown cart-offcanvas mr-0 mr-lg-2" style="margin-right: 20px !important;">
+                        <div class="cart-overlay"></div>
+                        <a style="cursor: pointer;" class="cart-toggle label-down link" type="button" data-bs-toggle="offcanvas" data-bs-target="#cart_product" aria-controls="cart_product_canvas">
+                                <i class="w-icon-cart" style="color: white;"></i>
+<!--                            <sup class="cart-count" id="cart-count">{% get_user_cart_products request as cart_products %} {{cart_products.2}}</sup>-->
+                        </a>
+
+                        <div class="dropdown-box">
+                            <a class="action" href="{% url 'webmain:home' %}#" role="button" data-bs-toggle="dropdown">
+                                <i class="w-icon-long-arrow-right"></i>
+                                {% include 'site/shop2/include/cart_product.html' %}
+                            </a>
+                        </div>
+                    </div>
+                    <div>
+                        <a href="{% url 'webmain:login' %}" class="">
+                            <p style="color: white;margin-bottom: 0;">{% if request.user.is_authenticated %} {{ request.user.username }} {% else %} ВОЙТИ {% endif %}</p>
+                        </a>
+                    </div>
+                    <!-- End of Dropdown Box -->
+                </div>
+            </div>
+        </div>
+        <!-- End of Header Middle -->
+
+
+
+    </header>
+
+    {% block content %}
+    {% endblock content %}
+
+    <footer class="footer appear-animate" data-animation-options="{'name': 'fadeIn'}">
+<!--        <div class="footer-newsletter bg-primary">-->
+<!--            <div class="container">-->
+<!--                <div class="row justify-content-center align-items-center">-->
+<!--                    <div class="col-xl-5 col-lg-6">-->
+<!--                        <div class="icon-box icon-box-side text-white">-->
+<!--                            <div class="icon-box-icon d-inline-flex">-->
+<!--                                <i class="w-icon-envelop3"></i>-->
+<!--                            </div>-->
+<!--                            <div class="icon-box-content">-->
+<!--                                <h4 class="icon-box-title text-white text-uppercase font-weight-bold">Подписаться</h4>-->
+<!--                                <p class="text-white">-->
+<!--                                </p>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                    <div class="col-xl-7 col-lg-6 col-md-9 mt-4 mt-lg-0 ">-->
+<!--                        {% include 'site/shop2/include/subscriptions.html' %}-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+        <div class=" container-footer" style="background: #74BBC6; ">
+            <div class="footer-top container " >
+                <div class="row mob-row" >
+                    <div class="col-lg-2 col-sm-4 mob">
+                        <h4 class="widget-title"></h4>
+                        <h4 class="widget-collapsed-title collapsed" data-bs-toggle="collapse"
+                            data-bs-target="#widgetId-1">Информация</h4>
+                        <p class="desc">
+                            {% with request|get_settings as settings %}
+                            {% if settings.description %}
+                            {{ settings.description }}
+                            {% endif %}
+                            {% endwith %}
+                        </p>
+                        <ul class="footer-link">
+                            <li><a href="{% url 'webmain:home' %}">Главная</a></li>
+                            <li><a href="{% url 'webmain:blogs' %}">Новости</a></li>
+                            <li><a href="{% url 'shop:catalogs' %}">Магазин</a></li>
+                            <li><a href="{% url 'webmain:about' %}">О проекте</a></li>
+                            <li><a href="{% url 'webmain:contacts' %}">Контакты</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-2 col-sm-4 mob">
+                        <!-- Footer Widget Start -->
+                        <div class="widget-item nav-menu-item3">
+                            <h4 class="widget-title"></h4>
+                            <h4 class="widget-collapsed-title collapsed" data-bs-toggle="collapse"
+                                data-bs-target="#widgetId-3">Пользователю</h4>
+                            <div id="widgetId-4" class=" widget-collapse-body">
+                                <div class="collapse-body">
+                                    <div class="widget-contact-info">
+
+                                        <ul class="footer-link">
+                                            <li>
+                                                <a href="{% if user.is_authenticated %}{% url 'useraccount:edit_profile' %}{% else %}{% url 'webmain:login' %}{% endif %}">Профиль</a>
+                                            </li>
+                                            {% if not user.type == 2 %}
+                                            <li><a href="{% url 'shop:my_cart' %}">Корзина</a></li>
+                                            <li >
+                                                <a href="{% if user.is_authenticated %}{% url 'shop:bookmark_list' %}{% endif %}">Избранное</a>
+                                            </li>
+                                            <li>
+                                                <a href="{% if user.is_authenticated %}{% url 'shop:my_order' %}{% endif %}">Покупки</a>
+                                            </li>
+                                            {% else %}
+                                            <li>
+                                                <a href="{% if user.is_authenticated %}{% url 'shop:manufacturerorder' %}{% endif %}">Продажи</a>
+                                            </li>
+                                            <li>
+                                                <a href="{% if user.is_authenticated %}{% url 'webmain:shop_edit' %}{% endif %}">Мой
+                                                    магазин</a></li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Footer Widget End -->
+                    </div>
+                    <div class="col-lg-3 col-sm-4 mob">
+                        <div class="widget-item nav-menu-item1">
+                            <h4 class="widget-title"></h4>
+                            <h4 class="widget-collapsed-title collapsed" data-bs-toggle="collapse"
+                                data-bs-target="#widgetId-1">О нас</h4>
+                            <div id="widgetId-1" class=" widget-collapse-body">
+                                <div class="collapse-body">
+                                    <div class="widget-menu-wrap">
+                                        <ul class="nav-menu">
+                                            {% get_pages as pages %}
+                                            {% if pages %}{% for page in pages %}{% if page.pagetype == 6 %}
+                                            <li><a href="{% url 'webmain:page' page.slug %}">Партнерство</a></li>
+                                            {% endif %}{% endfor %}{% endif %}
+                                            {% if pages %}{% for page in pages %}{% if page.pagetype == 7 %}
+                                            <li><a href="{% url 'webmain:page' page.slug %}">Сотрудничество</a></li>
+                                            {% endif %}{% endfor %}{% endif %}
+                                            {% if pages %}{% for page in pages %}{% if page.pagetype == 8 %}
+                                            <li><a href="{% url 'webmain:page' page.slug %}">Доставка</a></li>
+                                            {% endif %}{% endfor %}{% endif %}
+                                            {% if pages %}{% for page in pages %}{% if page.pagetype == 9 %}
+                                            <li><a href="{% url 'webmain:page' page.slug %}">Оплата</a></li>
+                                            {% endif %}{% endfor %}{% endif %}
+                                            {% if pages %}{% for page in pages %}{% if page.pagetype == 10 %}
+                                            <li><a href="{% url 'webmain:page' page.slug %}">Возврат</a></li>
+                                            {% endif %}{% endfor %}{% endif %}
+                                            <li><a href="{% url 'hr:vacancys' %}">Вакансии</a></li>
+
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-sm-4 mob">
+                        <div class="widget-item nav-menu-item2">
+                            <h4 class="widget-title"></h4>
+                            <h4 class="widget-collapsed-title collapsed" data-bs-toggle="collapse"
+                                data-bs-target="#widgetId-2">Политики</h4>
+                            <div id="widgetId-2" class=" widget-collapse-body">
+                                <div class="collapse-body">
+                                    <div class="widget-menu-wrap">
+                                        <ul class="nav-menu">
+                                            {% if pages %}{% for page in pages %}{% if page.pagetype == 2 %}
+                                            <li><a href="{% url 'webmain:page' page.slug %}">Пользовательское соглашение</a></li>
+                                            {% endif %}{% endfor %}{% endif %}
+                                            {% if pages %}{% for page in pages %}{% if page.pagetype == 3 %}
+                                            <li><a href="{% url 'webmain:page' page.slug %}">Политика конфиденциальности</a></li>
+                                            {% endif %}{% endfor %}{% endif %}
+                                            {% if pages %}{% for page in pages %}{% if page.pagetype == 4 %}
+                                            <li><a href="{% url 'webmain:page' page.slug %}">Политика Cookie - Файлов</a></li>
+                                            {% endif %}{% endfor %}{% endif %}
+                                            {% if pages %}{% for page in pages %}{% if page.pagetype == 5 %}
+                                            <li><a href="{% url 'webmain:page' page.slug %}">Согласия на обработку персональных данных</a></li>
+                                            {% endif %}{% endfor %}{% endif %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-sm-4 mob">
+                        <div class="widget-item nav-menu-item3">
+                            <h4 class="widget-title"></h4>
+                            <h4 class="widget-collapsed-title collapsed" data-bs-toggle="collapse"
+                                data-bs-target="#widgetId-3">Контакты</h4>
+                            <div id="widgetId-3" class=" widget-collapse-body">
+                                <div class="collapse-body">
+                                    <div class="widget-contact-info">
+                                        <p class="contact-info-desc">Email:
+                                            <a href="mailto://{% with request|get_settings as setting %}
+                                                    {% if setting %}
+                                                    {% with setting.settings as settings %}
+                                                    {% if setting.email_default %}
+                                                        {{ setting.email_default.information_contact }}
+                                                    {% endif %}
+                                                    {% endwith %}
+                                                    {% endif %}
+                                                    {% endwith %}">
+                                                {% with request|get_settings as setting %}
+                                                    {% if setting %}
+                                                    {% with setting.settings as settings %}
+                                                    {% if setting.email_default %}
+                                                        {{ setting.email_default.information_contact }}
+                                                    {% endif %}
+                                                    {% endwith %}
+                                                    {% endif %}
+                                                    {% endwith %}
+                                            </a></p>
+                                        <div class="contact-item">
+                                            <div class="icon">
+                                                <i class="pe-7s-map-marker"></i>
+                                            </div>
+                                            <div class="info">
+                                                <p>Наш адрес: <br>{% with request|get_settings as setting %}
+                                                    {% if setting %}
+                                                    {% with setting.settings as settings %}
+                                                    {% if setting.address_default %}
+                                                        {{ setting.address_default.information_contact }}
+                                                    {% endif %}
+                                                    {% endwith %}
+                                                    {% endif %}
+                                                    {% endwith %}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="contact-item phone-info">
+                                            <div class="icon">
+                                                <i class="pe-7s-phone"></i>
+                                            </div>
+                                            <div class="info">
+                                                <p><span>Телефон:</span> <a
+                                                        href="tel://">
+                                                    {% with request|get_settings as setting %}
+                                                    {% if setting %}
+                                                    {% with setting.settings as settings %}
+                                                    {% if setting.phone_default %}
+
+                                                        {{ setting.phone_default.information_contact }}
+
+                                                    {% endif %}
+                                                    {% endwith %}
+                                                    {% endif %}
+                                                    {% endwith %}
+                                                </a></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom" style="margin-left: 5%; margin-right: 5%;">
+                <div class="footer-left">
+                                                <p class="copyright">{% with request|get_settings as data %} {% if data %} {{ data.setting.content }}{% endif %}{%endwith%}</p>
+
+                </div>
+                <div class="footer-right">
+                    <span class="payment-label mr-lg-8">Мы используем безопасные системы оплат</span>
+                    <figure class="payment">
+                        <img src="{% with request|get_settings as data %}{% if data.setting.paymentmetod %}{{ data.setting.paymentmetod.url }}{% endif %}{% endwith %}"
+                                     alt="payment" width="192" height="21"/>
+                    </figure>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- End of Footer -->
+</div>
+<!-- End of Page-wrapper-->
+
+
+<!-- Start of Sticky Footer -->
+<div class="sticky-footer sticky-content fix-bottom fixed" style=" position: fixed; height: 70px; width: 100%; ">
+    <a href="{% url 'webmain:home' %}" class="sticky-link active">
+        <i class="w-icon-home"></i>
+        <p>ГЛАВНАЯ</p>
+    </a>
+    <a href="{% url 'shop:catalogs' %}" class="sticky-link">
+        <i class="w-icon-category"></i>
+        <p>КАТАЛОГ</p>
+    </a>
+    {% if user.is_authenticated%}
+    <a href="{% url 'useraccount:edit_profile' %}" class="sticky-link">
+        <i class="w-icon-account"></i>
+        <p>ПРОФИЛЬ</p>
+    </a>
+    {% endif %}
+    {% if not user.is_authenticated%}
+    <a href="{% url 'webmain:login' %}" class="sticky-link">
+        <i class="w-icon-account"></i>
+        <p>ВОЙТИ</p>
+    </a>
+    {% endif %}
+    <div class="cart dir-up">
+        <a href="{% url 'shop:my_cart' %}" class="sticky-link">
+            <i class="w-icon-cart"></i>
+            <p>КОРЗИНА</p>
+        </a>
+        <!-- End of Dropdown Box -->
+    </div>
+
+    <div class="header-search hs-toggle dir-up">
+        <a href="{% url 'webmain:home' %}#" class="search-toggle sticky-link">
+            <i class="w-icon-search"></i>
+            <p>ПОИСК</p>
+        </a>
+        <form action="{% url 'webmain:search' %}" method="get" class="input-wrapper">
+    <input id="search-input-1" name="q" type="text" class="form-control" placeholder="Поиск..." />
+    <button class="btn btn-search" type="submit" id="search-btn-1">
+        <i class="w-icon-search"></i>
+    </button>
+</form>
+    </div>
+</div>
+<!-- End of Sticky Footer -->
+
+<!-- Start of Scroll Top -->
+<a id="scroll-top" class="scroll-top" href="#top" title="Top" role="button"> <i class="w-icon-angle-up"></i> <svg
+        version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 70">
+    <circle id="progress-indicator" fill="transparent" stroke="#000000" stroke-miterlimit="10" cx="35" cy="35"
+            r="34" style="stroke-dasharray: 16.4198, 400;"></circle>
+</svg> </a>
+<!-- End of Scroll Top -->
+
+<!-- Start of Mobile Menu -->
+<div class="mobile-menu-wrapper">
+    <div class="mobile-menu-overlay"></div>
+    <!-- End of .mobile-menu-overlay -->
+
+    <a href="#" class="mobile-menu-close"><i class="close-icon"></i></a>
+    <!-- End of .mobile-menu-close -->
+
+    <div class="mobile-menu-container scrollable">
+        <form action="{% url 'webmain:search' %}" method="get" class="input-wrapper">
+            <input id="search-input" name="q" type="text" class="form-control" value="{{ query }}" placeholder="Введи поисковую фразу..." aria-describedby="button-addon3" style="border-left: 2px solid #336699;margin-right: 0px ;" />
+            <button class="btn btn-search" type="submit" id="button-addon3">
+                <i class="w-icon-search"></i>
+            </button>
+        </form>
+        <!-- End of Search Form -->
+        <div class="tab">
+            <ul class="nav nav-tabs"  role="tablist">
+                <li class="nav-item">
+                    <a href="#main-menu" class="nav-link active">Меню</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#categories" class="nav-link">Каталог</a>
+                </li>
+            </ul>
+        </div>
+        <div class="tab-content">
+            <div class="tab-pane active" id="main-menu">
+                <ul class="mobile-menu">
+                    <li style="display: flex">
+                        {% if user.is_authenticated%}
+                        <a href="{% url 'useraccount:edit_profile' %}">Мой аккаунт</a>
+                        {% endif %}
+                        {% if not user.is_authenticated %}
+                        <a href="{% url 'webmain:login' %}">Вход</a>
+                        <a>/</a>
+                        <a href="{% url 'webmain:signup' %}">Регистрация</a>
+                        {% endif %}
+                    </li>
+                    <li>
+                        <a href="{% url 'webmain:home' %}">Главная</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'shop:catalogs' %}">Магазин</a>
+                    </li>
+                    {% if user.is_authenticated%}
+                    <li >
+                        <a href="{% url 'shop:bookmark_list' %}">Избранное</a>
+                    </li>
+                    {% endif %}
+                    <li>
+                        <a href="{% url 'shop:my_cart' %}">Корзина</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'webmain:blogs' %}">Новости</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'webmain:contacts' %}">Контакты</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'webmain:about' %}">О компании</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="tab-pane" id="categories">
+                <ul class="mobile-menu">
+                    {% get_categories_hierarchy request.get_host as all_categories %}
+                    {% for category in all_categories|print_categories_tree %}
+                    <li class="category {% if category.parent %}child-category{% endif %}">
+                <span class="category-name">
+                    <a style="display: flex; padding-left: {% if category.parent %}20px{% else %}0{% endif %};"
+                       href="{% url 'shop:categories' category.slug %}">
+                        {{ category.name }}
+                    </a>
+                </span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="global-modal-container"></div>
+<!-- End of Mobile Menu -->
+{% block footer %}{% endblock footer %}
+{% block footertop %}{% endblock footertop %}
+<script>
+    window.csrfToken = "{{ csrf_token }}";
+    console.log("CSRF Token: ", window.csrfToken);  // Debugging log
+</script>
+
+<!-- JavaScript to handle currency change -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.change-currency').forEach(function (element) {
+            element.addEventListener('click', function (event) {
+                event.preventDefault();
+                const currencyId = this.getAttribute('data-currency-id');
+                const csrfToken = window.csrfToken;
+
+                fetch('/update-cart-currency/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken  // Ensure CSRF token is included in headers
+                    },
+                    body: JSON.stringify({currency_id: currencyId})
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            alert('Currency updated to: ' + data.currency);
+                            location.reload();
+                        } else {
+                            alert('Failed to update currency.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            });
+        });
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form1 = document.querySelector('#search-input2')?.closest('form');
+        const input1 = document.querySelector('#search-input2');
+        const btn1 = document.querySelector('#button-addon2');
+
+        if (form1 && input1 && btn1) {
+            // Отправка при нажатии Enter
+            input1.addEventListener("keypress", function (e) {
+                if (e.key === "Enter") {
+                    e.preventDefault();  // Предотвращаем баги в некоторых браузерах
+                    form1.submit();
+                }
+            });
+
+            // Отправка при клике на кнопку
+            btn1.addEventListener("click", function (e) {
+                e.preventDefault();
+                form1.submit();
+            });
+        }
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const btn = document.getElementById("search-btn-1");
+        const form = btn?.closest("form");
+
+        if (btn && form) {
+            btn.addEventListener("click", function (e) {
+                e.preventDefault();  // отменяем стандартное поведение на всякий случай
+                console.log("Принудительная отправка формы #search-input-1");
+                form.submit();       // вручную отправляем форму
+            });
+        } else {
+            console.warn("Форма или кнопка не найдены");
+        }
+    });
+</script>
+
+
+
+<!-- Plugin JS File -->
+<script data-cfasync="false" src="{% static 'site/wolmart/5c5dd728/cloudflare-static/email-decode.min.js' %}"></script>
+<script src="{% static 'site/wolmart/assets/vendor/jquery/jquery.min.js' %}"></script>
+<script src="{% static 'site/wolmart/assets/vendor/jquery.plugin/jquery.plugin.min.js' %}"></script>
+<script src="{% static 'site/wolmart/assets/vendor/imagesloaded/imagesloaded.pkgd.min.js' %}"></script>
+<script src="{% static 'site/wolmart/assets/vendor/zoom/jquery.zoom.js' %}"></script>
+<script src="{% static 'site/wolmart/assets/vendor/jquery.countdown/jquery.countdown.min.js' %}"></script>
+<script src="{% static 'site/script.js' %}"></script>
+<script src="{% static 'site/wolmart/assets/vendor/skrollr/skrollr.min.js' %}"></script>
+
+<!-- Swiper JS -->
+<script src="{% static 'site/wolmart/assets/vendor/swiper/swiper-bundle.min.js' %}"></script>
+
+<!-- Main JS -->
+<script src="{% static 'site/wolmart/assets/js/main.min.js' %}"></script>
+<style>
+    .swiper-wrapper {
+        height: auto;
+    }
+    .header-search.hs-round.hs-expanded .form-control {
+        border-radius: 0.3rem 0 0 0.3rem;
+    }
+    .header-bottom:not(.fixed) .dropdown-box{
+        visibility: visible;
+    }
+</style>
+
+<script>
+    window.urls = {
+        bookmarkAdd: "{% url 'shop:bookmark-add' %}",
+        bookmarkDelete: "{% url 'shop:bookmark-delete' %}",
+        deleteSelectedProductCart: "{% url 'shop:delete_selected_product' %}"
+    };
+</script>
+{% block bottomfooter %}{% endblock bottomfooter %}
+</body>

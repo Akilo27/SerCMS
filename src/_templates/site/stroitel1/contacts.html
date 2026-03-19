@@ -1,0 +1,409 @@
+{% extends 'site/stroitel1/base.html' %}
+{% load static generals_tag  shop_tags %}
+{% block title %}{{ contact.title }}{% endblock title %}
+{% block description %}{{ contact.metadescription }}{% endblock description %}
+{% block propertytitle %}{{ contact.propertytitle }}{% endblock propertytitle %}
+{% block propertydescription %}{{ contact.propertydescription }}{% endblock propertydescription %}
+{% block propertyimage %}{% if contact.previev %}{{ contact.previev.url }}{% endif %}{% endblock propertyimage %}
+{% block head %}
+<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+
+<style>
+    .row {
+        --bs-gutter-x: 1.5rem;
+        --bs-gutter-y: 0;
+        display: flex
+    ;
+        flex-wrap: wrap;
+        margin-top: calc(-1* var(--bs-gutter-y));
+        margin-right: calc(-.5* var(--bs-gutter-x));
+        margin-left: calc(-.5* var(--bs-gutter-x));
+    }
+    .row {
+        --bs-gutter-x: 1.5rem;
+        --bs-gutter-y: 0;
+        display: flex
+    ;
+        flex-wrap: wrap;
+        margin-top: calc(-1* var(--bs-gutter-y));
+        margin-right: calc(-.5* var(--bs-gutter-x));
+        margin-left: calc(-.5* var(--bs-gutter-x));
+    }
+        @media (min-width: 992px) {
+        .col-lg-8 {
+            flex: 0 0 auto;
+            width: 66.66666667%;
+        }
+    }
+    @media (min-width: 768px) {
+        .col-md-12 {
+            flex: 0 0 auto;
+            width: 100%;
+        }
+    }
+    .row>* {
+        flex-shrink: 0;
+        width: 100%;
+        max-width: 100%;
+        padding-right: calc(var(--bs-gutter-x)* .5);
+        padding-left: calc(var(--bs-gutter-x)* .5);
+        margin-top: var(--bs-gutter-y);
+    }
+    .col-md-12 {
+        flex: 0 0 auto;
+        width: 100%;
+    }
+    .col-lg-8 {
+        flex: 0 0 auto;
+        width: 66.66666667%;
+    }
+        @media (min-width: 992px) {
+        .col-lg-4 {
+            flex: 0 0 auto;
+            width: 33.33333333%;
+        }
+    }
+        .form-control {
+        display: block;
+        width: 100%;
+        padding: .375rem .75rem;
+        font-size: 1rem;
+        font-weight: 400;
+        line-height: 1.5;
+        color: #212529;
+        background-color: #fff;
+        background-clip: padding-box;
+        border: 1px solid #ced4da;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        border-radius: .375rem;
+        transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    }
+
+.call-info {
+    margin-top: 35px;
+}
+
+
+
+
+</style>
+<!--- Вкладки --->
+<style>
+    .tabs {
+      width: 100%;
+      margin: 20px 0;
+    }
+
+    .tab-buttons {
+      display: flex;
+      border-bottom: 2px solid #ccc;
+    }
+
+    .tab-buttons button {
+      padding: 10px 20px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 16px;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s ease;
+    }
+
+    .tab-buttons button.active {
+      border-bottom: 3px solid #3498db;
+      font-weight: bold;
+      color: #3498db;
+    }
+
+    .tab-content {
+      display: none;
+      padding: 20px;
+      background-color: #f9f9f9;
+      border: 1px solid #ddd;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+    li {
+        list-style: none;
+    }
+    ul {
+        padding: 0;
+        margin: 0;
+    }
+    ul.contacts-list {
+    height: 350px;
+    overflow-x: hidden;
+}
+</style>
+<script>
+    window.onload = function() {
+        // Находим все элементы с классом tab-title
+        const tabTitles = document.querySelectorAll('.tab-title');
+
+        // Создаем новый контейнер для вкладок и добавляем его в начало страницы
+        const newTabsContainer = document.createElement('ul');
+        newTabsContainer.classList.add('tabs-overview'); // Можно добавить свой класс для стилей
+        document.body.insertBefore(newTabsContainer, document.getElementById('tabs'));
+
+        // Переносим вкладки в новый контейнер
+        tabTitles.forEach(tab => {
+            const listItem = document.createElement('li');
+            listItem.classList.add('tab-item');
+            listItem.appendChild(tab); // Переносим саму вкладку
+            newTabsContainer.appendChild(listItem);
+        });
+
+        // Делаем первую вкладку активной
+        const firstTab = newTabsContainer.querySelector('.tab-item');
+        firstTab.classList.add('active');
+
+        // Теперь можно подключить логику для активных вкладок, чтобы при клике показывался контент
+        newTabsContainer.addEventListener('click', (event) => {
+            const clickedTab = event.target.closest('.tab-item');
+            if (clickedTab) {
+                // Убираем активный класс со всех вкладок
+                newTabsContainer.querySelectorAll('.tab-item').forEach(tab => tab.classList.remove('active'));
+
+                // Добавляем активный класс к кликнутой вкладке
+                clickedTab.classList.add('active');
+
+                // Скрываем весь контент
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+                // Показываем контент для кликнутой вкладки
+                const index = Array.from(newTabsContainer.children).indexOf(clickedTab);
+                document.querySelectorAll('.tab-content')[index].classList.add('active');
+            }
+        });
+    };
+
+</script>
+
+
+{% endblock head %}
+{% block content %}
+
+<div class="inner-pages ui-elements hd-white">
+    <!-- START SECTION HEADINGS -->
+    <section class="ui-element">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-md-12">
+
+                    <div class="tabs">
+                        <div class="tab-buttons">
+                            <button class="active" data-tab="tab1">На карте</button>
+                            <button data-tab="tab2">Оставить заявку</button>
+                        </div>
+
+                        <div class="tab-content active" id="tab1">
+                            <div id="map" style="width: 100%; height: 400px;" data-map="
+                            {% for information in branch_contacts %}
+                            {% with children=information.contactpageinformation_set.all %}
+                                        {% for child in children %}
+                                        {% if child.page_type == 'map' %}
+                            map:{{ child.information_contact }}, description:{{ child.description_contact }}, title:{{ child.title_contact }},
+                            {% endif %}
+                            {% endfor %}
+                            {% endwith %}
+                            {% endfor %}
+                            "></div>
+                    </div>
+                    <div class="tab-content" id="tab2">
+                        <h3 class="mb-4">Форма обратной связи</h3>
+                        <form class="contact-form input-smoke ajax-contact"  method="post">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <input type="text" name="name" class="form-control input-custom input-full" required placeholder="Ваше Имя*">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" name="email" class="form-control input-custom input-full" required placeholder="Электронная почта *">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" name="subject" class="form-control input-custom input-full" required placeholder="Предмет">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" name="phone" id="id_phone{{ forloop.counter }}" class="form-control input-custom input-full" required placeholder="Телефон">
+                            </div>
+                            <div class="form-group">
+                                <textarea class="form-control textarea-custom input-full" id="comment" name="message" required rows="8" placeholder="Обращение"></textarea>
+                            </div>
+                            <button type="submit"  class="btn btn-primary btn-lg">Отправить</button>
+                        </form>
+                    </div>
+                    <div class="tab-content" id="tab3">
+                        <h2>Контакты</h2>
+                        <p>Телефон, адрес, email, форма обратной связи и пр.</p>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-lg-4 col-md-12 bgc">
+                <div class="call-info">
+                    <h3>Контактная информация</h3>
+                    <p class="mb-5">{{ contact.description }}</p>
+                    <ul class="contacts-list">
+                        {% for information in branch_contacts %}
+                        <li class="contact-list">
+                            <ul class="contact-item">
+                                <h5>{{information.title_contact}}</h5>
+
+
+                                {% with children=information.contactpageinformation_set.all %}
+                                {% for child in children %}
+                                {% if child.page_type == "address" %}
+                                <li>
+                                    <div class="info">
+                                        <i class="fa fa-map-marker" aria-hidden="true"></i>
+                                        <p class="in-p">{{ child.title_contact }}</p>
+                                    </div>
+                                </li>
+                                {% endif %}
+                                {% empty %}
+                                <p>Нет информации о адресах</p>
+                                {% endfor %}
+                                {% endwith %}
+
+                                {% with children=information.contactpageinformation_set.all %}
+                                {% for child in children %}
+                                {% if child.page_type == "phone" %}
+                                <li>
+                                    <div class="info">
+                                        <i class="fa fa-phone" aria-hidden="true"></i>
+                                        <a href="{{ child.information_contact }}" class="in-p">{{ child.title_contact }}</a>
+                                    </div>
+                                </li>
+                                {% endif %}
+                                {% empty %}
+                                <p>Нет информации о телефонах</p>
+                                {% endfor %}
+                                {% endwith %}
+
+                                {% with children=information.contactpageinformation_set.all %}
+                                {% for child in children %}
+                                {% if child.page_type == "email" %}
+                                <li>
+                                    <div class="info">
+                                        <i class="fa fa-envelope" aria-hidden="true"></i>
+                                        <a href="{{ child.information_contact }}" class="in-p">{{ child.title_contact }}</a>
+                                    </div>
+                                </li>
+                                {% endif %}
+                                {% empty %}
+                                <p>Нет информации о эл.почте</p>
+                                {% endfor %}
+                                {% endwith %}
+
+                                {% with children=information.contactpageinformation_set.all %}
+                                {% for child in children %}
+                                {% if child.page_type == "email" %}
+                                <li>
+                                    <div class="info">
+                                        <i class="fa fa-envelope" aria-hidden="true"></i>
+                                        <a href="{{ child.information_contact }}" class="in-p">{{ child.title_contact }}</a>
+                                    </div>
+                                </li>
+                                {% endif %}
+                                {% empty %}
+                                <p>Нет информации о эл.почте</p>
+                                {% endfor %}
+                                {% endwith %}
+                                {% with children=information.contactpageinformation_set.all %}
+                                <li>
+                                    <div class="info">
+                                        <i class="fa fa-clock-o" aria-hidden="true"></i>
+                                        {% for child in children %}
+                                        {% if child.page_type == "works" %}
+                                        <p class="in-p">{{ child.title_contact }}</p>
+                                        {% endif %}
+                                        {% empty %}
+                                        <p>Нет рабочих дняй</p>
+                                        {% endfor %}
+                                        {% for child in children %}
+                                        {% if child.page_type == "weekend" %}
+                                        <p class="in-p">{{ child.title_contact }}</p>
+                                        {% endif %}
+                                        {% empty %}
+                                        <p>Нет выходных</p>
+                                        {% endfor %}
+                                    </div>
+                                </li>
+                                {% endwith %}
+                            </ul>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+</div>
+</section>
+<!-- Contact Section End -->
+</div>
+
+{% endblock content %}
+{% block bootomfooter %}
+<script type="text/javascript">
+    ymaps.ready(init);
+
+    function init() {
+        const mapElement = document.getElementById('map');
+        const data = mapElement.dataset.map;
+
+        // Парсим данные вручную
+        const items = data.split('map:').filter(i => i.trim() !== '');
+        const placemarks = [];
+
+        items.forEach(item => {
+            const parts = item.split(',');
+            const lat = parseFloat(parts[0]);
+            const lon = parseFloat(parts[1]);
+            const descMatch = item.match(/description:([^,]+)/);
+            const titleMatch = item.match(/title:([^,]+)/);
+            const description = descMatch ? descMatch[1].trim() : 'Описание';
+            const title = titleMatch ? titleMatch[1].trim() : 'Заголовок';
+
+            placemarks.push({lat, lon, description, title});
+        });
+
+        // Центр карты по первой метке
+        const center = placemarks.length > 0 ? [placemarks[0].lat, placemarks[0].lon] : [55.751244, 37.618423];
+
+        const myMap = new ymaps.Map("map", {
+            center: center,
+            zoom: 12
+        });
+
+        placemarks.forEach(p => {
+            const placemark = new ymaps.Placemark([p.lat, p.lon], {
+                hintContent: p.title,
+                balloonContent: p.description
+            });
+            myMap.geoObjects.add(placemark);
+        });
+    }
+</script>
+
+<script>
+    const buttons = document.querySelectorAll('.tab-buttons button');
+    const contents = document.querySelectorAll('.tab-content');
+
+    buttons.forEach(button => {
+      button.addEventListener('click', () => {
+        const tabId = button.getAttribute('data-tab');
+
+        // Сброс активных
+        buttons.forEach(btn => btn.classList.remove('active'));
+        contents.forEach(content => content.classList.remove('active'));
+
+        // Активируем выбранную
+        button.classList.add('active');
+        document.getElementById(tabId).classList.add('active');
+      });
+    });
+</script>
+{% endblock bootomfooter %}

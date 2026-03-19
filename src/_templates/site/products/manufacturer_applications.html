@@ -1,0 +1,49 @@
+{% extends 'products/base_profile.html' %}
+{% load static generals_tag %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+{% block content %}
+<aside class="sidebar-area">
+  <div class="widget widget_categories">
+    <h3 class="widget_title">Запросы
+    </h3>
+
+       <div class="cart-table table-responsive">
+    <table class="table">
+        <thead>
+        <tr>
+            <th class="product-thumb"> </th>
+            <th class="product-total-price">
+                Информация
+            </th>
+            <th class="product-thumb">
+                Дата
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for application in applications %}
+        <tr >
+            <td>
+                <a class="action" href="{% url 'shop:applicationdetail' application.pk %}" >
+                    Подробнее
+                    {% if ticket.status == 0 %}<span class="new_ticket">*</span>{% endif %}
+                </a>
+            </td>
+            <td>{{ application.products.name }}</td>
+            <td><i class="pe-7s-date"></i> <span>{{ application.create }}</span></td>
+        </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+</div>
+  </div>
+  {% include 'products/include/paginations.html' with items=applications %}
+</aside>
+{% endblock content %}
+{% block footer %}{% endblock footer %}

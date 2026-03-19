@@ -1,0 +1,1094 @@
+{% load i18n %}
+{% load static  %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<!-- Vendor css (Require in all Page) -->
+<link href="{% static 'site/moderations/assets/css/vendor.min.css' %}" rel="stylesheet" type="text/css" />
+
+<!-- Icons css (Require in all Page) -->
+<link href="{% static 'site/moderations/assets/css/icons.min.css' %}" rel="stylesheet" type="text/css" />
+
+<!-- App css (Require in all Page) -->
+<link href="{% static 'site/moderations/assets/css/app.min.css' %}" rel="stylesheet" type="text/css" />
+<!-- Theme Config js (Require in all Page) -->
+<script src="{% static 'site/moderations/assets/js/config.min.js' %}"></script>
+
+{% endblock head %}
+<style>
+    /* Стиль для таблицы */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-family: 'Arial', sans-serif;
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Стиль для заголовков таблицы */
+th {
+    background-color: #4CAF50;
+    color: white;
+    padding: 12px;
+    text-align: left;
+    font-weight: bold;
+}
+
+/* Стиль для ячеек таблицы */
+td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Стиль для строки при наведении */
+tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Стиль для строк с четным индексом (для улучшения читабельности) */
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* Стиль для строки, если нет данных */
+p {
+    font-size: 16px;
+    color: #666;
+    text-align: center;
+    padding: 20px;
+}
+
+/* Стили для кнопок */
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+
+    .filters {
+        margin-bottom: 20px;
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    .filters label {
+        font-weight: bold;
+    }
+    .filters input, .filters select {
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    .filters button {
+        padding: 8px 16px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .filters button:hover {
+        background-color: #45a049;
+    }
+    .chart-container {
+        position: relative;
+        height: 500px;
+        margin-bottom: 20px;
+    }
+    .metrics-selector {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+    .metric-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .summary-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    .card {
+        background-color: #f9f9f9;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+</style>
+{% block content %}
+<div class="row g-3 pb-2">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3 class="text-dark mb-1 pl-3">{{manufacturers.name}} </h3>
+        </div>
+<!--        <a href="{% url 'moderation:manufacturers_dashboard' manufacturers.id %}" class="link-dark fw-medium">-->
+<!--            Подробнее <i class="ri-arrow-right-line align-middle"></i>-->
+<!--        </a>-->
+    </div>
+
+    <div class="filters" data-manufacturer-id="{{manufacturers.id}}">
+        <label for="start-date">С:</label>
+        <input type="date" id="start-date">
+
+        <label for="end-date">По:</label>
+        <input type="date" id="end-date">
+        <button id="chart-list" style="display:none;">{% trans "График" %}</button>
+        <button id="table-list" >{% trans "Таблица" %}</button>
+
+        <button id="apply-filter">{% trans "Применить фильтр" %}</button>
+        <button id="reset-filter">{% trans "Сбросить" %}</button>
+
+    </div>
+
+    <div class="metrics-selector d-none">
+        <div class="metric-checkbox">
+            <input type="checkbox" id="revenue-checkbox" checked>
+            <label for="revenue-checkbox">{% trans "Выручка по товарам" %}</label>
+        </div>
+        <div class="metric-checkbox">
+            <input type="checkbox" id="expenses-stores-checkbox" checked>
+            <label for="expenses-stores-checkbox">{% trans "Расходы по магазинам" %}</label>
+        </div>
+        <div class="metric-checkbox">
+            <input type="checkbox" id="expenses-products-checkbox" checked>
+            <label for="expenses-products-checkbox">{% trans "Расходы по товарам" %}</label>
+        </div>
+        <div class="metric-checkbox">
+            <input type="checkbox" id="salary-expenses-checkbox" checked>
+            <label for="salary-expenses-checkbox">{% trans "Зарплатные расходы" %}</label>
+        </div>
+        <div class="metric-checkbox">
+            <input type="checkbox" id="income-checkbox" checked>
+            <label for="income-checkbox">{% trans "Доход" %}</label>
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <canvas id="areaChart"></canvas>
+    </div>
+    <div class="list" style="display:none;">
+        <div id="expenses-list"></div>
+    </div>
+</div>
+
+<div class="row g-3"> <!-- Контейнер row с отступами -->
+
+    <!-- Выручка по товарам -->
+    <div class="col-md-2_4 col-sm-6">
+        <div class="card h-100 d-flex flex-column">
+            <div class="card-body d-flex flex-column justify-content-between">
+                <div class="d-flex align-items-start mb-3">
+                    <div class="avatar-md bg-light bg-opacity-50 rounded me-3">
+                        <iconify-icon icon="solar:hand-money-broken" class="fs-32 text-primary avatar-title"></iconify-icon>
+                    </div>
+                    <div class="flex-grow-1">
+                        <p class="text-muted mb-1">{% trans "Выручка по товарам" %}</p>
+                        <p id="total-revenue" class="mb-0" style="white-space: nowrap;">0 ₽</p>
+                    </div>
+                </div>
+                <button class="btn btn-outline-primary btn-sm w-100 show-table-btn"
+                        data-target="revenue-table">
+                    {% trans "Показать список" %} <i class="ri-arrow-down-s-line"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Расходы по товарам -->
+    <div class="col-md-2_4 col-sm-6">
+        <div class="card h-100 d-flex flex-column">
+            <div class="card-body d-flex flex-column justify-content-between">
+                <div class="d-flex align-items-start mb-3">
+                    <div class="avatar-md bg-light bg-opacity-50 rounded me-3">
+                        <iconify-icon icon="solar:chart-broken" class="fs-32 text-danger avatar-title"></iconify-icon>
+                    </div>
+                    <div class="flex-grow-1">
+                        <p class="text-muted mb-1">{% trans "Расходы по товарам" %}</p>
+                        <p id="total-expenses" class="mb-0" style="white-space: nowrap;">0 ₽</p>
+                    </div>
+                </div>
+                <button class="btn btn-outline-danger btn-sm w-100 show-table-btn"
+                        data-target="expenses-table">
+                    {% trans "Показать список" %} <i class="ri-arrow-down-s-line"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Расходы по магазину -->
+    <div class="col-md-2_4 col-sm-6">
+        <div class="card h-100 d-flex flex-column">
+            <div class="card-body d-flex flex-column justify-content-between">
+                <div class="d-flex align-items-start mb-3">
+                    <div class="avatar-md bg-light bg-opacity-50 rounded me-3">
+                        <iconify-icon icon="solar:shop-broken" class="fs-32 text-warning avatar-title"></iconify-icon>
+                    </div>
+                    <div class="flex-grow-1">
+                        <p class="text-muted mb-1">{% trans "Расходы магазина" %}</p>
+                        <p id="total-profit" class="mb-0" style="white-space: nowrap;">0 ₽</p>
+                    </div>
+                </div>
+                <button class="btn btn-outline-warning btn-sm w-100 show-table-btn"
+                        data-target="shop-expenses-table">
+                    {% trans "Показать список" %} <i class="ri-arrow-down-s-line"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Сотрудники -->
+    <div class="col-md-2_4 col-sm-6">
+        <div class="card h-100 d-flex flex-column">
+            <div class="card-body d-flex flex-column justify-content-between">
+                <div class="d-flex align-items-start mb-3">
+                    <div class="avatar-md bg-light bg-opacity-50 rounded me-3">
+                        <iconify-icon icon="solar:user-rounded-broken" class="fs-32 text-success avatar-title"></iconify-icon>
+                    </div>
+                    <div class="flex-grow-1">
+                        <p class="text-muted mb-1">{% trans "Сотрудники" %}</p>
+                        <p id="total-salary" class="mb-0" style="white-space: nowrap;">0 ₽</p>
+                    </div>
+                </div>
+                <button class="btn btn-outline-success btn-sm w-100 show-table-btn"
+                        data-target="withdrawals-table">
+                    {% trans "Показать список" %} <i class="ri-arrow-down-s-line"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Доход -->
+    <div class="col-md-2_4 col-sm-6">
+        <div class="card h-100 d-flex flex-column">
+            <div class="card-body d-flex flex-column justify-content-between">
+                <div class="d-flex align-items-start mb-3">
+                    <div class="avatar-md bg-light bg-opacity-50 rounded me-3">
+                        <iconify-icon icon="solar:wallet-money-broken" class="fs-32 text-info avatar-title"></iconify-icon>
+                    </div>
+                    <div class="flex-grow-1">
+                        <p class="text-muted mb-1">{% trans "Доход" %}</p>
+                        <p id="total-income" class="mb-0" style="white-space: nowrap;">0 ₽</p>
+                    </div>
+                </div>
+                <button class="btn btn-outline-info btn-sm w-100 show-table-btn"
+                        data-target="income-table">
+                    {% trans "Показать список" %} <i class="ri-arrow-down-s-line"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div> <!-- Закрываем контейнер row -->
+<!-- Таблица с выручкой по товарам -->
+<div id="revenue-table" class="table-container" style="display: none;">
+    <div class="card mt-3">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">{% trans "Выручка по товарам" %}</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>{% trans "Товар" %}</th>
+                        <th>{% trans "Количество" %}</th>
+                        <th>{% trans "Стоимость" %}</th>
+                        <th>{% trans "Продажа" %}</th>
+                    </tr>
+                    </thead>
+                    <tbody id="product-revenue-body">
+                    <!-- Данные будут загружаться сюда -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Таблица с расходами по товарам -->
+<div id="expenses-table" class="table-container" style="display: none;" data-manufacturer-id="{{manufacturers.id}}">
+    <div class="card mt-3">
+        <div class="card-header bg-danger text-white">
+            <h5 class="mb-0">{% trans "Расходы по товарам" %}</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>{% trans "Товар" %}</th>
+                        <th>{% trans "Закупочная цена" %}</th>
+                        <th>{% trans "Количество" %}</th>
+                        <th>{% trans "Общие расходы" %}</th>
+                        <th>{% trans "Дата" %}</th>
+                        <th>{% trans "Дата создания" %}</th>
+                    </tr>
+                    </thead>
+                    <tbody id="product-expenses-body">
+                    <!-- Данные будут загружаться сюда -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Таблица с расходами по магазину -->
+<div id="shop-expenses-table" class="table-container" data-manufacturer-id="{{manufacturers.id}}">
+    <div class="card mt-3">
+        <div class="card-header bg-warning text-white">
+            <h5 class="mb-0">{% trans "Расходы по магазину" %}</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>{% trans "Категория" %}</th>
+                        <th>{% trans "Сумма" %}</th>
+                        <th>{% trans "Дата" %}</th>
+                        <th>{% trans "Дата создания" %}</th>
+                    </tr>
+                    </thead>
+                    <tbody id="shop-expenses-body">
+                    <!-- Данные будут загружаться сюда -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Таблица с выводом средств -->
+<div id="withdrawals-table" class="table-container" style="display: none;">
+    <div class="card mt-3">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">{% trans "Вывод средств" %}</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>{% trans "Пользователь" %}</th>
+                        <th>{% trans "Сумма" %}</th>
+                        <th>{% trans "Тип платежа" %}</th>
+                        <th>{% trans "Дата создания" %}</th>
+                    </tr>
+                    </thead>
+                    <tbody id="withdrawals-body">
+                    <!-- Данные будут загружаться сюда -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Таблица с доходами производителей -->
+<div id="income-table" class="table-container" style="display: none;">
+    <div class="card mt-3">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">{% trans "Доход производителей" %}</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>{% trans "Сумма" %}</th>
+                        <th>{% trans "Дата" %}</th>
+                        <th>{% trans "Дата создания" %}</th>
+                    </tr>
+                    </thead>
+                    <tbody id="income-body">
+                    <!-- Данные будут загружаться сюда -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    // Получаем элементы
+    const chartListButton = document.getElementById('chart-list');
+    const tableListButton = document.getElementById('table-list');
+    const chartContainer = document.querySelector('.chart-container');
+    const listContainer = document.querySelector('.list');
+
+    // Слушатели событий для переключения между графиком и таблицей
+    tableListButton.addEventListener('click', function() {
+        // Скрываем таблицу, показываем график
+        listContainer.style.display = 'block';
+        chartContainer.style.display = 'none';
+
+        // Меняем кнопки
+        tableListButton.style.display = 'none';
+        chartListButton.style.display = 'inline-block';
+    });
+
+    chartListButton.addEventListener('click', function() {
+        // Скрываем график, показываем таблицу
+        chartContainer.style.display = 'block';
+        listContainer.style.display = 'none';
+
+        // Меняем кнопки
+        chartListButton.style.display = 'none';
+        tableListButton.style.display = 'inline-block';
+    });
+});
+
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Функция для подсчета сумм
+      function calculateSums(expenses) {
+          let totalRevenue = 0;
+          let totalExpenses = 0;
+          let totalSalary = 0;
+          let totalIncome = 0;
+
+          expenses.forEach(expense => {
+              totalRevenue += parseFloat(expense.Revenue);
+              totalExpenses += parseFloat(expense['Expenses by products']) + parseFloat(expense['Expenses by store']) + parseFloat(expense['Expenses by employee']);
+              totalSalary += parseFloat(expense['Expenses by employee']);
+              totalIncome += parseFloat(expense.Income);
+          });
+
+          return {
+              totalRevenue: totalRevenue.toFixed(2),
+              totalExpenses: totalExpenses.toFixed(2),
+              totalSalary: totalSalary.toFixed(2),
+              totalIncome: totalIncome.toFixed(2),
+              totalProfit: (totalRevenue - totalExpenses - totalSalary).toFixed(2)
+          };
+      }
+
+      // Функция для отображения данных на странице
+      function displayExpenses(expenses) {
+          const expensesList = document.getElementById('expenses-list');
+          expensesList.innerHTML = ''; // Очищаем список перед добавлением новых данных
+
+          // Проверяем, есть ли данные
+          if (expenses.length === 0) {
+              expensesList.innerHTML = '<p>Нет данных для отображения.</p>';
+              return;
+          }
+
+          // Создаем таблицу для отображения данных
+          const table = document.createElement('table');
+          table.innerHTML = `
+              <thead>
+                  <tr>
+                      <th>ID</th>
+                      <th>Магазин</th>
+                      <th>Дата</th>
+                      <th>Выручка</th>
+                      <th>Расходы по товарам</th>
+                      <th>Расходы по магазинам</th>
+                      <th>Расходы по сотрудникам</th>
+                      <th>Доход</th>
+                  </tr>
+              </thead>
+              <tbody></tbody>
+          `;
+
+          const tbody = table.querySelector('tbody');
+
+          expenses.forEach(expense => {
+              const row = document.createElement('tr');
+              row.innerHTML = `
+                  <td>${expense.ID}</td>
+                  <td>${expense.Store}</td>
+                  <td>${formatDate(new Date(expense.data))}</td>
+                  <td>${expense.Revenue}</td>
+                  <td>${expense['Expenses by products']}</td>
+                  <td>${expense['Expenses by store']}</td>
+                  <td>${expense['Expenses by employee']}</td>
+                  <td>${expense.Income}</td>
+              `;
+              tbody.appendChild(row);
+          });
+
+          // Добавляем таблицу в DOM
+          expensesList.appendChild(table);
+
+          // Рассчитываем суммы
+          const sums = calculateSums(expenses);
+
+          // Выводим суммы в соответствующие элементы
+          document.getElementById('total-revenue').textContent = `${sums.totalRevenue} ₽`;
+          document.getElementById('total-expenses').textContent = `${sums.totalExpenses} ₽`;
+          document.getElementById('total-salary').textContent = `${sums.totalSalary} ₽`;
+          document.getElementById('total-income').textContent = `${sums.totalIncome} ₽`;
+          document.getElementById('total-profit').textContent = `${sums.totalProfit} ₽`;
+      }
+
+      // Функция для получения данных с API
+      function fetchExpenses() {
+          const startDate = document.getElementById('start-date').value;
+          const endDate = document.getElementById('end-date').value;
+          let url = '/api/aggregated-expenses/daily/';
+
+          // Формируем параметры запроса с фильтрами, если они заданы
+          const filters = [];
+          if (startDate) filters.push(`data__gte=${startDate}`);
+          if (endDate) filters.push(`data__lte=${endDate}`);
+          if (filters.length > 0) {
+              url += '?' + filters.join('&');
+          }
+
+          fetch(url)
+              .then(response => response.json())
+              .then(data => {
+                  displayExpenses(data);  // Отображаем данные
+                  initializeData(data);    // Инициализация данных для графика
+              })
+              .catch(error => {
+                  console.error('Ошибка при получении данных:', error);
+              });
+      }
+
+      // Функция для инициализации фильтрации за месяц
+      function initMonthFilter() {
+          const date = new Date();
+          const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+          const lastDayOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+
+          // Устанавливаем начальные значения дат для фильтра
+          document.getElementById('start-date').valueAsDate = firstDayOfMonth;
+          document.getElementById('end-date').valueAsDate = lastDayOfMonth;
+
+          fetchExpenses();  // Загружаем данные за месяц
+      }
+
+      // Обработчики событий для кнопок фильтрации
+      document.getElementById('apply-filter').addEventListener('click', fetchExpenses);
+      document.getElementById('reset-filter').addEventListener('click', function() {
+          document.getElementById('start-date').value = '';
+          document.getElementById('end-date').value = '';
+          fetchExpenses();  // Перезагружаем данные без фильтров
+      });
+
+      // Инициализация данных при загрузке страницы
+      initMonthFilter();  // Фильтрация за текущий месяц
+  });
+
+function formatDate(date) {
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+}
+</script>
+<script>
+function formatDate(date) {
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+}
+    document.addEventListener("DOMContentLoaded", function() {
+        const manufacturerId = document.getElementById("expenses-table").dataset.manufacturerId;
+
+        // Функция для загрузки всех данных (расходы и выручка)
+        function loadExpensesAndRevenue() {
+            // Запрос для получения данных о расходах и выручке
+            fetch(`/api/expenses/?manufacturer_id=${manufacturerId}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Обновляем таблицу с расходами по товарам
+                    const productExpensesBody = document.getElementById('product-expenses-body');
+                    productExpensesBody.innerHTML = "";  // Очистить таблицу перед загрузкой новых данных
+
+                    data.product_expenses.forEach(expense => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${expense.id}</td>
+                            <td>${expense.productexpenseposition_name}</td>
+                            <td>₽ ${expense.price}</td>
+                            <td>${expense.count}</td>
+                            <td>₽ ${expense.price * expense.count}</td>
+                            <td>${formatDate(new Date(expense.data))}</td>
+                            <td>${expense.create}</td>
+                        `;
+                        productExpensesBody.appendChild(row);
+                    });
+
+                    // Обновляем таблицу с расходами по магазину
+                    const shopExpensesBody = document.getElementById('shop-expenses-body');
+                    shopExpensesBody.innerHTML = "";  // Очистить таблицу перед загрузкой новых данных
+
+                    data.manufacturer_expenses.forEach(expense => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${expense.id}</td>
+                            <td>${expense.manufacturersexpense_name}</td>
+                            <td>₽ ${expense.count}</td>
+                            <td>${expense.price}</td>
+                          <td>${formatDate(new Date(expense.data))}</td>
+                        `;
+                        shopExpensesBody.appendChild(row);
+                    });
+
+                    // Обновляем таблицу с выручкой по товарам
+                    const productRevenueBody = document.getElementById('product-revenue-body');
+                    productRevenueBody.innerHTML = "";  // Очистить таблицу перед загрузкой новых данных
+
+                    data.selected_products.forEach(product => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${product.product_name}</td>
+                            <td>${product.quantity}</td>
+                            <td>₽ ${product.product_price}</td>
+                            <td>₽ ${product.amount}</td>
+                        `;
+                        productRevenueBody.appendChild(row);
+                    });
+
+                    // Обновляем таблицу с выводами
+                    const withdrawalsBody = document.getElementById('withdrawals-body');
+                    withdrawalsBody.innerHTML = "";
+
+                    data.withdrawals.forEach(withdrawal => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${withdrawal.id}</td>
+                            <td>${withdrawal.user}</td>
+                            <td>₽ ${withdrawal.amount}</td>
+                            <td>${withdrawal.type_payment}</td>
+                            <td>${withdrawal.create}</td>
+                        `;
+                        withdrawalsBody.appendChild(row);
+                    });
+
+                    // Обновляем таблицу с доходами производителей
+                    const incomeBody = document.getElementById('income-body');
+                    incomeBody.innerHTML = "";
+
+                    data.manufacturers_incomes.forEach(income => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${income.id}</td>
+                            <td>₽ ${income.price}</td>
+                            <td>${formatDate(new Date(expense.data))}</td>
+                            <td>${income.create}</td>
+                        `;
+                        incomeBody.appendChild(row);
+                    });
+
+                    // Показываем таблицу с выручкой
+                    document.getElementById("revenue-table").style.display = "block";
+                })
+                .catch(error => {
+                    console.error('Ошибка при загрузке данных:', error);
+                });
+        }
+
+        // Загружаем данные сразу при загрузке страницы
+        loadExpensesAndRevenue();
+    });
+
+function formatDate(date) {
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+}
+</script>
+
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const showTableButtons = document.querySelectorAll('.show-table-btn');
+        const tableContainers = document.querySelectorAll('.table-container');
+
+        // Скрываем все таблицы при загрузке
+        tableContainers.forEach(container => {
+            container.style.display = 'none';
+        });
+
+        showTableButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                const targetTable = document.getElementById(targetId);
+
+                // Проверяем, открыта ли уже таблица
+                const isCurrentlyVisible = targetTable.style.display !== 'none';
+
+                // Скрываем все таблицы
+                tableContainers.forEach(container => {
+                    container.style.display = 'none';
+                });
+
+                // Обновляем все кнопки на "Показать список"
+                showTableButtons.forEach(btn => {
+                    btn.innerHTML = 'Показать список <i class="ri-arrow-down-s-line"></i>';
+                });
+
+                if (!isCurrentlyVisible) {
+                    // Показываем выбранную таблицу
+                    targetTable.style.display = 'block';
+                    // Меняем текст текущей кнопки на "Скрыть список"
+                    this.innerHTML = 'Скрыть список <i class="ri-arrow-up-s-line"></i>';
+                }
+            });
+        });
+    });
+</script>
+
+<style>
+    /* Добавляем кастомные стили для 5 колонок */
+    .col-md-2_4 {
+        flex: 0 0 auto;
+        width: 20%;
+    }
+
+    /* Адаптивность для мобильных устройств */
+    @media (max-width: 768px) {
+        .col-md-2_4 {
+            width: 50%;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .col-md-2_4 {
+            width: 100%;
+        }
+    }
+</style>
+
+<style>
+    .show-table-btn {
+        transition: all 0.3s ease;
+    }
+    .show-table-btn:hover {
+        transform: translateY(-1px);
+    }
+    .table-container {
+        transition: all 0.3s ease;
+    }
+</style>
+<script>
+    // Данные для обработки
+    const inputData = [
+
+    ];
+
+    // Преобразование данных из нового формата в старый
+    function transformData(inputData) {
+        const result = {
+            revenue: [],
+            expensesStores: [],
+            expensesProducts: [],
+            salaryExpenses: [],
+            income: []
+        };
+
+        inputData.forEach(item => {
+            const date = new Date(item.Date);
+
+            // Выручка
+            result.revenue.push({
+                date: date,
+                category: "Общая выручка",
+                amount: item.Revenue
+            });
+
+            // Расходы по магазинам
+            result.expensesStores.push({
+                date: date,
+                store: item.Store,
+                amount: item["Expenses by store"]
+            });
+
+            // Расходы по товарам
+            result.expensesProducts.push({
+                date: date,
+                category: "Общие товары",
+                amount: item["Expenses by products"]
+            });
+
+            // Зарплатные расходы
+            result.salaryExpenses.push({
+                date: date,
+                amount: item["Expenses by employee"]
+            });
+
+            // Доход
+            result.income.push({
+                date: date,
+                amount: item.Income
+            });
+        });
+
+        return result;
+    }
+    let allData = {}; // Данные будут загружаться извне
+
+    // Поиск минимальной и максимальной даты для установки диапазона фильтров
+    let allDates = [];
+    let minDate = null;
+    let maxDate = null;
+
+    // Функция для инициализации данных
+    function initializeData(externalData) {
+        // Преобразуем данные в нужный формат
+        allData = transformData(externalData);
+
+        // Обновляем даты на основе полученных данных
+        allDates = [
+            ...allData.revenue.map(item => new Date(item.date).getTime()),
+            ...allData.expensesStores.map(item => new Date(item.date).getTime()),
+            ...allData.expensesProducts.map(item => new Date(item.date).getTime()),
+            ...allData.salaryExpenses.map(item => new Date(item.date).getTime()),
+            ...allData.income.map(item => new Date(item.date).getTime())
+        ];
+
+        minDate = new Date(Math.min(...allDates));
+        maxDate = new Date(Math.max(...allDates));
+
+        // Установка начальных значений дат
+        document.getElementById('start-date').valueAsDate = minDate;
+        document.getElementById('end-date').valueAsDate = maxDate;
+
+        // Инициализация графика
+        updateChart();
+    }
+
+    // Инициализация графика
+    let areaChart;
+
+    // Функция фильтрации данных
+    function filterData() {
+        const startDate = document.getElementById('start-date').valueAsDate;
+        const endDate = document.getElementById('end-date').valueAsDate;
+
+        const filteredData = {
+            revenue: [],
+            expensesStores: [],
+            expensesProducts: [],
+            salaryExpenses: [],
+            income: []
+        };
+
+        // Фильтрация по дате для каждого типа данных
+        ['revenue', 'expensesStores', 'expensesProducts', 'salaryExpenses', 'income'].forEach(type => {
+            filteredData[type] = allData[type].filter(item => {
+                const itemDate = new Date(item.date);
+                if (startDate && itemDate < startDate) return false;
+                if (endDate && itemDate > endDate) return false;
+                return true;
+            });
+        });
+
+        return filteredData;
+    }
+
+    // Функция агрегации данных по дням
+    function aggregateDataByDay(data) {
+        const aggregated = {};
+
+        // Создаем структуру для агрегированных данных
+        ['revenue', 'expensesStores', 'expensesProducts', 'salaryExpenses', 'income'].forEach(type => {
+            aggregated[type] = {};
+
+            data[type].forEach(item => {
+                const dateStr = new Date(item.date).toISOString().split('T')[0];
+                if (!aggregated[type][dateStr]) {
+                    aggregated[type][dateStr] = 0;
+                }
+                aggregated[type][dateStr] += item.amount;
+            });
+        });
+
+        return aggregated;
+    }
+
+    // Функция обновления графика
+    function updateChart() {
+        const filteredData = filterData();
+        const aggregatedData = aggregateDataByDay(filteredData);
+
+        // Получаем все уникальные даты из отфильтрованных данных
+        const allDateStrs = new Set();
+
+        ['revenue', 'expensesStores', 'expensesProducts', 'salaryExpenses', 'income'].forEach(type => {
+            Object.keys(aggregatedData[type]).forEach(dateStr => {
+                allDateStrs.add(dateStr);
+            });
+        });
+
+        // Сортируем даты
+        const sortedDates = Array.from(allDateStrs).sort();
+
+        // Создаем datasets для графика
+        const datasets = [];
+
+        // Выручка
+        if (document.getElementById('revenue-checkbox').checked) {
+            datasets.push({
+                label: 'Выручка',
+                data: sortedDates.map(date => aggregatedData.revenue[date] || 0),
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                fill: true,
+                tension: 0.4
+            });
+        }
+
+        // Расходы по магазинам
+        if (document.getElementById('expenses-stores-checkbox').checked) {
+            datasets.push({
+                label: 'Расходы по магазинам',
+                data: sortedDates.map(date => aggregatedData.expensesStores[date] || 0),
+                borderColor: 'rgba(255, 99, 132, 1)',
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                fill: true,
+                tension: 0.4
+            });
+        }
+
+        // Расходы по товарам
+        if (document.getElementById('expenses-products-checkbox').checked) {
+            datasets.push({
+                label: 'Расходы по товарам',
+                data: sortedDates.map(date => aggregatedData.expensesProducts[date] || 0),
+                borderColor: 'rgba(255, 159, 64, 1)',
+                backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                fill: true,
+                tension: 0.4
+            });
+        }
+
+        // Зарплатные расходы
+        if (document.getElementById('salary-expenses-checkbox').checked) {
+            datasets.push({
+                label: 'Зарплатные расходы',
+                data: sortedDates.map(date => aggregatedData.salaryExpenses[date] || 0),
+                borderColor: 'rgba(153, 102, 255, 1)',
+                backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                fill: true,
+                tension: 0.4
+            });
+        }
+
+        // Доход
+        if (document.getElementById('income-checkbox').checked) {
+            datasets.push({
+                label: 'Доход',
+                data: sortedDates.map(date => aggregatedData.income[date] || 0),
+                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                fill: true,
+                tension: 0.4
+            });
+        }
+
+        // Обновляем или создаем график
+        const ctx = document.getElementById('areaChart').getContext('2d');
+
+        if (areaChart) {
+            areaChart.data.labels = sortedDates;
+            areaChart.data.datasets = datasets;
+            areaChart.update();
+        } else {
+            areaChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: sortedDates,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Сумма (₽)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Дата'
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y.toLocaleString('ru-RU') + ' ₽';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    // Инициализация при загрузке страницы
+    document.addEventListener('DOMContentLoaded', function() {
+        // Обработчики событий для фильтров
+        document.getElementById('apply-filter').addEventListener('click', updateChart);
+        document.getElementById('reset-filter').addEventListener('click', function() {
+            document.getElementById('start-date').valueAsDate = minDate;
+            document.getElementById('end-date').valueAsDate = maxDate;
+            updateChart();
+        });
+
+        // Обработчики событий для чекбоксов
+        document.querySelectorAll('.metric-checkbox input').forEach(checkbox => {
+            checkbox.addEventListener('change', updateChart);
+        });
+
+        // Инициализируем данные при загрузке страницы
+        initializeData(inputData);
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script src="{% static 'site/moderations/assets/js/vendor.js' %}"></script>
+<!-- App Javascript (Require in all Page) -->
+<script src="{% static 'site/moderations/assets/js/app.js' %}"></script>
+<!-- Vector Map Js -->
+<script src="{% static 'site/moderations/assets/vendor/jsvectormap/js/jsvectormap.min.js' %}"></script>
+<script src="{% static 'site/moderations/assets/vendor/jsvectormap/maps/world-merc.js' %}"></script>
+<script src="{% static 'site/moderations/assets/vendor/jsvectormap/maps/world.js' %}"></script>
+<script src="{% static 'site/moderations/assets/js/pages/agent-detail.js' %}"></script>
+<script src="{% static 'site/moderations/assets/js/components/apexchart-area.js' %}"></script>
+
+{% endblock content %}

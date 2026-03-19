@@ -1,0 +1,225 @@
+ {% extends 'site/trendsup/base.html' %}
+{% load static generals_tag  shop_tags %}
+ {% load static generals_tag i18n %}
+
+{% block title %}{{ aboutpage.title }}{% endblock title %}
+{% block description %}{{ aboutpage.metadescription }}{% endblock description %}
+{% block propertytitle %}{{ aboutpage.propertytitle }}{% endblock propertytitle %}
+{% block propertydescription %}{{ aboutpage.propertydescription }}{% endblock propertydescription %}
+{% block propertyimage %}{% if aboutpage.previev %}{{ aboutpage.previev.url }}{% endif %}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+{% block content %}
+<div class="breadcumb-wrapper" data-bg-src="{% static 'site/frutin//img/bg/breadcumb-bg.jpg' %}">
+    <div class="container">
+        <div class="breadcumb-content"><h1 class="breadcumb-title">{{ json_fields.about_title_small.field }}</h1>
+            <ul class="breadcumb-menu">
+                <li><a href="{% url 'webmain:home' %}">{% trans "Главная" %}</a></li>
+                <li>{{ json_fields.about_title_small.field }}</li>
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="overflow-hidden overflow-hidden space" id="about-sec">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-xl-6 mb-30 mb-xl-0">
+                <div class="img-box1">
+                    <div class="img1"><img src="{{ json_fields.about_1_image.info }}" alt="About"></div>
+                    <div class="img2"><img src="{{ json_fields.about_2_image.info }}" alt="Image"></div>
+                    <div class="shape1 movingX"><img src="{% static 'site/frutin/img/normal/about_1_3.png' %}" alt="Image"></div>
+                    <div class="year-counter">
+                        <div class="year-counter_number"><span class="counter-number">{{json_fields.about_years.field}}</span>+</div>
+                        <p class="year-counter_text">{{ json_fields.about_years_title.field }}</p></div>
+                </div>
+            </div>
+            <div class="col-xl-6">
+                <div class="ps-xxl-5 ps-xl-2 ms-xl-1 text-center text-xl-start">
+                    <div class="title-area mb-32"><span class="sub-title"><img src="{% static 'site/frutin/img/theme-img/title_icon.svg' %}"
+                                                                               alt="shape">{{ json_fields.about_title_small.field }}</span>
+                        <h2 class="sec-title">{{ json_fields.about_title.field }}</h2>
+                        <p class="sec-text">{{ json_fields.about_description.field }}</p></div>
+                    <div class="about-feature-wrap">
+                        <div class="about-feature">
+                            <div class="box-icon"><img src="{{ json_fields.about_small_image_1.info }}" alt="Icon"></div>
+                            <h3 class="box-title">{{ json_fields.about_small_title_1.field }}</h3></div>
+                        <div class="about-feature">
+                            <div class="box-icon"><img src="{{ json_fields.about_small_image_2.info }}" alt="Icon"></div>
+                            <h3 class="box-title">{{ json_fields.about_small_title_2.field }}</h3></div>
+                    </div>
+                    <div><a href="{{ json_fields.about_button_link.field }}" class="th-btn">{{ json_fields.about_button_title.field }}<i class="fas fa-chevrons-right ms-2"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<section class="space bg-smoke2" id="process-sec">
+    <div class="shape-mockup" data-top="0" data-left="0"><img src="{% static 'site/frutin/img/shape/vector_shape_7.png' %}" alt="shape">
+    </div>
+    <div class="shape-mockup" data-bottom="0" data-right="0"><img src="{% static 'site/frutin/img/shape/vector_shape_6.png' %}" alt="shape">
+    </div>
+    <div class="container">
+        <div class="title-area text-center"><span class="sub-title"><img src="{% static 'site/frutin/img/theme-img/title_icon.svg' %}"
+                                                                         alt="Icon">{{ json_fields.step_title_small.field }}</span>
+            <h2 class="sec-title">
+{{ json_fields.step_title.field }}</h2></div>
+        <div class="row gy-4 justify-content-center">
+            <div class="col-xl-3 col-md-6 process-box-wrap">
+                <div class="process-box">
+                    <div class="box-icon"><img src="{{ json_fields.step_image_1.info }}" alt="icon"></div>
+                    <div class="box-img" data-mask-src="{% static 'site/frutin//img/bg/process_bg_shape.png' %}"><img
+                            src="{% static 'site/frutin/img/normal/process_box_1.jpg' %}" alt="image"></div>
+                    <p class="box-number">{{ json_fields.step_title_small_1.field }}</p>
+                    <h3 class="box-title">{{ json_fields.step_title_1.field }} </h3>
+                    <p class="box-text">{{ json_fields.step_description_1.field }}</p></div>
+            </div>
+            <div class="col-xl-3 col-md-6 process-box-wrap">
+                <div class="process-box">
+                    <div class="box-icon"><img src="{{ json_fields.step_image_2.info }}" alt="icon"></div>
+                    <div class="box-img" data-mask-src="{% static 'site/frutin//img/bg/process_bg_shape.png' %}"><img
+                            src="{% static 'site/frutin/img/normal/process_box_2.jpg' %}" alt="image"></div>
+                    <p class="box-number">{{ json_fields.step_title_small_2.field }}</p>
+                    <h3 class="box-title">{{ json_fields.step_title_2.field }}</h3>
+                    <p class="box-text">{{ json_fields.step_description_1.field }}</p></div>
+            </div>
+            <div class="col-xl-3 col-md-6 process-box-wrap">
+                <div class="process-box">
+                    <div class="box-icon"><img src="{{ json_fields.step_image_3.info }}" alt="icon"></div>
+                    <div class="box-img" data-mask-src="{% static 'site/frutin//img/bg/process_bg_shape.png' %}"><img
+                            src="{% static 'site/frutin/img/normal/process_box_3.jpg' %}" alt="image"></div>
+                    <p class="box-number">{{ json_fields.step_title_small_3.field }}</p>
+                    <h3 class="box-title">{{ json_fields.step_title_3.field }}</h3>
+                    <p class="box-text">{{ json_fields.step_description_1.field }}</p></div>
+            </div>
+            <div class="col-xl-3 col-md-6 process-box-wrap">
+                <div class="process-box">
+                    <div class="box-icon"><img src="{{ json_fields.step_image_4.info }}" alt="icon"></div>
+                    <div class="box-img" data-mask-src="{% static 'site/frutin//img/bg/process_bg_shape.png' %}"><img
+                            src="{% static 'site/frutin/img/normal/process_box_4.jpg' %}" alt="image"></div>
+                    <p class="box-number">{{ json_fields.step_title_small_4.field }}</p>
+                    <h3 class="box-title">{{ json_fields.step_title_4.field }}</h3>
+                    <p class="box-text">{{ json_fields.step_description_1.field }}</p></div>
+            </div>
+        </div>
+    </div>
+</section>
+<div class="counter-sec11" data-bg-src="{% static 'site/frutin//img/bg/counter_bg_1_1.jpg' %}">
+    <div class="container">
+        <div class="counter-card-wrap">
+            <div class="counter-card">
+                <div class="box-icon"><img src="{% static 'site/frutin/img/icon/counter_card_1.svg' %}" alt="Icon"></div>
+                <div class="media-body"><h2 class="box-number"><span class="counter-number">{{ json_fields.counter_1.field }}</span>+</h2>
+                    <p class="box-text">{{ json_fields.counter_title_1.field }}</p></div>
+            </div>
+            <div class="divider"></div>
+            <div class="counter-card">
+                <div class="box-icon"><img src="{% static 'site/frutin/img/icon/counter_card_2.svg' %}" alt="Icon"></div>
+                <div class="media-body"><h2 class="box-number"><span class="counter-number">{{ json_fields.counter_2.field }}</span>+</h2>
+                    <p class="box-text">{{ json_fields.counter_title_2.field }}</p></div>
+            </div>
+            <div class="divider"></div>
+            <div class="counter-card">
+                <div class="box-icon"><img src="{% static 'site/frutin/img/icon/counter_card_3.svg' %}" alt="Icon"></div>
+                <div class="media-body"><h2 class="box-number"><span class="counter-number">{{ json_fields.counter_3.field }}</span>+</h2>
+                    <p class="box-text">{{ json_fields.counter_title_3.field }}</p></div>
+            </div>
+            <div class="divider"></div>
+            <div class="counter-card">
+                <div class="box-icon"><img src="{% static 'site/frutin/img/icon/counter_card_4.svg' %}" alt="Icon"></div>
+                <div class="media-body"><h2 class="box-number"><span class="counter-number">{{ json_fields.counter_4.field }}</span>+</h2>
+                    <p class="box-text">{{ json_fields.counter_title_4.field }}</p></div>
+            </div>
+            <div class="divider"></div>
+        </div>
+    </div>
+</div>
+<div class="overflow-hidden space">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-6 text-center text-xl-start">
+                <div class="title-area"><span class="sub-title"><img src="{% static 'site/frutin/img/theme-img/title_icon.svg' %}"
+                                                                     alt="shape">{{ json_fields.benefit_title_small.field }}</span>
+                    <h2 class="sec-title">{{ json_fields.benefit_title.field }}</h2>
+                    <p class="sec-text">{{ json_fields.benefit_description.field }}</p></div>
+            </div>
+        </div>
+        <div class="text-center text-xl-start">
+            <div class="choose-feature-area">
+                <div class="row">
+                    <div class="col-xl-7">
+                        <div class="choose-feature-wrap">
+                            <div class="choose-feature">
+                                <div class="box-icon"><img src="{{ json_fields.benefit_step_image_1.info }}" alt="Icon"></div>
+                                <h3 class="box-title">{{ json_fields.benefit_step_1_title.field }}</h3>
+                                <p class="box-text">{{ json_fields.benefit_step_1_description.field }}</p></div>
+                            <div class="choose-feature">
+                                <div class="box-icon"><img src="{{ json_fields.benefit_step_image_2.info }}" alt="Icon"></div>
+                                <h3 class="box-title">{{ json_fields.benefit_step_2_title.field }}</h3>
+                                <p class="box-text">{{ json_fields.benefit_step_2_description.field }}</p></div>
+                            <div class="choose-feature">
+                                <div class="box-icon"><img src="{{ json_fields.benefit_step_image_3.info }}" alt="Icon"></div>
+                                <h3 class="box-title">{{ json_fields.benefit_step_3_title.field }}</h3>
+                                <p class="box-text">{{ json_fields.benefit_step_3_description.field }}</p></div>
+                            <div class="choose-feature">
+                                <div class="box-icon"><img src="{{ json_fields.benefit_step_image_4.info }}" alt="Icon"></div>
+                                <h3 class="box-title">{{ json_fields.benefit_step_4_title.field }}</h3>
+                                <p class="box-text">{{ json_fields.benefit_step_4_description.field }}</p></div>
+                        </div>
+                    </div>
+                    <div class="col-xl-5 d-none d-xl-block">
+                        <div class="img-box2-wrap">
+                            <div class="img-box2">
+                                <div class="img1"><img src="{{ json_fields.benefit_image.info }}" alt="Why"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<section class="overflow-hidden bg-smoke2" id="testi-sec">
+    <div class="shape-mockup testi-shape1" data-top="0" data-left="0"><img src="{{ json_fields.reviews_banner_image_1.info }}"
+                                                                           alt="shape"></div>
+    <div class="shape-mockup" data-bottom="0" data-right="0"><img src="{% static 'site/frutin/img/shape/vector_shape_5.png' %}" alt="shape">
+    </div>
+    <div class="container">
+        <div class="testi-card-area">
+            <div class="title-area"><span class="sub-title"><img src="{% static 'site/frutin/img/theme-img/title_icon.svg' %}" alt="Icon">{{ json_fields.reviews_banner_title_1.field }}</span>
+                <h2 class="sec-title">{{ json_fields.reviews_banner_title_2.field }}</h2></div>
+            <div class="testi-card-slide">
+                <div class="swiper th-slider" id="testiSlide1" data-slider-options='{"effect":"slide"}'>
+                    <div class="swiper-wrapper">
+                        <div class="swiper-slide">
+                            <div class="testi-card"><p class="testi-card_text">{{ json_fields.reviews_title_1.field }}</p>
+                                <div class="testi-card_profile">
+                                    <div class="testi-card_avater"><img src="{{ json_fields.reviews_image_1.info }}"
+                                                                        alt="Avater"></div>
+                                    <div class="testi-card_content"><h3 class="testi-card_name">{{ json_fields.reviews_description_1.field }}</h3>
+                                        <span class="testi-card_desig">{{ json_fields.reviews_name_1.field }}</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="testi-card"><p class="testi-card_text">{{ json_fields.reviews_title_2.field }}</p>
+                                <div class="testi-card_profile">
+                                    <div class="testi-card_avater"><img src="{{ json_fields.reviews_image_2.info }}"
+                                                                        alt="Avater"></div>
+                                    <div class="testi-card_content"><h3 class="testi-card_name">{{ json_fields.reviews_description_2.field }}</h3>
+                                        <span class="testi-card_desig">{{ json_fields.reviews_name_2.field }}</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="icon-box">
+                    <button data-slider-prev="#testiSlide1" class="slider-arrow default"><i
+                            class="far fa-arrow-left"></i></button>
+                    <button data-slider-next="#testiSlide1" class="slider-arrow default"><i
+                            class="far fa-arrow-right"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}

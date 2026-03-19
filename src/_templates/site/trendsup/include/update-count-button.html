@@ -1,0 +1,130 @@
+{% load static generals_tag shop_tags i18n%}
+
+<div class="qty-control input-group"
+     data-product="{% url 'shop:update_quantity' selected.id %}"
+     data-price="{% if selected.variety %}
+                    {% if valute != selected.variety.valute %}
+                        {% currency_conversion_for_products request selected.variety.price selected.variety.valute.id %}
+                    {% else %}
+                        {{ selected.variety.price }}
+                    {% endif %}
+                 {% else %}
+                    {% if valute != selected.product.valute %}
+                        {% currency_conversion_for_products request selected.product.price selected.product.valute.id %}
+                    {% else %}
+                        {{ selected.product.price }}
+                    {% endif %}
+                 {% endif %}">
+
+  <input type="number"
+         name="quantity"
+         value="{{ selected.quantity }}"
+         min="0"
+         max="{{ selected.product.quantity }}"
+         maxlength="{{ selected.product.quantity }}"
+         class="qty form-control"
+         aria-label="{% trans 'Количество' %}">
+
+  <div class="qty-buttons">
+    <button type="button"
+            class="btn qty-btn w-icon-plus"
+            data-type="plus"
+            aria-label="{% trans 'Увеличить' %}">
+      <!-- plus icon -->
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+        <path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
+
+    <button type="button"
+            class="btn qty-btn w-icon-minus"
+            data-type="minus"
+            aria-label="{% trans 'Уменьшить' %}">
+      <!-- minus icon -->
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+        <path d="M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+</div>
+<style>
+   /* Контейнер без «плясок»: две колонки — поле и колонка кнопок */
+.qty-control{
+  --qty-h: 50px;
+  --btn-col-w: 34px;
+  --gap: 6px;
+
+  display: inline-grid;               /* не тянем на всю ширину */
+  grid-template-columns: 1fr var(--btn-col-w);
+  grid-template-rows: 1fr 1fr;
+  column-gap: var(--gap);
+  align-items: stretch;
+}
+
+/* Чтобы bootstrap .input-group не ломал сетку */
+.qty-control.input-group{
+  position: relative;
+  width: auto;
+}
+
+/* Поле количества — занимает обе строки слева */
+.qty-control .qty{
+  grid-column: 1 / 2;
+  grid-row: 1 / 3;
+
+  height: var(--qty-h);
+  background-color: #fff;             /* видно значение */
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  color: #323232;
+  font-size: 15px;
+  font-weight: 400;
+  text-align: center;
+  padding: 6px 8px;
+  min-width: 80px;
+}
+
+/* убираем стрелки у number */
+.qty::-webkit-outer-spin-button,
+.qty::-webkit-inner-spin-button{ -webkit-appearance: none; margin: 0; }
+.qty[type=number]{ -moz-appearance: textfield; }
+
+/* Колонка с кнопками — два ряда */
+.qty-buttons{
+  grid-column: 2 / 3;
+  grid-row: 1 / 3;
+
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  row-gap: var(--gap);
+  align-items: stretch;
+}
+
+/* Кнопки одинакового размера, по высоте делим пополам */
+.qty-btn{
+  width: var(--btn-col-w);
+  min-width: var(--btn-col-w);
+  height: calc((var(--qty-h) - var(--gap)) / 2);
+  padding: 0;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  background: #fff;
+  color: #444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+
+.qty-btn:hover{ background: #f5f5f5; border-color: #d9d9d9; }
+.qty-btn:active{ background: #eee; }
+.qty-btn:focus{ outline: none; box-shadow: 0 0 0 3px rgba(25,118,210,.2); }
+
+/* Компактнее на очень узких экранах */
+@media (max-width: 420px){
+  .qty-control{ --qty-h: 44px; --btn-col-w: 30px; --gap: 4px; }
+  .qty-control .qty{ font-size: 14px; }
+}
+
+</style>

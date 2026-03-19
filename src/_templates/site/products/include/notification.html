@@ -1,0 +1,19 @@
+{% load notifications_tags %}
+{% get_unread_notifications user as notifications %}
+
+
+<div class="th-widget-contact">
+{% for notification in notifications %}
+    <a class="info-box" href="{{notification.slug|safe}}">
+        <div class="info-box_icon">
+            <i class="fas fa-info"></i>
+        </div>
+        <p class="info-box_text">
+            <span>{{ notification.created_at|date:"d M Y" }}</span>
+            {{ notification.message|slice:":100" }}{% if notification.message|length > 100 %}...{% endif %}
+        </p>
+    </a>
+{% empty %}
+<p>Нет уведомлений.</p>
+{% endfor %}
+</div>

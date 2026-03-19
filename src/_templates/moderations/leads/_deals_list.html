@@ -1,0 +1,40 @@
+{% load i18n %}
+{% if deals %}
+{% for deal in deals %}
+<div class="col-xl-4 col-lg-6">
+    <div class="card">
+        <div class="card-body">
+            <h4>{% trans "Исполнитель" %}</h4>
+            <div class="d-flex flex-wrap align-items-center gap-2 border-bottom pb-3">
+                <img src="{% if deal.user.avatar %}{{ deal.user.avatar.url }}{% endif %}" alt="" class="avatar-lg rounded-3 border border-light border-3">
+                <div class="d-block">
+                    <a href="agents-grid.html#!" class="text-dark fw-medium fs-16">{{ deal.user.first_name }} {{ deal.user.last_name }}</a>
+                    <p class="mb-0">{{ deal.user.email }}</p>
+                    <p class="mb-0 text-primary">{% trans "Подробно о задаче" %}</p>
+                </div>
+            </div>
+            <p class="mt-3 d-flex align-items-center gap-2 mb-2">{{ deal.title }}</p>
+            <hr>
+            <p class=" align-items-center gap-2 mt-2">
+                {% trans "Ожидаемая дата закрытия" %}: <strong>{{ deal.expected_close_date }}</strong>
+                <br>
+                {% trans "Создано" %}: <strong>{{ deal.created_at|date:"d M Y, H:i" }}</strong>
+            </p>
+        </div>
+        <div class="card-footer border-top">
+
+
+        </div>
+    </div>
+
+
+</div>
+
+{% endfor %}
+{% else %}
+<p class="text-muted">{% trans "Задачи отсутствуют" %}.</p>
+{% endif %}
+
+{% if has_next %}
+<button id="load-more-btn" class="btn btn-primary mt-3">{% trans "Загрузить еще" %}</button>
+{% endif %}

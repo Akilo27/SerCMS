@@ -1,0 +1,139 @@
+{% extends 'site/shop4/base.html' %}
+{% load static generals_tag shop_tags i18n %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+
+<style>
+@media (max-width: 768px) {
+    .bookmark-list {
+        display: block;
+    }
+
+    .bookmark-list .tbody-item {
+        display: grid;
+        grid-template-columns: 60px 1fr;
+        grid-template-rows: auto auto auto;
+        gap: 10px;
+        padding: 15px;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .bookmark-list .product-remove,
+    .bookmark-list .product-thumbnail,
+    .bookmark-list .product-name,
+    .bookmark-list .product-price,
+    .bookmark-list .product-stock-status,
+    .bookmark-list .product-add-to-cart {
+        display: contents;
+    }
+
+    .bookmark-list .product-thumbnail .thumb img {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+    }
+
+    .bookmark-list .product-name a.title,
+    .bookmark-list .product-price .price,
+    .bookmark-list .product-stock-status .wishlist-in-stock {
+        font-size: 14px;
+        display: block;
+    }
+
+    .bookmark-list .product-remove {
+        grid-column: 2 / -1;
+        text-align: right;
+    }
+
+    .bookmark-list .product-add-to-cart {
+        grid-column: 1 / -1;
+        text-align: center;
+    }
+}</style>
+{% endblock head %}
+
+{% block content %}
+<main class="main">
+    <div class="page-content mb-8 mt-5">
+        <div class="container">
+            <div class="tab-vertical row gutter-lg">
+                {% include 'site/shop4/include/profile_menu.html' %}
+                <div class="tab-content" id="nav-tabContent">
+                    <div class="shopping-wishlist-form table-responsive">
+                        <table class="shop-table cart-table">
+                            <thead>
+                            <tr>
+                                <th class="product-remove">&nbsp;</th>
+                                <th class="product-thumbnail">&nbsp;</th>
+                                <th class="product-name">{% trans 'Название' %}</th>
+                                <th class="product-price">{% trans 'Цена' %}</th>
+                                <th class="product-stock-status">{% trans 'Наличие' %}</th>
+                                <th class="product-add-to-cart">&nbsp;</th>
+                            </tr>
+                            </thead>
+                            <tbody class="bookmark-list">
+                            {% for product in is_bookmarked %}
+                            <tr class="tbody-item" data-product="{{product.id}}">
+                                <td class="product-remove">
+                                    {% include 'site/shop4/include/bookmark-button.html' %}
+                                </td>
+                                <td class="product-thumbnail">
+                                    <div class="thumb">
+                                        <a href="{% url 'shop:products' product.slug %} ">
+                                            <img src="{% if product.image %}{{ product.image.url }}{% else %}/_static/site/furbar/images/nophotoyeti.jpg{% endif %}" width="59" height="58" alt="Image-HasTech">
+                                        </a>
+                                    </div>
+                                </td>
+                                <td class="product-name" style="max-width: 200px;">
+                                    <a class="title" style="justify-content: center" href="/catalog/{{ product.slug }}">{{ product.name }}</a>
+                                </td>
+                                <td class="product-price">
+                <span class="price" style="justify-content: center;
+    display: flex;">{% if valute != product.valute %}
+                                    {% if product.type == 1 %}
+                                    <span class="sale-price">{% currency_conversion_for_products request product.price product.valute.id %} {{valute.icon_code}}</span>
+                                    {% else %}
+                                    <span class="sale-price">{% currency_conversion_for_products request product.productsvariable_set.all.first.price product.valute.id  %} {{valute.icon_code}}</span>
+                                    {% endif %}
+                                {% else %}
+                                    {% if product.type == 1 %}
+                                   <span class="sale-price">{{ product.price }} {{valute.icon_code}}</span>
+                                    {% else %}
+                                    <span class="sale-price">{{ product.productsvariable_set.all.first.price }} {{valute.icon_code}}</span>
+                                    {% endif %}
+                                {% endif %}</span>
+                                </td>
+                                {% if product.quantity == 0 and product.order %}
+                                {% include 'site/shop4/include/form_applications.html' %}
+                                {% else %}
+                                <td class="product-stock-status">
+                                    <div id="in-stock-{{product.id}}" class="badge-container"><span style="justify-content: center;
+    display: flex;"
+                                                                                                    class="wishlist-in-stock">{% trans 'В наличии' %} : {{ product.quantity }} шт</span></div>
+                                </td>
+                                {% endif %}
+                                <td class="product-add-to-cart">
+                                    {#% include 'site/shop4/include/cart-button.html' %#}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<script>
+    window.urls = {
+        bookmarkAdd: "{% url 'shop:bookmark-add' %}",
+        bookmarkDelete: "{% url 'shop:bookmark-delete' %}"
+    };
+</script>
+
+{% endblock content %}

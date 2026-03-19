@@ -1,0 +1,496 @@
+{% extends 'site/useraccount/base.html' %}
+{% load i18n %}
+{% load static  %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/suggestions-jquery@latest/dist/css/suggestions.min.css">
+
+{% endblock head %}
+
+{% block content %}
+<div id="wrapper" class="inner-pages ui-elements hd-white">
+
+    {% if messages %}
+    <div class="container mt-4">
+        {% for message in messages %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ message }}
+            <a href="{% url 'publication:advertisements' %}" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+                к списку
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <form id="advertisement-form" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+        {% csrf_token %}
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            <strong>Исправьте следующие ошибки:</strong>
+            <ul>
+                {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                <li><strong>{{ field|default:"Общие ошибки" }}:</strong> {{ error }}</li>
+                {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <div class="container mt-4">
+            <h3>Создание объявления</h3>
+            <p class="text-muted">Заполните все необходимые поля для создания объявления.</p>
+            <ul class="nav nav-pills chat-tab-pills nav-justified p-1 rounded mx-1">
+                <li class="nav-item">
+                    <a href="#chat-list" data-bs-toggle="tab" aria-expanded="false" class="nav-link active">
+                        Основное
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#group-list" data-bs-toggle="tab" aria-expanded="true" class="nav-link">
+                        СЕО
+                    </a>
+                </li>
+            </ul>
+            <div class="tabbed-content button-tabs">
+                <div class="tab-content">
+                    <div class="tab-pane show active" id="chat-list">
+
+
+                        <div class="tab-content">
+                            <!-- Опубликовано -->
+                            <div class="form-check mb-3">
+                                <input type="checkbox" class="form-check-input" id="publishet" name="publishet" {% if object and object.publishet %}checked{% endif %}>
+                                <label for="publishet" class="form-check-label">Опубликовать</label>
+                            </div>
+                            <!-- Название -->
+                            <div class="mb-3">
+                                <label for="name" class="form-label fw-bold">Название</label>
+                                <input type="text" class="form-control" id="name" name="name"  value="{{ object.name|default_if_none:'' }}" placeholder="Введите название" required>
+                            </div>
+                            <!-- Слаг -->
+                            <div class="mb-3">
+                                <label for="slug" class="form-label fw-bold">Slug (URL)</label>
+                                <input type="text" class="form-control" id="slug" name="slug"  value="{{ object.slug|default_if_none:'' }}"  placeholder="Введите URL">
+                            </div>
+                            <!-- Описание -->
+                            <div class="mb-3">
+                                <label for="description" class="form-label fw-bold">Описание</label>
+                                <textarea class="form-control" id="description" name="description" rows="3" placeholder="Введите описание">{{ object.description|default_if_none:'' }}</textarea>
+                            </div>
+                            <!-- Артикул -->
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <label for="sky" class="form-label fw-bold">Артикул</label>
+                                    <input type="text" class="form-control" id="sky" name="sky"  value="{{ object.sky|default_if_none:'' }}"  placeholder="Введите артикул">
+                                </div>
+                                <!-- Цена -->
+                                <div class="col-md-3 mb-3">
+                                    <label for="pagetype" class="form-label fw-bold">Тип</label>
+                                    <select class="form-control" id="pagetype" name="pagetype" required>
+                                        <option value="" {% if not object.pagetype %}selected{% endif %}>Выберите тип</option>
+                                        <option value="1" {% if object.pagetype == 1 %}selected{% endif %}>По суточно</option>
+                                        <option value="2" {% if object.pagetype == 2 %}selected{% endif %}>Долгосрочное</option>
+                                    </select>
+                                </div>
+                                <!-- Тип -->
+                                <div class="col-md-2 mb-3">
+                                    <label for="price" class="form-label fw-bold">Цена</label>
+                                    <input type="number" class="form-control" id="price"  value="{{ object.price|default_if_none:'' }}" name="price" required>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <label for="time_check" class="form-label fw-bold">Время заезда</label>
+                                    <input type="time" class="form-control" id="time_check"  value="{{ object.time_check|default_if_none:'' }}"name="time_check">
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <label for="time_check_out" class="form-label fw-bold">Время выезда</label>
+                                    <input type="time" class="form-control" id="time_check_out"  value="{{ object.time_check_out|default_if_none:'' }}"name="time_check_out">
+                                </div>
+                            </div>
+                            <!-- Комнаты, ванны, спальни -->
+                            <div class="row">
+                                <div class="col-md-1 mb-3"></div>
+                                <div class="col-md-2 mb-3">
+                                    <label for="area" class="form-label fw-bold">Площадь</label>
+                                    <input type="number" class="form-control" id="area" value="{{ object.area|default_if_none:'' }}" name="area" min="0">
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <label for="rooms" class="form-label fw-bold">Комнат</label>
+                                    <input type="number" class="form-control" id="rooms" value="{{ object.rooms|default_if_none:'' }}" name="rooms" min="0">
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <label for="bathrooms" class="form-label fw-bold">Ванные комнаты</label>
+                                    <input type="number" class="form-control" id="bathrooms" value="{{ object.bathrooms|default_if_none:'' }}" name="bathrooms" min="0">
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <label for="bedrooms" class="form-label fw-bold">Спальни</label>
+                                    <input type="number" class="form-control" id="bedrooms" value="{{ object.bedrooms|default_if_none:'' }}" name="bedrooms" min="0">
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <label for="garages" class="form-label fw-bold">Парковок</label>
+                                    <input type="number" class="form-control"  value="{{ object.garages|default_if_none:'' }}" id="garages" name="garages" min="0">
+                                </div>
+                                <div class="col-md-1 mb-3"></div>
+                            </div>
+                            <!-- Адрес -->
+                            <div class="mb-3">
+                                <label for="address" class="form-label fw-bold">Адрес</label>
+                                <input type="text" class="form-control" id="address" name="address"  value="{{ object.address|default_if_none:'' }}"  placeholder="Введите адрес">
+                                <input type="hidden" class="form-control" id="longitude" value="{{ object.longitude|default_if_none:'' }}" name="longitude">
+                                <input type="hidden" class="form-control" id="width" value="{{ object.width|default_if_none:'' }}" name="width">
+                            </div>
+                            <!-- Номер телефона -->
+                            <div class="mb-3">
+                                <label for="phone" class="form-label fw-bold">Номер телефона</label>
+                                <input type="text" class="form-control" id="phone" name="phone" value="{{ object.phone|default_if_none:'' }}" placeholder="Введите номер телефона">
+                            </div>
+                            <!-- Видео -->
+                            <div class="mb-3">
+                                <label for="video" class="form-label fw-bold">Видео</label>
+                                <input type="file" class="form-control" id="video" name="video">
+                            </div>
+                            <!-- Категория -->
+                            <div class="mb-3">
+                                <label for="category" class="form-label fw-bold">Категория</label>
+                                <select class="form-control select2" id="category"   name="category">
+                                    <option value="">Выберите категорию</option>
+                                    {% for category in categories %}
+                                    <option value="{{ category.id }}" {% if object.category.id == category.id %}selected{% endif %}>
+                                        {{ category.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <!-- Метки -->
+                            <div class="mb-3">
+                                <label for="tags" class="form-label  fw-bold">Метки</label>
+                                <select class="form-control select2" data-choices multiple  id="tags" name="tags">
+                                    {% for tag in tags %}
+                                    <option value="{{ tag.id }}" {% if tag in object.tags.all %}selected{% endif %}>
+                                        {{ tag.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <!-- Дополнительные услуги -->
+                            <div class="mb-3">
+                                <label for="dop_servce" class="form-label fw-bold">Дополнительные услуги</label>
+                                <select class="form-control select2" id="dop_servce" name="dop_servce" data-choices multiple>
+                                    {% for service in dop_services %}
+                                    <option value="{{ service.id }}" {% if service in object.dop_servce.all %}selected{% endif %}>
+                                        {{ service.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <!-- Галерея -->
+                            <div class="mb-3">
+                                <label for="gallery-images" class="form-label fw-bold">Галерея</label>
+                                <input type="file" class="form-control" id="gallery-images" name="gallery_images" multiple>
+
+                                <!-- Список загруженных файлов -->
+                                {% if gallery_files %}
+                                <ul class="mt-3">
+                                    {% for file in gallery_files %}
+                                    <li>
+                                        <input type="checkbox" id="delete-file-{{ file.id }}" name="delete_files" value="{{ file.id }}">
+                                        <label for="delete-file-{{ file.id }}">
+                                            <a href="{{ file.image.url }}" target="_blank">{{ file.image.name }}</a>
+                                        </label>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                                {% else %}
+                                <p class="text-muted">Нет загруженных файлов.</p>
+                                {% endif %}
+                            </div>
+
+                            <!-- Планы -->
+                            <div class="mb-3">
+                                <label for="plans-images" class="form-label fw-bold">Планы</label>
+                                <input type="file" class="form-control" id="plans-images" name="plans_images" multiple>
+
+                                <!-- Список загруженных файлов -->
+                                {% if plans_files %}
+                                <ul class="mt-3">
+                                    {% for file in plans_files %}
+                                    <li>
+                                        <input type="checkbox" id="delete-plan-{{ file.id }}" name="delete_files" value="{{ file.id }}">
+                                        <label for="delete-plan-{{ file.id }}">
+                                            <a href="{{ file.image.url }}" target="_blank">{{ file.image.name }}</a>
+                                        </label>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                                {% else %}
+                                <p class="text-muted">Нет загруженных файлов.</p>
+                                {% endif %}
+                            </div>
+
+                            <!-- Образы -->
+                            <div class="mb-3">
+                                <label for="obraz-images" class="form-label fw-bold">Образы</label>
+                                <input type="file" class="form-control" id="obraz-images" name="obraz_images" multiple>
+
+                                <!-- Список загруженных файлов -->
+                                {% if obraz_files %}
+                                <ul class="mt-3">
+                                    {% for file in obraz_files %}
+                                    <li>
+                                        <input type="checkbox" id="delete-obraz-{{ file.id }}" name="delete_files" value="{{ file.id }}">
+                                        <label for="delete-obraz-{{ file.id }}">
+                                            <a href="{{ file.file.url }}" target="_blank">{{ file.file.name }}</a>
+                                        </label>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                                {% else %}
+                                <p class="text-muted">Нет загруженных файлов.</p>
+                                {% endif %}
+                            </div>
+
+
+                        </div>
+                    </div>
+
+                    <div class="tab-pane" id="group-list">
+                        <div class="tab-content">
+                            <!-- Превью -->
+                            <div class="mb-3">
+                                <label for="previev" class="form-label fw-bold">Превью</label>
+                                <input type="file" class="form-control" id="previev" name="previev">
+                            </div>
+                            <!-- Мета-заголовок -->
+                            <div class="mb-3">
+                                <label for="title" class="form-label fw-bold">Мета-заголовок</label>
+                                <input type="text" class="form-control" id="title" value="{{ object.title|default_if_none:'' }}" name="title" placeholder="Введите мета-заголовок">
+                            </div>
+                            <!-- Мета-описание -->
+                            <div class="mb-3">
+                                <label for="metadescription" class="form-label fw-bold">Мета-описание</label>
+                                <textarea class="form-control" id="metadescription" value="{{ object.metadescription|default_if_none:'' }}" name="metadescription" rows="3"></textarea>
+                            </div>
+                            <!-- Мета-ключевые слова -->
+                            <div class="mb-3">
+                                <label for="metakeywords" class="form-label fw-bold">Мета-ключевые слова</label>
+                                <textarea class="form-control" id="metakeywords" value="{{ object.metakeywords|default_if_none:'' }}" name="metakeywords" rows="3"></textarea>
+                            </div>
+                            <!-- Мета-заголовок -->
+                            <div class="mb-3">
+                                <label for="propertytitle" class="form-label fw-bold">Мета-заголовок</label>
+                                <input type="text" class="form-control" id="propertytitle" value="{{ object.propertytitle|default_if_none:'' }}" name="propertytitle" placeholder="Введите мета-заголовок">
+                            </div>
+                            <!-- Мета-описание -->
+                            <div class="mb-3">
+                                <label for="propertydescription" class="form-label fw-bold">Мета-описание</label>
+                                <textarea class="form-control" id="propertydescription" value="{{ object.propertydescription|default_if_none:'' }}" name="propertydescription" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Кнопка отправки -->
+                <button type="submit" class="btn btn-primary btn-lg">{% if object %}Сохранить изменения{% else %}Создать объявление{% endif %}</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+{% endblock content %}
+
+{% block footertop %}
+<style>
+    .error-message {
+        color: red;
+        font-size: 0.9rem;
+        margin-top: 0.25rem;
+    }
+    .is-invalid {
+        border-color: red;
+    }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/suggestions-jquery@latest/dist/js/jquery.suggestions.min.js"></script>
+<script>
+    var api_key = 'f57f601d1ae22f609d5f8ae6b3601e9ec3e9a85d';
+    $('#address').suggestions({
+        token: api_key,
+        type: 'ADDRESS',
+        hint: false,
+        bounds: "city-settlement",
+        formatSelected: function(suggestion) {
+            return suggestion.value;
+        },
+        onSelect: function(suggestion) {
+            console.log('Широта и долгота из API:', suggestion.data.geo_lat, suggestion.data.geo_lon);
+            // Поменяйте местами широту и долготу
+            $('#longitude').val(suggestion.data.geo_lat || ''); // Используем geo_lat как долготу
+            $('#width').val(suggestion.data.geo_lon || '');     // Используем geo_lon как широту
+        }
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const nameInput = document.getElementById('name'); // Поле "Название"
+        const slugInput = document.getElementById('slug'); // Поле "Slug (URL)"
+        // Функция транслитерации
+        function transliterate(text) {
+            const translitMap = {
+                'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo',
+                'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm',
+                'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u',
+                'ф': 'f', 'х': 'kh', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'sch', 'ь': '',
+                'ы': 'y', 'ъ': 'e', 'э': 'e', 'ю': 'yu', 'я': 'ya',
+                'А': 'A', 'Б': 'B', 'В': 'V', 'Г': 'G', 'Д': 'D', 'Е': 'E', 'Ё': 'Yo',
+                'Ж': 'Zh', 'З': 'Z', 'И': 'I', 'Й': 'Y', 'К': 'K', 'Л': 'L', 'М': 'M',
+                'Н': 'N', 'О': 'O', 'П': 'P', 'Р': 'R', 'С': 'S', 'Т': 'T', 'У': 'U',
+                'Ф': 'F', 'Х': 'Kh', 'Ц': 'Ts', 'Ч': 'Ch', 'Ш': 'Sh', 'Щ': 'Sch', 'Ь': '',
+                'Ы': 'Y', 'Ъ': 'E', 'Э': 'E', 'Ю': 'Yu', 'Я': 'Ya'
+            };
+            return text.split('').map(char => translitMap[char] || char).join('');
+        }
+        // Обработчик события ввода
+        nameInput.addEventListener('input', function () {
+            let transliteratedText = transliterate(nameInput.value);
+            transliteratedText = transliteratedText.replace(/\s+/g, '-').toLowerCase(); // Заменяем пробелы на "-"
+            slugInput.value = transliteratedText; // Устанавливаем значение slug
+        });
+    });
+</script>
+
+<script>
+    document.getElementById('create-advertisement').addEventListener('click', () => {
+        const form = document.getElementById('advertisement-form');
+        const formData = new FormData(form);
+
+        // Получаем файлы для галереи и планов
+        const galleryImages = document.getElementById('gallery-images').files;
+        const plansImages = document.getElementById('plans-images').files;
+
+        // Добавляем файлы в FormData
+        for (const file of galleryImages) {
+            formData.append('gallery_images', file);
+        }
+        for (const file of plansImages) {
+            formData.append('plans_images', file);
+        }
+
+        fetch('/advertisements/create/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')  // Убедитесь, что у вас есть функция getCookie
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displaySuccessMessage(data.message);
+                    form.reset(); // Сбрасываем форму после успешного сохранения
+                } else {
+                    console.error('Ошибки:', data.errors);
+                    displayErrors(data.errors);
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert('Произошла ошибка при отправке формы.');
+            });
+    });
+
+    // Функция отображения успешного сообщения
+    function displaySuccessMessage(message) {
+        const notificationContainer = document.getElementById('notification-container');
+
+        // Очищаем предыдущие уведомления
+        notificationContainer.innerHTML = '';
+
+        const successMessage = document.createElement('div');
+        successMessage.className = 'alert alert-success';
+        successMessage.innerText = message;
+
+        notificationContainer.appendChild(successMessage);
+
+        // Автоматически скрываем сообщение через 5 секунд
+        setTimeout(() => {
+            successMessage.remove();
+        }, 5000);
+    }
+
+    // Функция отображения ошибок
+    function displayErrors(errors) {
+        // Очищаем предыдущие сообщения об ошибках
+        document.querySelectorAll('.error-message').forEach(elem => elem.remove());
+
+        for (const [field, messages] of Object.entries(errors)) {
+            const fieldElement = document.getElementById(field);
+            if (fieldElement) {
+                // Создаем контейнер для отображения сообщений об ошибках
+                const errorContainer = document.createElement('div');
+                errorContainer.className = 'error-message text-danger mt-1';
+                errorContainer.innerText = messages.join(', '); // Объединяем сообщения
+                fieldElement.parentElement.appendChild(errorContainer);
+            }
+        }
+    }
+    // Функция для получения CSRF-токена
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+<script src="{% static 'site/js/imask.js' %}"></script>
+
+<script>
+    window.addEventListener('load', function() {
+        // Инициализация маски для телефона
+        var element = document.getElementById('phone');
+        var maskOptions = {
+            mask: '+7(000)000-00-00',
+            lazy: false
+        }
+        var mask = new IMask(element, maskOptions);
+        // Инициализация маски для email
+        var maskOptions2 = {
+            mask: function (value) {
+                if(/^[a-z0-9_\.-]+$/.test(value))
+                    return true;
+                if(/^[a-z0-9_\.-]+@$/.test(value))
+                    return true;
+                if(/^[a-z0-9_\.-]+@[a-z0-9-]+$/.test(value))
+                    return true;
+                if(/^[a-z0-9_\.-]+@[a-z0-9-]+\.$/.test(value))
+                    return true;
+                if(/^[a-z0-9_\.-]+@[a-z0-9-]+\.[a-z]{1,4}$/.test(value))
+                    return true;
+                if(/^[a-z0-9_\.-]+@[a-z0-9-]+\.[a-z]{1,4}\.$/.test(value))
+                    return true;
+                if(/^[a-z0-9_\.-]+@[a-z0-9-]+\.[a-z]{1,4}\.[a-z]{1,4}$/.test(value))
+                    return true;
+                return false;
+            },
+            lazy: false
+        }
+        var emailElement = document.getElementById('id_email');
+        if (emailElement) {
+            var mask2 = new IMask(emailElement, maskOptions2);
+        }
+    });
+</script>
+
+
+{% endblock footertop %}
+{% block footerbottom %}{% endblock footerbottom %}

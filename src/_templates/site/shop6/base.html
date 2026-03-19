@@ -1,0 +1,826 @@
+{% load static generals_tag i18n shop_tags %}
+
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+
+    <title>{% with request|get_settings as data %} {% if data %}{{ data.setting.name }}{% endif %}{% endwith %} - {% block title %}{% endblock title %}</title>
+
+    <meta name="keywords" content="Marketplace ecommerce responsive HTML5 Template" />
+    <meta name="description"
+          content="Wolmart is powerful marketplace &amp; ecommerce responsive Html5 Template.">
+    <meta name="author" content="D-THEMES">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png' %}" href="/_media/{% with request|get_settings as settings %}{% if settings.favicon %}{{ settings.favicon }}{% endif %}{% endwith %}">
+
+    {% with request|get_settings as data %} {% if data %}{{ data.setting.yandex_metrica|safe }}{% endif %}{% endwith %}
+    {% with request|get_settings as data %}{% if data.setting.google_analitic %}{{ data.setting.google_analitic|safe }}{% endif %}{% endwith %}
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+
+    <meta content="{% block description %}{% endblock description %}" name="description">
+    <meta property="og:title" content="{% block propertytitle %} {% endblock propertytitle %}">
+    <meta property="og:description" content="{% block propertydescription %}{% endblock propertydescription %}">
+    <meta property="og:image" content="{% block propertyimage %}{% endblock propertyimage %}">
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="{% with request|get_settings as data %} {% if data %}{% if data.setting.favicon %}{{ data.setting.favicon.url }}{% endif %}{% endif %}{% endwith %}" />
+    <!-- Analitic link -->
+
+    <!-- WebFont.js -->
+    <script>
+        WebFontConfig = {
+            google: { families: ['Poppins:400,600,500,700,800', 'Zeyada: 400'] }
+        };
+        (function (d) {
+            var wf = d.createElement('script'), s = d.scripts[0];
+            wf.src = "{% static 'site/wolmart/assets/js/webfont.js' %}";
+            wf.async = true;
+            s.parentNode.insertBefore(wf, s);
+        })(document);
+    </script>
+
+    <link rel="preload" href="{% static 'site/wolmart/assets/vendor/fontawesome-free/webfonts/fa-regular-400.woff2' %}" as="font" type="font/woff2"
+          crossorigin="anonymous">
+    <link rel="preload" href="{% static 'site/wolmart/assets/vendor/fontawesome-free/webfonts/fa-solid-900.woff2' %}" as="font" type="font/woff2"
+          crossorigin="anonymous">
+    <link rel="preload" href="{% static 'site/wolmart/assets/vendor/fontawesome-free/webfonts/fa-brands-400.woff2' %}" as="font" type="font/woff2"
+          crossorigin="anonymous">
+    <link rel="preload" href="{% static 'site/wolmart/assets/fonts/wolmart.woff@png09e' %}" as="font" type="font/woff" crossorigin="anonymous">
+
+    <!-- Vendor CSS -->
+    <link rel="stylesheet" type="text/css" href="{% static 'site/wolmart/assets/vendor/fontawesome-free/css/all.min.css' %}">
+    <!-- Plugins CSS -->
+    <link rel="stylesheet" href="{% static 'site/wolmart/assets/vendor/swiper/swiper-bundle.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'site/wolmart/assets/vendor/animate/animate.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'site/wolmart/assets/vendor/magnific-popup/magnific-popup.min.css' %}">
+
+    <!-- Default CSS -->
+    <link rel="stylesheet" type="text/css" href="{% static 'site/wolmart/assets/css/demo2.min.css' %}">
+
+
+</head>
+
+<body class="home">
+<div class="page-wrapper">
+
+    <header class="header">
+        <div class="header-top">
+            <div class="container">
+                <div class="header-left">
+                    <p class="welcome-msg">
+                        {% with request|get_settings as data %} {% if data %}{{ data.setting.slogan }}{% endif %}{% endwith %}
+                    </p>
+                </div>
+                <div class="header-right">
+
+                    <style>
+                        /* Контейнер для всего блока — гарантируем выравнивание по центру и фиксированную высоту */
+                        .header-flex1 {
+                          display: flex;
+                          align-items: center;
+                          height: 50px; /* скорректируй по необходимости */
+                          margin: 0;
+                          padding: 0;
+                        }
+                        /* Обёртка для формы выбора языка */
+                        .inline-select-wrapper1 {
+                          position: relative;
+                          display: flex;
+                          align-items: center;
+                          margin: 0;
+                          padding: 0;
+                        }
+                        /* Видимая часть выбора языка */
+                        .display-select1 {
+                          display: flex;
+                          align-items: center;
+                          margin: 0;
+                          padding: 0;
+                        }
+                        /* Стили для флага — устанавливаем высоту и отступ справа */
+                        .flag-icon1 {
+                          display: inline-block;
+                          vertical-align: middle;
+                          margin-right: 4px;
+                          height: 16px;  /* подбери нужное значение */
+                        }
+                        /* Стили для текста языка — фиксированный line-height поможет выровнять по центру */
+                        #language-text1 {
+                          display: inline-block;
+                          vertical-align: middle;
+                          line-height: 16px;
+                          margin: 0;
+                          padding: 0;
+                        }
+                        /* Разделитель между языком и валютой */
+                        .separator1 {
+                          display: inline-flex;
+                          align-items: center;
+                          margin: 0 8px;
+                        }
+                        /* Блок для выбора валюты — сброс отступов и выравнивание по центру */
+                        .dropdown1 {
+                          display: flex;
+                          align-items: center;
+                          margin: 0;
+                          padding: 0;
+                        }
+                        /* Прозрачный селект занимает всю область обертки */
+                        .transparent-select1 {
+                          position: absolute;
+                          top: 0;
+                          left: 0;
+                          width: 100%;
+                          height: 100%;
+                          opacity: 0;
+                          cursor: pointer;
+                        }
+                        /* Сброс возможных внутренних отступов у всех дочерних элементов в блоке валюты */
+                        .dropdown1 * {
+                          margin: 0;
+                          padding: 0;
+                          box-sizing: border-box;
+                        }
+                    </style>
+
+                    {% get_current_language as LANGUAGE_CODE %}
+                    {% get_available_languages as LANGUAGES %}
+                    {% get_language_info_list for LANGUAGES as languages %}
+                    <div class="header-flex1">
+                        <!-- Форма выбора языка -->
+                        <form action="{% url 'set_language' %}" method="post" id="language-form1"
+                              class="inline-select-wrapper1">
+                            {% csrf_token %}
+                            <input name="next" type="hidden" value="{{ redirect_to }}">
+                            <!-- Видимая часть -->
+                            <span class="display-select1" id="language-display1">
+                                <img src="{% if LANGUAGE_CODE == 'ru' %}/_media/default/rusflag.jpg {% elif LANGUAGE_CODE == 'en' %}/_media/default/engflag.png{% endif %}" alt="{{ LANGUAGE_CODE }}" class="flag-icon1" id="language-flag1">
+                            {% for language in languages %}
+                            {% if language.code == LANGUAGE_CODE %}
+                            <span id="language-text1">{{ language.name_local }}</span>
+                            {% endif %}
+                            {% endfor %}
+                            </span>
+                            <!-- Прозрачный селект -->
+                            <select name="language" id="language-select1" class="transparent-select1"
+                                    onchange="this.form.submit()">
+                                {% for language in languages %}
+                                <option value="{{ language.code }}" {% if language.code == LANGUAGE_CODE %} selected {% endif %}>
+                                    {{ language.name_local }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </form>
+                        <!-- Разделитель -->
+                        <span class="separator1">/</span>
+                        <!-- Форма выбора валюты -->
+                        <div class="dropdown1">
+                            {% include 'site/shop6/include/valute.html' %}
+                        </div>
+                        <script>
+                            // Обновление флага и названия языка после выбора нового значения
+                            document.getElementById("language-select1").addEventListener("change", function() {
+                              var selectedOption = this.options[this.selectedIndex];
+                              var newFlag = selectedOption.getAttribute("data-flag");
+                              var newText = selectedOption.text;
+                              document.getElementById("language-flag1").src = newFlag;
+                              document.getElementById("language-text1").textContent = newText;
+                            });
+                        </script>
+                    </div>
+
+                    <!-- End of Dropdown Menu -->
+                    <span class="divider d-lg-show"></span>
+                    <a href="{% url 'hr:vacancys' %}" class="d-lg-show">{% trans 'Вакансии' %}</a>
+                    <a href="{% url 'webmain:about' %}" class="d-lg-show">{% trans 'Компания' %}</a>
+                    <a href="{% url 'webmain:contacts' %}" class="d-lg-show">{% trans 'Контакты' %}</a>
+                    {% if not user.is_authenticated %}
+                    <a href="{% url 'webmain:login' %}" class="d-lg-show ">
+                        <i class="w-icon-account"></i>
+                        {% trans "ВОЙТИ" %}
+                    </a>
+                    <span class="delimiter d-lg-show">/</span>
+                    <a href="{% url 'webmain:signup' %}" class="ml-0 d-lg-show ">{% trans 'Зарегистрироваться' %}</a>
+                    {% else %}
+                    <a href="{% url 'webmain:login' %}" class="d-lg-show ">
+                        <i class="w-icon-account"></i>
+                        {% trans "Мой профиль" %}
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <!-- End of Header Top -->
+
+        <div class="header-middle">
+            <div class="container">
+                <div class="header-left mr-md-4">
+                    <a href="{% url 'webmain:home' %}" class="mobile-menu-toggle  w-icon-hamburger" aria-label="menu-toggle">
+                    </a>
+                    <a href="{% url 'webmain:home' %}" class="logo ml-lg-0">
+                        <img src="{% with request|get_settings as data %}{% if data.logo %}{{ data.setting.logo.url }}{% else %}{% static 'site/moderations/assets/images/logo-dark.png' %}{% endif %}{% endwith %}" alt="{% with request|get_settings as data %} {% if data %}{{ data.setting.name }}{% endif %}{% endwith %}" width="144" height="45" />
+                    </a>
+                    <nav class="main-nav">
+                        <ul class="menu active-underline">
+                            <li class="{% if request.path|default_if_none:'' == '/' %} active {% endif %}">
+                                <a href="{% url 'webmain:home' %}">{% trans "Главная" %}</a>
+                            </li>
+                            <li class="{% if request.path|default_if_none:''|slice:':7' == '/about/' %} active {% endif %}">
+                                <a href="{% url 'webmain:about' %}">{% trans "О компании" %}</a>
+                            </li>
+                            <li class="{% if request.path|default_if_none:''|slice:':9' == '/catalog/' %} active {% endif %}">
+                                <a href="{% url 'shop:catalogs' %}">{% trans "Магазин" %}</a>
+                            </li>
+                            <li class="{% if request.path|default_if_none:''|slice:':7' == '/blogs/' %} active {% endif %}">
+                                <a href="{% url 'webmain:blogs' %}">{% trans "Новости" %}</a>
+                            </li>
+                            <li class="{% if request.path|default_if_none:''|slice:':10' == '/contacts/' %} active {% endif %}">
+                                <a href="{% url 'webmain:contacts' %}">{% trans "Контакты" %}</a>
+                            </li>
+                        </ul>
+                    </nav>
+
+                </div>
+                <div class="header-right ml-4">
+
+                    <div class="header-call d-xs-show d-lg-flex align-items-center">
+                        <a href="tel:
+{% with request|get_settings as setting %}
+                              {% if setting %}
+                                {% with setting.settings as settings %}
+                                  {% if setting.phone_default %}
+                                    {{ setting.phone_default.title_contact }}
+                                  {% endif %}
+                                {% endwith %}
+                              {% endif %}
+                            {% endwith %}
+" class="w-icon-call"></a>
+                        <div class="call-info d-lg-show">
+                            <h4 class="chat font-weight-normal font-size-md text-normal ls-normal text-light mb-0">
+                                <a href="{% for phone in phones %}{{ phone.information_contact }}{% empty %}Нет данных для отображения{% endfor %}" class="text-capitalize">{% trans "Телефон" %}</a>:
+                            </h4>
+                            <a href="tel:{% for phone in phones %}{{ phone.information_contact }}{% empty %}Нет данных для отображения{% endfor %}" class="phone-number font-weight-bolder ls-50">
+                                {% with request|get_settings as setting %}
+                                {% if setting %}
+                                {% with setting.settings as settings %}
+                                {% if setting.phone_default %}
+                                <div>
+                                    {{ setting.phone_default.information_contact }}
+                                </div>
+                                {% endif %}
+                                {% endwith %}
+                                {% endif %}
+                                {% endwith %}
+                            </a>
+                        </div>
+                    </div>
+                    {% if user.is_authenticated %}
+
+                    <div class="shopping-cart cart-dropdown cart-offcanvas mr-0 mr-lg-2" style="position: relative;">
+
+                        <a style="cursor: pointer;" class=" label-down link" href="{% url 'shop:bookmark_list' %}">
+                            <i class="w-icon-heart"></i>
+                            <sup class="cart-count" id="bookmark-count">{% get_likes_count request.user %}</sup>
+                            <span class="cart-label">{% trans "Закладки" %}</span>
+                        </a>
+
+                    </div>
+                    {% endif %}
+                    <div class="shopping-cart dropdown cart-dropdown cart-offcanvas mr-0 mr-lg-2">
+                        <div class="cart-overlay"></div>
+
+                        <a style="cursor: pointer;" class="cart-toggle label-down link" type="button" data-bs-toggle="offcanvas" data-bs-target="#cart_product" aria-controls="cart_product_canvas">
+                            <i class="w-icon-cart"></i>
+                            <sup class="cart-count" id="cart-count">{% get_user_cart_products request as cart_products %} {{cart_products.2}}</sup>
+                            <span class="cart-label">{% trans "Корзина" %}</span>
+                        </a>
+                        <div class="dropdown-box">
+                            <a class="action" href="{% url 'webmain:home' %}#" role="button" data-bs-toggle="dropdown">
+                                <i class="w-icon-long-arrow-right"></i>
+                                {% include 'site/shop6/include/cart_product.html' %}
+                            </a>
+                        </div>
+                    </div>
+
+
+                    <!-- End of Dropdown Box -->
+                </div>
+            </div>
+        </div>
+        <!-- End of Header Middle -->
+
+        <div class="header-bottom sticky-content fix-top sticky-header has-dropdown">
+            <div class="container">
+                <div class="inner-wrap">
+                    <div class="header-left flex-1">
+                        {% include 'site/shop6/include/category.html' %}
+                        <form method="get" action="{% url 'webmain:search' %}" class="header-search hs-expanded hs-round d-none d-md-flex input-wrapper ml-3 mr-3 ">
+                            <input id="search-input" name="q" type="text" class="form-control" value="{{ query }}" placeholder="{% trans 'Введи поисковую фразу...' %}" aria-describedby="button-addon2" style="border-left: 2px solid #336699;margin-right: 0px;" />
+                            <button class="btn btn-search" type="submit" id="button-addon2" data-bs-toggle="offcanvas" data-bs-target="#AsideOffcanvasSearch" aria-controls="AsideOffcanvasSearch"><i class="w-icon-search"></i>
+                            </button>
+                        </form>
+                    </div>
+                    <div class="header-right">
+                        <a href="{% url 'webmain:home' %}#" class="d-xl-show mr-2"><i class="w-icon-map-marker mr-1"></i>{% trans 'Доставка' %}: &nbsp; <small>{% trans 'Выберите способ получения' %}</small></a>
+                        <a href="{% url 'webmain:home' %}#"><i class="w-icon-sale"></i>{% trans 'Акции' %}</a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </header>
+
+    <p class="form-message"></p>
+
+    {% if messages %}
+    <div style="display:none;  width: 500px;
+        text-align: center;
+        position: fixed;
+        top: 200px;
+        padding: 10px 20px;
+        background-color: #5cb85c;
+        color: #fff;
+        border-radius: 5px;
+        z-index: 1000;
+        left: 50%;
+        transform: translateX(-50%);
+        opacity:0; transition: opacity 0.5s ease;" id="message-box">
+        {% for message in messages %}
+        {{ message }}
+        {% endfor %}
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("Страница загружена, скрипт начал работу");  // Проверка в консоли
+            var messageBox = document.getElementById("message-box");
+            if (messageBox) {
+                messageBox.style.display = "block";
+                setTimeout(function() {
+                    messageBox.style.opacity = "1";
+                }, 500);
+
+                // Скрываем через 5 секунд
+                setTimeout(function() {
+                    messageBox.style.opacity = "0";
+                    setTimeout(function() {
+                        messageBox.style.display = "none";
+                    }, 500);  // Даем время для завершения анимации
+                }, 5000);  // Время показа сообщения
+            }
+        });
+    </script>
+    {% endif %}
+
+    <div id="custom-alert" style="display:none;  width: 500px;
+    text-align: center;
+    position: fixed;
+    top: 200px;
+    padding: 10px 20px;
+    background-color: #5cb85c;
+    color: #fff;
+    border-radius: 5px;
+    z-index: 1000;
+    left: 50%;
+    transform: translateX(-50%);
+ opacity:0; transition: opacity 0.5s ease;">
+        {% trans "Товар добавлен в корзину!" %}
+    </div>
+    {% block content %}
+    {% endblock content %}
+
+    <footer class="footer appear-animate" data-animation-options="{'name': 'fadeIn'}">
+        <div class="footer-newsletter bg-primary">
+            <div class="container">
+                <div class="row justify-content-center align-items-center">
+                    <div class="col-xl-5 col-lg-6">
+                        <div class="icon-box icon-box-side text-white">
+                            <div class="icon-box-icon d-inline-flex">
+                                <i class="w-icon-envelop3"></i>
+                            </div>
+                            <div class="icon-box-content">
+                                <h4 class="icon-box-title text-white text-uppercase font-weight-bold">{% trans "Подписаться" %}</h4>
+                                <p class="text-white">
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-7 col-lg-6 col-md-9 mt-4 mt-lg-0 ">
+                        {% include 'site/shop6/include/subscriptions.html' %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="footer-top">
+                <div class="row" >
+                    <div class="col-lg-2 col-sm-4">
+                        <h4 class="widget-title"></h4>
+                        <h4 class="widget-collapsed-title collapsed" data-bs-toggle="collapse"
+                            data-bs-target="#widgetId-1">{% trans "Информация" %}</h4>
+                        <p class="desc">
+                            {% with request|get_settings as settings %}
+                            {% if settings.description %}
+                            {{ settings.description }}
+                            {% endif %}
+                            {% endwith %}
+                        </p>
+                        <ul class="footer-link">
+                            <li><a href="{% url 'webmain:home' %}">{% trans "Главная" %}</a></li>
+                            <li><a href="{% url 'webmain:blogs' %}">{% trans "Новости" %}</a></li>
+                            <li><a href="{% url 'shop:catalogs' %}">{% trans "Магазин" %}</a></li>
+                            <li><a href="{% url 'webmain:about' %}">{% trans "О проекте" %}</a></li>
+                            <li><a href="{% url 'webmain:contacts' %}">{% trans "Контакты" %}</a></li>
+                            <li><a href="{% url 'webmain:galleries' %}">{% trans "Галерея" %}</a></li>
+                            <li><a href="{% url 'webmain:sponsorships' %}">{% trans "Благотворительность" %}</a></li>
+                            <li><a href="{% url 'webmain:services' %}">{% trans "Услуги" %}</a></li>
+                            <li><a href="{% url 'webmain:prices' %}">{% trans "Прайс" %}</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-2 col-sm-4">
+                        <!-- Footer Widget Start -->
+                        <div class="widget-item nav-menu-item3">
+                            <h4 class="widget-title"></h4>
+                            <h4 class="widget-collapsed-title collapsed" data-bs-toggle="collapse"
+                                data-bs-target="#widgetId-3">{% trans "Пользователю" %}</h4>
+                            <div id="widgetId-4" class=" widget-collapse-body">
+                                <div class="collapse-body">
+                                    <div class="widget-contact-info">
+
+                                        <ul class="footer-link">
+                                            <li>
+                                                <a href="{% if user.is_authenticated %}{% url 'useraccount:edit_profile' %}{% else %}{% url 'webmain:login' %}{% endif %}">{% trans "ПРОФИЛЬ" %}</a>
+                                            </li>
+                                            {% if not user.type == 2 %}
+                                            <li><a href="{% url 'shop:my_cart' %}">{% trans "Корзина" %}</a></li>
+                                            <li>
+                                                <a href="{% if user.is_authenticated %}{% url 'shop:bookmark_list' %}{% endif %}">{% trans "Закладки" %}</a>
+                                            </li>
+                                            <li>
+                                                <a href="{% if user.is_authenticated %}{% url 'shop:my_order' %}{% endif %}">{% trans "Покупки" %}</a>
+                                            </li>
+                                            {% else %}
+                                            <li>
+                                                <a href="{% if user.is_authenticated %}{% url 'shop:manufacturerorder' %}{% endif %}">{% trans "Продажи" %}</a>
+                                            </li>
+                                            <li>
+                                                <a href="{% if user.is_authenticated %}{% url 'webmain:shop_edit' %}{% endif %}">
+                                                    {% trans "Мой магазин" %}</a></li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Footer Widget End -->
+                    </div>
+                    <div class="col-lg-3 col-sm-4">
+                        <div class="widget-item nav-menu-item1">
+                            <h4 class="widget-title"></h4>
+                            <h4 class="widget-collapsed-title collapsed" data-bs-toggle="collapse"
+                                data-bs-target="#widgetId-1">{% trans "О нас" %}</h4>
+                            <div id="widgetId-1" class=" widget-collapse-body">
+                                <div class="collapse-body">
+                                    <div class="widget-menu-wrap">
+                                        <ul class="nav-menu">
+                                            {% get_pages as pages %}
+                                            {% if pages %}{% for page in pages %}{% if page.pagetype == 6 %}
+                                            <li><a href="{% url 'webmain:page' page.slug %}">{% trans "Партнерство" %}</a></li>
+                                            {% endif %}{% endfor %}{% endif %}
+                                            {% if pages %}{% for page in pages %}{% if page.pagetype == 7 %}
+                                            <li><a href="{% url 'webmain:page' page.slug %}">{% trans "Сотрудничество" %}</a></li>
+                                            {% endif %}{% endfor %}{% endif %}
+                                            {% if pages %}{% for page in pages %}{% if page.pagetype == 8 %}
+                                            <li><a href="{% url 'webmain:page' page.slug %}">{% trans "Доставка" %}</a></li>
+                                            {% endif %}{% endfor %}{% endif %}
+                                            {% if pages %}{% for page in pages %}{% if page.pagetype == 9 %}
+                                            <li><a href="{% url 'webmain:page' page.slug %}">{% trans "Оплата" %}</a></li>
+                                            {% endif %}{% endfor %}{% endif %}
+                                            {% if pages %}{% for page in pages %}{% if page.pagetype == 10 %}
+                                            <li><a href="{% url 'webmain:page' page.slug %}">{% trans "Возврат" %}</a></li>
+                                            {% endif %}{% endfor %}{% endif %}
+
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-sm-4">
+                        <div class="widget-item nav-menu-item2">
+                            <h4 class="widget-title"></h4>
+                            <h4 class="widget-collapsed-title collapsed" data-bs-toggle="collapse"
+                                data-bs-target="#widgetId-2">{% trans "Политики" %}</h4>
+                            <div id="widgetId-2" class=" widget-collapse-body">
+                                <div class="collapse-body">
+                                    <div class="widget-menu-wrap">
+                                        <ul class="nav-menu">
+                                            {% if pages %}{% for page in pages %}{% if page.pagetype == 2 %}
+                                            <li><a href="{% url 'webmain:page' page.slug %}">{% trans "Пользовательское соглашение" %}</a></li>
+                                            {% endif %}{% endfor %}{% endif %}
+                                            {% if pages %}{% for page in pages %}{% if page.pagetype == 3 %}
+                                            <li><a href="{% url 'webmain:page' page.slug %}">{% trans "Политика конфедециальности" %}	</a></li>
+                                            {% endif %}{% endfor %}{% endif %}
+                                            {% if pages %}{% for page in pages %}{% if page.pagetype == 4 %}
+                                            <li><a href="{% url 'webmain:page' page.slug %}">{% trans "Политика Cookie - Файлов" %}</a></li>
+                                            {% endif %}{% endfor %}{% endif %}
+                                            {% if pages %}{% for page in pages %}{% if page.pagetype == 5 %}
+                                            <li><a href="{% url 'webmain:page' page.slug %}">{% trans "Согласия на обработку персональных данных" %}</a></li>
+                                            {% endif %}{% endfor %}{% endif %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-sm-4">
+                        <div class="widget-item nav-menu-item3">
+                            <h4 class="widget-title"></h4>
+                            <h4 class="widget-collapsed-title collapsed" data-bs-toggle="collapse"
+                                data-bs-target="#widgetId-3">{% trans "Контакты" %}</h4>
+                            <div id="widgetId-3" class=" widget-collapse-body">
+                                <div class="collapse-body">
+                                    <div class="widget-contact-info">
+                                        <p class="contact-info-desc">Email:
+                                            <a href="mailto://{% with request|get_contact as settings %}{% if settings.email %}{{ settings.email }}{% endif %}{%endwith%}">
+                                                {% with request|get_contact as settings %}
+                                                {% if settings.email %}
+                                                {{ settings.email }}
+                                                {% endif %}{%endwith%}
+                                            </a></p>
+                                        <div class="contact-item">
+                                            <div class="icon">
+                                                <i class="pe-7s-map-marker"></i>
+                                            </div>
+                                            <div class="info">
+                                                <p>{% trans "Наш адрес" %}: <br>{% with request|get_contact as settings %}
+                                                    {% if settings.adress %}
+                                                    {{ settings.adress }}
+                                                    {% endif %}
+                                                    {% endwith %}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="contact-item phone-info">
+                                            <div class="icon">
+                                                <i class="pe-7s-phone"></i>
+                                            </div>
+                                            <div class="info">
+                                                <p><span>{% trans "Телефон" %}:</span> <br><a
+                                                        href="tel://">
+                                                    {% with request|get_settings as setting %}
+                                                    {% if setting %}
+                                                    {% with setting.settings as settings %}
+                                                    {% if setting.phone_default %}
+                                                    <div>
+                                                        <strong>{{ setting.phone_default.title_contact }}</strong><br>
+                                                        {{ setting.phone_default.information_contact }}
+                                                    </div>
+                                                    {% endif %}
+                                                    {% endwith %}
+                                                    {% endif %}
+                                                    {% endwith %}
+                                                </a></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="footer-left">
+                    <p class="copyright">{% with request|get_settings as data %} {% if data %} {{ data.setting.content }}{% endif %}{%endwith%}</p>
+
+                </div>
+                <div class="footer-right">
+                    <span class="payment-label mr-lg-8">{% trans "Мы используем безопасную оплату для" %}</span>
+                    <figure class="payment">
+                        <img src="{% with request|get_settings as data %}{% if data.setting.paymentmetod %}{{ data.setting.paymentmetod.url }}{% endif %}{% endwith %}"
+                             alt="payment" width="192" height="21"/>
+                    </figure>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- End of Footer -->
+</div>
+<!-- End of Page-wrapper-->
+
+
+<!-- Start of Sticky Footer -->
+<div class="sticky-footer sticky-content fix-bottom fixed" style=" position: fixed; height: 70px; width: 100%; ">
+    <a href="{% url 'webmain:home' %}" class="sticky-link active">
+        <i class="w-icon-home"></i>
+        <p>{% trans "Главная" %}</p>
+    </a>
+    <a href="{% url 'shop:catalogs' %}" class="sticky-link">
+        <i class="w-icon-category"></i>
+        <p>{% trans "КАТАЛОГ" %}</p>
+    </a>
+    {% if user.is_authenticated%}
+    <a href="{% url 'useraccount:edit_profile' %}" class="sticky-link">
+        <i class="w-icon-account"></i>
+        <p>{% trans "ПРОФИЛЬ" %}</p>
+    </a>
+    {% endif %}
+    {% if not user.is_authenticated%}
+    <a href="{% url 'webmain:login' %}" class="sticky-link">
+        <i class="w-icon-account"></i>
+        <p>{% trans "ВОЙТИ" %}</p>
+    </a>
+    {% endif %}
+    <div class="cart dir-up">
+        <a href="{% url 'shop:my_cart' %}" class="sticky-link">
+            <i class="w-icon-cart"></i>
+            <p>{% trans "Корзина" %}</p>
+        </a>
+        <!-- End of Dropdown Box -->
+    </div>
+
+    <div class="header-search hs-toggle dir-up">
+        <a href="{% url 'webmain:home' %}#" class="search-toggle sticky-link">
+            <i class="w-icon-search"></i>
+            <p>{% trans "ПОИСК" %}</p>
+        </a>
+        <form action="{% url 'webmain:home' %}#" class="input-wrapper">
+            <input type="text" class="form-control" name="search" autocomplete="off" placeholder="Search"
+                   required />
+            <button class="btn btn-search" type="submit">
+                <i class="w-icon-search"></i>
+            </button>
+        </form>
+    </div>
+</div>
+<!-- End of Sticky Footer -->
+
+<!-- Start of Scroll Top -->
+<a id="scroll-top" class="scroll-top" href="#top" title="Top" role="button"> <i class="w-icon-angle-up"></i> <svg
+        version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 70">
+    <circle id="progress-indicator" fill="transparent" stroke="#000000" stroke-miterlimit="10" cx="35" cy="35"
+            r="34" style="stroke-dasharray: 16.4198, 400;"></circle>
+</svg> </a>
+<!-- End of Scroll Top -->
+
+<!-- Start of Mobile Menu -->
+<div class="mobile-menu-wrapper">
+    <div class="mobile-menu-overlay"></div>
+    <!-- End of .mobile-menu-overlay -->
+
+    <a href="#" class="mobile-menu-close"><i class="close-icon"></i></a>
+    <!-- End of .mobile-menu-close -->
+
+    <div class="mobile-menu-container scrollable">
+        <form action="{% url 'webmain:search' %}" method="get" class="input-wrapper">
+            <input id="search-input" name="q" type="text" class="form-control" value="{{ query }}" placeholder="{% trans 'Введи поискоовую фразу...' %}" aria-describedby="button-addon2" style="border-left: 2px solid #336699;margin-right: 0px ;" />
+            <button class="btn btn-search" type="submit" id="button-addon2">
+                <i class="w-icon-search"></i>
+            </button>
+        </form>
+        <!-- End of Search Form -->
+        <div class="tab">
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item">
+                    <a href="#main-menu" class="nav-link active">{% trans "Меню" %}</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#categories" class="nav-link">{% trans "КАТАЛОГ" %}</a>
+                </li>
+            </ul>
+        </div>
+        <div class="tab-content">
+            <div class="tab-pane active" id="main-menu">
+                <ul class="mobile-menu">
+                    <li style="display: flex">
+                        {% if user.is_authenticated%}
+                        <a href="{% url 'useraccount:edit_profile' %}">{% trans "Мой аккаунт" %}</a>
+                        {% endif %}
+                        {% if not user.is_authenticated %}
+                        <a href="{% url 'webmain:login' %}">{% trans "Вход" %}</a>
+                        <a>/</a>
+                        <a href="{% url 'webmain:signup' %}">Регистрация</a>
+                        {% endif %}
+                    </li>
+                    <li>
+                        <a href="{% url 'webmain:home' %}">{% trans "Главная" %}</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'shop:catalogs' %}">{% trans "Магазин" %}</a>
+                    </li>
+                    {% if user.is_authenticated%}
+                    <li>
+                        <a href="{% url 'shop:bookmark_list' %}">{% trans "Закладки" %}</a>
+                    </li>
+                    {% endif %}
+                    <li>
+                        <a href="{% url 'shop:my_cart' %}">{% trans "Корзина" %}</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'webmain:blogs' %}">{% trans "Новости" %}</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'webmain:contacts' %}">{% trans "Контакты" %}</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'webmain:about' %}">{% trans "О компании" %}</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="tab-pane" id="categories">
+                <ul class="mobile-menu">
+                    {% get_categories_hierarchy request.get_host as all_categories %}
+                    {% for category in all_categories|print_categories_tree %}
+                    <li class="category {% if category.parent %}child-category{% endif %}">
+                <span class="category-name">
+                    <a style="display: flex; padding-left: {% if category.parent %}20px{% else %}0{% endif %};"
+                       href="{% url 'shop:categories' category.slug %}">
+                        {{ category.name }}
+                    </a>
+                </span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="global-modal-container"></div>
+<!-- End of Mobile Menu -->
+{% block footer %}{% endblock footer %}
+<script>
+    window.csrfToken = "{{ csrf_token }}";
+    console.log("CSRF Token: ", window.csrfToken);  // Debugging log
+</script>
+
+<!-- JavaScript to handle currency change -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.change-currency').forEach(function (element) {
+            element.addEventListener('click', function (event) {
+                event.preventDefault();
+                const currencyId = this.getAttribute('data-currency-id');
+                const csrfToken = window.csrfToken;
+
+                fetch('/update-cart-currency/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken  // Ensure CSRF token is included in headers
+                    },
+                    body: JSON.stringify({currency_id: currencyId})
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            alert('Currency updated to: ' + data.currency);
+                            location.reload();
+                        } else {
+                            alert('Failed to update currency.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            });
+        });
+    });
+</script>
+<!-- Plugin JS File -->
+<script data-cfasync="false" src="{% static 'site/wolmart/5c5dd728/cloudflare-static/email-decode.min.js' %}"></script>
+<script src="{% static 'site/wolmart/assets/vendor/jquery/jquery.min.js' %}"></script>
+<script src="{% static 'site/wolmart/assets/vendor/jquery.plugin/jquery.plugin.min.js' %}"></script>
+<script src="{% static 'site/wolmart/assets/vendor/imagesloaded/imagesloaded.pkgd.min.js' %}"></script>
+<script src="{% static 'site/wolmart/assets/vendor/zoom/jquery.zoom.js' %}"></script>
+<script src="{% static 'site/wolmart/assets/vendor/jquery.countdown/jquery.countdown.min.js' %}"></script>
+<script src="{% static 'site/script.js' %}"></script>
+<script src="{% static 'site/wolmart/assets/vendor/skrollr/skrollr.min.js' %}"></script>
+
+<!-- Swiper JS -->
+<script src="{% static 'site/wolmart/assets/vendor/swiper/swiper-bundle.min.js' %}"></script>
+
+<!-- Main JS -->
+<script src="{% static 'site/wolmart/assets/js/main.min.js' %}"></script>
+<style>
+    .swiper-wrapper {
+        height: auto;
+    }
+
+    .header-search.hs-round.hs-expanded .form-control {
+        border-radius: 0.3rem 0 0 0.3rem;
+    }
+    .header-bottom:not(.fixed) .dropdown-box{
+        visibility: visible;
+    }
+
+
+</style>
+
+</body>

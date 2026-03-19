@@ -1,0 +1,59 @@
+{% extends 'products/base_profile.html' %}
+{% load static generals_tag %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+{% block content %}
+<aside class="sidebar-area">
+    <div class="widget widget_categories">
+        <h3 class="widget_title">Обращения в поддержку
+        </h3>
+        <br>
+
+        <a href="{% url 'moderation:ticketscreate' %}" class="th-btn btn-sm style4"> <i class="fab fa-plus"></i>Новое обращение в поддержку </a>
+        <table class="cart_table mb-20">
+            <thead>
+            <tr>
+                <th class="cart-col-productname">Информация</th>
+                <th class="cart-col-price">Статус</th>
+                <th class="cart-col-quantity">Дата</th>
+                <th class="cart-col-total">Удалить</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for ticket in tickets %}
+            <tr class="cart_item">
+                <td data-title="Name">
+                    <a class="cart-productname" href="{% url 'moderation:ticket_message' ticket.pk %}">{{ ticket.themas }}</a>
+
+                </td>
+                <td data-title="Price">
+                    {{ ticket.get_status_display }}
+                    {% if ticket.status == 0 %}<span class="new_ticket">*</span>{% endif %}
+                </td>
+                <td data-title="Quantity">
+                    <span>{{ ticket.date }}</span>
+                </td>
+                <td data-title="Total">
+                    <form method="post" action="{% url 'moderation:ticket_delete' ticket.pk %}">
+                        {% csrf_token %}
+                        <button  type="submit" class="remove simple-icon ">
+                            <i class="fa fa-trash" aria-hidden="true"></i>
+
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+
+        </table>
+    </div>
+    {% include 'products/include/paginations.html' with items=applications %}
+
+</aside>
+{% endblock content %}
+{% block footer %}{% endblock footer %}

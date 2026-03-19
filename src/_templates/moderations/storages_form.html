@@ -1,0 +1,746 @@
+{% extends 'moderations/base.html' %}
+{% load i18n %}
+{% load static  %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<style>
+    /* Стили для попапа */
+
+#search-results {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+#search-results div {
+    padding: 8px;
+    cursor: pointer;
+}
+
+.delete-file {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Центрируем иконку */
+.delete-file .iconify-icon {
+  margin: auto;
+  vertical-align: middle;
+}
+
+#search-results div:hover {
+    background-color: #eee;
+}
+.preview-image {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.preview-image:hover {
+    transform: scale(1.03);
+}
+
+.delete-file {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.card:hover .delete-file {
+    opacity: 1;
+}
+</style>
+<style>
+    .custom-alert {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+
+.custom-alert-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 350px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    animation: alertFadeIn 0.3s;
+}
+
+@keyframes alertFadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.custom-alert-buttons {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+    gap: 10px;
+}
+    textarea {
+        --tw-border-opacity: 1;
+        border-color: rgb(226 232 240 / var(--tw-border-opacity));
+        display: block;
+        width: 100%;
+        border-radius: .375rem;
+        border-width: 1px;
+        padding: .5rem 1rem;
+        font-size: .875rem;
+        font-weight: inherit;
+        line-height: inherit;
+        color: inherit;
+        margin: 0;
+        font-family: inherit;
+        resize: none;
+        height: 120px;
+    }
+    textarea:focus{
+        --tw-border-opacity: 1!important;
+        border-color: rgb(59 130 246 / var(--tw-border-opacity))!important;
+    }
+    .form-control[type="file"]:not(:disabled):not([readonly]) {
+        --tw-border-opacity: 1;
+        border-color: rgb(226 232 240 / var(--tw-border-opacity));
+        width: fit-content;
+        display: block;
+        border-radius: .375rem;
+        border-width: 1px;
+        font-size: .875rem;
+        height: auto!important;
+        padding: 5px 0px 5px 10px;
+    }
+    .django-ckeditor-widget {
+        width: 100%;
+    }
+    .cke_editor_id_description {
+        display: block !important;
+        background: #fff;
+        border: 0.0625rem solid #EEEEEE;
+        padding: 0.3125rem 1.25rem;
+        color: #6e6e6e;
+        border-radius: 0.5rem;
+        width: auto!important;
+    }
+    .choices__list--dropdown, .choices__list[aria-expanded] {
+        position: relative;
+        max-height: 120px;
+        overflow: auto;
+    }
+    .modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1040;
+        display: none;
+    }
+    .modal-backdrop.show {
+        display: block;
+    }
+#selected-files-preview .col-md-3 {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Стили для карточек превью */
+.preview-image {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.preview-image:hover {
+    transform: scale(1.03);
+}
+
+/* Кнопка удаления */
+.delete-file {
+    transition: all 0.2s;
+}
+
+.delete-file:hover {
+    background-color: #dc3545 !important;
+    color: white !important;
+}
+
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/suggestions-jquery@latest/dist/css/suggestions.min.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/suggestions-jquery@latest/dist/js/jquery.suggestions.min.js"></script>
+
+{% endblock head %}
+
+{% block content %}
+<div class="row page-titles mx-0">
+    <div class="col-sm-6 p-md-0">
+        <div class="welcome-text">
+            <h4>{{ services.name }}</h4>
+        </div>
+    </div>
+    <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'moderation:service_settings' %}">{% trans "Новости" %}</a></li>
+            <li class="breadcrumb-item active">{% trans "Новость" %}</li>
+        </ol>
+    </div>
+</div>
+<div class="card">
+    <div class="card-body" >
+
+        <form method="post" class="requisites-info" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.media }}
+
+            <div class="card-body">
+                <div class="row">
+
+                    <div class="col-xl-6 ">
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <h6 class="mb-2" style="width: max-content">{% trans "Название" %}</h6>
+                            </div>
+                            <div class="mb-3">
+                                {{ form.name }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xl-8">
+                                <h6 class="mb-2" style="width: max-content">{% trans "Город" %}</h6>
+
+                                <div class="mb-3">
+                                    {{ form.city }}
+                                </div>
+                            </div>
+                            <div class="col-xl-4">
+                                <h6 class="mb-2" style="width: max-content">{% trans "Почтовый индекс" %}</h6>
+
+                                <div class="mb-3">
+                                    {{ form.zip_index }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <h6 class="mb-2" style="width: max-content">{% trans "Адрес" %}</h6>
+                            </div>
+                            <div class="mb-3">
+                                {{ form.address }}
+                                <div class="d-none">
+                                    {{ form.longitude }}
+                                    {{ form.latitude }}
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <h6 class="mb-2" style="width: max-content">{% trans "Описание" %}</h6>
+                            </div>
+                            <div class="mb-3">
+                                {{ form.content }}
+                            </div>
+                        </div>
+
+
+
+                    </div>
+                    <div class="col-xl-6 ">
+
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <h6 class="mb-2" style="width: max-content">{% trans "Контактная почта" %}</h6>
+                            </div>
+                            <div class="mb-3">
+                                {{ form.email }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <h6 class="mb-2" style="width: max-content">{% trans "Контактный Имя" %}</h6>
+                            </div>
+                            <div class="mb-3">
+                                {{ form.contact_name }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <h6 class="mb-2" style="width: max-content">{% trans "Контактный номер" %}</h6>
+                            </div>
+                            <div class="mb-3">
+                                {{ form.contact_phone }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <h6 class="mb-2" style="width: max-content">{% trans "Комментарий склада для доставки" %}</h6>
+                            </div>
+                            <div class="mb-3">
+                                {{ form.delivery_comment }}
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-12 form-btn">
+                            <button type="submit"
+                                    class="btn btn-success"
+                                    style=" margin-top: 10px; width: 150px">
+                                {% trans "Сохранить" %}
+                            </button>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+    </div><!--end card-->
+</div><!--end col-->
+<div id="custom-alert" class="custom-alert">
+    <div class="custom-alert-content">
+        <h5>Подтверждение удаления</h5>
+        <p>Вы уверены, что хотите удалить этот файл?</p>
+        <div class="custom-alert-buttons">
+            <button id="alert-cancel" class="btn btn-secondary">Отмена</button>
+            <button id="alert-confirm" class="btn btn-danger">Удалить</button>
+        </div>
+    </div>
+</div>
+<style>
+    textarea#id_email, textarea#id_contact_name, textarea#id_contact_phone {
+    height: 36px;
+}
+    input {
+    width: 100%;
+}
+</style>
+<script>
+    var api_key = 'f57f601d1ae22f609d5f8ae6b3601e9ec3e9a85d';
+
+    function formatCity(suggestion) {
+        var address = suggestion.data;
+        if (address.city_with_type === address.region_with_type) {
+            return address.settlement_with_type || "";
+        } else {
+            return address.city_with_type || "";
+        }
+    }
+
+    var $city = $('#id_city');
+    var $address = $('#id_address');
+    var $latitude = $('#id_latitude');
+    var $longitude = $('#id_longitude');
+
+    $city.suggestions({
+        token: api_key,
+        type: 'ADDRESS',
+        hint: false,
+        bounds: "city-settlement",
+        formatSelected: formatCity,
+        onSelect: function (suggestion) {
+            const data = suggestion.data;
+
+            // 📍 Формируем адрес
+            let fullAddress = '';
+            if (data.postal_code) fullAddress += data.postal_code + ', ';
+            if (data.region_with_type) fullAddress += data.region_with_type + ', ';
+            if (data.city_with_type) fullAddress += data.city_with_type + ', ';
+            if (data.settlement_with_type) fullAddress += data.settlement_with_type + ', ';
+            if (data.street_with_type) fullAddress += data.street_with_type + ', ';
+            if (data.house) fullAddress += 'д. ' + data.house;
+            fullAddress = fullAddress.replace(/,\s*$/, '');
+
+            // 🏠 Записываем адрес
+            $address.val(fullAddress);
+
+            // 🌍 Записываем координаты
+            if (data.geo_lat && data.geo_lon) {
+                $latitude.val(data.geo_lat);
+                $longitude.val(data.geo_lon);
+            } else {
+                $latitude.val('');
+                $longitude.val('');
+            }
+        }
+    });
+</script>
+
+
+<script>
+    function transliterate(text) {
+        const translitDict = {
+            'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd',
+            'е': 'e', 'ё': 'e', 'ж': 'zh', 'з': 'z', 'и': 'i',
+            'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n',
+            'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't',
+            'у': 'u', 'ф': 'f', 'х': 'kh', 'ц': 'ts', 'ч': 'ch',
+            'ш': 'sh', 'щ': 'shch', 'ъ': '', 'ы': 'y', 'ь': '',
+            'э': 'e', 'ю': 'yu', 'я': 'ya', ' ': '-', 'ç': 'c',
+            'ƣ': 'q', 'ī': 'i', 'ş': 's', 'ū': 'u', 'ƶ': 'z'
+        };
+
+        return text.split('').map(char => {
+            // Приводим к нижнему регистру и используем транслитерацию
+            const lowerChar = char.toLowerCase();
+            return translitDict[lowerChar] || lowerChar; // Используем транслитерацию или сам символ
+        }).join('');
+    }
+
+    function generateSlug() {
+        const nameInput = document.querySelector('input[name="name"]');
+        const slugInput = document.querySelector('input[name="slug"]');
+
+        // Преобразование текста в slug
+        const slug = transliterate(nameInput.value) // Транслитерация
+            .trim() // Убираем пробелы по краям
+            .replace(/-+/g, '-') // Убираем лишние дефисы
+            .replace(/^-|-$/g, '') // Убираем дефисы в начале и в конце
+            .replace(/[^a-z0-9-]/g, ''); // Убираем все символы, кроме букв, цифр и дефисов
+
+        slugInput.value = slug;
+        console.log(slugInput.value);
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const nameInput = document.querySelector('input[name="name"]');
+        nameInput.addEventListener('input', generateSlug);
+    });
+</script>
+
+
+<!--COVER-->
+<script>
+    function previewCover(input) {
+        const previewContainer = document.getElementById('cover-preview-container');
+        const emptyCover = document.getElementById('empty-cover');
+        let preview = document.getElementById('cover-preview');
+
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                if (!preview) {
+                    preview = document.createElement('img');
+                    preview.id = 'cover-preview';
+                    preview.style.maxHeight = '300px';
+                    preview.style.maxWidth = '95%';
+                    const clearBtn = document.querySelector('.clear-btn[onclick="clearCover()"]');
+        if (clearBtn) clearBtn.style.display = 'block';
+                    previewContainer.insertBefore(preview, emptyCover);
+
+                }
+
+                preview.src = e.target.result;
+
+                if (emptyCover) {
+
+                    emptyCover.style.display = 'none';
+                }
+            }
+
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            if (preview) {
+                preview.remove();
+            }
+            const clearBtn = document.querySelector('.clear-btn[onclick="clearCover()"]');
+        if (clearBtn) clearBtn.style.display = 'none';
+            if (emptyCover) {
+                emptyCover.style.display = 'flex';
+            }
+        }
+    }
+
+    // Инициализация при загрузке страницы
+    document.addEventListener('DOMContentLoaded', function() {
+        const coverInput = document.getElementById('id_cover');
+        if (coverInput) {
+            // Если уже есть выбранный файл (например, при ошибке формы)
+            if (coverInput.files && coverInput.files[0]) {
+                previewCover(coverInput);
+            }
+        }
+    });
+</script>
+<!--PREVIEW-->
+<script>
+    function previewImage(input, type) {
+        const previewContainer = document.getElementById(`${type}-preview-container`);
+        const emptyPreview = document.getElementById(`empty-${type}`);
+        let preview = document.getElementById(`${type}-preview`);
+
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                if (!preview) {
+                    preview = document.createElement('img');
+                    preview.id = `${type}-preview`;
+                    preview.style.maxHeight = '300px';
+                    preview.style.maxWidth = '95%';
+                    const clearBtn = document.querySelector('.clear-btn[onclick="clearPreview()"]');
+        if (clearBtn) clearBtn.style.display = 'block';
+                    previewContainer.insertBefore(preview, emptyPreview);
+                }
+
+                preview.src = e.target.result;
+
+                if (emptyPreview) {
+                    emptyPreview.style.display = 'none';
+                }
+            }
+
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            if (preview) {
+                preview.remove();
+            }
+            const clearBtn = document.querySelector('.clear-btn[onclick="clearPreview()"]');
+        if (clearBtn) clearBtn.style.display = 'none';
+            if (emptyPreview) {
+                emptyPreview.style.display = 'flex';
+            }
+        }
+    }
+
+    // Инициализация при загрузке страницы
+    document.addEventListener('DOMContentLoaded', function() {
+        const previewInput = document.getElementById('id_previev');
+        if (previewInput) {
+            if (previewInput.files && previewInput.files[0]) {
+                previewImage(previewInput, 'preview');
+            }
+        }
+    });
+</script>
+<!--DELETE-->
+<script>
+    // Функция очистки обложки (cover)
+    function clearCover() {
+        // Сбрасываем input
+        document.getElementById('id_cover').value = '';
+
+        // Удаляем preview-изображение
+        const coverPreview = document.getElementById('cover-preview');
+        if (coverPreview) coverPreview.remove();
+
+        // Показываем placeholder
+        const emptyCover = document.getElementById('empty-cover');
+        if (emptyCover) emptyCover.style.display = 'block';
+
+        // Скрываем кнопку очистки
+        const clearBtn = document.querySelector('.clear-btn[onclick="clearCover()"]');
+        if (clearBtn) clearBtn.style.display = 'none';
+
+        document.getElementById('delete_cover').value = 'true';
+    }
+
+    // Функция очистки превью (previev)
+    function clearPreview() {
+        // Сбрасываем input
+        document.getElementById('id_previev').value = '';
+
+        // Удаляем preview-изображение
+        const previewPreview = document.getElementById('preview-preview');
+        if (previewPreview) previewPreview.remove();
+
+        // Показываем placeholder
+        const emptyPreview = document.getElementById('empty-preview');
+        if (emptyPreview) emptyPreview.style.display = 'block';
+
+        // Скрываем кнопку очистки
+        const clearBtn = document.querySelector('.clear-btn[onclick="clearPreview()"]');
+        if (clearBtn) clearBtn.style.display = 'none';
+        document.getElementById('delete_previev').value = 'true';
+    }
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Проверяем, есть ли текущее изображение для обложки (cover)
+        const coverPreview = document.getElementById('cover-preview');
+        const coverClearBtn = document.querySelector('.clear-btn[onclick="clearCover()"]');
+        if (coverPreview && coverClearBtn) {
+            coverClearBtn.style.display = 'block'; // Показываем кнопку
+        }
+
+        // Проверяем, есть ли текущее изображение для превью (previev)
+        const previewPreview = document.getElementById('preview-preview');
+        const previewClearBtn = document.querySelector('.clear-btn[onclick="clearPreview()"]');
+        if (previewPreview && previewClearBtn) {
+            previewClearBtn.style.display = 'block'; // Показываем кнопку
+        }
+    });
+</script>
+<!--ДОП. ФАЙЛЫ-->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Элементы кастомного алерта
+        const customAlert = document.getElementById('custom-alert');
+        const alertConfirm = document.getElementById('alert-confirm');
+        const alertCancel = document.getElementById('alert-cancel');
+
+        let currentFileToDelete = null;
+        let currentDeleteCallback = null;
+
+        // Показ кастомного алерта
+        function showCustomAlert(callback) {
+            currentDeleteCallback = callback;
+            customAlert.style.display = 'flex';
+        }
+
+        // Скрытие кастомного алерта
+        function hideCustomAlert() {
+            customAlert.style.display = 'none';
+            currentFileToDelete = null;
+            currentDeleteCallback = null;
+        }
+
+        // Обработчики кнопок алерта
+        alertConfirm.addEventListener('click', function() {
+            if (currentDeleteCallback) {
+                currentDeleteCallback();
+            }
+            hideCustomAlert();
+        });
+
+        alertCancel.addEventListener('click', hideCustomAlert);
+
+        // Обработка удаления существующих файлов
+        const deleteButtons = document.querySelectorAll('.delete-file');
+        const deleteFilesInput = document.getElementById('delete_files');
+        let deletedFiles = [];
+
+        function setupDeleteButton(button, deleteCallback) {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                currentFileToDelete = this;
+                showCustomAlert(deleteCallback);
+            });
+        }
+
+        // Для существующих файлов из БД
+        deleteButtons.forEach(button => {
+            setupDeleteButton(button, function() {
+                const fileId = button.dataset.fileId;
+                deletedFiles.push(fileId);
+                deleteFilesInput.value = deletedFiles.join(',');
+                button.closest('.col-md-3').style.display = 'none';
+            });
+        });
+
+        // Предпросмотр выбранных файлов
+        const fileInput = document.querySelector('input[type="file"][name="files"]');
+        const previewContainer = document.getElementById('selected-files-preview');
+
+        fileInput.addEventListener('change', function(e) {
+            previewContainer.innerHTML = ''; // Очищаем предыдущие превью
+
+            // Для каждого выбранного файла
+            Array.from(e.target.files).forEach((file, index) => {
+                const col = document.createElement('div');
+                col.className = 'col-md-3 position-relative mb-3';
+
+                const card = document.createElement('div');
+                card.className = 'card shadow-sm';
+
+                // Проверяем тип файла
+                if (file.type.match('image.*')) {
+                    const img = document.createElement('img');
+                    img.className = 'card-img-top preview-image';
+                    img.style.height = '150px';
+                    img.style.objectFit = 'cover';
+
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        img.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+
+                    card.appendChild(img);
+                } else {
+                    const fileIcon = document.createElement('div');
+                    fileIcon.className = 'text-center py-4';
+
+                    const icon = document.createElement('i');
+                    icon.className = 'fas fa-file fa-3x text-muted';
+
+                    fileIcon.appendChild(icon);
+                    card.appendChild(fileIcon);
+                }
+
+                const cardBody = document.createElement('div');
+                cardBody.className = 'card-body';
+
+                const fileName = document.createElement('small');
+                fileName.className = 'd-block text-truncate mb-2';
+                fileName.textContent = file.name.length > 20 ?
+                    file.name.substring(0, 20) + '...' :
+                    file.name;
+
+                // Кнопка удаления для новых файлов
+                const deleteBtn = document.createElement('button');
+                deleteBtn.type = 'button';
+                deleteBtn.className = 'btn btn-sm btn-outline-danger delete-file d-flex align-items-center justify-content-center';
+                deleteBtn.dataset.fileIndex = index;
+                deleteBtn.innerHTML = '<iconify-icon icon="mdi:trash-outline" class="m-auto"></iconify-icon>';
+
+                // Позиционирование кнопки удаления
+                deleteBtn.style.position = 'absolute';
+                deleteBtn.style.top = '5px';
+                deleteBtn.style.right = '5px';
+                deleteBtn.style.zIndex = '10';
+
+                card.appendChild(deleteBtn);
+                cardBody.appendChild(fileName);
+                card.appendChild(cardBody);
+                col.appendChild(card);
+                previewContainer.appendChild(col);
+
+                // Настройка кнопки удаления для нового файла
+                setupDeleteButton(deleteBtn, function() {
+                    // Удаляем файл из FileList
+                    const dt = new DataTransfer();
+                    Array.from(fileInput.files).forEach((f, i) => {
+                        if (i !== parseInt(deleteBtn.dataset.fileIndex)) {
+                            dt.items.add(f);
+                        }
+                    });
+                    fileInput.files = dt.files;
+
+                    // Обновляем предпросмотр
+                    const event = new Event('change');
+                    fileInput.dispatchEvent(event);
+                });
+            });
+        });
+    });
+</script>
+{% endblock content %}

@@ -1,0 +1,36 @@
+<form method="post" >
+    {% csrf_token %}
+    <div class="row">
+        <div class="single-form col-md-12">
+            {{ form.company_name }}
+        </div>
+        <div class="single-form col-md-12">
+            {{ form.company_director }}
+        </div>
+        <div class="single-form col-md-12">
+            {{ form.company_adress }}
+            {{ form.type }}
+        </div>
+        <div class="single-form col-md-6">
+            {{ form.email }}
+        </div>
+        <div class="single-form col-md-6">
+            {{ form.phone }}
+        </div>
+        <div class="single-form col-md-4">
+            {{ form.company_inn }}
+        </div>
+        <div class="single-form col-md-4">
+            {{ form.company_sku }}
+        </div>
+        <div class="single-form col-md-4">
+            {{ form.categories }}
+        </div>
+        <div class="single-form col-md-12">
+            {{ form.company_description }}
+        </div>
+        <div class="single-form col-md-12">
+            <button type="submit" class="btn btn-primary">{% trans 'Отправить' %}</button>
+        </div>
+    </div>
+</form>

@@ -1,0 +1,169 @@
+{% extends 'site/useraccount/base.html' %}
+{% load i18n %}
+{% load static  %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+{% block content %}
+<!-- Start Container Fluid -->
+
+
+    <!-- ========== Page Title Start ========== -->
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <h4 class="mb-0 fw-semibold">{{ company.name }}</h4>
+            </div>
+        </div>
+    </div>
+    <!-- ========== Page Title End ========== -->
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header border-0">
+                    <div class="row justify-content-between">
+                        <div class="col-lg-6">
+                            <div class="row align-items-center">
+                                <div class="col-lg-6">
+                                    <form class="app-search d-none d-md-block me-auto" method="GET">
+                                        <div class="position-relative">
+                                            <input type="search"
+                                                   class="form-control"
+                                                   name="search"
+                                                   placeholder="Поиск по сотрудникам"
+                                                   autocomplete="off"
+                                                   value="{{ request.GET.search }}">
+                                            <iconify-icon icon="solar:magnifer-broken" class="search-widget-icon"></iconify-icon>
+                                        </div>
+                                    </form>
+
+                                </div>
+                                <div class="col-lg-4">
+                                    <h5 class="text-dark fw-medium mb-0">{{ company.users.count }} <span class="text-muted"> Сотрудников</span></h5>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="text-md-end mt-3 mt-md-0 d-flex">
+                                <a href="{% url 'useraccount:groups_list' %}" style=" height: 40px;" type="button" class="btn btn-outline-primary me-1"><i class="ri-settings-2-line me-1"></i>Группы</a>
+                                <!-- Форма для добавления нового пользователя в компанию -->
+                                <form method="POST" class="mb-3">
+                                    {% csrf_token %}
+                                    <div class="input-group" style="max-width: 400px;">
+                                        <input type="text" name="identifier" class="form-control" placeholder="Username или Email">
+                                        <button class="btn btn-success me-1" type="submit"><i class="ri-add-line"></i> Добавить пользователя</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div><!-- end col-->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table align-middle text-nowrap table-hover table-centered mb-0">
+                            <thead class="bg-light-subtle">
+                            <tr>
+                                <th>Фото и имя</th>
+                                <th>Логин</th>
+                                <th>Email</th>
+                                <th>Телефон</th>
+                                <th>Группа</th>
+                                <th>Действие</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for user in page_obj %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div>
+                                            <img src="{{user.avatar.url}}" alt="" class="avatar-sm rounded-circle">
+                                        </div>
+                                        <div>
+                                            <a href="agents-list.html#!" class="text-dark fw-medium fs-15">{{user.last_name}} {{user.first_name}}</a>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>@{{user.username}}</td>
+                                <td>{{user.email}}</td>
+                                <td>{{user.phone}}</td>
+                                <td>
+                                    {% comment %}
+                                    user.grouppersonal.all вернёт все PersonalGroups, в которых состоит пользователь,
+                                    но нам нужно убедиться, что группа относится именно к этой компании.
+                                    {% endcomment %}
+                                        {% for group in user.grouppersonal.all %}
+                                        {% if group.company == company %}
+                                        {{ group.name }}, 
+                                        {% endif %}
+                                        {% endfor %}
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <form method="POST" style="display:inline;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="remove_user_id" value="{{ user.id }}">
+                                            <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- end table-responsive -->
+                </div>
+                <div class="card-footer">
+                    <nav>
+                        <ul class="pagination">
+                            {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Назад</a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled"><span class="page-link">Назад</span></li>
+                            {% endif %}
+                            {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                            {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                            {% endfor %}
+                            {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Вперёд</a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled"><span class="page-link">Вперёд</span></li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+
+            </div>
+        </div>
+        <!-- Форма добавления пользователя -->
+
+
+
+    </div>
+
+
+<!-- End Container Fluid -->
+
+{% endblock content %}

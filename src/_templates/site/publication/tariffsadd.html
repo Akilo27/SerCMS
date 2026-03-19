@@ -1,0 +1,94 @@
+{% extends 'site/useraccount/base.html' %}
+{% load i18n %}
+{% load static  %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+
+{% endblock head %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-xxl-11">
+        <div class="text-center my-4">
+            <h3>Простые тарифные планы</h3>
+            <p class="text-muted text-center">
+                Получите больше внимание к вашему объявлению, привлеките больше клиентов.
+            </p>
+        </div>
+        <div class="row justify-content-center pt-3">
+            <div class="col-lg-3">
+                <div class="card card-pricing">
+                    <div class="card-body rounded-top text-center bg-gradient bg-primary">
+                        <h5 class="mt-0 mb-3 fs-14 text-uppercase fw-semibold text-white">{{settings.tarife_name_1}}</h5>
+                        <h2 class="mt-0 mb-0 fw-bold text-white">{{settings.tarife_price_1}} <span class="fs-14 fw-medium text-white text-opacity-50">/ {{settings.tarife_days_1}}</span></h2>
+                    </div>
+                    <div class="card-body pt-0">
+                        <p class="m-2">
+                            {{settings.tarife_description_1}}
+                        </p>
+                        <div class="mt-4 text-center">
+                            <button class="btn btn-primary px-sm-4 w-100">Оплатить</button>
+                        </div>
+                    </div> <!-- end card body -->
+                </div> <!-- end card -->
+            </div> <!-- end col -->
+            <div class="col-lg-3">
+                <div class="card card-pricing">
+                    <div class="card-body rounded-top text-center bg-gradient bg-primary">
+                        <div class="pricing-ribbon pricing-ribbon-primary float-end">Популярный</div>
+                        <h5 class="mt-0 mb-3 fs-14 text-uppercase fw-semibold text-white">{{settings.tarife_name_2}}</h5>
+                        <h2 class="mt-0 mb-0 fw-bold text-white">{{settings.tarife_price_2}} <span class="fs-14 fw-medium text-white text-opacity-50">/ {{settings.tarife_days_2}}</span></h2>
+                    </div>
+                    <div class="card-body pt-0">
+                        <p class="m-2">
+                            {{settings.tarife_description_2}}
+                        </p>
+                        <div class="mt-4 text-center">
+                            <button class="btn btn-primary px-sm-4 w-100">Оплатить</button>
+                        </div>
+                    </div> <!-- end card body -->
+                </div> <!-- end card -->
+            </div> <!-- end col -->
+            <div class="col-lg-3">
+                <div class="card card-pricing">
+                    <div class="card-body rounded-top text-center bg-gradient bg-primary">
+                        <h5 class="mt-0 mb-3 fs-14 text-uppercase fw-semibold text-white">{{settings.tarife_name_3}}</h5>
+                        <h2 class="mt-0 mb-0 fw-bold text-white">{{settings.tarife_price_3}} <span class="fs-14 fw-medium text-white text-opacity-50">/ {{settings.tarife_days_3}}</span></h2>
+                    </div>
+                    <div class="card-body pt-0">
+                        <p class="m-2">
+                            {{settings.tarife_description_3}}
+                        </p>
+
+                        <div class="mt-4 text-center">
+                            <button class="btn btn-primary px-sm-4 w-100">Оплатить</button>
+                        </div>
+                    </div> <!-- end card body -->
+                </div> <!-- end card -->
+            </div> <!-- end col -->
+            <div class="col-lg-3">
+                <div class="card card-pricing">
+                    <div class="card-body rounded-top text-center bg-gradient bg-primary">
+                        <h5 class="mt-0 mb-3 fs-14 text-uppercase fw-semibold text-white">{{settings.tarife_name_4}}</h5>
+                        <h2 class="mt-0 mb-0 fw-bold text-white">{{settings.tarife_price_4}} <span class="fs-14 fw-medium text-white text-opacity-50">/ {{settings.tarife_days_4}}</span></h2>
+                    </div>
+                    <div class="card-body pt-0">
+                        <p class="m-2">
+                            {{settings.tarife_description_4}}
+                        </p>
+
+                        <div class="mt-4 text-center">
+                            <button class="btn btn-primary px-sm-4 w-100">Оплатить</button>
+                        </div>
+                    </div> <!-- end card body -->
+                </div> <!-- end card -->
+            </div> <!-- end col -->
+        </div> <!-- end row -->
+    </div> <!-- end col -->
+</div> <!-- end row -->
+
+{% endblock content %}

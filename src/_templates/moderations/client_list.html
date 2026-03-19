@@ -1,0 +1,208 @@
+{% extends 'moderations/base.html' %}
+{% load i18n %}
+{% load static  %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+{% endblock head %}
+
+{% block content %}
+<!-- Add Project -->
+<div class="container-fluid group-data-[content=boxed]:max-w-boxed mx-auto">
+    <div class="d-flex row">
+        <div class="col-9">
+            <h5 class="text-16">{% trans 'Поиск по имени клиента' %}</h5>
+            <form method="GET" action="{% url 'moderation:clients_list' %}" class="mb-5">
+                {% csrf_token %}
+                    <div class="relative ">
+                        <input
+                                type="text"
+                                name="q"
+                                id="user-search"
+                                value="{{ request.GET.q }}"
+                                class=" search form-input form-control"
+                                placeholder="{% trans 'Поиск по ФИО' %}..."
+                                autocomplete="off">
+                        <i data-lucide="search" class="inline-block size-4 absolute ltr:left-2.5 rtl:right-2.5 top-2.5 text-slate-500 dark:text-zink-200 fill-slate-100 dark:fill-zink-600"></i>
+                    </div>
+            </form>
+        </div>
+        <div class="col-3 text-end pt-4">
+            <a href="{% url 'moderation:create_client' %}" data-modal-target="addUserModal" type="button" class="btn btn-primary light px-3">
+                <i data-lucide="plus" class="inline-block size-4"></i>
+                <span class="align-middle">{% trans 'Добавить' %}</span>
+            </a>
+        </div>
+    </div>
+    <div id="user-list">
+        {% include 'moderations/client_list_partial.html' %}
+    </div>
+    <div class="flex flex-col items-center mb-5 md:flex-row">
+        <div class="mb-4 grow md:mb-0">
+        </div>
+        {% include 'moderations/include/paginations.html' with items=users %}
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        function attachPopupHandlers() {
+            $('[data-popup-open]').off('click').on('click', function () {
+                const popupId = $(this).data('popup-open');
+                const userId = $(this).data('user-id');
+                const popup = $(`[data-popup="${popupId}"]`);
+                const iframe = popup.find('iframe');
+
+                iframe.attr('src', `/user-detail/${userId}/`);
+                popup.removeClass('hidden').attr('data-user-id', userId);
+            });
+
+            $('[data-popup-close]').off('click').on('click', function () {
+                const popupId = $(this).data('popup-close');
+                const popup = $(`[data-popup="${popupId}"]`);
+
+                popup.addClass('hidden');
+            });
+        }
+
+        function initDropdowns() {
+            // Инициализация Bootstrap dropdown
+            document.querySelectorAll('.dropdown-toggle').forEach(function (dropdown) {
+                if (!dropdown.classList.contains('bs-dropdown-initialized')) {
+                    new bootstrap.Dropdown(dropdown);
+                    dropdown.classList.add('bs-dropdown-initialized'); // Добавляем флаг, чтобы избежать повторной инициализации
+                }
+            });
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        const csrftoken = getCookie('csrftoken');
+
+        let timer = null;
+
+        $('#user-search').on('input', function () {
+            clearTimeout(timer);
+
+            const query = $(this).val();
+
+            timer = setTimeout(function () {
+                $.ajax({
+                    url: "{% url 'moderation:clients_list' %}",
+                    type: 'GET',
+                    data: {
+                        'q': query
+                    },
+                    dataType: 'json',
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    },
+                    success: function (data) {
+                        if (data.html) {
+                            $('#user-list').html(data.html);
+                            attachPopupHandlers();
+                            initDropdowns();
+
+                            $('#user-list .dropdown-menu').removeClass('hidden').addClass('block');// Повторная привязка событий после обновления списка
+                        } else {
+                            console.warn('No HTML data returned.');
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error:', error);
+                    }
+                });
+            }, 200); // Задержка перед отправкой запроса
+        });
+
+        // Первичная привязка событий
+        attachPopupHandlers();
+        initDropdowns();
+
+        // Закрытие попапа при клике вне его области
+        document.addEventListener('click', function (event) {
+            const openPopup = document.querySelector('.fixed[data-popup]:not(.hidden)');
+            if (openPopup) {
+                const popupContent = openPopup.querySelector('.bg-white');
+                if (!popupContent.contains(event.target) && !event.target.closest('[data-popup-open]')) {
+                    openPopup.classList.add('hidden');
+                }
+            }
+        });
+
+        // Закрытие попапа при нажатии клавиши Escape
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                const openPopup = document.querySelector('.fixed[data-popup]:not(.hidden)');
+                if (openPopup) {
+                    openPopup.classList.add('hidden');
+                }
+            }
+        });
+    });
+
+</script>
+<script>
+    function toggleDropdown(event) {
+        event.stopPropagation(); // Предотвращаем всплытие события
+        const dropdownMenu = document.getElementById('dropdownMenu');
+        if (dropdownMenu.classList.contains('hidden')) {
+            dropdownMenu.classList.remove('hidden');
+            dropdownMenu.classList.add('block');
+        } else {
+            dropdownMenu.classList.remove('block');
+            dropdownMenu.classList.add('hidden');
+        }
+    }
+
+    // Закрытие выпадающего меню при клике вне его области
+    document.addEventListener('click', function(event) {
+        const dropdownMenu = document.getElementById('dropdownMenu');
+        if (!dropdownMenu.contains(event.target) && !document.getElementById('userGridDropdown12').contains(event.target)) {
+            dropdownMenu.classList.remove('block');
+            dropdownMenu.classList.add('hidden');
+        }
+    });
+
+    // Обработчик события клика для кнопки
+    document.getElementById('userGridDropdown12').addEventListener('click', toggleDropdown);
+
+    // Функция для инициализации иконок и выпадающего меню после успешного выполнения AJAX
+    function initializeDropdown() {
+        // Перезапуск скриптов, связанных с выпадающим меню
+        document.getElementById('userGridDropdown12').addEventListener('click', toggleDropdown);
+
+        // Здесь можете добавить другие инициализации или обновления
+    }
+
+    // Пример функции, которая вызывается после успешного выполнения AJAX
+    function handleAjaxSuccess(response) {
+        // Обновляем содержимое списка
+        document.getElementById('user-list').innerHTML = response;
+
+        // Инициализируем обновленные элементы
+        initializeDropdown();
+    }
+</script>
+{% endblock content %}
+{% block footer_extra %}
+
+{% endblock footer_extra %}

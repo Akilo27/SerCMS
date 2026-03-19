@@ -1,0 +1,559 @@
+{% extends 'moderations/base.html' %}
+{% load static user_tags i18n %}
+{% block title %}Переска с {{ other_user.username }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<style>
+    ul#messages-container {
+        overflow-y: scroll;
+        min-height: calc(100vh - 364px)!important;
+    }
+    div#chat-list-json {
+        overflow-y: scroll;
+        max-height: calc(100vh - 310px);
+    }
+
+    .chatbox-height {
+        max-height: calc(100vh - 364px);
+
+    }
+</style>
+<link href="https://unpkg.com/@joeattardi/emoji-button@4.6.0/dist/index.css" rel="stylesheet">
+
+{% endblock head %}
+{% block content %}
+<div class="row g-1">
+    <div class="col-xxl-3">
+        {% include 'site/chat/chat_list_include.html' %}
+    </div> <!-- end col -->
+    <div class="col-xxl-9">
+        <div class="card position-relative overflow-hidden">
+
+            <div class="card-header d-flex align-items-center mh-100 bg-light-subtle">
+                <button class="btn btn-light d-xxl-none d-flex align-items-center px-2 me-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#Contactoffcanvas" aria-controls="Contactoffcanvas">
+                    <i class="ri-menu-line fs-18"></i>
+                </button>
+
+                <div class="d-flex align-items-center">
+                    <img src="{{ other_user.avatar.url }}" class="me-2 rounded" height="36" alt="avatar-4" />
+                    <div class="d-none d-md-flex flex-column">
+                        <h5 class="my-0 fs-16 fw-semibold">
+                            <a data-bs-toggle="offcanvas" href="messages.html#user-profile" class="text-dark">
+                                {{ other_user.username }}
+                            </a>
+                        </h5>
+                    </div>
+                </div>
+
+                <div class="flex-grow-1">
+                    <ul class="list-inline float-end d-flex gap-1 mb-0 align-items-center">
+
+                        <li class="list-inline-item fs-20 dropdown">
+                            <a data-bs-toggle="offcanvas" href="messages.html#user-profile" class="btn btn-light avatar-sm d-flex align-items-center justify-content-center text-dark fs-20">
+                                <iconify-icon icon="solar:user-bold-duotone"></iconify-icon>
+                            </a>
+                        </li>
+
+                    </ul>
+                </div>
+            </div>
+
+            <div class="chat-box">
+
+                <ul class="chat-conversation-list p-3 chatbox-height"  id="messages-container"> </ul> <!-- end chat-conversation-list -->
+                <div class="bg-light bg-opacity-50 p-2">
+                    <form class="needs-validation" name="message-form" id="chat-form">
+                        <div class="row align-items-center">
+                            <div class="col mb-2 mb-sm-0 d-flex">
+                                <div class="input-group">
+                                    <input type="hidden" id="chat-id" value="{{ chat.id }}">
+                                    <div class="emoji-picker-container"></div>
+
+                                    <!-- Кнопка для смайликов -->
+                                    <span type="button" id="emoji-button" class="btn btn-sm btn-primary rounded-start d-flex align-items-center input-group-text">
+                                        <i class="ri-emotion-line fs-18"></i>
+                                    </span>
+
+                                    <input type="text" id="message-content" class="form-control border-0" placeholder="Введите сообщение ...">
+                                </div>
+                            </div>
+                            <div class="col-sm-auto">
+                                <div class="d-flex gap-2">
+                                    <label for="message-files" class="btn btn-soft-success btn-sm">
+                                        <i class="ri-attachment-2 fs-18"></i>
+                                    </label>
+                                    <input type="file" class="form-control d-none" id="message-files" multiple>
+                                    <a href="messages.html#!" class="btn btn-soft-warning btn-sm d-none">
+                                        <i class="ri-video-on-line fs-18"></i>
+                                    </a>
+                                    <button type="submit" id="send-message" class="btn btn-primary btn-sm chat-send">
+                                        <i class="ri-send-plane-2-line fs-18"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+            <!-- Profile Start -->
+            <div class="offcanvas offcanvas-end position-absolute shadow border-start" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="user-profile" aria-labelledby="user-profileLabel">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title text-truncate w-50" id="user-profileLabel">Переписка</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body p-0 h-100" data-simplebar>
+                    <div class="p-3">
+                        <div class="text-center">
+                            <img src="{{ other_user.avatar.url }}" alt="shreyu" class="img-thumbnail avatar-lg rounded-circle mb-1">
+                            <h4>{{ other_user.username }}</h4>
+                        </div>
+                        <ul class="nav nav-pills chat-tab-pills nav-justified p-1 rounded mx-1">
+                            <li class="nav-item">
+                                <a href="#link" data-bs-toggle="tab" aria-expanded="false" class="nav-link active">
+                                    <i class='bx bx-link'></i>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#file-doc" data-bs-toggle="tab" aria-expanded="true" class="nav-link">
+                                    <i class='bx bxs-file-doc'></i>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#image" data-bs-toggle="tab" aria-expanded="true" class="nav-link">
+                                    <i class='bx bx-image-alt'></i>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#videos" data-bs-toggle="tab" aria-expanded="true" class="nav-link">
+                                    <i class='bx bxs-videos'></i>
+                                </a>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane show active" id="link">
+                                <h5 class="mt-3">
+                                    <a href="javascript:void(0);" class="my-0">
+                                        <span class="float-end">Все</span>
+                                        Общие ссылке
+                                    </a>
+                                </h5>
+                            </div>
+
+                            <div class="tab-pane" id="file-doc">
+                                <h5 class="mt-3">
+                                    <a href="javascript:void(0);" class="my-0">
+                                        <span class="float-end">Все</span>
+                                        Общие документы
+                                    </a>
+                                </h5>
+
+                            </div>
+                            <div class="tab-pane" id="image">
+                                <h5 class="mt-3">
+                                    <a href="javascript:void(0);" class="my-0">
+                                        <span class="float-end">Все</span>
+                                        Общие изображения
+                                    </a>
+                                </h5>
+
+                                <div class="row gx-1 pt-2">
+                                    <div class="col-4">
+                                        <a href="javascript:void(0);">
+                                            <img src="assets/images/small/img-1.jpg" alt="img-1" class="img-fluid rounded">
+                                        </a>
+                                    </div>
+                                    <div class="col-4">
+                                        <a href="javascript:void(0);">
+                                            <img src="assets/images/small/img-2.jpg" alt="img-2" class="img-fluid rounded">
+                                        </a>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="position-relative overflow-hidden rounded">
+                                            <a href="javascript:void(0);">
+                                                <img src="assets/images/small/img-3.jpg" alt="img-3" class="img-fluid rounded">
+                                                <div class="bg-overlay bg-dark"></div>
+                                                <h3 class="position-absolute top-50 start-50 translate-middle my-0 text-white">+3</h3>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="tab-pane" id="videos">
+                                <h5 class="mt-3">
+                                    <a href="javascript:void(0);" class="my-0">
+                                        <span class="float-end">Все</span>
+                                        Общие видео
+                                    </a>
+                                </h5>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <!-- Profile End -->
+
+        </div> <!-- end card -->
+    </div> <!-- end col -->
+</div>
+
+{% endblock content %}
+{% block footertop %}
+
+{% endblock footertop %}
+{% block footerbottom %}
+<script>
+    const chatMessagesLoader = {
+        currentPage: 1,
+        hasNext: true,
+        isLoading: false,
+
+        formatTime(date) {
+            return new Intl.DateTimeFormat("en-US", {
+                hour: "numeric",
+                minute: "numeric",
+                hour12: true,
+            }).format(new Date(date));
+        },
+
+        createMessageHTML({ author, content, date, isCurrentUser, files = [] }) {
+            const time = this.formatTime(date);
+            const avatar = author.avatar || '/static/images/default-avatar.png';
+
+            let filesHTML = '';
+            if (files.length > 0) {
+                const imageFiles = files.filter(file => file.is_image);
+                const otherFiles = files.filter(file => !file.is_image);
+
+                if (imageFiles.length > 0) {
+                    filesHTML += `<div class="chat-ctext-wrap mt-2">`;
+                    imageFiles.forEach(file => {
+                        filesHTML += `
+                            <a href="${file.url}" target="_blank">
+                                <img src="${file.url}" alt="${escapeHTML(file.filename)}" style="height: 84px;" class="img-thumbnail me-1">
+                            </a>`;
+                    });
+                    filesHTML += `</div>`;
+                }
+
+                if (otherFiles.length > 0) {
+                    filesHTML += `<div class="chat-ctext-wrap mt-2">`;
+                    otherFiles.forEach(file => {
+                        filesHTML += `
+                            <div class="d-flex align-items-center gap-1">
+                                <i class="ri-file-2-fill fs-24 text-success me-2"></i>
+                                <div>
+                                    <a href="${file.url}" target="_blank" class="text-dark fw-medium">${escapeHTML(file.filename)}</a>
+                                </div>
+                            </div>`;
+                    });
+                    filesHTML += `</div>`;
+                }
+            }
+
+            return `
+            <li class="d-flex ${isCurrentUser ? 'justify-content-end' : ''} gap-2 clearfix ${isCurrentUser ? 'odd' : ''}">
+                ${!isCurrentUser ? `
+                <div class="chat-avatar text-center">
+                    <img src="${avatar}" alt="User Avatar" class="avatar rounded-circle">
+                </div>` : ''}
+
+                <div class="chat-conversation-text ${isCurrentUser ? 'ms-0 text-end' : ''}">
+                    <div>
+                        <p class="mb-2">
+                            ${isCurrentUser ? '' : `<span class="text-dark fw-medium me-1">${escapeHTML(author.username)}</span>`}
+                            ${time}
+                        </p>
+                    </div>
+                    <div class="d-flex align-items-start ${isCurrentUser ? 'justify-content-end' : ''}">
+                        <div class="chat-ctext-wrap">
+                            <p>${escapeHTML(content)}</p>
+                            ${filesHTML} <!-- Добавляем прикрепленные файлы -->
+                        </div>
+                    </div>
+                </div>
+
+                ${isCurrentUser ? `
+                <div class="chat-avatar text-center">
+                    <img src="${avatar}" alt="User Avatar" class="avatar rounded-circle">
+                </div>` : ''}
+            </li>`;
+        },
+
+        loadMessages(initialLoad = false) {
+            if (!this.hasNext || this.isLoading) return;
+
+            this.isLoading = true;
+
+            const chatId = document.getElementById('chat-id').value;
+            const messagesContainer = document.getElementById('messages-container');
+            const previousScrollHeight = messagesContainer.scrollHeight;
+
+            fetch(`/chat/chats/${chatId}/messages/?page=${this.currentPage}`)
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        data.messages.forEach(message => {
+                            const messageHTML = this.createMessageHTML({
+                                author: message.author,
+                                content: message.content,
+                                date: message.date,
+                                isCurrentUser: message.is_current_user,
+                                files: message.files,
+                            });
+
+                            messagesContainer.insertAdjacentHTML('afterbegin', messageHTML);
+                        });
+
+                        this.hasNext = data.has_next;
+                        this.currentPage++;
+
+                        if (initialLoad) {
+                            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                        } else {
+                            messagesContainer.scrollTop = messagesContainer.scrollHeight - previousScrollHeight;
+                        }
+                    } else {
+                        alert('Ошибка загрузки сообщений.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка загрузки сообщений:', error);
+                })
+                .finally(() => {
+                    this.isLoading = false;
+                });
+        }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const messagesContainer = document.getElementById('messages-container');
+
+        chatMessagesLoader.loadMessages(true);
+
+        messagesContainer.addEventListener('scroll', () => {
+            if (messagesContainer.scrollTop <= 50 && chatMessagesLoader.hasNext && !chatMessagesLoader.isLoading) {
+                chatMessagesLoader.loadMessages();
+            }
+        });
+    });
+</script>
+
+
+
+
+<script>
+    // Функция для получения CSRF-токена
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Функция для экранирования HTML (XSS защита)
+    function escapeHTML(str) {
+        const div = document.createElement('div');
+        div.innerText = str;
+        return div.innerHTML;
+    }
+
+    // Функция для форматирования времени
+    function formatTime(date) {
+        return new Intl.DateTimeFormat("en-US", {
+            hour: "numeric",
+            minute: "numeric",
+            hour12: true,
+        }).format(new Date(date));
+    }
+
+    // Функция для создания HTML исходящего сообщения
+    function createOutgoingMessageHTML({ username, avatar, content, date, images = [], files = [] }) {
+        const time = formatTime(date);
+
+        // HTML для изображений
+        const imagesHTML = images
+            .map(image => `<a href="${image}" target="_blank"><img src="${image}" alt="attachment" style="height: 84px;" class="img-thumbnail me-1"></a>`)
+            .join('');
+
+        // HTML для файлов
+        const filesHTML = files
+            .map(file => `
+            <div class="d-flex align-items-center gap-2">
+                <i class="ri-file-2-fill fs-24 text-success"></i>
+                <div>
+                    <a href="${file.url}" target="_blank" class="text-dark">${escapeHTML(file.name)}</a>
+                    <p class="mb-0">${file.size}</p>
+                </div>
+            </div>`)
+            .join('');
+
+        return `
+        <li class="d-flex justify-content-end gap-2 clearfix odd">
+            <div class="chat-conversation-text ms-0">
+                <div>
+                    <p class="mb-2">${time} <span class="text-dark fw-medium ms-1">${escapeHTML(username)}</span></p>
+                </div>
+                <div class="d-flex justify-content-end">
+                    <div class="chat-ctext-wrap">
+                        <p>${escapeHTML(content)}</p>
+                        <div>${imagesHTML}</div>
+                        <div>${filesHTML}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="chat-avatar text-center">
+                <img src="${avatar}" alt="User Avatar" class="avatar rounded-circle">
+            </div>
+        </li>`;
+    }
+
+    // Обработчик отправки сообщения
+    document.getElementById('send-message').addEventListener('click', function () {
+        const chatId = document.getElementById('chat-id').value;
+        const content = document.getElementById('message-content').value.trim();
+        const files = document.getElementById('message-files').files;
+
+        if (!content && files.length === 0) {
+            alert('Введите сообщение или прикрепите файл.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('chat', chatId);
+        formData.append('content', content);
+
+        const images = [];
+        const fileList = [];
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            formData.append('files', file);
+
+            if (file.type.startsWith('image/')) {
+                images.push(URL.createObjectURL(file));
+            } else {
+                fileList.push({ name: file.name, size: `${(file.size / 1024 / 1024).toFixed(2)} MB` });
+            }
+        }
+
+        const sendButton = document.getElementById('send-message');
+        sendButton.disabled = true;
+
+        fetch('/chat/create-message/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Ошибка HTTP: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    const myAvatarElement = document.getElementById('my-user-avatar');
+                    const myAvatar = myAvatarElement.getAttribute('src');
+                    const myUsername = myAvatarElement.getAttribute('data-username');
+
+                    const messagesContainer = document.getElementById('messages-container');
+                    const newMessageHTML = createOutgoingMessageHTML({
+                        username: myUsername,
+                        avatar: myAvatar,
+                        content: content,
+                        date: new Date().toISOString(),
+                        images: images,
+                        files: fileList,
+                    });
+
+                    messagesContainer.insertAdjacentHTML('beforeend', newMessageHTML);
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+                    document.getElementById('message-content').value = '';
+                    document.getElementById('message-files').value = '';
+                } else {
+                    alert('Ошибка: ' + (data.errors ? JSON.stringify(data.errors) : 'Неизвестная ошибка.'));
+                }
+            })
+            .catch(error => {
+                alert('Ошибка отправки: ' + error.message);
+            })
+            .finally(() => {
+                sendButton.disabled = false;
+            });
+    });
+
+</script>
+<script type="module">
+    import('https://unpkg.com/@joeattardi/emoji-button@4.6.0/dist/index.js').then(({ EmojiButton }) => {
+        // Создание объекта пикера эмодзи
+        const picker1 = new EmojiButton({
+            showPreview: false,        // Отключаем предварительный просмотр
+            position: 'top-start',     // Позиция отображения пикера относительно кнопки
+            emojiVersion: '11.0',      // Версия эмодзи
+            zIndex: 0,                // Позиция слоя (z-index)
+            emojiSize: '2em',         // Размер эмодзи
+            emojisPerRow: 8,          // Количество эмодзи на строку
+            rows: 5,                  // Количество строк
+            rootElement: document.querySelector(".emoji-picker-container") // Контейнер для пикера
+        });
+
+        // Обработчик выбора эмодзи
+        picker1.on('emoji', selection => {
+            const messageContent = document.querySelector("#message-content");
+            messageContent.value += selection.emoji; // Вставляем эмодзи в поле ввода
+        });
+
+        // Открытие/закрытие пикера при клике на кнопку эмодзи
+        const button = document.querySelector("#emoji-button");
+        button.addEventListener('click', () => {
+            picker1.togglePicker(button); // Показываем/скрываем пикер при клике на кнопку
+        });
+
+        // Отключаем стандартное поведение отправки формы
+        const chatForm = document.querySelector("#chat-form");
+        chatForm.addEventListener('submit', (event) => {
+            event.preventDefault();  // Предотвращаем перезагрузку страницы
+        });
+
+        // Кнопка отправки не вызывает отправку формы
+        const sendButton = document.querySelector("#send-message");
+        sendButton.addEventListener('click', (event) => {
+            event.preventDefault();  // Останавливаем стандартное поведение кнопки
+            // Логика для дальнейших действий (например, очистить поле ввода)
+            console.log("Сообщение:", document.querySelector("#message-content").value);
+            document.querySelector("#message-content").value = ""; // Очистка поля ввода
+        });
+    });
+</script>
+
+
+
+
+
+<!-- Page Js -->
+<script src="{#% static 'site/moderations/assets/js/pages/app-chat.js' %#}"></script>
+
+{% endblock footerbottom %}

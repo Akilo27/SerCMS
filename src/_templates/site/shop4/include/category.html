@@ -1,0 +1,124 @@
+{% load static shop_tags generals_tag i18n %}
+<style>
+    .hidden {
+        display: none;
+    }
+    .show {
+        display: block;
+        position: absolute;
+        z-index: 1000;
+        background: white;
+    }
+</style>
+
+{% block content %}
+{% get_categories_without_parent as categories %}
+<div class="category-body d-xl-show">
+    <div class="categorys-wrapper d-flex pt-4">
+        {% for category in categories %}
+        <div class="category category-ellipse category-group" data-category-id="{{ category.id }}">
+            <figure class="category-media" style="width: 120px; justify-self: center; padding: 10px;">
+                <a href="{% url 'shop:categories' category.slug %}" data-category-id="{{ category.id }}">
+                    {% if category.image %}
+                    <img src="{{ category.image.url }}" alt=" {{ category.name }}" style="width:220px; "/>
+                    {% else %}
+                    <span class="icon-box-icon mb-0 text-white"> <i class="w-icon-hamburger"></i> </span>
+                    {% endif %}
+                </a>
+            </figure>
+            <div class="category-content">
+                <h4 class="category-name">
+                    <a href="{% url 'shop:categories' category.slug %}"> {{ category.name }}</a>
+                </h4>
+            </div>
+        </div>
+        {% endfor %}
+        <div class="category category-ellipse " style="display:none;">
+            <div class="icon-box icon-colored-circle" style="justify-self: center;">
+                <span class="icon-box-icon mb-0 text-white"> <i class="w-icon-hamburger"></i> </span>
+            </div>
+            <div class="category-content">
+                <h4 class="category-name">
+                    <a href="demo12-shop.html">{% trans 'Категории' %}</a>
+                </h4>
+            </div>
+        </div>
+    </div>
+
+    {% for category in categories %}
+    <li class="hidden" data-category-show-id="{{ category.id }}" style=" width: 100%; ">
+        <ul class="megamenu type2" style="display: block;     width: 100%;">
+            <li class="row">
+                {% if category.children.all %}
+                <div class="col-xl-8 mt-5">
+                    <h4 class="menu-title">{{ category.name }}</h4>
+                    <hr class="divider" />
+                    <ul>
+                        {% for child in category.children.all %}
+                        <li><a href="{% url 'shop:categories' child.slug %}">{{ child.name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                {#% for banner in category.children.all %#}
+                <div class="col-xl-4 mt-5 d-none">
+                    <div class="menu-banner banner-fixed menu-banner3">
+                        <figure>
+                            <img src="{% static 'site/wolmart/assets/images/menu/banner-2.jpg' %}" alt="Menu Banner" width="235" height="461" />
+                        </figure>
+                        <div class="banner-content">
+                            <h4 class="banner-subtitle font-weight-normal text-white mb-1">{% trans 'На категорию' %}</h4>
+                            <h3 class="banner-title font-weight-bolder text-white ls-normal">{% trans 'с меткой' %}</h3>
+                            <div class="banner-price-info text-white font-weight-normal ls-25">
+                                {% trans 'Скидка' %}
+                                <span class="text-secondary text-uppercase font-weight-bold">25% </span>
+                            </div>
+                            <a href="/catalog/" class="btn btn-white btn-link btn-sm btn-slide-right btn-icon-right">
+                                {% trans 'Каталог' %}<i class="w-icon-long-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {#% endfor %#}
+            </li>
+        </ul>
+    </li>
+    {% endfor %}
+</div>
+{% endblock content %}
+
+{% block footer %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const categoryBody = document.querySelector('.category-body');
+        const categories = document.querySelectorAll("[data-category-id]");
+        let activeSubmenu = null;
+
+        categories.forEach(category => {
+            const categoryId = category.getAttribute("data-category-id");
+            const submenu = document.querySelector(`[data-category-show-id="${categoryId}"]`);
+
+            if (!submenu) return;
+
+            category.addEventListener("mouseenter", () => {
+                if (activeSubmenu && activeSubmenu !== submenu) {
+                    activeSubmenu.classList.remove("show");
+                    activeSubmenu.classList.add("hidden");
+                }
+                submenu.classList.remove("hidden");
+                submenu.classList.add("show");
+                activeSubmenu = submenu;
+            });
+        });
+
+        // Отслеживаем уход мышки за пределы .category-body
+        categoryBody.addEventListener("mouseleave", () => {
+            if (activeSubmenu) {
+                activeSubmenu.classList.remove("show");
+                activeSubmenu.classList.add("hidden");
+                activeSubmenu = null;
+            }
+        });
+    });
+</script>
+{% endblock footer %}

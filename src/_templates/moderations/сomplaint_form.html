@@ -1,0 +1,80 @@
+{% extends 'moderations/base.html' %}
+{% load i18n %}
+{% load static  %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+{% endblock head %}
+
+{% block content %}
+
+
+<form method="post" class="needs-validation" novalidate>
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-sm-3">
+            <h6 class="mb-2" style="width: max-content">{% trans "Статус" %}</h6>
+        </div>
+        <div class="mb-3">
+            {{ form.type }}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-3">
+            <h6 class="mb-2" style="width: max-content">{% trans "Автор" %}</h6>
+        </div>
+        <div class="mb-3">
+            {{ form.author }}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-3">
+            <h6 class="mb-2" style="width: max-content">{% trans "Описание" %}</h6>
+        </div>
+        <div class="mb-3">
+            {{ form.description }}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-3">
+            <h6 class="mb-2" style="width: max-content">{% trans "Продукт" %}</h6>
+        </div>
+        <div class="mb-3">
+            {{ form.products }}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-3">
+            <h6 class="mb-2" style="width: max-content">{% trans "Объект" %}</h6>
+        </div>
+        <div class="mb-3">
+            {{ form.advertisement }}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-3">
+            <h6 class="mb-2" style="width: max-content">{% trans "Чат (если есть)" %}</h6>
+        </div>
+        <div class="mb-3">
+            {{ form.chat }}
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Сохранить</button>
+    <a href="{% url 'moderation:complaints' %}" class="btn btn-secondary">Отмена</a>
+</form>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll("form input, form select, form textarea").forEach(function (element) {
+        if (!element.classList.contains("form-control")) {
+            element.classList.add("form-control");
+        }
+    });
+});
+
+</script>
+{% endblock content %}

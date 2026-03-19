@@ -1,0 +1,154 @@
+{% load static shop_tags generals_tag %}
+{% get_categories_without_parent as categories %}
+<style>
+    .category-dropdown > a
+     {
+        background: none;
+    }
+    .category-dropdown:hover > a, .category-dropdown.show > a  {
+        background: none !important;
+    }
+
+    .category-dropdown.has-border .category-toggle {
+    border-left: 0;
+    border-right: 0;
+    }
+
+    .category-dropdown > a::after {
+    content: '';
+    }
+
+    .w-icon-bars:before {
+        font-size: 31px;
+    }
+
+    .category-menu li:hover  > a:not(.menu-title) {
+    color: #74BBC6 ;
+    }
+
+    .category-menu li.etem-category > a:hover {
+        color: white !important;
+    }
+    .category_a {
+        color: white !important;
+    }
+
+    .dropdown a,
+    .category-dropdown a {
+      text-decoration: none !important; /* Убираем underline */
+      outline: none; /* Убираем контур при фокусе */
+    }
+
+    /* Дополнительно, чтобы убрать любые эффекты при нажатии */
+    .dropdown a:active,
+    .category-dropdown a:active,
+    .dropdown a:focus,
+    .category-dropdown a:focus {
+      outline: none;
+      text-decoration: none !important;
+    }
+
+
+    @media (max-width: 768px ) {
+    .vertical-menu > li:hover > ul, .vertical-menu > li:hover .megamenu, .vertical-menu > li.active > ul, .vertical-menu > li.active .megamenu {
+    left: -10%;
+    }
+    .toggle_txt {
+        display: none !important;
+    }
+    }
+
+</style>
+<div class="dropdown category-dropdown has-border" data-visible="true">
+    <a href="#" class="category-toggle" role="button" data-toggle="dropdown"
+       aria-haspopup="true" aria-expanded="true" data-display="static"
+       title="Browse Categories">
+        <i class="w-icon-bars" style="color: white"></i>
+        <span class="toggle_txt" style="color: white; font-size: 21px; font-weight: 600;">КАТАЛОГ ТОВАРОВ</span>
+    </a>
+    <div class="dropdown-box">
+        <ul class="menu vertical-menu category-menu"  style="background: #74BBC6; color: white; font-weight: 600;">
+            {% for category in categories %}
+
+            <li class="etem-category {% if category.children.exists %}has-submenu{% endif %}">
+                <a class="category_a" href="{{ category.get_absolute_url }}" data-category-id="{{ category.id }}">
+                    {{ category.name }}
+                    {% if category.children.exists %}
+                    <span class="submenu-toggle-btn"></span>
+                    {% endif %}
+                </a>
+                {% if category.children.exists %}
+                {% if forloop.counter > 1 %}
+                        {% with offset=forloop.counter|add:"-1"|multiply:43 %}
+                        <ul class="megamenu type2" style="margin-top: -{{ offset }}px;">
+                            {% endwith %}
+                            {% else %}
+                            <ul class="megamenu type2" style=" margin-top: 10px; ">
+                                {% endif %}
+                    <li>
+                        <h4 class="menu-title">{{ category.name }}</h4>
+                        <hr class="divider">
+                        <ul>
+                            {% for child in category.children.all %}
+                            {% if child.children.exists %}
+                        </ul>
+                    </li>
+                    <li class="">
+                        <h4 class="menu-title"><a href="{{ child.get_absolute_url }}">{{ child.name }}</a>
+                        </h4>
+                        {% if child.children.exists %}
+                        <ul class="submenu">
+                            {% for subchild in child.children.all %}
+                            <li>
+                                <a href="{{ subchild.get_absolute_url }}">{{ subchild.name }}</a>
+                            </li>
+                            {% endfor %}
+
+                            {% endif %}
+
+                            {% else %}
+                            <li class="">
+                                <a href="{{ child.get_absolute_url }}">{{ child.name }}</a>
+                                {% if child.children.exists %}
+                                <ul class="submenu">
+                                    {% for subchild in child.children.all %}
+                                    <li><a href="{{ subchild.get_absolute_url }}">{{ subchild.name }}</a></li>
+                                    {% endfor %}
+                                </ul>
+                                {% endif %}
+                            </li>
+                            {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    {# Выводим баннеры, если есть #}
+                    {% get_banners_for_category category as banners %}
+        {% if banners %}
+                    {% for banner in banners_by_category|get_item:category.id %}
+                    <li>
+                        <div class="banner-fixed menu-banner menu-banner2">
+                            <figure>
+                                <img src="{{ banner.image.url }}" alt="Menu Banner"
+                                     width="235" height="347" />
+                            </figure>
+                            <div class="banner-content">
+                                <div class="banner-price-info mb-1 ls-normal">
+                                    {{ banner.title }}
+                                </div>
+                                <h3 class="banner-title ls-normal">{{ banner.content }}</h3>
+                                <a href="{{ banner.link }}"
+                                   class="btn btn-dark btn-sm btn-link btn-slide-right btn-icon-right">
+                                    {{ banner.link_name }}<i class="w-icon-long-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </li>
+                    {% endfor %}
+                    {% endif %}
+                </ul>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>

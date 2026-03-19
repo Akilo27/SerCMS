@@ -1,0 +1,76 @@
+{% if user.is_authenticated %}
+{% if show_reviews_form %}
+
+<div class="th-comment-form">
+    <div class="form-title">
+        <h3 class="blog-inner-title">Add a review</h3>
+    </div>
+    <form id="review-form" class="review-form" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="product" value="{{ product.id }}">
+        {{ reviews_form.author }}
+        <input type="hidden" name="author" value="{{ user.id }}">
+        <div class="row">
+            <div class="form-group rating-select d-flex align-items-center">
+                <label>Оценка</label>
+                <p class="stars">
+                <span>
+                    <a class="star-1" href="shop-details.html#">1</a>
+                    <a class="star-2" href="shop-details.html#">2</a>
+                    <a class="star-3" href="shop-details.html#">3</a>
+                    <a class="star-4" href="shop-details.html#">4</a>
+                    <a class="star-5" href="shop-details.html#">5</a>
+                </span>
+                <div class="rate" style="dislay:none;">
+                    <input type="radio" id="star5" name="rate" value="5" />
+                    <label for="star5" title="text">5 stars</label>
+                    <input type="radio" id="star4" name="rate" value="4" />
+                    <label for="star4" title="text">4 stars</label>
+                    <input type="radio" id="star3" name="rate" value="3" />
+                    <label for="star3" title="text">3 stars</label>
+                    <input type="radio" id="star2" name="rate" value="2" />
+                    <label for="star2" title="text">2 stars</label>
+                    <input type="radio" id="star1" name="rate" value="1" />
+                    <label for="star1" title="text">1 star</label>
+                </div>
+                </p>
+                <input type="hidden" name="starvalue" id="reiting">
+            </div>
+            <div class="col-12 form-group">
+                <textarea name="text" placeholder="Ваш отзыв" class="form-control"></textarea>
+                <i class="text-title far fa-pencil-alt"></i>
+            </div>
+            <div class="col-12 form-group mb-0">
+                <button type="submit" class="th-btn">Оставить отзыв</button>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Select all star links
+    const starLinks = document.querySelectorAll('.stars a');
+
+    // Add click event listener to each star link
+    starLinks.forEach((link, index) => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault(); // Prevent the default anchor behavior
+
+            // Get the value based on the link's class
+            const starValue = index + 1;
+
+            // Select the corresponding radio button
+            const radio = document.querySelector(`input[name="rate"][value="${starValue}"]`);
+            if (radio) {
+                radio.checked = true; // Check the radio button
+            }
+
+            // Optionally, you can update the hidden input with the selected value
+            document.getElementById('reiting').value = starValue;
+        });
+    });
+});
+</script>
+
+{% endif %}
+{% endif %}

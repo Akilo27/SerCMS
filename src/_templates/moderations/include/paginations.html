@@ -1,0 +1,30 @@
+<nav class="mt-2 right" style=" float: right; ">
+    <ul class="pagination pagination-xs pagination-circle">
+        {% if paginator.num_pages >= 1 %}
+        {% if page_obj.has_previous %}
+        <li class="page-item page-indicator">
+            <a class="page-link" href="?page=1">
+                <iconify-icon icon="solar:double-alt-arrow-left-broken"></iconify-icon>
+            </a>
+        </li>
+        {% endif %}
+        {% for i in paginator.page_range %}
+        {% if page_obj.number == i %}
+        <li class="page-item active"><a class="page-link" href="">{{ i }}</a>
+        </li>
+        {% elif i > page_obj.number|add:'-2' and i < page_obj.number|add:'3' %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+        </li>
+        {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <li class="page-item page-indicator">
+            <a class="page-link" href="?page={{ paginator.num_pages }}">
+                <iconify-icon icon="solar:double-alt-arrow-right-broken"></iconify-icon>
+            </a>
+        </li>
+        {% endif %}
+        {% endif %}
+    </ul>
+</nav>

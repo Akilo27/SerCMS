@@ -1,0 +1,220 @@
+{% extends 'site/useraccount/base.html' %}
+{% load static i18n %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+{% endblock head %}
+{% block content %}
+<!-- ========== Page Title Start ========== -->
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="mb-0 fw-semibold">Analytics</h4>
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="javascript: void(0);">Dashboard</a></li>
+                <li class="breadcrumb-item active">Analytics</li>
+            </ol>
+        </div>
+    </div>
+</div>
+<!-- ========== Page Title End ========== -->
+
+<!-- Start here.... -->
+<div class="row">
+    <div class="col-md-6 {% if not user.type == 3 %}col-xl-4{% else %}col-xl-3{% endif%}">
+        <div class="card">
+            <div class="card-body">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-6">
+                        <div class="avatar-md bg-light bg-opacity-50 rounded">
+                            <iconify-icon icon="solar:buildings-2-broken" class="fs-32 text-primary avatar-title"></iconify-icon>
+                        </div>
+                        <p class="text-muted mb-2 mt-3">Объявления</p>
+                        <h3 class="text-dark fw-bold d-flex align-items-center gap-2 mb-0">{{ advertisements_count }}</h3>
+                    </div> <!-- end col -->
+                    <div class="col-6">
+                        <div id="total_customers" class="apex-charts"></div>
+                    </div> <!-- end col -->
+                </div> <!-- end row-->
+            </div> <!-- end card body -->
+        </div> <!-- end card -->
+    </div> <!-- end col -->
+    <div class="col-md-6 {% if not user.type == 3 %}col-xl-4{% else %}col-xl-3{% endif%}">
+        <div class="card">
+            <div class="card-body">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-6">
+                        <div class="avatar-md bg-light bg-opacity-50 rounded">
+                            <iconify-icon icon="solar:users-group-two-rounded-broken" class="fs-32 text-primary avatar-title"></iconify-icon>
+                        </div>
+                        <p class="text-muted mb-2 mt-3">Броней</p>
+                        <h3 class="text-dark fw-bold d-flex align-items-center gap-2 mb-0">{{ advertisements_count }}</h3>
+                    </div> <!-- end col -->
+                    <div class="col-6 text-end">
+                        <div id="invoiced_customers" class="apex-charts"></div>
+                    </div> <!-- end col -->
+                </div> <!-- end row-->
+            </div> <!-- end card body -->
+        </div> <!-- end card -->
+    </div> <!-- end col -->
+    <div class="col-md-6 {% if not user.type == 3 %}col-xl-4{% else %}col-xl-3{% endif%}">
+        <div class="card">
+            <div class="card-body">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-5">
+                        <div class="avatar-md bg-light bg-opacity-50 rounded">
+                            <iconify-icon icon="solar:money-bag-broken" class="fs-32 text-primary avatar-title"></iconify-icon>
+                        </div>
+                        <p class="text-muted mb-2 mt-3">Заработок</p>
+                        <h3 class="text-dark fw-bold d-flex align-items-center gap-2 mb-0">{{user.earned}}</h3>
+                    </div> <!-- end col -->
+                    <div class="col-6 text-end">
+                        <div id="invoiced_sales" class="apex-charts"></div>
+                    </div> <!-- end col -->
+                </div> <!-- end row-->
+            </div> <!-- end card body -->
+        </div> <!-- end card -->
+    </div> <!-- end col -->
+    {% if user.type == 3 %}
+    <div class="col-md-6 col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-5">
+                        <div class="avatar-md bg-light bg-opacity-50 rounded">
+                            <iconify-icon icon="solar:shield-user-broken" class="fs-32 text-primary avatar-title"></iconify-icon>
+                        </div>
+                        <p class="text-muted mb-2 mt-3">Сотрудников</p>
+                        <h3 class="text-dark fw-bold d-flex align-items-center gap-2 mb-0"> {{ company_users_count }}</h3>
+                    </div> <!-- end col -->
+                    <div class="col-6 text-end">
+                        <div id="new_sale" class="apex-charts"></div>
+                    </div> <!-- end col -->
+                </div> <!-- end row-->
+            </div> <!-- end card body -->
+        </div> <!-- end card -->
+    </div> <!-- end col -->
+    {% endif %}
+</div> <!-- end row -->
+<div class="row">
+    <div class="col-xl-8">
+        <div class="card overflow-hidden">
+            <div class="card-header d-flex justify-content-between align-items-center pb-1">
+                <div>
+                    <h4 class="card-title">Бюджет</h4>
+                </div>
+            </div>
+            <div class="card-footer p-2 bg-light-subtle text-center">
+                <div class="row g-3">
+                    <div class="col-md-4 border-end">
+                        <p class="text-muted mb-1">Заработано</p>
+                        <p class="text-dark fs-18 fw-medium d-flex align-items-center justify-content-center gap-2 mb-0">{{user.earned}}</p>
+                    </div>
+                    <div class="col-md-4 border-end">
+                        <p class="text-muted mb-1">Заморожено</p>
+                        <p class="text-dark fs-18 fw-medium d-flex align-items-center justify-content-center gap-2 mb-0">{{user.frozen}}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p class="text-muted mb-1">Баланс</p>
+                        <p class="text-dark fs-18 fw-medium d-flex align-items-center justify-content-center gap-2 mb-0">{{user.balance}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="card-title">Брони</h4>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table align-middle text-nowrap table-hover table-centered mb-0">
+                                <thead class="bg-light-subtle">
+                                <tr>
+                                    <th>id</th>
+                                    <th>Объявления</th>
+                                    <th>Людей</th>
+                                    <th>Количество дней</th>
+                                    <th>Дата въезда</th>
+                                    <th>Дата выезда</th>
+                                    <th>Сумма</th>
+                                    <th>Детали</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for booking in user_bookings %}
+                                <tr>
+
+                                    <td><a href="javascript: void(0);" class="text-dark fw-medium">#TZ2540</a> </td>
+                                    <td><img src="{{ booking.advertisement.galleryadvertisement_set.all.0.image.url }}" class="avatar-sm rounded-circle me-2" alt="...">  {{ booking.advertisement.name }}</td>
+                                    <td>{{ booking.people }}</td>
+                                    <td> {{ booking.days }}</td>
+                                    <td> {{ booking.data_entry }} </td>
+                                    <td> {{ booking.data_exit }} </td>
+                                    <td> <span class="badge bg-success-subtle text-success py-1 px-2 fs-12">{{ booking.amount }}</span> </td>
+                                    <td>
+                                        <div class="d-flex gap-2">
+                                            <a href="index.html#!" class="btn btn-light btn-sm"><iconify-icon icon="solar:eye-broken" class="align-middle fs-18"></iconify-icon></a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- end table-responsive -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="col-xl-4">
+        <div class="card">
+            <div class="card-header d-flex  justify-content-between align-items-center border-0">
+                <div>
+                    <h4 class="card-title mb-1">Чаты с потенциальныии покупателями</h4>
+                    <p class="mb-0 fs-13">Не отвечаные чаты</p>
+                </div>
+            </div>
+            <div class="card-body pt-2">
+                {% for chat in user_chats %}
+
+                <div class="d-flex flex-wrap align-items-center justify-content-between border-bottom gap-2 pb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="avatar">
+                            <img src="{{chat.last_message.author.avatar.url}}" alt="avatar-3" class="img-fluid rounded-circle">
+                        </div>
+                        <div class="d-block">
+                                            <span class="text-dark">
+                                                <a href="{% url 'chats:chat_detail' chat.id %}" class="text-dark fw-medium fs-15">{{chat.last_message.author.last_name}}</a>
+                                            </span>
+                            <p class="mb-0 fs-13 text-muted">{{chat.last_message.content}}</p>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-muted fw-medium mb-0">{{chat.last_message.date}}</p>
+                    </div>
+                </div>
+                {% endfor %}
+
+            </div>
+            <div class="card-footer border-top">
+                <a href="{% url 'chats:chat_list' %}" class="btn btn-primary w-100">Все чаты</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+{% block footerbottom %}
+
+<script src="{% static 'site/moderations/assets/js/pages/dashboard-analytics.js' %}"></script>
+{% endblock footerbottom %}

@@ -1,0 +1,41 @@
+{% extends 'site/shop4/base.html' %}
+{% load static generals_tag i18n %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<style>
+    .why-features-item {
+    display: flex
+;
+    margin-bottom: 45px;
+    max-width: 100%;
+}
+</style>
+{% endblock head %}
+{% block content %}
+{# order_lookup.html #}
+<h1>Поиск заказа</h1>
+<form method="get" action="{% url 'shop:order_lookup' %}">
+    {{ form.q }}
+    <button type="submit" class="btn btn-primary">Найти заказ</button>
+</form>
+
+{% if order %}
+    <div class="alert alert-success mt-3">
+        <h4>Заказ № {{ order.pk }}</h4>
+        <p><strong>Статус:</strong> {{ order.get_status_display }}</p>
+        <p><strong>Оплата:</strong> {{ order.get_type_display }}</p>
+        <p><strong>Клиент:</strong> {{ order.customer_name }} {{ order.customer_surname }}</p>
+        <p><strong>Телефон:</strong> {{ order.phone_number }}</p>
+        <p><strong>Email:</strong> {{ order.customer_email }}</p>
+        <p><strong>Сумма:</strong> {{ order.all_amount }}</p>
+    </div>
+{% elif not_found %}
+    <div class="alert alert-danger mt-3">Заказ не найден.</div>
+{% endif %}
+
+
+{% endblock content %}

@@ -1,0 +1,56 @@
+{% extends 'site/trendsup/base.html' %}
+{% load static generals_tag %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+
+{% block content %}
+<!-- Start of Main -->
+<main class="main">
+    <!-- Start of Page Content -->
+    <div class="page-content">
+        <div class="container">
+            <div class="row gutter-lg mb-10">
+                <div class="main-content">
+                    <article class="post post-classic overlay-zoom mb-4">
+                        <section class="s-about" id="s-about">
+                            <div class="container">
+                                <h2 class="def-title wow fadeInLeft" data-wow-delay="0.2s" style="visibility: visible; animation-delay: 0.2s; animation-name: fadeInLeft;">{{  service.name  }}</h2>
+                                <div class="about-row">
+                                    <div class="about-left">
+                                        <div class="def-desc wow fadeInLeft" data-wow-delay="0.3s" style="visibility: visible; animation-delay: 0.3s; animation-name: fadeInLeft;">
+                                            {{ service.description|safe }}
+                                        </div>
+                                    </div>
+                                    <div class="swiper banner-swiper">
+                                        <div class="swiper-wrapper">
+                                            {% for media in service.servicemedia_set.all %}
+                                            <div class="swiper-slide" style="background-image: url({{media.file.url}}); width: 100%; ">
+                                                <div class="banner-content">
+                                                    <a href="{% url 'webmain:contacts' %}" class="banner-btn def-btn anchor-link wow fadeIn" sytle="position: absolute;     bottom: 80px;" data-wow-delay="0.3s">{% trans "Заказать услугу" %}</a>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="swiper-pagination wow fadeInUp" data-wow-delay="0.5s"></div>
+                                        <div class="container">
+                                            <div class="swiper-button-prev"></div>
+                                            <div class="swiper-button-next"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </section>
+                    </article>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End of Page Content -->
+</main>
+<!-- End of Main -->
+
+{% endblock content %}

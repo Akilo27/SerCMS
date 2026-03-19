@@ -1,0 +1,699 @@
+{% load static generals_tag shop_tags %}
+
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+
+    <title>{% with request|get_settings as settings %}{% if settings.name %}{{ settings.name }}{% endif %}{% endwith %}
+        - {% block title %}{% endblock title %}</title>
+
+    <meta name="keywords" content="Marketplace ecommerce responsive HTML5 Template"/>
+    <meta name="description"
+          content="Wolmart is powerful marketplace &amp; ecommerce responsive Html5 Template.">
+    <meta name="author" content="D-THEMES">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png' %}"
+          href="/_media/{% with request|get_settings as settings %}{% if settings.favicon %}{{ settings.favicon }}{% endif %}{% endwith %}">
+
+    {% with request|get_settings as settings %}{% if settings.yandex_metrica %}{{ settings.yandex_metrica|safe }}
+    {% endif %}{% endwith %}
+    {% with request|get_settings as settings %}{% if settings.google_analitic %}{{ settings.google_analitic|safe }}
+    {% endif %}{% endwith %}
+
+    <!-- WebFont.js -->
+    <script>
+        WebFontConfig = {
+            google: {families: ['Poppins:400,500,600,700,800']}
+        };
+        (function (d) {
+            var wf = d.createElement('script'), s = d.scripts[0];
+            wf.src = 'assets/js/webfont.js';
+            wf.async = true;
+            s.parentNode.insertBefore(wf, s);
+        })(document);
+    </script>
+
+    <!-- Vendor CSS -->
+    <link rel="stylesheet" type="text/css"
+          href="{% static 'site/wolmart/assets/vendor/fontawesome-free/css/all.min.css' %}">
+
+    <!-- Plugins CSS -->
+    <!-- <link rel="stylesheet" href="{% static 'site/wolmart/assets/vendor/swiper/swiper-bundle.min.css' %}"> -->
+    <link rel="stylesheet" type="text/css" href="{% static 'site/wolmart/assets/vendor/animate/animate.min.css' %}">
+    <!-- Link Swiper's CSS -->
+    <link rel="stylesheet" href="{% static 'site/wolmart/assets/vendor/swiper/swiper-bundle.min.css' %}">
+
+    <!-- Default CSS -->
+    <link rel="stylesheet" type="text/css" href="{% static 'site/wolmart/assets/css/demo1.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'site/wolmart/assets/css/style.min.css' %}">
+</head>
+
+<body class="home">
+{% if messages %}
+    <div style="display:none;  width: 500px;
+        text-align: center;
+        position: fixed;
+        top: 200px;
+        padding: 10px 20px;
+        background-color: #5cb85c;
+        color: #fff;
+        border-radius: 5px;
+        z-index: 1000;
+        left: 50%;
+        transform: translateX(-50%);
+        opacity:0; transition: opacity 0.5s ease;" id="message-box">
+        {% for message in messages %}
+            {{ message }}
+        {% endfor %}
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("Страница загружена, скрипт начал работу");  // Проверка в консоли
+            var messageBox = document.getElementById("message-box");
+            if (messageBox) {
+                messageBox.style.display = "block";
+                setTimeout(function() {
+                    messageBox.style.opacity = "1";
+                }, 500);
+
+                // Скрываем через 5 секунд
+                setTimeout(function() {
+                    messageBox.style.opacity = "0";
+                    setTimeout(function() {
+                        messageBox.style.display = "none";
+                    }, 500);  // Даем время для завершения анимации
+                }, 5000);  // Время показа сообщения
+            }
+        });
+    </script>
+{% endif %}
+<p class="form-message"></p><div id="custom-alert" style="display:none;  width: 500px;
+    text-align: center;
+    position: fixed;
+    top: 200px;
+    padding: 10px 20px;
+    background-color: #5cb85c;
+    color: #fff;
+    border-radius: 5px;
+    z-index: 1000;
+    left: 50%;
+    transform: translateX(-50%);
+ opacity:0; transition: opacity 0.5s ease;">
+    {% trans 'Товар добавлен в корзину!' %}
+</div>
+<div class="page-wrapper">
+
+    <div class="page-wrapper">
+
+         <header class="header header-border">
+
+        <div class="header-top">
+            <div class="container">
+                <div class="header-left">
+                    <p class="welcome-msg">{% with request|get_settings as settings %}{% if settings.name %}{{ settings.name }}{% endif %}{% endwith %}</p>
+                </div>
+                <div class="header-right">
+                    <div class="dropdown">
+                        {% include 'site/shop4/include/valute.html' %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End of Header Top -->
+
+        <div class="header-middle">
+            <div class="container">
+                <div class="header-left mr-md-4">
+                    <a href="{% url 'webmain:home' %}" class="mobile-menu-toggle  w-icon-hamburger" aria-label="menu-toggle">
+                    </a>
+                    <a href="{% url 'webmain:home' %}" class="logo ml-lg-0">
+                        <img src="/_media/{% with request|get_settings as settings %}{% if settings.logo %}{{ settings.logo }}{% endif %}{% endwith %}" alt="logo" width="144" height="45" />
+                    </a>
+                    <form method="get" action="{% url 'webmain:search' %}" class="header-search hs-expanded hs-round d-none d-md-flex input-wrapper">
+                        <input id="search-input" name="q" type="text" class="form-control" value="{{ query }}" placeholder="{% trans 'Введи поисковую фразу' %}..." aria-describedby="button-addon2" style="border-left: 2px solid #336699;margin-right: 0px;" />
+                        <button class="btn btn-search" type="submit" id="button-addon2" data-bs-toggle="offcanvas" data-bs-target="#AsideOffcanvasSearch" aria-controls="AsideOffcanvasSearch"><i class="w-icon-search"></i>
+                        </button>
+                    </form>
+                </div>
+                <div class="header-right ml-4">
+                    <div class="header-call d-xs-show d-lg-flex align-items-center">
+                        <a href="tel:#" class="w-icon-call"></a>
+                        <div class="call-info d-lg-show">
+                            <h4 class="chat font-weight-normal font-size-md text-normal ls-normal text-light mb-0">
+                                <a href="https://portotheme.com/cdn-cgi/l/email-protection#90b3" class="text-capitalize">{% trans 'Телефон' %}</a>:</h4>
+                            <a href="tel:#" class="phone-number font-weight-bolder ls-50">{{contact.phone}}</a>
+                        </div>
+                    </div>
+                    {% if user.is_authenticated %}
+
+
+                     <div class="shopping-cart cart-dropdown cart-offcanvas mr-0 mr-lg-2" style="position: relative;">
+
+                        <a style="cursor: pointer;" class=" label-down link" href="{% url 'shop:bookmark_list' %}">
+                            <i class="w-icon-heart"></i>
+                            <sup class="cart-count" id="bookmark-count">{% get_likes_count request.user %}</sup>
+                            <span class="cart-label">{% trans 'Закладки' %}</span>
+                        </a>
+
+                    </div>
+                    {% endif %}
+                    {% if user.is_authenticated%}
+                    <a class="wishlist label-down link d-xs-show" href="{% url 'useraccount:edit_profile' %}">
+                            <i class="w-icon-account"></i>
+                            <span class="wishlist-label d-lg-show">{% trans 'Мой аккаунт' %}</span>
+                    </a>
+                    {% else %}
+                    <a class="wishlist label-down link d-xs-show" href="{% url 'useraccount:login' %}">
+                        <i class="w-icon-account"></i>
+                        <span class="wishlist-label d-lg-show">{% trans 'Вход' %}</span>
+                    </a>
+                    {% endif %}
+                    <div class="shopping-cart dropdown cart-dropdown cart-offcanvas mr-0 mr-lg-2">
+                        <div class="cart-overlay"></div>
+
+                        <a class="cart-toggle label-down link" style="cursor: pointer" type="button" data-bs-toggle="offcanvas" data-bs-target="#cart_product" aria-controls="cart_product_canvas">
+                            <i class="w-icon-cart"></i>
+                            <sup class="cart-count" id="cart-count">{% get_user_cart_products request as cart_products %} {{cart_products.2}}</sup>
+                            <span class="cart-label">{% trans 'Корзина' %}</span>
+                        </a>
+                        <div class="dropdown-box">
+                            <a class="action" href="{% url 'webmain:home' %}#" role="button" data-bs-toggle="dropdown">
+                                <i class="w-icon-long-arrow-right"></i>
+                                {% include 'site/shop4/include/cart_product.html' %}
+                            </a>
+                        </div>
+                    </div>
+
+
+                    <!-- End of Dropdown Box -->
+                </div>
+            </div>
+        </div>
+        <!-- End of Header Middle -->
+
+        <div class="ticky-content sticky-content-wrapper fix-top sticky-header">
+            <div class="container">
+                <div class="inner-wrap">
+                    <div class="header-left">
+                        {% include 'site/shop4/include/category.html' %}
+                        &nbsp;
+                        &nbsp;
+                        &nbsp;
+                        <nav class="main-nav">
+                            <ul class="menu active-underline">
+                                <li class="{% if request.path|default_if_none:'' == '/' %} active {% endif %}">
+                                    <a href="{% url 'webmain:home' %}">Главная</a>
+                                </li>
+                                <li class="{% if request.path|default_if_none:''|slice:':7' == '/about/' %} active {% endif %}">
+                                    <a href="{% url 'webmain:about' %}">О компании</a>
+                                </li>
+                                <li class="{% if request.path|default_if_none:''|slice:':9' == '/catalog/' %} active {% endif %}">
+                                    <a href="{% url 'shop:catalogs' %}">Магазин</a>
+                                </li>
+                                <li class="{% if request.path|default_if_none:''|slice:':7' == '/blogs/' %} active {% endif %}">
+                                    <a href="{% url 'webmain:blogs' %}">Новости</a>
+                                </li>
+                                <li class="{% if request.path|default_if_none:''|slice:':10' == '/contacts/' %} active {% endif %}">
+                                    <a href="{% url 'webmain:contacts' %}">Контакты</a>
+                                </li>
+
+                            </ul>
+                        </nav>
+                    </div>
+                    <div class="header-right">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </header>
+
+        <main class="main">
+            <!-- Start of Page Header -->
+            <div class="page-header">
+                <div class="container">
+                    <h1 class="page-title mb-0">{{seo_title}}</h1>
+                </div>
+            </div>
+            <!-- End of Page Header -->
+
+            <!-- Start of Breadcrumb -->
+            <nav class="breadcrumb-nav">
+                <div class="container">
+                    <ul class="breadcrumb">
+                        <li><a href="{% url 'webmain:home' %}">Главная</a></li>
+                        <li>{{seo_title}}</li>
+                    </ul>
+                </div>
+            </nav>
+            <!-- End of Breadcrumb -->
+
+            <!-- Start of PageContent -->
+            <div class="page-content pt-2">
+                <div class="container">
+                    <div class="tab-vertical row gutter-lg">
+                        <ul class="nav nav-tabs mb-6" role="tablist">
+                            {% with app_name=request.resolver_match.namespace url_name=request.resolver_match.url_name %}
+                            {% if not user.type == 2 %}
+                            <li class="nav-item">
+                                <a href="{% url 'shop:my_order' %}"
+                                   class="nav-link {% if app_name == 'shop' and url_name == 'my_order' %} active {% endif %}">
+                                    <i class="fa fa-shopping-cart"></i>&nbsp; Мои Покупки</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{% url 'shop:bookmark_list' %}" class="nav-link {% if url_name == 'bookmark_list' %}active{% endif %}"
+                                   class="{% if app_name == 'shop' and url_name == 'bookmark_list' %} active {% endif %}"><i
+                                        class="w-icon-heart"></i> &nbsp;  Закладки</a>
+                            </li>
+                            {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   class="{% if app_name == 'shop' and url_name == 'manufacturerapplications' %} active {% endif %}"
+                                   href="{% url 'shop:manufacturerapplications' %}">
+                                    <i class="fa fa-magnet"></i> &nbsp;  Запросы</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   class="{% if app_name == 'shop' and url_name == 'manufacturerorder' %} active {% endif %}"
+                                   href="{% url 'shop:manufacturerorder' %}">
+                                    <i class="fa fa-shopping-bag"></i> &nbsp; Продажи</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   class="{% if app_name == 'shop' and url_name == 'manufacturerapplications' %} active {% endif %}"
+                                   href="{% url 'shop:manufacturerapplications' %}">
+                                    <i class="fa fa-magnet"></i> &nbsp; Заявки</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   class="{% if app_name == 'useraccount' and url_name == 'shop_edit' %} active {% endif %}"
+                                   href="{% url 'useraccount:shop_edit' %}">
+                                    <i class="fa fa-table"></i>&nbsp; Мои магазин</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   class="{% if app_name == 'shop' and url_name == 'manufacturerreviews' %} active {% endif %}"
+                                   href="{% url 'shop:manufacturerreviews' %}">
+                                    <i class="fa fa-star-o"></i>&nbsp; Отзывы</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   class="{% if app_name == 'shop' and url_name == 'manufacturerfaqs' %} active {% endif %}"
+                                   href="{% url 'shop:manufacturerfaqs' %}">
+                                    <i class="fa fa-question-circle-o"></i> &nbsp; Вопросы</a>
+                            </li>
+                            {% endif %}
+                            <li class="nav-item">
+                                <a class="nav-link {% if url_name == 'tickets' %} active {% endif %}"
+                                   href="{% url 'moderation:tickets' %}">
+                                    <i class="fa fa-life-ring"></i>&nbsp; Поддержка</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if url_name == 'edit_profile' %} active {% endif %}"
+                                   href="{% url 'useraccount:edit_profile' %}">
+                                    <i class="fa fa-user"></i>&nbsp; Мой профиль</a>
+                            </li>
+                            {% endwith %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{#% url 'useraccount:logout' %#}"><i class="fa fa-sign-out"></i>Выйти</a>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content" id="nav-tabContent">
+                            {% block content %}
+
+                            {% endblock content %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End of PageContent -->
+        </main>
+
+        <footer class="footer appear-animate" data-animation-options="{'name': 'fadeIn'}">
+            <div class="footer-newsletter bg-primary">
+                <div class="container">
+                    <div class="row justify-content-center align-items-center">
+                        <div class="col-xl-5 col-lg-6">
+                            <div class="icon-box icon-box-side text-white">
+                                <div class="icon-box-icon d-inline-flex">
+                                    <i class="w-icon-envelop3"></i>
+                                </div>
+                                <div class="icon-box-content">
+                                    <h4 class="icon-box-title text-white text-uppercase font-weight-bold">Подписаться</h4>
+                                    <p class="text-white">
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-7 col-lg-6 col-md-9 mt-4 mt-lg-0 ">
+                            {% include 'site/shop4/include/subscriptions.html' %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container">
+                <div class="footer-top">
+                    <div class="row" >
+                        <div class="col-lg-2 col-sm-4">
+                            <h4 class="widget-title"></h4>
+                            <h4 class="widget-collapsed-title collapsed" data-bs-toggle="collapse"
+                                data-bs-target="#widgetId-1">Информация</h4>
+                            <p class="desc">
+                                {% with request|get_settings as settings %}
+                                {% if settings.description %}
+                                {{ settings.description }}
+                                {% endif %}
+                                {% endwith %}
+                            </p>
+                            <ul class="footer-link">
+                                <li><a href="{% url 'webmain:home' %}">Главная</a></li>
+                                <li><a href="{% url 'webmain:blogs' %}">Новости</a></li>
+                                <li><a href="{% url 'shop:catalogs' %}">Магазин</a></li>
+                                <li><a href="{% url 'webmain:about' %}">О проекте</a></li>
+                                <li><a href="{% url 'webmain:contacts' %}">Контакты</a></li>
+                            </ul>
+                        </div>
+                        <div class="col-lg-2 col-sm-4">
+                            <!-- Footer Widget Start -->
+                            <div class="widget-item nav-menu-item3">
+                                <h4 class="widget-title"></h4>
+                                <h4 class="widget-collapsed-title collapsed" data-bs-toggle="collapse"
+                                    data-bs-target="#widgetId-3">Пользователю</h4>
+                                <div id="widgetId-4" class=" widget-collapse-body">
+                                    <div class="collapse-body">
+                                        <div class="widget-contact-info">
+
+                                            <ul class="footer-link">
+                                                <li>
+                                                    <a href="{% if user.is_authenticated %}{% url 'useraccount:edit_profile' %}{% endif %}">Профиль</a>
+                                                </li>
+                                                {% if not user.type == 2 %}
+                                                <li><a href="{% url 'shop:my_cart' %}">Корзина</a></li>
+                                                <li>
+                                                    <a href="{% if user.is_authenticated %}{% url 'shop:bookmark_list' %}{% endif %}">Закладки</a>
+                                                </li>
+                                                <li>
+                                                    <a href="{% if user.is_authenticated %}{% url 'shop:my_order' %}{% endif %}">Покупки</a>
+                                                </li>
+                                                {% else %}
+                                                <li>
+                                                    <a href="{% if user.is_authenticated %}{% url 'shop:manufacturerorder' %}{% endif %}">Продажи</a>
+                                                </li>
+                                                <li>
+                                                    <a href="{% if user.is_authenticated %}{% url 'useraccount:products' %}{% endif %}">Мой
+                                                        магазин</a></li>
+                                                {% endif %}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Footer Widget End -->
+                        </div>
+                        <div class="col-lg-3 col-sm-4">
+                            <div class="widget-item nav-menu-item1">
+                                <h4 class="widget-title"></h4>
+                                <h4 class="widget-collapsed-title collapsed" data-bs-toggle="collapse"
+                                    data-bs-target="#widgetId-1">О нас</h4>
+                                <div id="widgetId-1" class=" widget-collapse-body">
+                                    <div class="collapse-body">
+                                        <div class="widget-menu-wrap">
+                                            <ul class="nav-menu">
+                                                <li><a href="{% url 'webmain:sponsorships' %}">Партнерство</a></li>
+                                                {% get_pages as pages %}
+                                                {% if pages %}{% for page in pages %}{% if page.pagetype == 2 %}
+                                                <li><a href="{% url 'webmain:page' page.slug %}">Доставка</a></li>
+                                                {% endif %}{% endfor %}{% endif %}
+                                                {% if pages %}{% for page in pages %}{% if page.pagetype == 3 %}
+                                                <li><a href="{% url 'webmain:page' page.slug %}">Оплата</a></li>
+                                                {% endif %}{% endfor %}{% endif %}
+                                                {% if pages %}{% for page in pages %}{% if page.pagetype == 4 %}
+                                                <li><a href="{% url 'webmain:page' page.slug %}">Возврат</a></li>
+                                                {% endif %}{% endfor %}{% endif %}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-2 col-sm-4">
+                            <div class="widget-item nav-menu-item2">
+                                <h4 class="widget-title"></h4>
+                                <h4 class="widget-collapsed-title collapsed" data-bs-toggle="collapse"
+                                    data-bs-target="#widgetId-2">Политики</h4>
+                                <div id="widgetId-2" class=" widget-collapse-body">
+                                    <div class="collapse-body">
+                                        <div class="widget-menu-wrap">
+                                            <ul class="nav-menu">
+                                                {% if pages %}{% for page in pages %}{% if page.pagetype == 5 %}
+                                                <li><a href="{% url 'webmain:page' page.slug %}">Условия
+                                                    использования</a></li>
+                                                {% endif %}{% endfor %}{% endif %}
+                                                {% if pages %}{% for page in pages %}{% if page.pagetype == 6 %}
+                                                <li><a href="{% url 'webmain:page' page.slug %}">Политика обработки
+                                                    персональных данных</a></li>
+                                                {% endif %}{% endfor %}{% endif %}
+                                                {% if pages %}{% for page in pages %}{% if page.pagetype == 7 %}
+                                                <li><a href="{% url 'webmain:page' page.slug %}">Политика Cookie -
+                                                    Файлов</a></li>
+                                                {% endif %}{% endfor %}{% endif %}
+                                                {% if pages %}{% for page in pages %}{% if page.pagetype == 8 %}
+                                                <li><a href="{% url 'webmain:page' page.slug %}">Согласия на обработку
+                                                    персональных данных</a></li>
+                                                {% endif %}{% endfor %}{% endif %}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-sm-4">
+                            <div class="widget-item nav-menu-item3">
+                                <h4 class="widget-title"></h4>
+                                <h4 class="widget-collapsed-title collapsed" data-bs-toggle="collapse"
+                                    data-bs-target="#widgetId-3">Контакты</h4>
+                                <div id="widgetId-3" class=" widget-collapse-body">
+                                    <div class="collapse-body">
+                                        <div class="widget-contact-info">
+                                            <p class="contact-info-desc">Email:
+                                                <a href="mailto://{% with request|get_contact as settings %}{% if settings.email %}{{ settings.email }}{% endif %}{%endwith%}">
+                                                    {% with request|get_contact as settings %}
+                                                    {% if settings.email %}
+                                                    {{ settings.email }}
+                                                    {% endif %}{%endwith%}
+                                                </a></p>
+                                            <div class="contact-item">
+                                                <div class="icon">
+                                                    <i class="pe-7s-map-marker"></i>
+                                                </div>
+                                                <div class="info">
+                                                    <p>Наш адрес: <br>{% with request|get_contact as settings %}
+                                                        {% if settings.adress %}
+                                                        {{ settings.adress }}
+                                                        {% endif %}
+                                                        {% endwith %}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div class="contact-item phone-info">
+                                                <div class="icon">
+                                                    <i class="pe-7s-phone"></i>
+                                                </div>
+                                                <div class="info">
+                                                    <p><span>Телефон:</span> <br><a
+                                                            href="tel://{% with request|get_contact as settings %}{% if settings.phone %}{{ settings.phone }}{% endif %}{%endwith%}">
+                                                        {% with request|get_contact as settings %}
+                                                        {% if settings.phone %}
+                                                        {{ settings.phone }}
+                                                        {% endif %}
+                                                        {% endwith %}
+                                                    </a></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="footer-bottom">
+                    <div class="footer-left">
+                        <p class="copyright">{% with request|get_settings as settings %}{% if settings.content %}
+                            {{ settings.content }}{% endif %}{%endwith%}</p>
+                    </div>
+                    <div class="footer-right">
+                        <span class="payment-label mr-lg-8">Мы используем безопасную оплату для</span>
+                        <figure class="payment">
+                            <img src="{% with request|get_settings as settings %}{% if settings.paymentmetod %}{{ settings.paymentmetod.url }}{% endif %}{% endwith %}"
+                                 alt="payment" width="192" height="21"/>
+                        </figure>
+                    </div>
+                </div>
+            </div>
+        </footer>
+        <!-- End of Footer -->
+    </div>
+    <!-- End of Page-wrapper-->
+
+    <!-- Start of Scroll Top -->
+    <a id="scroll-top" class="scroll-top" href="demo1.html#top" title="Top" role="button"> <i
+            class="w-icon-angle-up"></i>
+        <svg
+                version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 70">
+            <circle id="progress-indicator" fill="transparent" stroke="#000000" stroke-miterlimit="10" cx="35" cy="35"
+                    r="34" style="stroke-dasharray: 16.4198, 400;"></circle>
+        </svg>
+    </a>
+    <!-- End of Scroll Top -->
+    <div class="mobile-menu-wrapper">
+        <div class="mobile-menu-overlay"></div>
+        <!-- End of .mobile-menu-overlay -->
+
+        <a href="#" class="mobile-menu-close"><i class="close-icon"></i></a>
+        <!-- End of .mobile-menu-close -->
+
+        <div class="mobile-menu-container scrollable">
+            <form action="{% url 'webmain:search' %}" method="get" class="input-wrapper">
+                <input id="search-input" name="q" type="text" class="form-control" value="{{ query }}" placeholder="Введи поисковую фразу..." aria-describedby="button-addon2" style="margin-right: 0px;border-left: 2px solid #336699" />
+                <button class="btn btn-search" type="submit" id="button-addon2">
+                    <i class="w-icon-search"></i>
+                </button>
+            </form>
+            <!-- End of Search Form -->
+            <div class="tab">
+                <ul class="nav nav-tabs" role="tablist">
+                    <li class="nav-item">
+                        <a href="#main-menu" class="nav-link active">Меню</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#categories" class="nav-link">Каталог</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="tab-content">
+                <div class="tab-pane active" id="main-menu">
+                    <ul class="mobile-menu">
+                        <li style="display: flex">
+                            {% if user.is_authenticated%}
+                            <a href="{% url 'useraccount:edit_profile' %}">Мой аккаунт</a>
+                            {% endif %}
+                            {% if not user.is_authenticated %}
+                            <a href="{% url 'useraccount:login' %}">Вход</a>
+                            <a>/</a>
+                            <a href="{% url 'useraccount:signup' %}">Регистрация</a>
+                            {% endif %}
+                        </li>
+                        <li>
+                            <a href="{% url 'webmain:home' %}">Главная</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'shop:catalogs' %}">Магазин</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'shop:bookmark_list' %}">Закладки</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'shop:my_cart' %}">Корзина</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'webmain:blogs' %}">Новости</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'webmain:contacts' %}">Контакты</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'webmain:about' %}">О компании</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="tab-pane" id="categories">
+                    <ul class="mobile-menu">
+
+                        {%  get_categories_with_count request.get_host as categories_with_count %}
+                        {% for category in categories_with_count %}
+                            {% if category.product_count != 0  %}
+                                <li class="category">
+                                    <span class="category-name"><a style="display: flex;" href="{#% url 'shop:categories' category.slug %#}">{{ category.name }}</a></span>
+
+                                </li>
+                                {% endif %}
+                        {% endfor %}
+
+                </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% block footer %}{% endblock footer %}
+    <script>
+        window.csrfToken = "{{ csrf_token }}";
+        console.log("CSRF Token: ", window.csrfToken);  // Debugging log
+    </script>
+    <!-- JavaScript to handle currency change -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.change-currency').forEach(function (element) {
+                element.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    const currencyId = this.getAttribute('data-currency-id');
+                    const csrfToken = window.csrfToken;
+
+                    fetch('/update-cart-currency/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken  // Ensure CSRF token is included in headers
+                        },
+                        body: JSON.stringify({currency_id: currencyId})
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === 'success') {
+                                alert('Currency updated to: ' + data.currency);
+                                location.reload();
+                            } else {
+                                alert('Failed to update currency.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                        });
+                });
+            });
+        });
+    </script>
+    <!-- Plugin JS File -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="{% static 'site/script.js' %}"></script>
+
+    <script data-cfasync="false"
+            src="{% static 'site/wolmart/5c5dd728/cloudflare-static/email-decode.min.js' %}"></script>
+    <script src="{% static 'site/wolmart/assets/vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'site/wolmart/assets/vendor/jquery.plugin/jquery.plugin.min.js' %}"></script>
+    <script src="{% static 'site/wolmart/assets/vendor/imagesloaded/imagesloaded.pkgd.min.js' %}"></script>
+    <script src="{% static 'site/wolmart/assets/vendor/zoom/jquery.zoom.js"></script>
+    <script src="{% static 'site/wolmart/assets/vendor/jquery.countdown/jquery.countdown.min.js' %}"></script>
+    <script src="{% static 'site/wolmart/assets/vendor/skrollr/skrollr.min.js' %}"></script>
+    <!-- Swiper JS -->
+    <script src="{% static 'site/wolmart/assets/vendor/swiper/swiper-bundle.min.js' %}"></script>
+    <!-- Main JS -->
+    <script src="{% static 'site/wolmart/assets/js/main.min.js' %}"></script>
+    <style>
+        .swiper-wrapper {
+            height: auto;
+        }
+
+        .header-search.hs-round.hs-expanded .form-control {
+            border-radius: 0.3rem 0 0 0.3rem;
+        }
+    </style>
+</div>
+</body>
+</html>
+

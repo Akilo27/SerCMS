@@ -1,0 +1,486 @@
+{% extends 'moderations/base.html' %}
+{% load generals_tag static i18n %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+{% endblock head %}
+{% block content %}
+
+<!-- ========== Page Title Start ========== -->
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="mb-0 fw-semibold">{% trans "Статистика" %}</h4>
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item active">{% trans "Общая статистика" %}</li>
+            </ol>
+        </div>
+    </div>
+</div>
+<!-- ========== Page Title End ========== -->
+
+<div class="row">
+    <div class="col-xl-12">
+        <div class="card overflow-hidden">
+    <div class="card-header d-flex justify-content-between align-items-center pb-1">
+        <div>
+            <h4 class="card-title">{% trans "Магазины" %}</h4>
+        </div>
+        <div class="dropdown">
+            <a href="index.html#" class="dropdown-toggle btn btn-sm btn-outline-light rounded" data-bs-toggle="dropdown" aria-expanded="false">
+                {% trans "Выбрать магазин" %}
+            </a>
+            <div class="dropdown-menu dropdown-menu-end">
+                <!-- item-->
+                {% for manufacturer in manufacturers %}
+                    <a href="javascript:void(0);" class="dropdown-item" data-manufacturer-id="{{ manufacturer.id }}">{{ manufacturer.name }}</a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="card-footer p-2 bg-light-subtle">
+        {% for manufacturer in manufacturers %}
+            <!-- Генерация ссылки для каждого производителя -->
+            <div class="manufacturer-frame" id="manufacturer-{{ manufacturer.id }}" style="display:none;">
+                <iframe src="{% url 'moderation:manufacturers_dashboard' manufacturer.id %}" width="100%" height="500px" frameborder="0"></iframe>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Получаем все элементы dropdown-item
+        const items = document.querySelectorAll('.dropdown-item');
+
+        // Добавляем обработчик клика на каждый элемент
+        items.forEach(item => {
+            item.addEventListener('click', function() {
+                const manufacturerId = this.getAttribute('data-manufacturer-id');
+
+                // Скрываем все iframes
+                const allFrames = document.querySelectorAll('.manufacturer-frame');
+                allFrames.forEach(frame => frame.style.display = 'none');
+
+                // Показываем только выбранный iframe
+                const selectedFrame = document.getElementById('manufacturer-' + manufacturerId);
+                if (selectedFrame) {
+                    selectedFrame.style.display = 'block';
+                }
+            });
+        });
+    });
+</script>
+
+    </div>
+<!--    <div class="col-xl-8">-->
+<!--        <div class="card overflow-hidden">-->
+<!--            <div class="card-header d-flex justify-content-between align-items-center pb-1">-->
+<!--                <div>-->
+<!--                    <h4 class="card-title">{% trans "Доход магазинов" %}</h4>-->
+<!--                </div>-->
+<!--                <div class="dropdown d-none">-->
+<!--                    <a href="index.html#" class="dropdown-toggle btn btn-sm btn-outline-light rounded" data-bs-toggle="dropdown" aria-expanded="false">-->
+<!--                        {% trans "This Month" %}-->
+<!--                    </a>-->
+<!--                    <div class="dropdown-menu dropdown-menu-end">-->
+<!--                        &lt;!&ndash; item&ndash;&gt;-->
+<!--                        <a href="index.html#!" class="dropdown-item">{% trans "Week" %}</a>-->
+<!--                        &lt;!&ndash; item&ndash;&gt;-->
+<!--                        <a href="index.html#!" class="dropdown-item">{% trans "Months" %}</a>-->
+<!--                        &lt;!&ndash; item&ndash;&gt;-->
+<!--                        <a href="index.html#!" class="dropdown-item">{% trans "Years" %}</a>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="card-footer p-2 bg-light-subtle text-center">-->
+<!--                <div class="row g-3">-->
+<!--                    <div class="col-md-4 border-end">-->
+<!--                        <p class="text-muted mb-1">{% trans "Продажи" %}</p>-->
+<!--                        <p class="text-dark fs-18 fw-medium d-flex align-items-center justify-content-center gap-2 mb-0">{{total_order_cool}}</p>-->
+<!--                    </div>-->
+<!--                    <div class="col-md-4 border-end">-->
+<!--                        <p class="text-muted mb-1">{% trans "Продана" %}</p>-->
+<!--                        <p class="text-dark fs-18 fw-medium d-flex align-items-center justify-content-center gap-2 mb-0">{{total_order_cool}}</p>-->
+<!--                    </div>-->
+<!--                    <div class="col-md-4">-->
+<!--                        <p class="text-muted mb-1">{% trans "Выручка" %}</p>-->
+<!--                        <p class="text-dark fs-18 fw-medium d-flex align-items-center justify-content-center gap-2 mb-0">{{total_order_cool}}</p>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+    <div class="col-xl-4" style="display: none;">
+        <div class="card bg-primary bg-gradient">
+            <div class="card-body">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-xl-7 col-lg-6 col-md-6">
+                        <h3 class="text-white fw-bold">{{ total_amount }} </h3>
+                        <div class="row mt-4">
+                            <div class="col-lg-6 col-lg-6 col-md-6 col-6">
+                                <div class="d-flex gap-2">
+                                    <div class="avatar-sm flex-shrink-0">
+                                         <span class="avatar-title bg-success bg-opacity-50 text-white rounded">
+                                             <i class="ri-arrow-down-line fs-4"></i>
+                                         </span>
+                                    </div>
+                                    <div class="d-block">
+                                        <h5 class="text-white fw-medium mb-0">{{ total_profit }} </h5>
+                                        <p class="mb-0 text-white-50">{% trans "Приход" %}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 col-lg-6 col-md-6 col-6">
+                                <div class="d-flex gap-2">
+                                    <div class="avatar-sm flex-shrink-0">
+                                        <span class="avatar-title bg-danger bg-opacity-50 text-white rounded">
+                                            <i class="ri-arrow-up-line fs-4"></i>
+                                        </span>
+                                    </div>
+                                    <div class="d-block">
+                                        <h5 class="text-white fw-medium mb-0">{{ total_expenditure }} </h5>
+                                        <p class="mb-0 text-white-50">{% trans "Выплаты" %}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<div class="row">
+    <div class="col-xl-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="card-title">{% trans "Платежи" %}</h4>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table align-middle text-nowrap table-hover table-centered mb-0">
+                        <thead class="bg-light-subtle">
+                        <tr>
+                            <th>{% trans "ID" %}</th>
+                            <th>{% trans "Статус" %}</th>
+                            <th>{% trans "Сумма" %}</th>
+                            <th>{% trans "Описание" %}</th>
+                            <th>{% trans "Тип платежа" %}</th>
+                            <th>{% trans "Дата" %}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for payment in payments %}
+                        <tr class="btn-reveal-trigger">
+                            <td class="py-2">{{ payment.id }}</td>
+                            <td class="py-2">{{ payment.get_status_display }}</td>
+                            <td class="py-2">{{ payment.amount }}</td>
+                            <td class="py-2">{{ payment.description }}</td>
+                            <!-- Задачи -->
+                            <td class="py-2">
+                                {% if payment.tasks %}
+                                {% for task in payment.tasks %}
+                                {% trans "Задача" %} ID: {{ task.id }}
+                                {% endfor %}
+                                {% elif payment.leads %}
+                                {% for lead in payment.leads %}
+                                {% trans "Лид" %} ID: {{ lead.id }}
+                                {% endfor %}
+                                {% else %}
+                                {% trans "Нет привязки" %}
+                                {% endif %}
+                            </td>
+
+
+                            <td class="py-2">{{ payment.created_at }}</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <!-- end table-responsive -->
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-4">
+        <div class="card">
+            <div class="card-header d-flex  justify-content-between align-items-center border-0">
+                <div>
+                    <h4 class="card-title mb-1">{% trans "Тикеты" %}</h4>
+                </div>
+            </div>
+            <div class="card-body pt-2">
+                {% for ticket in tickets %}
+                <div class="d-flex flex-wrap align-items-center justify-content-between border-bottom gap-2 pb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="avatar">
+                            <img src="{{ticket.author.avatar.url}}" alt="avatar-3" class="img-fluid rounded-circle">
+                        </div>
+                        <div class="d-block">
+                                            <span class="text-dark">
+                                                <a href="{% url 'moderation:ticket_message' ticket.id %}" class="text-dark fw-medium fs-15">{{ticket.author.username}}</a>
+                                            </span>
+                            <p class="mb-0 fs-13 text-muted">{{ticket.themas}}</p>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-muted fw-medium mb-0">{{ticket.date}}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="card-footer border-top">
+                <a href="{% url 'moderation:tickets' %}" class="btn btn-primary w-100">{% trans "К списку" %}</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 col-xl-2">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <p class="mb-2 fs-15 fw-medium">{% trans "Склады" %}</p>
+                        <h3 class="text-dark fw-bold d-flex align-items-center gap-2 mb-0">{{total_storage}}</h3>
+                    </div>
+                    <div>
+                        <div class="avatar-md bg-primary bg-opacity-10 rounded">
+                            <iconify-icon icon="solar:home-bold" class="fs-32 text-primary avatar-title"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-2">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <p class="mb-2 fs-15 fw-medium d-flex align-items-center gap-2">{% trans "Компании" %} </p>
+                        <h3 class="text-dark fw-bold d-flex align-items-center gap-2 mb-0">{{total_manufacturers}}</h3>
+                    </div>
+                    <div>
+                        <div class="avatar-md bg-success bg-opacity-10 rounded">
+                            <iconify-icon icon="solar:buildings-bold-duotone" class="fs-32 text-success avatar-title"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-2">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <p class="mb-2 fs-15 fw-medium">{% trans "Товары" %}</p>
+                        <h3 class="text-dark fw-bold d-flex align-items-center gap-2 mb-0">{{total_products}}</h3>
+                    </div>
+                    <div>
+                        <div class="avatar-md bg-warning bg-opacity-10 rounded">
+                            <iconify-icon icon="solar:cart-5-outline" class="fs-32 text-warning avatar-title"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-2">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <p class="mb-2 fs-15 fw-medium">{% trans "Категории" %}</p>
+                        <h3 class="text-dark fw-bold d-flex align-items-center gap-2 mb-0">{{total_categories}}</h3>
+                    </div>
+                    <div>
+                        <div class="avatar-md bg-info bg-opacity-10 rounded">
+                            <iconify-icon icon="solar:bill-bold" class="fs-32 text-info avatar-title"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-2">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <p class="mb-2 fs-15 fw-medium">{% trans "Покупки" %}</p>
+                        <h3 class="text-dark fw-bold d-flex align-items-center gap-2 mb-0">{{total_order}}</h3>
+                    </div>
+                    <div>
+                        <div class="avatar-md bg-info bg-opacity-10 rounded">
+                            <iconify-icon icon="solar:bag-smile-bold-duotone" class="fs-32 text-info avatar-title"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-2">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <p class="mb-2 fs-15 fw-medium">{% trans "Заявки" %}</p>
+                        <h3 class="text-dark fw-bold d-flex align-items-center gap-2 mb-0">{{total_applications}}</h3>
+                    </div>
+                    <div>
+                        <div class="avatar-md bg-info bg-opacity-10 rounded">
+                            <iconify-icon icon="solar:notification-unread-lines-broken" class="fs-32 text-info avatar-title"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-2">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <p class="mb-2 fs-15 fw-medium">{% trans "Жалобы" %}</p>
+                        <h3 class="text-dark fw-bold d-flex align-items-center gap-2 mb-0">{{total_complaint}}</h3>
+                    </div>
+                    <div>
+                        <div class="avatar-md bg-primary bg-opacity-10 rounded">
+                            <iconify-icon icon="solar:confounded-square-bold" class="fs-32 text-primary avatar-title"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-2">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <p class="mb-2 fs-15 fw-medium d-flex align-items-center gap-2">{% trans "Отзывы" %}</p>
+                        <h3 class="text-dark fw-bold d-flex align-items-center gap-2 mb-0">{{total_reviews}}</h3>
+                    </div>
+                    <div>
+                        <div class="avatar-md bg-success bg-opacity-10 rounded">
+                            <iconify-icon icon="solar:stars-bold" class="fs-32 text-success avatar-title"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-2">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <p class="mb-2 fs-15 fw-medium">{% trans "Комментарии" %}</p>
+                        <h3 class="text-dark fw-bold d-flex align-items-center gap-2 mb-0">{{total_comment}}</h3>
+                    </div>
+                    <div>
+                        <div class="avatar-md bg-warning bg-opacity-10 rounded">
+                            <iconify-icon icon="solar:chat-dots-linear" class="fs-32 text-warning avatar-title"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-2">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <p class="mb-2 fs-15 fw-medium">{% trans "Вопросы" %}</p>
+                        <h3 class="text-dark fw-bold d-flex align-items-center gap-2 mb-0">{{total_faq}}</h3>
+                    </div>
+                    <div>
+                        <div class="avatar-md bg-info bg-opacity-10 rounded">
+                            <iconify-icon icon="solar:question-square-broken" class="fs-32 text-info avatar-title"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-2">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <p class="mb-2 fs-15 fw-medium">{% trans "Вариации" %}</p>
+                        <h3 class="text-dark fw-bold d-flex align-items-center gap-2 mb-0">{{total_variable}}</h3>
+                    </div>
+                    <div>
+                        <div class="avatar-md bg-info bg-opacity-10 rounded">
+                            <iconify-icon icon="solar:archive-check-linear" class="fs-32 text-info avatar-title"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-2">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <p class="mb-2 fs-15 fw-medium">{% trans "Валюта" %}</p>
+                        <h3 class="text-dark fw-bold d-flex align-items-center gap-2 mb-0">{{total_valute}}</h3>
+                    </div>
+                    <div>
+                        <div class="avatar-md bg-info bg-opacity-10 rounded">
+                            <iconify-icon icon="solar:hand-money-linear" class="fs-32 text-info avatar-title"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script src="{% static 'site/moderations/assets/js/components/apexchart-area.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Получаем все элементы dropdown-item
+        const items = document.querySelectorAll('.dropdown-item');
+
+        // Обработка клика по элементам
+        items.forEach(item => {
+            item.addEventListener('click', function() {
+                const manufacturerId = this.getAttribute('data-manufacturer-id');
+
+                // Скрываем все iframe
+                const allFrames = document.querySelectorAll('.manufacturer-frame');
+                allFrames.forEach(frame => frame.style.display = 'none');
+
+                // Показываем выбранный iframe
+                const selectedFrame = document.getElementById('manufacturer-' + manufacturerId);
+                if (selectedFrame) {
+                    selectedFrame.style.display = 'block';
+                }
+            });
+        });
+
+        // При загрузке показываем первый магазин по умолчанию
+        const firstManufacturer = document.querySelector('.manufacturer-frame');
+        if (firstManufacturer) {
+            firstManufacturer.style.display = 'block';
+
+            // Также можно подсветить или выделить соответствующий пункт меню, если нужно
+        }
+    });
+</script>
+
+{% endblock content %}

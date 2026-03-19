@@ -1,0 +1,836 @@
+{% extends 'site/shop5/base.html' %}
+{% load static generals_tag shop_tags %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+<style>
+    .category-main:hover, .subcategory-header:hover {
+        background-color: #f1f8ff !important;
+        border-color: #cfe2ff !important;
+    }
+
+    .subsubcategory-item:hover {
+        background-color: #e9ecef !important;
+    }
+
+    /* Плавное раскрытие списков */
+    .subcategories-level-1, .subcategories-level-2 {
+        overflow: hidden;
+        transition: max-height 0.3s ease, opacity 0.2s ease;
+        max-height: 0;
+        opacity: 0;
+    }
+
+    .subcategories-level-1[style*="display: block"],
+    .subcategories-level-2[style*="display: block"] {
+        max-height: 2000px;
+        opacity: 1;
+    }
+
+
+
+</style>
+{% block content %}
+<style>
+
+    .intro-wrappers {
+ position: relative;
+ overflow: hidden;
+ width: 100%;
+ height: 650px;
+ margin-top: -50px;
+}
+
+.swiper-wrappers {
+ display: flex;
+ transition: transform 0.5s ease-in-out;
+ height: 100%;
+}
+
+.swipers-slide {
+ min-width: 100%;
+ height: 100%;
+ background-size: cover;
+ background-position: center;
+}
+
+.swiper-button-prev,
+.swiper-button-next {
+ position: absolute;
+ top: 50%;
+ transform: translateY(-50%);
+ background: rgba(0,0,0,0.4);
+ color: #fff;
+ border: none;
+ padding: 10px 15px;
+ cursor: pointer;
+ z-index: 10;
+ font-size: 18px;
+ border-radius: 50%;
+}
+
+.swiper-button-prev {
+ left: 10px;
+}
+
+.swiper-button-next {
+ right: 10px;
+}
+
+.swiper-pagination {
+ position: absolute;
+ bottom: 15px;
+ width: 100%;
+ text-align: center;
+}
+
+.swiper-pagination span {
+ display: inline-block;
+ width: 30px;
+ height: 4px;
+ margin: 0 3px;
+ background: rgba(255,255,255,0.4);
+ border-radius: 2px;
+ transition: background 0.3s ease;
+}
+
+.swiper-pagination .active {
+ background: #fff;
+}
+     .intro-slide-bonus {
+ background-color: #f278a5; /* розовый цвет из баннера */
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ padding: 10px;
+}
+
+.promo-content {
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ width: 100%;
+}
+
+.promo-text {
+ color: white;
+ text-align: left;
+}
+
+.promo-text .small-text {
+padding-left: 40px;
+ font-size: 66px;
+ font-weight: bold;
+ margin: 0;
+ line-height: 1.2;
+ text-transform: uppercase;
+}
+.price-block span {
+    font-size: 102px;
+    margin: 20px;
+}
+.price-block {
+cursor: pointer;
+height: 143px;
+ background-color: #de3b35;
+ border-radius: 100px;
+ padding: 5px 35px;
+ display: inline-flex;
+ align-items: center;
+ margin-top: 5px;
+}
+
+.price-label {
+ font-weight: bold;
+ font-size: 16px;
+ margin-right: 4px;
+}
+
+.price-value {
+ font-weight: bold;
+ font-size: 24px;
+ margin-right: 2px;
+}
+.cart-action > button:nth-child(3) {
+    background: #d14a40 !important;
+    color: #fff !important;
+    margin: 5px !important;
+    border: 1px solid #d14a40 !important;
+}
+.currency {
+ font-weight: bold;
+ font-size: 20px;
+}
+
+.promo-image img {
+ max-height: 300px;
+ margin-left: 10px;
+}
+    @media (max-width: 768px) {
+
+.promo-text .small-text {
+    font-size: 11px!important;
+padding-left: 10px;
+}
+
+.price-block  {
+    border-radius: 30px;
+    padding: 5px 5px;
+    height: 30px;
+}
+.price-block span {
+    font-size: 16px!important;
+    margin: 5px;
+}
+.intro-wrappers {
+ height: 200px;
+}
+    }
+</style>
+
+<script>
+    // полоска фильтра по цене
+    // For Filters
+    document.addEventListener("DOMContentLoaded", function() {
+        var filterAngle = document.getElementById('filter-angle');
+        // For Range Sliders
+        var inputLeft = document.getElementById("input-left1");
+        var inputRight = document.getElementById("input-right1");
+
+        var thumbLeft = document.querySelector(".slider > .thumb.left");
+        var thumbRight = document.querySelector(".slider > .thumb.right");
+        var range = document.querySelector(".slider > .range");
+
+        var amountLeft = document.getElementById('amount-left1')
+        var amountRight = document.getElementById('amount-right1')
+
+        function setLeftValue() {
+            var _this = inputLeft,
+                min = parseInt(_this.min),
+                max = parseInt(_this.max);
+
+            // Убедиться, что left не превышает right
+            _this.value = Math.min(parseInt(_this.value), parseInt(inputRight.value));
+
+            var percent = ((_this.value - min) / (max - min)) * 100;
+
+            thumbLeft.style.left = percent + "%";
+            range.style.left = percent + "%";
+            amountLeft.innerText = Math.round((_this.value));
+        }
+        setLeftValue();
+        function setRightValue() {
+            var _this = inputRight,
+                min = parseInt(_this.min),
+                max = parseInt(_this.max);
+
+            // Убедиться, что right не ниже left
+            _this.value = Math.max(parseInt(_this.value), parseInt(inputLeft.value));
+
+            var percent = ((_this.value - min) / (max - min)) * 100;
+
+            thumbRight.style.right = (100 - percent) + "%";
+            range.style.right = (100 - percent) + "%";
+            amountRight.innerText = Math.round((_this.value));
+        }
+        setRightValue();
+
+        inputLeft.addEventListener("input", setLeftValue);
+        inputRight.addEventListener("input", setRightValue);
+
+        inputLeft.addEventListener("mouseover", function () {
+            thumbLeft.classList.add("hover");
+        });
+        inputLeft.addEventListener("mouseout", function () {
+            thumbLeft.classList.remove("hover");
+        });
+        inputLeft.addEventListener("mousedown", function () {
+            thumbLeft.classList.add("active");
+        });
+        inputLeft.addEventListener("mouseup", function () {
+            thumbLeft.classList.remove("active");
+        });
+
+        inputRight.addEventListener("mouseover", function () {
+            thumbRight.classList.add("hover");
+        });
+        inputRight.addEventListener("mouseout", function () {
+            thumbRight.classList.remove("hover");
+        });
+        inputRight.addEventListener("mousedown", function () {
+            thumbRight.classList.add("active");
+        });
+        inputRight.addEventListener("mouseup", function () {
+            thumbRight.classList.remove("active");
+        });
+    });
+
+
+</script>
+<script>
+    document.querySelectorAll('[data-bs-target]').forEach(button => {
+        button.addEventListener('click', function() {
+            const targetModal = document.querySelector(this.getAttribute('data-bs-target'));
+            const productItem = this.closest('#no_order_' + this.getAttribute('data-product'));
+
+            if (targetModal && productItem) {
+                // Переносим содержимое модального окна в product-item
+                productItem.appendChild(targetModal);
+
+                // Показываем модальное окно
+                targetModal.classList.add('show');
+                targetModal.style.display = 'block';
+            }
+        });
+    });
+
+    // Обработчик для кнопки закрытия
+    document.querySelectorAll('.btn-close').forEach(button => {
+        button.addEventListener('click', function() {
+            const targetModal = this.closest('.modal');
+
+            if (targetModal) {
+                // Скрываем модальное окно
+                targetModal.classList.remove('show');
+                targetModal.style.display = 'none';
+
+                // Возвращаем модальное окно обратно в исходное состояние
+                const productItem = document.querySelector('#no_order_' + targetModal.dataset.product);
+                productItem.appendChild(targetModal);
+
+                // Сброс формы и восстановление содержимого
+                const form = targetModal.querySelector('form');
+                if (form) {
+                    form.reset(); // Сбрасываем поля формы
+                    const messageDiv = targetModal.querySelector('#application-message');
+                    if (messageDiv) {
+                        messageDiv.style.display = 'none'; // Скрываем сообщения
+                        messageDiv.innerHTML = ''; // Очищаем сообщения
+                    }
+
+                    // Восстанавливаем исходное содержимое формы
+                    const originalContent = form.dataset.originalContent;
+                    if (originalContent) {
+                        form.innerHTML = originalContent; // Восстанавливаем исходное содержимое
+                    }
+                }
+            }
+        });
+    });
+
+    // Сохраняем оригинальное содержимое формы при инициализации
+    document.querySelectorAll('.modal form').forEach(form => {
+        form.dataset.originalContent = form.innerHTML; // Сохраняем текущее содержимое формы
+    });
+
+</script>
+
+<main class="main">
+
+    <section class="intro-wrappers">
+        <div class="swiper-wrappers">
+            <div class="swipers-slide intro-slides intro-slide-bonus">
+                <div class="promo-content container">
+                    <div class="promo-text">
+                        <p class="small-text">КАЖДАЯ<br>10 ШАУРМА</p>
+                        <div class="price-block">
+                            <span class="price-label">ЗА</span>
+                            <span class="price-value">0</span>
+                            <span class="currency">₽</span>
+                        </div>
+                    </div>
+                    <div class="promo-image">
+                        <img src="{% static 'site/wolmart/img/shaurma2.png' %}" alt="Шаурма">
+                    </div>
+                </div>
+            </div>
+            <div class="swipers-slide intro-slides intro-slide-bonus">
+                <div class="promo-content container">
+                    <div class="promo-text">
+                        <p class="small-text">ВЫГОДА  30%</p>
+                        <div class="price-block">
+                            <span class="price-label">КОМБО</span>
+                        </div>
+                    </div>
+                    <div class="promo-image">
+                        <img src="{% static 'site/wolmart/img/komba.png' %}" alt="Шаурма">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="swiper-pagination"></div>
+    </section>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const wrapper = document.querySelector('.swiper-wrappers');
+            const slides = document.querySelectorAll('.swipers-slide');
+            const pagination = document.querySelector('.swiper-pagination');
+
+            let current = 0;
+            const total = slides.length;
+
+            // Создаем пагинацию
+            for (let i = 0; i < total; i++) {
+                const dot = document.createElement('span');
+                if (i === 0) dot.classList.add('active');
+                pagination.appendChild(dot);
+            }
+
+            const dots = pagination.querySelectorAll('span');
+
+            function goToSlide(index) {
+                if (index < 0) index = total - 1;
+                if (index >= total) index = 0;
+
+                wrapper.style.transform = `translateX(-${index * 100}%)`;
+                wrapper.style.transition = 'transform 0.3s ease';
+                dots.forEach(dot => dot.classList.remove('active'));
+                dots[index].classList.add('active');
+                current = index;
+            }
+
+            dots.forEach((dot, i) => dot.addEventListener('click', () => goToSlide(i)));
+
+            setInterval(() => goToSlide(current + 1), 5000);
+
+            // 👉 Поддержка свайпов
+            let startX = 0;
+            let endX = 0;
+
+            wrapper.addEventListener('touchstart', function (e) {
+                startX = e.touches[0].clientX;
+            });
+
+            wrapper.addEventListener('touchmove', function (e) {
+                endX = e.touches[0].clientX;
+            });
+
+            wrapper.addEventListener('touchend', function () {
+                let deltaX = endX - startX;
+
+                if (Math.abs(deltaX) > 50) { // Порог свайпа
+                    if (deltaX < 0) {
+                        goToSlide(current + 1); // свайп влево
+                    } else {
+                        goToSlide(current - 1); // свайп вправо
+                    }
+                }
+            });
+        });
+    </script>
+    <!-- Start of Page Content -->
+    <div class="page-content">
+        <div class="container">
+
+            <!-- Start of Shop Content -->
+            <div class="" style="margin-top: 40px;">
+                <!-- Start of Sidebar, Shop Sidebar -->
+                <!-- End of Shop Sidebar -->
+
+                <!-- Start of Shop Main Content -->
+                <div class="main-content">
+                    {% for category, products in grouped_products.items %}
+                    <h2 id="{{ category.slug }}" style=" padding: 80px 35px 20px 30px;">{{ category.name }}</h2>
+                    <div class="row ">
+
+                        {% for product in products %}
+                        <div  class="col-6 col-sm-6 col-md-4 grid-item {% for category in product.category.all %}{{ category.slug }} {% endfor %}">
+                            <div class="product text-center"
+                                 style="border-radius: 20px; border: 1px solid #e9eef4; padding: 0px; box-shadow: 4px 6px 15px rgba(0, 0, 0, 0.15);">
+                                <figure class="product-media">
+                                    <a href="{% url 'shop:products' product.slug %}">
+                                        <img src="{% if product.image %}{{ product.image.url }}{% endif %}" alt="Product"
+                                             width="600" height="675"/>
+                                    </a>
+                                </figure>
+                                <div class="product-details" style="border-radius: 20px 10px; margin: 0px 10px;">
+                                    {% include 'site/shop5/include/bookmark-button.html' %}
+                                    <h3 class="text-left product-name">
+                                        <a href="{% url 'shop:products' product.slug %}"
+                                           style="font-size: 22px; font-weight: bold;">{{ product.name }}</a>
+                                    </h3>
+                                    <div class="mobile-none"  style="display: flex; justify-content: flex-end;">
+                                        <div style="
+                                        justify-items: center;
+        background: #ededed;
+        border-radius: 10px;
+        padding: 6px 12px;
+        text-align: right;
+        color: #000;
+    ">
+                                            <div style="font-size: 14px;">вес</div>
+                                            <h5 style="margin: 0; font-weight: bold;">
+                                                {{ product.weight }} г
+                                            </h5>
+                                        </div>
+                                    </div>
+
+                                    <div class="product-price d-flex justify-content-between align-items-center">
+
+                                        <div class="price-container d-flex flex-column" style="align-items: flex-start;">
+                                            <del class="old-price" style="font-size: 1.9rem; color: #999; margin-top: 2px;">
+                                                {{ product.price_old }} ₽
+                                            </del>
+                                            <ins class="new-price"
+                                                 style="margin-top: -10px; font-size: 2rem; color: #333; font-weight: bold; text-decoration: none;">
+                                                {{ product.price }} ₽
+                                            </ins>
+                                        </div>
+                                        {% include 'site/shop5/include/cart-button.html' %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% endfor %}
+
+                    </div>
+                    {% endfor %}
+                    <div class="toolbox toolbox-pagination justify-content-between">
+
+                        {% include 'site/shop5/include/paginations_catalog.html' with items=products %}
+
+                    </div>
+                </div>
+                <!-- End of Shop Main Content -->
+            </div>
+            <!-- End of Shop Content -->
+        </div>
+    </div>
+    <!-- End of Page Content -->
+</main>
+<style>
+    .active>.page-link, .page-link.active{
+        border: 1px solid #336699;
+        border-radius: 5px;
+        color: #d5d5d5;
+        text-align: center;
+        background-color: #336699;
+        border-color: #336699;
+        display: -webkit-inline-box;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-box-pack: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        min-width: 3rem;
+        height: 4rem;
+        -webkit-transition: background-color 0.4s, border 0.4s, color 0.4s;
+        transition: background-color 0.4s, border 0.4s, color 0.4s;
+        line-height: 1;
+        margin-bottom: 0 !important;
+    }
+    .product-wrap{
+        align-content: end;
+    }
+    .toolbox {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 25px;
+    }
+
+    .select-box select, .select-menu select{
+        height: auto;
+    }
+    .d-flex.justify-content-between.align-items-center.category.show {
+        background: #e6c47f;
+    }
+    #price {
+        height: 45px
+    }
+
+    .middle {
+        position: relative;
+        width: 100%;
+        margin-top: 25px
+    }
+
+    .slider {
+        position: relative;
+        z-index: 1;
+        height: 5px;
+        margin: 0 15px
+    }
+
+    .slider > .track {
+        position: absolute;
+        z-index: 1;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        border-radius: 5px;
+        background-color: #ddd
+    }
+
+    .slider > .range {
+        position: absolute;
+        z-index: 2;
+        left: 25%;
+        right: 25%;
+        top: 0;
+        bottom: 0;
+        border-radius: 5px;
+        background-color: #336699
+    }
+
+    .slider > .thumb {
+        position: absolute;
+        top: 2px;
+        z-index: 3;
+        width: 20px;
+        height: 20px;
+        background-color: #336699;
+        border-radius: 50%;
+        box-shadow: #E6C47FFF;
+        transition: box-shadow .3s ease-in-out
+    }
+
+    .slider > .thumb::after {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        left: 28%;
+        top: 30%;
+        border-radius: 50%;
+        content: '';
+        background-color: #fff
+    }
+
+    .slider > .thumb.left {
+        left: 25%;
+        transform: translate(-15px, -10px)
+    }
+
+    .slider > .thumb.right {
+        right: 25%;
+        transform: translate(15px, -10px)
+    }
+
+    .slider > .thumb.hover {
+        box-shadow: #E6C47FFF;
+    }
+
+    .slider > .thumb.active {
+        box-shadow: #E6C47FFF;
+    }
+
+    input[type=range] {
+        position: absolute;
+        pointer-events: none;
+        -webkit-appearance: none;
+        z-index: 2;
+        height: 10px;
+        width: 100%;
+        opacity: 0
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+        pointer-events: all;
+        width: 30px;
+        height: 30px;
+        border-radius: 0;
+        border: 0 none;
+        background-color: #336699;
+        -webkit-appearance: none
+    }
+
+    .del {
+        text-decoration: line-through;
+        color: #336699
+    }
+
+    .text-muted{
+        color: #6c757d !important;
+    }
+    .brand .tick{
+
+        padding-left: 25px;
+    }
+    .rating .check{
+        background-color: #fff;
+        border: 1px solid #666;
+        top: 0;
+    }
+    .form-check-input[type=checkbox] {
+    border-radius: .25em;
+    }
+    .rating .fa.fa-star{
+        color: #ffbb00;
+        padding: 0px 3px;
+    }
+    .brand .tick:hover input ~ .check,
+    .rating .tick:hover input ~ .check{
+        background-color: #f9f9f9;
+    }
+    .brand .tick input:checked ~ .check,
+    .rating .tick input:checked ~ .check{
+        background-color: #61b15a;
+    }
+    .brand .check{
+        background-color: #fff;
+        top: 3px;
+        border: 1px solid #666;
+    }
+    .brand .tick{
+        font-size: 1rem;
+        padding-left: 25px;
+    }
+    .category{
+        font-size: 0.9rem;
+        cursor: pointer;
+    }
+    .list-group-item{
+        border: none;
+        padding: 0.3rem 0.4rem 0.3rem 0rem;
+    }
+    input[type="checkbox"] {
+        accent-color: #336699;
+    }
+
+</style>
+{% endblock content %}
+
+{% block footer %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        console.log("DOM полностью загружен и разобран");
+
+        // Находим все кнопки увеличения и уменьшения количества
+        var minusButtons = document.querySelectorAll('.qtyminus');
+        var plusButtons = document.querySelectorAll('.qtyplus');
+
+        console.log("Найдено кнопок минус:", minusButtons.length);
+        console.log("Найдено кнопок плюс:", plusButtons.length);
+
+        // Добавляем обработчики событий для кнопок уменьшения
+        minusButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                console.log("Кнопка минус нажата");
+                var input = this.parentNode.querySelector('.qty');
+                var value = parseInt(input.value, 10);
+                if (value > 1) {
+                    input.value = value - 1;
+                }
+                console.log("Новое значение:", input.value);
+            });
+        });
+
+        // Добавляем обработчики событий для кнопок увеличения
+        plusButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                console.log("Кнопка плюс нажата");
+                var input = this.parentNode.querySelector('.qty');
+                var value = parseInt(input.value, 10);
+                var max = parseInt(input.getAttribute('maxlength'), 10);
+                if (value < max) {
+                    input.value = value + 1;
+                }
+                console.log("Новое значение:", input.value);
+            });
+        });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let timeout = null;
+
+        document.querySelectorAll('input[type="checkbox"]').forEach(function(checkbox) {
+            checkbox.addEventListener('change', function() {
+                if (timeout) {
+                    clearTimeout(timeout);
+                }
+
+                timeout = setTimeout(function() {
+                    checkbox.form.submit();
+                }, 500);  // 2 секунды
+            });
+        });
+    });
+</script>
+
+<script>
+    let timer = null; // Переменная для хранения таймера
+    let changeCountLeft = 0; // Счётчик изменений для левого ползунка
+    let changeCountRight = 0; // Счётчик изменений для правого ползунка
+
+    // Получаем форму по id
+    const form = document.getElementById('price-filter-form');
+
+    // Получаем элементы .thumb, за которыми будем следить
+    const leftThumb = document.querySelector('.thumb.left');
+    const rightThumb = document.querySelector('.thumb.right');
+
+    // Функция для отправки формы через 2 секунды после последнего изменения
+    function handleThumbMove() {
+        // Если есть активный таймер, сбрасываем его
+        if (timer) {
+            clearTimeout(timer);
+        }
+
+        // Устанавливаем новый таймер на 2 секунды
+        timer = setTimeout(function() {
+            form.submit();  // Отправляем форму после 2 секунд тишины
+        }, 2000);
+    }
+
+    // Функция для отслеживания изменений стилей у элементов thumb
+    function observeThumb(thumb, isLeft = true) {
+        const observer = new MutationObserver(() => {
+            if (isLeft) {
+                changeCountLeft++;
+                if (changeCountLeft >= 2) {
+                    handleThumbMove(); // Только после второго изменения
+                }
+            } else {
+                changeCountRight++;
+                if (changeCountRight >= 2) {
+                    handleThumbMove(); // Только после второго изменения
+                }
+            }
+        });
+
+        // Настраиваем observer для отслеживания изменений атрибутов стиля
+        observer.observe(thumb, { attributes: true, attributeFilter: ['style'] });
+    }
+
+    // Запускаем наблюдателей для каждого ползунка
+    observeThumb(leftThumb, true);
+    observeThumb(rightThumb, false);
+</script>
+
+
+<script>
+    function toggleSubcategories(element) {
+        const subcategories = element.nextElementSibling;
+        const hamburger = element.querySelector('.hamburger-icon');
+
+        if (subcategories && (subcategories.classList.contains('subcategories-level-1') ||
+            subcategories.classList.contains('subcategories-level-2'))) {
+
+            if (subcategories.style.display === 'none' || !subcategories.style.display) {
+                subcategories.style.display = 'block';
+                // Анимация иконки в крестик
+                hamburger.children[0].style.transform = 'rotate(45deg)';
+                hamburger.children[0].style.top = '7px';
+                hamburger.children[1].style.opacity = '0';
+                hamburger.children[2].style.transform = 'rotate(-45deg)';
+                hamburger.children[2].style.top = '7px';
+            } else {
+                subcategories.style.display = 'none';
+                // Возвращаем в исходное состояние
+                hamburger.children[0].style.transform = 'rotate(0deg)';
+                hamburger.children[0].style.top = '0';
+                hamburger.children[1].style.opacity = '1';
+                hamburger.children[2].style.transform = 'rotate(0deg)';
+                hamburger.children[2].style.top = '14px';
+            }
+        }
+    }
+</script>
+{% endblock footer %}

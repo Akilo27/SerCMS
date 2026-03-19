@@ -1,0 +1,54 @@
+{% extends 'site/stroitel1/base.html' %}
+{% load static generals_tag %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+
+{% block content %}
+
+	<section class="s-banner">
+
+		<div class="swiper banner-swiper">
+
+			<div class="swiper-wrapper">
+                {% for media in gallery.gallerymedia_set.all %}
+				<div class="swiper-slide" style="background-image: url({% if media.file %}{{media.file.url}}{% endif %})">
+					<div class="banner-content">
+					</div>
+				</div>
+                {% endfor %}
+			</div>
+
+			<div class="swiper-pagination wow fadeInUp" data-wow-delay="0.5s"></div>
+
+			<div class="container">
+				<div class="swiper-button-prev"></div>
+				<div class="swiper-button-next"></div>
+			</div>
+
+		</div>
+
+	</section>
+
+	<section class="s-about" id="s-about">
+		<div class="container">
+
+			<div class="about-row">
+				<div class="about-left">
+					<h2 class="def-title wow fadeInLeft" data-wow-delay="0.2s">{{gallery.name}}</h2>
+					<div class="def-desc wow fadeInLeft" data-wow-delay="0.3s">
+						{{gallery.description|safe}}
+					</div>
+				</div>
+
+				<div class="about-right">
+					<img src="{% if gallery.image %}{{gallery.image.url}}{% endif %}" alt="{{gallery.name}}" class="wow fadeIn" data-wow-delay="0.5s">
+				</div>
+			</div>
+
+		</div>
+	</section>
+
+{% endblock content %}

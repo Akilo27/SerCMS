@@ -1,0 +1,20 @@
+{% load static generals_tag i18n shop_tags %}
+<li class="category-item" data-category-id="{{ item.category.id }}">
+    <div class="category-label">
+        {% if item.children %}
+            <button type="button" class="toggle-children" aria-label="{% trans 'Развернуть/Свернуть' %}"></button>
+        {% else %}
+            <span style="display:inline-block; width:12px;"></span>
+        {% endif %}
+        <input type="checkbox" name="category" value="{{ item.category.id }}" id="category-{{ item.category.id }}"
+            {% if item.category.id|stringformat:"s" in form.category.value|stringformat:"s" %}checked{% endif %}>
+        <label for="category-{{ item.category.id }}">{{ item.category.name }}</label>
+    </div>
+    {% if item.children %}
+        <ul class="category-children">
+            {% for child in item.children %}
+                {% include 'moderations/include/category_item.html' with item=child %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+</li>

@@ -1,0 +1,84 @@
+{% extends 'site/useraccount/base.html' %}
+{% load i18n %}
+{% load static  %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+{% block content %}
+<form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+    {% csrf_token %}
+
+    <!-- Поле Название -->
+    <div class="mb-3">
+        <label for="id_name" class="form-label">Название</label>
+        <input type="text" name="name" value="{{ form.name.value }}"
+               maxlength="150" required id="id_name"
+               class="form-control" placeholder="Введите название">
+        {% if form.name.errors %}
+        <div class="invalid-feedback">
+            {{ form.name.errors|join:", " }}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Поле Описание -->
+    <div class="mb-3">
+        <label for="id_description" class="form-label">Описание</label>
+        <textarea name="description" id="id_description" cols="40" rows="4"
+                  class="form-control" placeholder="Введите описание">{{ form.description.value }}</textarea>
+        {% if form.description.errors %}
+        <div class="invalid-feedback">
+            {{ form.description.errors|join:", " }}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Поле Превью -->
+    <div class="mb-3">
+        <label for="id_image" class="form-label">Превью</label>
+        {% if form.image.value %}
+        <p>На данный момент: <a href="{{ form.image.value.url }}">{{ form.image.value }}</a></p>
+        <input type="checkbox" name="image-clear" id="image-clear_id" class="form-check-input">
+        <label for="image-clear_id" class="form-check-label">Очистить</label>
+        {% endif %}
+        <input type="file" name="image" id="id_image" class="form-control mt-2">
+        {% if form.image.errors %}
+        <div class="invalid-feedback">
+            {{ form.image.errors|join:", " }}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Поле Опубликован -->
+    <div class="form-check mb-3">
+        <input type="checkbox" name="publishet" id="id_publishet"
+               class="form-check-input" {% if form.publishet.value %}checked{% endif %}>
+        <label for="id_publishet" class="form-check-label">Опубликован</label>
+        {% if form.publishet.errors %}
+        <div class="invalid-feedback">
+            {{ form.publishet.errors|join:", " }}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Поле Цена -->
+    <div class="mb-3">
+        <label for="id_price" class="form-label">Цена</label>
+        <input type="number" name="price" value="{{ form.price.value }}" min="0" required id="id_price"
+               class="form-control">
+        {% if form.price.errors %}
+        <div class="invalid-feedback">
+            {{ form.price.errors|join:", " }}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Кнопка отправки -->
+    <button type="submit" class="btn btn-primary">Сохранить</button>
+</form>
+
+
+{% endblock content %}

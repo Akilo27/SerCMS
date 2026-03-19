@@ -1,0 +1,65 @@
+{% load static shop_tags %}
+
+{% render_update_cart_currency_form as currency_form_context %}
+
+
+<form id="updateCurrencyForm" method="post" action="{% url 'shop:update_cart_currency' %}">
+    <input type="hidden" name="csrfmiddlewaretoken" value="{{ currency_form_context.csrf_token }}">
+    <div class="currency-list">
+        <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink2" data-bs-toggle="dropdown" aria-expanded="true">
+            {% if currency_form_context.selected_valute %}
+                {{ currency_form_context.selected_valute.name }}
+            {% else %}
+                Выберите валюту
+            {% endif %}
+        </a>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink2">
+            {% for valute in currency_form_context.form.valute.field.queryset %}
+            <li style="margin: 0;">
+
+
+
+                    <input type="radio" name="{{ currency_form_context.form.valute.name }}" value="{{ valute.pk }}"
+                           id="{{ currency_form_context.form.valute.name }}_{{ valute.pk }}"
+                           {% if currency_form_context.selected_valute.pk == valute.pk %}checked{% endif %}>
+                     <label for="{{ currency_form_context.form.valute.name }}_{{ valute.pk }}">{{ valute.name }}</label>
+
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</form>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('updateCurrencyForm');
+        const radioButtons = form.querySelectorAll('input[type="radio"]');
+
+        radioButtons.forEach(function(radio) {
+            radio.addEventListener('change', function() {
+                submitForm();
+            });
+        });
+
+        function submitForm() {
+            fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: {
+                    'X-CSRFToken': window.csrfToken
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        console.error('Ошибка:', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                });
+        }
+    });
+</script>

@@ -1,0 +1,636 @@
+{% extends 'moderations/base.html' %}
+{% load i18n %}
+{% load static  %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<link rel="stylesheet" href="{% static 'profile/css/font-awesome/css/all.min.css' %}">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<!-- Добавляем Sortable.js для drag and drop -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
+{% endblock head %}
+
+{% block content %}
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title" style="margin-right: 20px">{% trans 'Товары' %} {{total_products}}</h4>
+            <div class="toolbar" role="toolbar" style="text-align: -webkit-right;">
+                <!-- Кнопка включения/выключения режима перетаскивания -->
+
+
+                <div class="btn-group mb-1">
+                    <button type="button" class="btn btn-primary light px-3" onclick="location.href=`{% url 'moderation:product_create_and_edit' %}`">
+                        <iconify-icon icon="solar:add-circle-linear"></iconify-icon>
+                    </button>
+                    <button type="button" class="btn btn-primary light px-3" onclick="location.href=`{% url 'moderation:products' %}`">
+                        <iconify-icon icon="solar:refresh-broken"></iconify-icon>
+                    </button>
+                    <button type="button" class="btn btn-primary light px-3" id="deleteButton" onclick="deleteSelected()">
+                        <iconify-icon icon="solar:trash-bin-minimalistic-broken"></iconify-icon>
+                    </button>
+                    <button type="button" class="btn btn-primary light px-3" id="copyButton" onclick="copySelected()">
+                        <iconify-icon icon="solar:copy"></iconify-icon> {% trans "Копировать" %}
+                    </button>
+                    <button type="button" class="btn btn-primary light px-3" id="toggleDragMode">
+                        <iconify-icon icon="solar:swap-linear"></iconify-icon> {% trans 'Изменить порядок' %}
+                    </button>
+                </div>
+                <div class="btn-group mb-1">
+                    <button type="button" class="btn btn-primary light dropdown-toggle v" data-bs-toggle="dropdown">
+                        {% trans 'Поиск по' %}
+                        <span class="caret m-l-5"></span>
+                    </button>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" href="javascript:void(0);" onclick="openSearch('name')">{% trans 'Название' %}</a>
+                        <a class="dropdown-item" href="javascript:void(0);" onclick="openSearch('slug')">{% trans 'Slug' %}</a>
+                        <a class="dropdown-item" href="javascript:void(0);" onclick="openSearch('type')">{% trans 'Тип' %}</a>
+                        <a class="dropdown-item" href="javascript:void(0);" onclick="openSearch('typeofchoice')">{% trans 'Тип выбора' %}</a>
+                        <a class="dropdown-item" href="javascript:void(0);" onclick="openSearch('quantity')">{% trans 'Количество' %}</a>
+                        <a class="dropdown-item" href="javascript:void(0);" onclick="openSearch('review_rating')">{% trans 'Рейтинг' %}</a>
+                        <a class="dropdown-item" href="javascript:void(0);" onclick="openSearch('review_count')">{% trans 'Количество отзывов' %}</a>
+                        <a class="dropdown-item" href="javascript:void(0);" onclick="openSearch('review_all_sum')">{% trans 'Сумма отзывов' %}</a>
+                        <a class="dropdown-item" href="javascript:void(0);" onclick="openSearch('price')">{% trans 'Цена' %}</a>
+                        <a class="dropdown-item" href="javascript:void(0);" onclick="openSearch('order')">{% trans 'В заказе' %}</a>
+                        <a class="dropdown-item" href="javascript:void(0);" onclick="openSearch('stocks')">{% trans 'В наличии' %}</a>
+                        <a class="dropdown-item" href="javascript:void(0);" onclick="openSearch('manufacturers')">{% trans 'Производитель' %}</a>
+                        <a class="dropdown-item" href="javascript:void(0);" onclick="openSearch('valute')">{% trans 'Валюта' %}</a>
+                        <a class="dropdown-item" href="javascript:void(0);" onclick="openSearch('site')">{% trans 'Сайт' %}</a>
+                        <a class="dropdown-item" href="javascript:void(0);" onclick="openSearch('category')">{% trans 'Категория' %}</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div  style="overflow-x: auto;">
+                <!-- Добавляем ID для таблицы, чтобы использовать в Sortable -->
+                <table class="table" id="productsTable">
+                    <thead>
+                        <tr>
+                             <th></th>
+                            <th>{% trans "ID" %}</th>
+                            <th>{% trans "Позиция" %}</th>
+                            <th>{% trans "Название" %}</th>
+                            <th>{% trans "Тип" %}</th>
+                            <th>{% trans "Тип выбора" %}</th>
+                            <th>{% trans "Количество" %}</th>
+                            <th>{% trans "Оценка отзывов" %}</th>
+                            <th>{% trans "Кол-во отзывов" %}</th>
+                            <th>{% trans "Общая сумма отзывов" %}</th>
+                            <th>{% trans "Изображение" %}</th>
+                            <th>{% trans "Производитель" %}</th>
+                            <th>{% trans "Цена" %}</th>
+                            <th>{% trans "Валюта" %}</th>
+                            <th>{% trans "Под заказ" %}</th>
+                            <th>{% trans "Сайты" %}</th>
+                            <th>{% trans "Создано" %}</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="sortable-tbody">
+                    {% for product in products %}
+                    <tr data-id="{{ product.id }}" data-position="{{ product.position }}">
+                        <td class="py-2">
+                            <div class="form-check custom-checkbox checkbox-success">
+                                <input type="checkbox" name="blogs_ids" value="{{ product.id }}" class="form-check-input" id="checkbox_{{ product.id }}">
+                                    <label class="form-check-label" for="checkbox_{{ product.id }}"></label>
+                            </div>
+                        </td>
+                        <td>{{ product.id }}</td>
+                        <td class="position-cell">{{ product.position }}</td>
+                        <td>{{ product.name }}</td>
+                        <td>{{ product.get_type_display }}</td>
+                        <td>{{ product.get_typeofchoice_display }}</td>
+                        <td>{{ product.quantity }}</td>
+                        <td>{{ product.review_rating }}</td>
+                        <td>{{ product.review_count }}</td>
+                        <td>{{ product.review_all_sum }}</td>
+                        <td>
+                            {% if product.image %}
+                            <img src="{{ product.image.url }}" alt="product image" width="60">
+                            {% endif %}
+                        </td>
+                        <td>{{ product.manufacturers.name }}</td>
+                        <td>{{ product.price }}</td>
+                        <td>{{ product.valute.symbol }}</td>
+                        <td>{{ product.order|yesno:"Да,Нет" }}</td>
+                        <td>
+                            {% for site in product.site.all %}
+                            {{ site.domain }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </td>
+                        <td>{{ product.create|date:"d/m/Y H:i" }}</td>
+                        <td class="py-2 text-right">
+                            <div class="dropdown text-sans-serif">
+                                <button class="btn btn-primary tp-btn-light sharp" type="button" id="product-dropdown-{{ product.id }}" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <svg width="18px" height="18px" viewBox="0 0 24 24">
+                                        <circle fill="#000000" cx="5" cy="12" r="2"></circle>
+                                        <circle fill="#000000" cx="12" cy="12" r="2"></circle>
+                                        <circle fill="#000000" cx="19" cy="12" r="2"></circle>
+                                    </svg>
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-end border py-0" aria-labelledby="product-dropdown-{{ product.id }}">
+                                    <div class="py-2">
+                                        <a class="dropdown-item" href="{% url 'moderation:product_edit' product.id %}">Редактировать</a>
+                                        <div class="dropdown-divider"></div>
+                                        <button class="dropdown-item text-danger" onclick="deleteBlog('{{ product.id }}')">Удалить</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="100%">Нет продуктов</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% include 'moderations/include/paginations.html' with items=blogs_list %}
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="searchModalLabel">{% trans 'Поиск' %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="idSearchName" style="display: none;">
+                    <input type="text" id="searchInputName" class="form-control" placeholder="{% trans 'Введите название' %}">
+                </div>
+                <div id="idSearchSlug" style="display: none;">
+                    <input type="text" id="searchInputSlug" class="form-control" placeholder="{% trans 'Введите slug' %}">
+                </div>
+
+                <div id="idSearchType" style="display: none;">
+                    <input type="text" id="searchInputType" class="form-control" placeholder="{% trans 'Введите тип' %}">
+                </div>
+
+                <div id="idSearchTypeOfChoice" style="display: none;">
+                    <input type="text" id="searchInputTypeOfChoice" class="form-control" placeholder="{% trans 'Введите тип выбора' %}">
+                </div>
+
+                <div id="idSearchQuantity" style="display: none;">
+                    <input type="number" id="searchInputQuantity" class="form-control" placeholder="{% trans 'Введите количество' %}">
+                </div>
+
+                <div id="idSearchReviewRating" style="display: none;">
+                    <input type="number" id="searchInputReviewRating" class="form-control" placeholder="{% trans 'Введите рейтинг' %}">
+                </div>
+
+                <div id="idSearchReviewCount" style="display: none;">
+                    <input type="number" id="searchInputReviewCount" class="form-control" placeholder="{% trans 'Введите количество отзывов' %}">
+                </div>
+
+                <div id="idSearchReviewSum" style="display: none;">
+                    <input type="number" id="searchInputReviewSum" class="form-control" placeholder="{% trans 'Введите сумму отзывов' %}">
+                </div>
+
+                <div id="idSearchPrice" style="display: none;">
+                    <input type="number" id="searchInputPrice" class="form-control" placeholder="{% trans 'Введите цену' %}">
+                </div>
+
+                <div id="idSearchOrder" style="display: none;">
+                    <select id="searchInputOrder" class="form-control">
+                        <option value="">{% trans 'Выберите' %}</option>
+                        <option value="true">{% trans 'Да' %}</option>
+                        <option value="false">{% trans 'Нет' %}</option>
+                    </select>
+                </div>
+
+                <div id="idSearchStocks" style="display: none;">
+                    <select id="searchInputStocks" class="form-control">
+                        <option value="">{% trans 'Выберите' %}</option>
+                        <option value="true">{% trans 'Да' %}</option>
+                        <option value="false">{% trans 'Нет' %}</option>
+                    </select>
+                </div>
+
+                <div id="idSearchManufacturers" style="display: none;">
+                    <input type="text" id="searchInputManufacturers" class="form-control" placeholder="{% trans 'Введите производителя' %}">
+                </div>
+
+                <div id="idSearchValute" style="display: none;">
+                    <input type="text" id="searchInputValute" class="form-control" placeholder="{% trans 'Введите валюту' %}">
+                </div>
+
+                <div id="idSearchSite" style="display: none;">
+                    <input type="text" id="searchInputSite" class="form-control" placeholder="{% trans 'Введите сайт' %}">
+                </div>
+                <div id="categorySearch" style="display: none;">
+    <select id="categorySelect" class="form-control">
+        <option value="">{% trans 'Выберите категорию' %}</option>
+        {% for category in categories %}
+            <option value="{{ category.id }}">{{ category.name }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans 'Закрыть' %}</button>
+                <button type="button" class="btn btn-primary" onclick="performSearch()">{% trans 'Поиск' %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .table{
+        width: 100%;
+    }
+    .card{
+        margin-top: 1.25rem;
+    }
+    /* Стили для режима перетаскивания */
+    .drag-mode .sortable-ghost {
+        opacity: 0.5;
+        background: #c8ebfb;
+    }
+    .drag-mode .sortable-chosen {
+        background-color: #e6f7ff;
+    }
+    .drag-mode .sortable-drag {
+        opacity: 1;
+        box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+    .drag-handle {
+        cursor: move;
+        margin-right: 10px;
+    }
+</style>
+<script>
+    // Функции поиска
+    function openSearch(type) {
+        const modalLabel = document.getElementById('searchModalLabel');
+        const labels = {
+            name: '{% trans "Поиск по названию" %}',
+            slug: '{% trans "Поиск по slug" %}',
+            type: '{% trans "Поиск по типу" %}',
+            typeofchoice: '{% trans "Поиск по типу выбора" %}',
+            quantity: '{% trans "Поиск по количеству" %}',
+            review_rating: '{% trans "Поиск по рейтингу" %}',
+            review_count: '{% trans "Поиск по количеству отзывов" %}',
+            review_all_sum: '{% trans "Поиск по сумме отзывов" %}',
+            price: '{% trans "Поиск по цене" %}',
+            order: '{% trans "В заказе" %}',
+            stocks: '{% trans "В наличии" %}',
+            manufacturers: '{% trans "Поиск по производителю" %}',
+            valute: '{% trans "Поиск по валюте" %}',
+            site: '{% trans "Поиск по сайту" %}',
+            category: '{% trans "Поиск по категории" %}',
+        };
+
+        modalLabel.textContent = labels[type] || '{% trans "Поиск" %}';
+
+        // Скрываем все поля
+        document.querySelectorAll('.modal-body > div').forEach(div => {
+            div.style.display = 'none';
+        });
+
+        // Показываем нужное
+        const idMap = {
+            name: 'idSearchName',
+            slug: 'idSearchSlug',
+            type: 'idSearchType',
+            typeofchoice: 'idSearchTypeOfChoice',
+            quantity: 'idSearchQuantity',
+            review_rating: 'idSearchReviewRating',
+            review_count: 'idSearchReviewCount',
+            review_all_sum: 'idSearchReviewSum',
+            price: 'idSearchPrice',
+            order: 'idSearchOrder',
+            stocks: 'idSearchStocks',
+            manufacturers: 'idSearchManufacturers',
+            valute: 'idSearchValute',
+            site: 'idSearchSite',
+            category: 'categorySearch',
+        };
+
+        const idToShow = idMap[type];
+        if (idToShow) {
+            document.getElementById(idToShow).style.display = 'block';
+        }
+
+        $('#searchModal').modal('show');
+    }
+
+    function performSearch() {
+        const url = new URL(window.location.href);
+        const fields = {
+            search_name: 'searchInputName',
+            slug: 'searchInputSlug',
+            type: 'searchInputType',
+            typeofchoice: 'searchInputTypeOfChoice',
+            quantity: 'searchInputQuantity',
+            review_rating: 'searchInputReviewRating',
+            review_count: 'searchInputReviewCount',
+            review_all_sum: 'searchInputReviewSum',
+            price: 'searchInputPrice',
+            order: 'searchInputOrder',
+            stocks: 'searchInputStocks',
+            manufacturers: 'searchInputManufacturers',
+            valute: 'searchInputValute',
+            site: 'searchInputSite',
+            search_category: 'categorySelect',
+        };
+
+        Object.entries(fields).forEach(([param, inputId]) => {
+            const value = document.getElementById(inputId)?.value;
+            if (value) {
+                url.searchParams.set(param, value);
+            }
+        });
+
+        window.location.href = url.toString();
+        $('#searchModal').modal('hide');
+    }
+
+    // Функции удаления
+    function setupCheckAll() {
+        const checkAll = document.getElementById('checkAll');
+        if (checkAll) {
+            checkAll.addEventListener('change', function() {
+                const checkboxes = document.querySelectorAll('input[name="blogs_ids"]');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                });
+            });
+        }
+    }
+
+    function deleteSelected() {
+        const selectedIds = Array.from(document.querySelectorAll('input[name="blogs_ids"]:checked')).map(checkbox => checkbox.value);
+        if (selectedIds.length === 0) {
+            alert("{% trans 'Выберите хотя бы один элемент для удаления.' %}");
+            return;
+        }
+
+        if (confirm("{% trans 'Вы уверены, что хотите удалить выбранные элементы?' %}")) {
+            const csrfToken = '{{ csrf_token }}';
+
+            fetch("{% url 'moderation:product_delete' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    blogs_ids: selectedIds
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert("{% trans 'Ошибка при удалении элементов.' %}");
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert("{% trans 'Ошибка при удалении элементов.' %}");
+            });
+        }
+    }
+
+    function deleteBlog(blogsId) {
+        if (confirm("{% trans 'Вы уверены, что хотите удалить этот элемент?' %}")) {
+            const csrfToken = '{{ csrf_token }}';
+
+            fetch("{% url 'moderation:product_delete' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    blogs_ids: [blogsId]
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert("{% trans 'Ошибка при удалении элемента.' %}");
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert("{% trans 'Ошибка при удалении элемента.' %}");
+            });
+        }
+    }
+
+    // Функция копирования
+    function copySelected() {
+        const selectedIds = Array.from(document.querySelectorAll('input[name="blogs_ids"]:checked')).map(checkbox => checkbox.value);
+        if (selectedIds.length === 0) {
+            alert("{% trans 'Выберите хотя бы один элемент для копирования.' %}");
+            return;
+        }
+        if (selectedIds.length > 1) {
+            alert("{% trans 'Можно копировать только 1 товар за раз.' %}");
+            return;
+        }
+
+        if (confirm("{% trans 'Вы уверены, что хотите скопировать выбранные товары?' %}")) {
+            const csrfToken = '{{ csrf_token }}';
+
+            fetch("{% url 'moderation:product_copy' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({ blogs_ids: selectedIds })
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error("{% trans 'Ошибка при копировании товаров.' %}");
+                }
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    alert("{% trans 'Товары успешно скопированы.' %}");
+                    window.location.reload();
+                } else {
+                    alert(data.message || "{% trans 'Ошибка при копировании товаров.' %}");
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert(error.message);
+            });
+        }
+    }
+
+   // Новый код для drag and drop
+let sortable = null;
+let isDragMode = false;
+
+function initDragDrop() {
+    const toggleButton = document.getElementById('toggleDragMode');
+    if (!toggleButton) return;
+
+    toggleButton.addEventListener('click', function() {
+        isDragMode = !isDragMode;
+
+        if (isDragMode) {
+            enableDragMode();
+            this.innerHTML = '<iconify-icon icon="solar:check-circle-linear"></iconify-icon> {% trans "Завершить перетаскивание" %}';
+        } else {
+            disableDragMode();
+            this.innerHTML = '<iconify-icon icon="solar:swap-linear"></iconify-icon> {% trans "Изменить порядок" %}';
+        }
+    });
+}
+
+function enableDragMode() {
+    const productsTable = document.getElementById('productsTable');
+    if (productsTable) {
+        productsTable.classList.add('drag-mode');
+    }
+
+    const tbody = document.getElementById('sortable-tbody');
+    if (!tbody) return;
+
+    // Убедитесь, что старый экземпляр Sortable уничтожен
+    if (sortable) {
+        sortable.destroy();
+    }
+
+    sortable = new Sortable(tbody, {
+        animation: 150,
+        ghostClass: 'sortable-ghost',
+        chosenClass: 'sortable-chosen',
+        dragClass: 'sortable-drag',
+        onEnd: function(evt) {
+            updatePositions();
+        }
+    });
+
+    // Добавляем handle для перетаскивания
+    const rows = tbody.querySelectorAll('tr');
+    rows.forEach(row => {
+        if (!row.querySelector('.drag-handle')) {
+            const handle = document.createElement('span');
+            handle.className = 'drag-handle';
+            handle.innerHTML = '<iconify-icon icon="solar:sort-linear"></iconify-icon>';
+            handle.style.cursor = 'move';
+            handle.style.marginRight = '10px';
+
+            const firstTd = row.querySelector('td:first-child');
+            if (firstTd) {
+                // Вставляем handle перед чекбоксом
+                const checkbox = firstTd.querySelector('.form-check');
+                if (checkbox) {
+                    firstTd.insertBefore(handle, checkbox);
+                } else {
+                    firstTd.prepend(handle);
+                }
+            }
+        }
+    });
+}
+
+function disableDragMode() {
+    const productsTable = document.getElementById('productsTable');
+    if (productsTable) {
+        productsTable.classList.remove('drag-mode');
+    }
+
+    if (sortable) {
+        sortable.destroy();
+        sortable = null;
+    }
+
+    const handles = document.querySelectorAll('.drag-handle');
+    handles.forEach(handle => handle.remove());
+}
+
+function updatePositions() {
+    const rows = document.querySelectorAll('#sortable-tbody tr');
+    const positions = [];
+
+    rows.forEach((row, index) => {
+        const productId = row.getAttribute('data-id');
+        const positionCell = row.querySelector('.position-cell');
+
+        if (positionCell && productId) {
+            const newPosition = index + 1;
+            positionCell.textContent = newPosition;
+
+            positions.push({
+                id: productId,
+                position: newPosition
+            });
+        }
+    });
+
+    savePositions(positions);
+}
+
+function savePositions(positions) {
+    const csrfToken = getCookie('csrftoken');
+
+    fetch("{% url 'moderation:update_product_positions' %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({ positions: positions })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.status === 'success') {
+            console.log('Позиции успешно сохранены');
+        } else {
+            console.error('Ошибка при сохранении позиций:', data.message);
+            alert('Ошибка при сохранении порядка: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+        alert('Ошибка при сохранении порядка: ' + error.message);
+    });
+}
+
+// Функция для получения CSRF токена
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Инициализация после загрузки DOM
+document.addEventListener('DOMContentLoaded', function() {
+    setupCheckAll();
+    initDragDrop();
+});
+</script>
+{% endblock content %}

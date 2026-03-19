@@ -1,0 +1,529 @@
+{% load static shop_tags generals_tag %}
+<style>
+
+/* Модифицированный CSS */
+.category-dropdown.dropdown.show .dropdown-box {
+    width: 100rem;
+    max-width: 150rem; /* Фиксируем базовый размер */
+    overflow-x: hidden !important; /* Блокируем горизонтальную прокрутку */
+    overflow-y: auto;
+    height: 60vh;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.category-dropdown.dropdown.show .dropdown-box.expanded {
+    min-width: 140rem !important;
+    max-width: 150rem !important;
+    width: 141rem !important; /* Явно задаем ширину */
+}
+
+
+/* Для псевдоэлемента after (если нужно) */
+.category-dropdown.dropdown.show::after {
+    width: 140rem;
+    transition: width 0.3s ease;
+}
+
+    .menu-item-has-children {
+        position: relative;
+    }
+
+    /* Стили для основного контейнера меню */
+    .menu.vertical-menu.category-menu {
+        max-height: 100vh;
+        overflow-y: auto;
+        width: 24rem;
+    }
+
+    /* Стили для элементов списка */
+    .menu.vertical-menu.category-menu > ul {
+        position: relative;
+        max-height: 100vh;
+        overflow-y: auto;
+    }
+
+    /* Стили для контейнера содержимого */
+    .menu.vertical-menu.category-menu .content-container {
+        position: fixed;
+        top: 0;
+        left: 30rem;
+        width: 70%;
+        padding: 10px;
+        background-color: #f9f9f9;
+        z-index: 1000;
+
+    }
+
+    .menu.vertical-menu.category-menu > li.active .content-container {
+        display: block;
+    }
+
+    /* Стили для полоски с подкатегориями */
+    .category-path-wrapper {
+        position: relative;
+        margin-bottom: 2rem;
+        z-index: 2;
+        height:90%;
+        max-width: 78.6%;
+    }
+
+    .category-path {
+        padding: 1rem 0;
+        background: #ffffff;
+        border-radius:15px;
+        height:90%;
+    }
+
+    .path-items {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    padding: 2rem;
+    width: max-content;
+    min-width: 100%;
+}
+
+.path-item {
+    position: relative;
+    min-width: 200px;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: -3px 0 15px rgba(0, 0, 0, 0.1);
+    z-index: 1; /* Добавляем базовый z-index */
+}
+    .path-item > a {
+        font-weight: 600;
+        color: #333;
+        font-size: 1.4rem;
+    }
+
+.sub-items {
+    position: absolute;
+    top: calc(100% + 1.5px); /* Отступ от родителя */
+    left: 0;
+    width: 100%;
+    margin-top: 0;
+    padding: 1rem;
+    background: #ffffff;
+    border-radius: 6px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    display: none;
+    z-index: 1000; /* Высокий индекс для перекрытия */
+    transform: translateZ(0); /* Фикс для аппаратного ускорения */
+}
+
+   .path-item:hover {
+    z-index: 1001; /* Поднимаем выше соседних элементов */
+}
+
+.path-item:hover .sub-items {
+    display: block;
+    animation: fadeIn 0.2s ease;
+}
+
+    .sub-items a {
+        display: block;
+        padding: 0.5rem 0;
+        color: #ffffff;
+        font-size: 1.3rem;
+    }
+
+    .dropdown-box a {
+    padding: 0;
+}
+
+    @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.content-container {
+    overflow-x: hidden;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: #ccc transparent;
+    display: flex;
+    width: 97%;
+    transition: min-width 0.3s, max-width 0.3s; /* Добавляем анимацию */
+    max-width: 100%; /* Изменяем фиксированное значение */
+    min-width: 113rem;
+    will-change: min-width, max-width;/* Базовая ширина как у dropdown-box */
+}
+
+/* Расширенная версия */
+.category-dropdown.dropdown.show .dropdown-box.expanded .content-container {
+    min-width: 140rem !important;
+    max-width: 140rem !important;
+}
+
+/* Для вложенных элементов */
+.content-container .swiper-container {
+    min-width: 100%;
+    flex-shrink: 0;
+}
+
+    /* Новый контейнер для оверлея */
+    .content-container {
+        position: relative;
+        overflow: visible !important;
+    }
+    .content-container::-webkit-scrollbar {
+    height: 6px;
+}
+
+.content-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.content-container::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
+}
+
+/* Для swiper-контейнера */
+.content-container .swiper-container {
+    flex-shrink: 0;
+    width: auto;
+    padding: 0 15px;
+}
+
+    .product-overlay {
+    position: absolute;
+    top: auto;
+    bottom: 20px;
+    right: 20px;
+    width: calc(100% - 27.5%);
+    height: calc(100% - 85%);
+    background: rgba(255, 255, 255, 0.1);
+    z-index: 9999;
+    pointer-events: none;
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+}
+
+.category-dropdown.dropdown.show .dropdown-box.expanded .product-overlay {
+    width: calc(100% - 23.5%);
+    right: 20px;
+}
+
+     .banner-slider {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+    .swiper-slide-banner {
+        position: relative;
+        transition: opacity 0.5s;
+    }
+
+.banner-image {
+        width: 100%;
+        height: 100%;
+        object-fit: contain; /* Заполнение области без искажений */
+        display: block;
+    }
+    .banner-slider img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+     .content-container,
+    .product-wrapper,
+    .product-active {
+        height: 100%;
+    }
+
+     .swiper-wrapper {
+    display: flex !important; /* Переопределение стилей Swiper */
+    flex-wrap: nowrap !important;
+}
+
+.path-items {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 5 колонок */
+    gap: 2rem 1rem; /* Вертикальный и горизонтальный отступ */
+    padding: 0 2rem;
+    align-items: start;
+}
+
+/* Добавляем многострочное отображение при необходимости */
+.path-items.multi-row {
+    grid-template-rows: auto auto; /* 2 ряда */
+    row-gap: 3rem; /* Большой отступ между рядами */
+}
+
+.category-path {
+    height: auto; /* Автоматическая высота */
+    min-height: 90%; /* Минимальная высота */
+    padding: 2rem 0; /* Увеличиваем вертикальные отступы */
+}
+
+/* Корректируем высоту контейнера */
+.category-dropdown.dropdown.show .dropdown-box.expanded {
+    height: 75vh !important; /* Увеличиваем высоту при расширении */
+    min-width: 140rem !important;
+}
+</style>
+{% block content %}
+{% get_categories_without_parent as categories %}
+<div class="dropdown category-dropdown has-border" data-visible="true">
+    <a href="{% url 'shop:catalogs' %}" class="category-toggle text-dark" role="button" data-toggle="dropdown"
+       aria-haspopup="true" aria-expanded="true" data-display="static" title="Browse Categories">
+        <i class="w-icon-category"></i>
+        <span>Каталог</span>
+    </a>
+    <div class="dropdown-box" style="min-width: 120rem; overflow-x: hidden;max-height: 250vh;overflow-y: hidden; width:auto;">
+
+        <div class="product-overlay">
+            <div class="banner-slider swiper">
+                <div class="swiper-wrapper">
+                    {% for category in categories %}
+                     {% get_banners_for_category category as banners %}
+                    {% for banner in banners %}
+                    <div class="swiper-slide swiper-slide-banner">
+                        <a href="{{ banner.link }}" target="_blank">
+                            <img src="{% if banner.image %}{{ banner.image.url }}{% endif %}"
+                                 alt="{{ banner.title }}"
+                                 class="banner-image">
+                        </a>
+                    </div>
+                    {% endfor %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <ul class="menu vertical-menu category-menu" style="width: 28rem;max-height: 55vh;">
+            {% for category in categories %}
+            {#% if category.products_rekomendet.count != 0 %#}
+
+            <li class="menu-item-has-children">
+                <a href="{{ category.get_absolute_url }}" class="accordion-button collapsed"
+                   data-category-id="{{ category.id }}" data-loaded="false">
+                    {{ category.name }}
+                </a>
+
+                <div class="content-container" style="display: none; border-radius:15px; min-width:113rem;">
+
+                </div>
+
+            </li>
+            {#% endif %#}
+            {% endfor %}
+        </ul>
+
+    </div>
+</div>
+{% endblock content %}
+
+{% block footer %}
+<script>
+    const csrf_token = "{{ csrf_token }}";
+</script>
+<script src="{% static 'site/furbar/js/plugins/swiper-bundle.min.js' %}"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let previousButton = null;
+        let hoverTimer = null;
+        let lastMainCategory = null;
+
+        document.querySelectorAll('.accordion-button').forEach(function (button) {
+            button.addEventListener('mouseover', function () {
+                if (button.getAttribute('data-loaded') === 'true') {
+                    handleButtonAction(button);
+                } else {
+                    hoverTimer = setTimeout(() => {
+                        handleButtonAction(button);
+                    }, 200);
+                }
+            });
+
+            button.addEventListener('mouseout', function () {
+                clearTimeout(hoverTimer);
+            });
+        });
+
+        function handleButtonAction(button) {
+            if (previousButton && previousButton !== button) {
+                previousButton.classList.add('collapsed');
+                const previousContainer = previousButton.closest('li').querySelector('.content-container');
+                previousContainer.style.display = 'none';
+            }
+
+            button.classList.remove('collapsed');
+            const container = button.closest('li').querySelector('.content-container');
+            container.style.display = 'block';
+
+            if (button.getAttribute('data-loaded') === 'false') {
+                const categoryId = button.getAttribute('data-category-id');
+                loadCategoryContent(categoryId, container, button);
+
+                // Remember this as the last main category we loaded
+                lastMainCategory = {
+                    button: button,
+                    categoryId: categoryId,
+                    container: container
+                };
+            } else {
+                // If this is a main category button, update our reference
+                if (button.classList.contains('accordion-button')) {
+                    lastMainCategory = {
+                        button: button,
+                        categoryId: button.getAttribute('data-category-id'),
+                        container: container
+                    };
+                }
+            }
+
+            previousButton = button;
+        }
+
+        // Define the function within the DOMContentLoaded scope
+        window.findMainCategoryButtonForContainer = function (container) {
+            // Find li that contains this container
+            const listItem = container.closest('li');
+            if (listItem) {
+                // Find the button in this li
+                return listItem.querySelector('.accordion-button');
+            }
+            return null;
+        };
+    });
+
+   function loadCategoryContent(categoryId, container, button) {
+    console.log(`Loading content for category ID: ${categoryId}`);
+    fetch(`/load-category-content/${categoryId}/`)
+        .then(response => response.json())
+        .then(data => {
+            const dropdownBox = document.querySelector('.category-dropdown.dropdown.show .dropdown-box');
+            const contentContainer = dropdownBox.querySelector('.content-container');
+
+            // Полная сброс предыдущих состояний
+            dropdownBox.classList.remove('expanded');
+            contentContainer.style.minWidth = '';
+            contentContainer.style.maxWidth = '';
+
+            // Новая проверка расширения
+            const needsExpansion = data.children.length > 4;
+
+            // Генерация контента
+            let contentHtml = `
+                <div class="category-path-wrapper">
+                    <div class="category-path">
+                        <div class="path-items${needsExpansion ? ' expanded-grid' : ''}">`;
+
+            data.children.forEach((child, index) => {
+                contentHtml += `
+                    <div class="path-item">
+                        <a href="/categories/${child.slug}/"
+                           class="subcategory-link"
+                           data-category-id="${child.id}">
+                            ${child.name}
+                        </a>`;
+
+                if (child.children?.length > 0) {
+                    contentHtml += `
+                        <div class="sub-items">
+                            ${child.children.map(grandchild => `
+                                <a href="/categories/${grandchild.slug}/"
+                                   class="grandchild-link">
+                                    ${grandchild.name}
+                                </a>
+                            `).join('')}
+                        </div>`;
+                }
+                contentHtml += `</div>`;
+
+                // Добавляем перенос после каждых 5 элементов
+                if ((index + 1) % 4 === 0 && data.children[index + 1]) {
+                    contentHtml += `</div><div class="path-items">`;
+                }
+
+            });
+
+            contentHtml += `</div></div></div>`;
+
+            // Обновление DOM
+            container.innerHTML = contentHtml;
+
+            // Принудительное применение новых стилей
+            if (needsExpansion) {
+                dropdownBox.classList.add('expanded');
+                contentContainer.style.minWidth = '140rem';
+                contentContainer.style.maxWidth = '140rem';
+            } else {
+                dropdownBox.classList.remove('expanded');
+                contentContainer.style.minWidth = '113rem';
+                contentContainer.style.maxWidth = '113rem';
+            }
+
+            // Гарантия обновления прокрутки
+            setTimeout(() => {
+                dropdownBox.style.overflowX = needsExpansion ? 'auto' : 'hidden';
+            }, 300); // После завершения анимации
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+    new Swiper('.swiper-container', {
+        slidesPerView: 'auto',
+        freeMode: true,
+        scrollbar: {
+            el: '.swiper-scrollbar',
+            draggable: true,
+        },
+    });
+
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        console.log("DOM полностью загружен и разобран");
+
+        // Делегирование события для обработки кликов по кнопкам увеличения и уменьшения количества
+        document.addEventListener('click', function (event) {
+            if (event.target.classList.contains('qtyminus')) {
+                console.log("Кнопка минус нажата");
+                var input = event.target.parentNode.querySelector('.qty');
+                var value = parseInt(input.value, 10);
+                if (value > 1) {
+                    input.value = value - 1;
+                }
+                console.log("Новое значение:", input.value);
+            } else if (event.target.classList.contains('qtyplus')) {
+                console.log("Кнопка плюс нажата");
+                var input = event.target.parentNode.querySelector('.qty');
+                var value = parseInt(input.value, 10);
+                var max = parseInt(input.getAttribute('maxlength'), 10);
+                if (value < max) {
+                    input.value = value + 1;
+                }
+                console.log("Новое значение:", input.value);
+            }
+        });
+    });
+
+</script>
+<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        new Swiper('.banner-slider', {
+            direction: 'vertical',
+            loop: true,
+            autoplay: {
+                delay: 5000, // 5 секунд
+                disableOnInteraction: false,
+            },
+            effect: 'fade',
+            fadeEffect: {
+                crossFade: true
+            },
+            speed: 1000,
+            allowTouchMove: false
+        });
+    });
+</script>
+
+{% endblock footer %}

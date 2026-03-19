@@ -1,0 +1,25 @@
+{% load i18n %}
+<div class="deal-item" data-deal-id="{{ deal.id }}" style="margin-left: {{ level|add:level|add:level }}px; padding: 10px 5px; margin: 5px 0px; background-color: #f8f9fa; border-radius: 5px; border-left: 3px solid #604ae3;">
+    <div class="d-flex bg-white align-items-center gap-2">
+        <div class="form-check form-todo ps-4">
+            <input data-deal-id="{{ deal.id }}" type="checkbox" class="form-check-input rounded-circle mt-0 fs-18 toggle-deal" {% if deal.stage == 'won' %} checked {% endif %} id="deal-{{ deal.id }}">
+            <label class="form-check-label" for="deal-{{ deal.id }}">{{ deal.title }}</label>
+            {% if deal.expected_close_date %}
+                <span class="text-muted ms-2">{{ deal.expected_close_date }}</span>
+            {% endif %}
+        </div>
+        <div class="ms-auto">
+            <button class="btn btn-sm btn-outline-secondary add-subdeal" data-deal-id="{{ deal.id }}">
+                <i class="ri-add-line"></i>
+            </button>
+        </div>
+    </div>
+
+    {% if deal.children.all %}
+        <div class="subdeals mt-2">
+            {% for child in deal.children.all %}
+                {% include 'moderations/leads/deals_item.html' with deal=child level=level|add:1 %}
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>

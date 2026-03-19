@@ -1,0 +1,214 @@
+{% extends 'moderations/base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }}{% endif %}{% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+
+{% block head %}
+<style>
+    #id_image {
+    display:none;
+    }
+    .save-form {
+    right: 0;
+    position: fixed;
+    z-index: 2;
+    margin: 10px 20px 0px 0px;
+}
+
+    .flow-containers {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .step {
+      position: relative;
+      background: #00a99d;
+      color: white;
+      padding: 15px 30px;
+      border-radius: 5px;
+      font-weight: bold;
+          margin-right: 20px;
+    }
+
+    .step::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      right: -15px;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-top: 26px solid transparent;
+      border-bottom: 26px solid transparent;
+      border-left: 26px solid #00a99d;
+    }
+
+    .step:last-child::after {
+      display: none;
+    }
+</style>
+{% endblock head %}
+
+{% block content %}
+
+<div class="card">
+    <div class="card-header">
+       {% include 'moderations/leads/top-menu.html' %}
+    </div>
+    <div class="card-body">
+        <div class="card" id="documents">
+    <div class="card-header">
+        <div class="d-flex align-items-center justify-content-between mt-3">
+            <p class="mb-0">
+                <span class="text-success fw-medium mb-0">{{ lead.leaddocement_set.count }}</span> {% trans "загруженно файлов в рамках лида" %}
+            </p>
+            <div>
+                <!-- Кнопка запуска формы -->
+                <button data-lideid="{{ lead.id }}" class="link-primary fw-medium" id="upload-trigger">
+                    {% trans "Загрузить" %} <i class="ri-arrow-right-line align-middle"></i>
+                </button>
+
+                <!-- Скрытая форма с input -->
+                <form id="upload-form" style="display: none;" enctype="multipart/form-data">
+                    <input type="file" name="file" id="file-input" style="display: none;" required>
+                </form>
+
+                <!-- Прогресс-бар (скрыт изначально) -->
+                <div class="progress my-2" style="height: 20px; display: none;">
+                    <div id="upload-progress" class="progress-bar" role="progressbar" style="width: 0%;">0%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body">
+        {% for documents in lead.leaddocement_set.all %}
+        <div class="d-flex align-items-center gap-2 m-3">
+            <div class="avatar bg-light rounded">
+                <iconify-icon icon="solar:file-broken" class="fs-24 text-primary avatar-title"></iconify-icon>
+            </div>
+            <div>
+                <a href="{{ documents.file.url }}" class="text-dark fw-medium fs-16">{{ documents.title }}</a>
+                <p class="text-muted mb-0">{% trans "Загружено в" %} {{ documents.created_at }} {% trans "пользователем" %} {{ documents.user.username }}</p>
+            </div>
+            <div class="ms-auto">
+<button class="btn btn-soft-danger btn-sm delete-document-btn" data-url="{% url 'crm:delete_document' documents.id %}">
+    <iconify-icon icon="solar:trash-bin-minimalistic-2-broken" class="align-middle fs-18"></iconify-icon>
+</button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+    </div>
+</div>
+{% endblock content %}
+{% block footerbottom %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".delete-document-btn").forEach(function (btn) {
+        btn.addEventListener("click", function (e) {
+            e.preventDefault();
+            if (!confirm("{% trans 'Удалить этот документ' %}?")) return;
+
+            const url = btn.dataset.url;
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Удаляем родительский блок документа из DOM
+                    btn.closest(".d-flex.align-items-center").remove();
+                } else {
+                    alert(data.error || "Ошибка при удалении");
+                }
+            })
+            .catch(error => {
+                console.error("Ошибка запроса:", error);
+                alert("Ошибка удаления документа.");
+            });
+        });
+    });
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const triggerBtn = document.getElementById("upload-trigger");
+    const fileInput = document.getElementById("file-input");
+    const progressWrapper = document.querySelector(".progress");
+    const progressBar = document.getElementById("upload-progress");
+
+    triggerBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        fileInput.click();
+    });
+
+    fileInput.addEventListener("change", function () {
+        const file = fileInput.files[0];
+        if (!file) return;
+
+        const leadId = triggerBtn.dataset.lideid;
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('lead_id', leadId);
+        formData.append('title', file.name);
+
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "{% url 'crm:upload_lead_document' %}", true);
+        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+
+        // Показываем прогресс-бар и скрываем кнопку
+        progressWrapper.style.display = "block";
+        progressBar.style.width = "0%";
+        progressBar.textContent = "0%";
+        triggerBtn.style.display = "none";
+
+        xhr.upload.addEventListener("progress", function (e) {
+            if (e.lengthComputable) {
+                const percent = Math.round((e.loaded / e.total) * 100);
+                progressBar.style.width = percent + "%";
+                progressBar.textContent = percent + "%";
+            }
+        });
+
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                progressBar.style.width = "100%";
+                progressBar.textContent = "Загрузка завершена";
+
+                // Через секунду перезагружаем страницу
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            } else {
+                alert("Ошибка загрузки файла");
+                progressWrapper.style.display = "none";
+                triggerBtn.style.display = "inline-block";
+            }
+        };
+
+        xhr.onerror = function () {
+            alert("Ошибка соединения");
+            progressWrapper.style.display = "none";
+            triggerBtn.style.display = "inline-block";
+        };
+
+        xhr.send(formData);
+    });
+});
+</script>
+{% endblock footerbottom %}

@@ -1,0 +1,37 @@
+<form method="post"  class="contact-form input-smoke ajax-contact">
+    {% csrf_token %}
+    <div class="row">
+        <div class="form-group col-md-12">
+            {{ form.company_name }}
+        </div>
+        <div class="form-group col-md-12">
+            {{ form.company_director }}
+        </div>
+        <div class="form-group col-md-12">
+            {{ form.company_adress }}
+            {{ form.type }}
+        </div>
+        <div class="form-group col-md-6">
+            {{ form.email }}
+        </div>
+        <div class="form-group col-md-6">
+            {{ form.phone }}
+        </div>
+        <div class="form-group col-md-4">
+            {{ form.company_inn }}
+        </div>
+        <div class="form-group col-md-4">
+            {{ form.company_sku }}
+        </div>
+        <div class="form-group col-md-4">
+            {{ form.categories }}
+        </div>
+        <div class="form-group col-md-12">
+            {{ form.company_description }}
+        </div>
+        <div class="form-group col-md-12">
+            <button type="submit" class="th-btn btn-fw">
+                    Отправить<i class="fas fa-chevrons-right ms-2"></i></button>
+        </div>
+    </div>
+</form>

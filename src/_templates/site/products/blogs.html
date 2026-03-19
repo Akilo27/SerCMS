@@ -1,0 +1,53 @@
+{% extends 'products/base.html' %}
+{% load static generals_tag %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+{% endblock head %}{% block content %}
+<div class="breadcumb-wrapper background-image" style="background-image: url(&quot;assets/img/bg/breadcumb-bg.jpg&quot;);">
+    <div class="container">
+        <div class="breadcumb-content">
+            <h1 class="breadcumb-title">Наши новости</h1>
+            <ul class="breadcumb-menu">
+                <li><a href="{% url 'webmain:home' %}">Главная</a></li>
+                <li>Новости</li>
+            </ul>
+        </div>
+    </div>
+</div>
+<section class="th-blog-wrapper space-top space-extra-bottom">
+    <div class="container">
+        <div class="row">
+            {% for blog in blogs %}
+            <div class="col-lg-4">
+                <div class="th-blog blog-single has-post-thumbnail">
+                    <div class="blog-img">
+                        <a href="{% url 'webmain:blog' blog.slug %}">
+                            <img style="object-fit: cover; width: 100%;" src="{{blog.cover.url}}" alt="Blog Image">
+                        </a>
+                    </div>
+                    <div class="blog-content">
+                        <div class="blog-meta">
+                            <a href="{% url 'webmain:blog' blog.slug %}">
+                                <i class="far fa-calendar"></i>{{blog.create}}
+                            </a>
+                        </div>
+                        <h2 class="blog-title">
+                            <a href="{% url 'webmain:blog' blog.slug %}">{{blog.name}}</a>
+                        </h2>
+                        <p class="blog-text">
+                            {{blog.description|truncatechars:150|safe}}
+                        </p>
+                        <a href="{% url 'webmain:blog' blog.slug %}" class="th-btn btn-sm">Подробнее<i class="fas fa-chevrons-right ms-2"></i></a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% include 'products/include/paginations.html' with items=blogs %}
+{% endblock content %}

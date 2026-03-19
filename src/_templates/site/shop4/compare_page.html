@@ -1,0 +1,195 @@
+{% extends 'site/shop4/base.html' %}
+{% load static generals_tag %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+
+{% block content %}
+<style>
+    .compare-products {
+  padding: 20px;
+  margin: 0 auto;
+}
+
+.compare-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+.compare-card {
+  width: calc(25% - 20px);  /* 4 карточки в строке */
+  border: 1px solid #ddd;
+  padding: 10px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  transition: transform 0.2s ease;
+}
+
+.compare-card:hover {
+  transform: scale(1.05);
+}
+
+.compare-product-img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+
+.compare-product-info {
+  font-family: Arial, sans-serif;
+}
+
+.compare-product-name {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.compare-product-price {
+  font-size: 16px;
+  color: #1e5ea4;
+  margin-bottom: 10px;
+}
+
+.compare-product-attributes {
+  list-style-type: none;
+  padding: 0;
+  margin-bottom: 10px;
+}
+
+.compare-product-attributes li {
+  font-size: 14px;
+  color: #555;
+}
+
+.remove-compare {
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 14px;
+  width: 100%;
+}
+
+.remove-compare:hover {
+  background-color: #ff1a1a;
+}
+
+</style>
+  {% if compare_products %}
+<div class="compare-products">
+  <div class="compare-cards">
+    {% for product in compare_products %}
+      <div class="compare-card" id="compare-card-{{ product.id }}">
+        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="compare-product-img" />
+        <div class="compare-product-info">
+          <h3 class="compare-product-name">{{ product.name }}</h3>
+          <div class="compare-product-price">{{ product.price }} {{ product.valute }}</div>
+
+          <ul class="compare-product-attributes">
+            {% for attribute in product.atribute.all %}
+              <li>{{ attribute.name }}</li>
+            {% empty %}
+              <li>Нет атрибутов</li>
+            {% endfor %}
+          </ul>
+
+
+          {# 2) Для AJAX — положим URL в data-атрибут #}
+          <button type="button"
+                  class="btn btn-link text-danger remove-compare"
+                  data-url="{% url 'shop:compare_aremove' product_id=product.id %}"
+                  data-id="{{ product.id }}">
+            Удалить
+          </button>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% else %}
+  <p>Вы не добавили товары для сравнения.</p>
+{% endif %}
+<script>
+(function () {
+  // Достанем CSRF токен
+  function getCookie(name) {
+    let v = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let c of cookies) {
+        c = c.trim();
+        if (c.substring(0, name.length + 1) === (name + '=')) {
+          v = decodeURIComponent(c.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return v;
+  }
+  const csrftoken = getCookie('csrftoken');
+
+  // Перехватываем submit формы (фолбэк без перезагрузки)
+  document.addEventListener('submit', function (e) {
+    const form = e.target.closest('.remove-compare-form');
+    if (!form) return;
+    e.preventDefault();
+    fetch(form.action, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': csrftoken, 'X-Requested-With': 'XMLHttpRequest' },
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.ok) {
+        // удалить карточку
+        const card = form.closest('.compare-card');
+        if (card) card.remove();
+        // обновить счётчик, если есть
+        const badge = document.querySelector('[data-compare-count]');
+        if (badge && typeof data.count !== 'undefined') badge.textContent = data.count;
+      } else {
+        console.error('Удаление не удалось', data);
+      }
+    })
+    .catch(err => console.error(err));
+  });
+
+  // Кнопка «без перезагрузки»
+  document.addEventListener('click', function (e) {
+    const btn = e.target.closest('.remove-compare');
+    if (!btn) return;
+    const url = btn.dataset.url;
+    const id  = btn.dataset.id;
+    if (!url || !id) return;
+
+    fetch(url, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': csrftoken, 'X-Requested-With': 'XMLHttpRequest' },
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.ok) {
+        const card = document.getElementById('compare-card-' + id);
+        if (card) card.remove();
+        const badge = document.querySelector('[data-compare-count]');
+        if (badge && typeof data.count !== 'undefined') badge.textContent = data.count;
+      } else {
+        console.error('Удаление не удалось', data);
+      }
+    })
+    .catch(err => console.error(err));
+  });
+})();
+</script>
+
+{% endblock content %}

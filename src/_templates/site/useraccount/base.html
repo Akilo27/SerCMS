@@ -1,0 +1,366 @@
+{% load static generals_tag user_tags  i18n %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Title Meta -->
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <title> - {% block title %}{% endblock title %}</title>
+    <meta content="{% block description %}{% endblock description %}" name="description">
+    <meta property="og:title" content="{% block propertytitle %} {% endblock propertytitle %}">
+    <meta property="og:description" content="{% block propertydescription %}{% endblock propertydescription %}">
+    <meta property="og:image" content="{% block propertyimage %}{% endblock propertyimage %}">
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="{% if settings.favicon %}{{settings.favicon.url}}{% endif %}" />
+
+    <!-- Vendor css (Require in all Page) -->
+    <link href="{% static 'site/moderations/assets/css/vendor.min.css' %}" rel="stylesheet" type="text/css" />
+
+    <!-- Icons css (Require in all Page) -->
+    <link href="{% static 'site/moderations/assets/css/icons.min.css' %}" rel="stylesheet" type="text/css" />
+
+    <!-- App css (Require in all Page) -->
+    <link href="{% static 'site/moderations/assets/css/app.min.css' %}" rel="stylesheet" type="text/css" />
+
+    <!-- Theme Config js (Require in all Page) -->
+    <script src="{% static 'site/moderations/assets/js/config.min.js' %}"></script>
+    {% block head %} {% endblock head %}
+    <!-- Analitic link -->
+    <style>
+        html[data-menu-size=sm-hover-active] .button-toggle-menu {
+            display: block!important;
+        }
+        .table-responsive {
+            height: 300px;
+        }
+        body{
+            pointer-events: visible !important;
+        }
+    </style>
+
+</head>
+
+<body>
+
+<!-- START Wrapper -->
+<div class="wrapper">
+
+    <!-- ========== Topbar Start ========== -->
+    <header class="">
+        <div class="topbar">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <div class="d-flex align-items-center gap-2">
+                        <!-- Menu Toggle Button -->
+                        <div class="topbar-item">
+                            <button type="button" class="button-toggle-menu topbar-button">
+                                <i class="ri-menu-2-line fs-24"></i>
+                            </button>
+                        </div>
+                        <nav class="navbar navbar-expand-lg navbar-light">
+                            <!-- Main Navigation -->
+                            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                                <ul class="navbar-nav mr-auto">
+                                    <li class="nav-item"><a class="nav-link" href="{% url 'webmain:home' %}">Главная</a></li>
+                                    {% comment %}
+                                    <li class="nav-item"><a class="nav-link" href="{% url 'publication:advertisement_search' %}">Объявления</a></li>
+                                    {% endcomment %}
+                                    <li class="nav-item"><a class="nav-link" href="{% url 'webmain:sponsorships' %}">Благотворительность</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="{% url 'webmain:blogs' %}">Блог</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="{% url 'webmain:about' %}">О компании</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="{% url 'webmain:contacts' %}">Контакты</a></li>
+                                </ul>
+                                <!-- Main Navigation / End -->
+                            </div>
+                        </nav>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-1">
+                        <!-- Theme Color (Light/Dark) -->
+                        <div class="topbar-item">
+                            <button type="button" class="topbar-button" id="light-dark-mode">
+                                <i class="ri-moon-line fs-24 light-mode"></i>
+                                <i class="ri-sun-line fs-24 dark-mode"></i>
+                            </button>
+                        </div>
+                        <!-- Theme Color (Light/Dark) -->
+                        <div class="topbar-item">
+                            <a type="button" class="topbar-button" href="{% url 'chat:chat_list' %}">
+                                <span class="position-absolute topbar-badge fs-10 translate-middle badge bg-danger rounded-pill">{% count_unread_chats request.user %}<span class="visually-hidden">unread messages</span></span>
+
+                                <iconify-icon icon="solar:chat-dots-line-duotone" class="fs-24 align-middle"></iconify-icon>
+                            </a>
+                        </div>
+
+                        <!-- Category -->
+                        <div class="dropdown topbar-item d-none d-lg-flex">
+                            <button type="button" class="topbar-button" data-toggle="fullscreen">
+                                <i class="ri-fullscreen-line fs-24 fullscreen"></i>
+                                <i class="ri-fullscreen-exit-line fs-24 quit-fullscreen"></i>
+                            </button>
+                        </div>
+
+                        <!-- Notification -->
+                        <div class="dropdown topbar-item">
+                            <button type="button" class="topbar-button position-relative" id="page-header-notifications-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="ri-notification-3-line fs-24"></i>
+                                <span class="position-absolute topbar-badge fs-10 translate-middle badge bg-danger rounded-pill">{% get_notifications_count request.user %}<span class="visually-hidden">непрочитанные</span></span>
+                            </button>
+                            <div class="dropdown-menu py-0 dropdown-lg dropdown-menu-end" aria-labelledby="page-header-notifications-dropdown">
+                                <div class="p-3 border-top-0 border-start-0 border-end-0 border-dashed border">
+                                    <div class="row align-items-center">
+                                        <div class="col">
+                                            <h6 class="m-0 fs-16 fw-semibold"> Уведомления</h6>
+                                        </div>
+                                        <div class="col-auto">
+                                            <a href="javascript: void(0);" class="text-dark text-decoration-underline">
+                                                <small>Очистить</small>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div data-simplebar style="max-height: 280px;">
+                                    {% get_unread_notifications user as notifications %}
+                                    {% for notification in notifications %}
+                                    <!-- Item -->
+                                    <a href="javascript:void(0);" class="dropdown-item py-3 border-bottom text-wrap">
+                                        <div class="d-flex">
+                                            <div class="flex-shrink-0">
+                                                <img src="{% static 'site/moderations/assets/images/users/avatar-1.jpg' %}" class="img-fluid me-2 avatar-sm rounded-circle" alt="avatar-1" />
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <p class="mb-0"><span class="fw-medium">Josephine Thompson </span>commented on admin panel <span>" Wow 😍! this admin looks good and awesome design"</span></p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                    {% empty %}
+                                    <a href="javascript:void(0);" class="dropdown-item py-3 border-bottom text-wrap">
+                                        <div class="d-flex">
+                                            <div class="flex-grow-1">
+                                                <p class="mb-0">
+                                                    {% trans 'Нет уведомлений' %}.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                    {% endfor %}
+                                </div>
+                                <div class="text-center py-3">
+                                    <a href="{% url 'useraccount:notification' %}" class="btn btn-primary btn-sm">Все уведомления <i class="bx bx-right-arrow-alt ms-1"></i></a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- User -->
+                        <div class="dropdown topbar-item">
+                            <a type="button" class="topbar-button" id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <span class="d-flex align-items-center">
+                                             <img class="rounded-circle" width="32" src="{{user.avatar.url}}" data-username="{{user.username}}" alt="avatar-3" id='my-user-avatar'>
+                                        </span>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-end">
+                                <!-- item-->
+                                <h6 class="dropdown-header">{{user.username}}</h6>
+                                {% if user.type == 0 %}
+                                <a class="dropdown-item" href="{% url 'useraccount:edit_profile' %}">
+                                    <i class="bx bx-user-circle text-muted fs-18 align-middle me-1"></i><span class="align-middle">Модерация</span>
+                                </a>
+                                {% endif %}
+                                <a class="dropdown-item" href="{% url 'useraccount:edit_profile' %}">
+                                    <i class="bx bx-user-circle text-muted fs-18 align-middle me-1"></i><span class="align-middle">Профиль</span>
+                                </a>
+                                {% comment %}
+                                <a class="dropdown-item" href="{% url 'useraccount:bookmarks' %}">
+                                    <i class="bx bx-calendar-check text-muted fs-18 align-middle me-1"></i><span class="align-middle">Аренды</span>
+                                </a>
+                                {% endcomment %}
+                                <a class="dropdown-item" href="{% url 'useraccount:withdraw' %}">
+                                    <i class="bx bx-wallet text-muted fs-18 align-middle me-1"></i><span class="align-middle">Баланс</span>
+                                </a>
+                                <a class="dropdown-item" href="{% url 'useraccount:tickets' %}">
+                                    <i class="bx bx-help-circle text-muted fs-18 align-middle me-1"></i><span class="align-middle">Поддержка</span>
+                                </a>
+                                <div class="dropdown-divider my-1"></div>
+                                <a class="dropdown-item text-danger" href="{% url 'webmain:logout' %}">
+                                    <i class="bx bx-log-out fs-18 align-middle me-1"></i><span class="align-middle">Выйти</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========== App Menu Start ========== -->
+    <div class="main-nav">
+        <!-- Sidebar Logo -->
+        <div class="logo-box">
+            <a href="index.html" class="logo-dark">
+                <img src="{% if settings.logo_sm %}{{settings.logo_sm.url}}{% else %}{% static 'site/moderations/assets/images/logo-sm.png' %}{% endif %}" class="logo-sm" alt="logo sm">
+                <img src="{% if settings.logo_lg %}{{settings.logo_lg.url}}{% else %}{% static 'site/moderations/assets/images/logo-dark.png' %}{% endif %}" class="logo-lg" alt="logo dark">
+            </a>
+            <a href="index.html" class="logo-light">
+                <img src="{% if settings.logo_white_sm %}{{settings.logo_white_sm.url}}{% else %}{% static 'site/moderations/assets/images/logo-sm.png' %}{% endif %}" class="logo-sm" alt="logo sm">
+                <img src="{% if settings.logo_white %}{{settings.logo_white.url}}{% else %}{% static 'site/moderations/assets/images/logo-light.png' %}{% endif %}" class="logo-lg" alt="logo light">
+            </a>
+        </div>
+
+        <!-- Menu Toggle Button (sm-hover) -->
+        <button type="button" class="button-sm-hover" aria-label="Show Full Sidebar">
+            <iconify-icon icon="solar:double-alt-arrow-right-bold-duotone" class="button-sm-hover-icon"></iconify-icon>
+        </button>
+
+        <div class="scrollbar" data-simplebar>
+            <ul class="navbar-nav" id="navbar-nav">
+
+                <li class="menu-title">Основное</li>
+                {% if user.type == 2 or user.type == 3 %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'useraccount:statistic' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:widget-5-bold-duotone"></iconify-icon></span>
+                        <span class="nav-text"> Статистика </span>
+                    </a>
+                </li>
+                {% endif %}
+                <li class="nav-item">
+                    {% comment %}
+                    <a class="nav-link" href="{% url 'useraccount:bookmarks' %}">
+                        {% endcomment %}
+                        <span class="nav-icon"><iconify-icon icon="solar:calendar-bold-duotone"></iconify-icon></span>
+                        <span class="nav-text"> Аренды </span>
+                    </a>
+                </li>
+                {% if user.type == 2 or user.type == 3 %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'publication:advertisements' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:home-bold"></iconify-icon></span>
+                        <span class="nav-text"> Мои объявления </span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'useraccount:complaint_list' %}">
+                        <span class="nav-icon">
+                            <i class="ri-shield-star-line"></i>
+                        </span>
+                        <span class="nav-text">Претензии</span>
+                        {% comment %}
+                        <span class="badge bg-primary badge-pill text-end">{% count_user_complaints_with_type request.user 1 %}</span>
+                        {% endcomment %}
+                    </a>
+                </li>
+                {% endif %}
+                {% if user.type == 3 %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'useraccount:company' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:users-group-two-rounded-bold-duotone"></iconify-icon></span>
+                        <span class="nav-text"> Сотрудники </span>
+                    </a>
+                </li>
+                {% endif %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'useraccount:tickets' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:help-bold-duotone"></iconify-icon></span>
+                        <span class="nav-text"> Поддержка </span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{#% url 'moderation:edit_profile' %#}">
+                        <span class="nav-icon"><iconify-icon icon="solar:diploma-bold"></iconify-icon></span>
+                        <span class="nav-text"> Сертификаты </span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'useraccount:withdraw_point' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:hand-money-bold"></iconify-icon></span>
+                        <span class="nav-text"> Партнерка </span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'documentation:documentations_profile' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:info-circle-bold"></iconify-icon></span>
+                        <span class="nav-text"> Документация </span>
+                    </a>
+                </li>
+
+                <li class="menu-title mt-2">Личные</li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'useraccount:edit_profile' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:user-circle-bold-duotone"></iconify-icon></span>
+                        <span class="nav-text"> Профиль </span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'useraccount:edit_profile' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:user-circle-bold-duotone"></iconify-icon></span>
+                        <span class="nav-text"> Бонусы </span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'useraccount:withdraw' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:ruble-bold"></iconify-icon></span>
+                        <span class="nav-text"> Баланс </span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'webmain:logout' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:logout-3-bold"></iconify-icon></span>
+                        <span class="nav-text"> Выйти </span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <!-- ========== App Menu End ========== -->
+
+    <!-- ==================================================== -->
+    <!-- Start right Content here -->
+    <!-- ==================================================== -->
+    <div class="page-content">
+
+        <!-- Start Container Fluid -->
+        <div class="container-fluid">
+
+            {% block content %}{% endblock content %}
+
+        </div>
+        <!-- End Container Fluid -->
+
+
+    </div>
+    <!-- ==================================================== -->
+    <!-- End Page Content -->
+    <!-- ==================================================== -->
+
+</div>
+<!-- END Wrapper -->
+{% block footertop %}{% endblock footertop %}
+
+<!-- Vendor Javascript (Require in all Page) -->
+<script src="{% static 'site/moderations/assets/js/vendor.js' %}"></script>
+
+<!-- App Javascript (Require in all Page) -->
+<script src="{% static 'site/moderations/assets/js/app.js' %}"></script>
+
+<!-- Vector Map Js -->
+<script src="{% static 'site/moderations/assets/vendor/jsvectormap/js/jsvectormap.min.js' %}"></script>
+<script src="{% static 'site/moderations/assets/vendor/jsvectormap/maps/world-merc.js' %}"></script>
+<script src="{% static 'site/moderations/assets/vendor/jsvectormap/maps/world.js' %}"></script>
+
+
+<script src="{% static 'site/moderations/assets/js/pages/agent-detail.js' %}"></script>
+{% block footerbottom %}{% endblock footerbottom %}
+
+</body>
+
+</html>

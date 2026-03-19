@@ -1,0 +1,180 @@
+{% extends 'products/base_profile.html' %}
+{% load static generals_tag %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+{% block content %}
+<form method="get" action="{% url 'shop:manufacturerorder' %}">
+    <div style="display:flex;margin-bottom: 5px;">
+        <select name="type">
+            {% for value, label in payment_types %}
+            <option value="{{ value }}" {% if value == request.GET.type %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+
+        <select name="status">
+            {% for value, label in status_choices %}
+            <option value="{{ value }}" {% if value == request.GET.status %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div style="display:flex;margin-bottom: 5px;">
+        <input type="text" name="phone_number" placeholder="Номер телефона" value="{{request.GET.phone_number }}">
+        <input type="email" name="customer_email" placeholder="Эл.Почта" value="{{request.GET.customer_email }}">
+    </div>
+    <input type="text" name="delivery_address" placeholder="Адрес доставки" value="{{request.GET.delivery_address }}">
+    <div style="display:flex; margin-bottom: 5px; margin-top:5px;">
+        <input type="number" name="amount_min" placeholder="Мин сумма" value="{{request.GET.amount_min }}">
+        <input type="number" name="amount_max" placeholder="Макс сумма" value="{{request.GET.amount_max }}">
+
+        <input type="date" name="Дата начало">
+        <input type="date" name="Дата конца">
+    </div>
+    <div style="display:inline-flex; margin-bottom: 5px; margin-top:5px;">
+        <button type="submit" class="th-btn btn-fw">Применить</button>
+        <a class="th-btn btn-fw" href="{% url 'shop:manufacturerorder' %}">Сбросить</a>
+    </div>
+</form>
+{% for order in orders %}
+<div style="
+{% if order.type == 1 %}
+border: 1px solid #f68c8c; background: #ffecec;
+{% else %}
+border: 1px solid #cbc5c5; background: #fafafa;
+{% endif %}
+padding: 20px;border-radius: 10px;margin: 10px;">
+    <div class="soundHeader__actions g-transition-opacity">
+        <div class="th-social">
+            <a href="https://t.me/{{order.phone_number}}" target="_blank">
+                <i class="fab fa-telegram"></i>
+            </a>
+            <a href="https://wa.me/{{order.phone_number}}" target="_blank">
+                <i class="fab fa-whatsapp"></i>
+            </a>
+            <a href="https://nash-market.com{% url 'payment:customcheckout' order.key %}" for="copy">
+                <i class="fa fa-files"></i>
+            </a>
+            <a href="https://nash-market.com{% url 'payment:customcheckout' order.key %}" for="copy">
+                <i class="fa fa-address-card"></i>
+            </a>
+            <a href="{% url 'shop:order_update' order.id %}" style=" float: right; ">
+                <i class="fa fa-pencil"></i>
+            </a>
+        </div>
+
+    </div>
+    <div class="team-info" style=" padding-top: 30px; ">
+        <ul>
+            <li>
+                <b>Телефон:</b>
+                <span>{{order.phone_number}}</span>
+            </li>
+            <li>
+                <b>Имя:</b>
+                <span>{{order.customer_name}}</span>
+            </li>
+            <li>
+                <b>Адрес эл почты:</b>
+                <span>{{order.customer_email}}</span>
+            </li>
+            <li>
+                <b>Сумма:</b>
+                <span>{{order.all_amount}}</span>
+            </li>
+            <li>
+                <b>Тип:</b>
+                <span>
+                {% if order.requires_delivery == false %}
+                Без доставки
+                {% else %}
+                Доставка
+                {% endif %}
+            </span>
+            </li>
+            {% if order.requires_delivery == false %}
+            {% else %}
+            <li>
+                <b>Адресс:</b>
+                <span>{{order.adress}}</span>
+            </li>
+            {% endif %}
+        </ul>
+    </div>
+
+    <table class="cart_table mb-20">
+        <thead>
+        <tr>
+            <th class="cart-col-productname">Информация</th>
+            <th class="cart-col-price">Количество</th>
+            <th class="cart-col-quantity">Сумма</th>
+            <th class="cart-col-total"></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for selectedproduct in order.selectedproduct.all %}
+        <tr class="cart_item">
+            <td data-title="Name">
+                <a class="cart-productname" href="{% url 'shop:orderdetail' order.id %}">
+                    <img style="height:60px;" src="{{ selectedproduct.product.image.url }}" alt="Frutin">
+                    {{ selectedproduct.product.name }}
+                </a>
+            </td>
+            <td data-title="Price">
+                {{ selectedproduct.product.get_typeofchoice_display }} {{ selectedproduct.quantity }}
+                {% if selectedproduct.product.typeofchoice == 2%} /гр
+                {% elif  selectedproduct.product.typeofchoice == 3 or selectedproduct.product.typeofchoice == 1 %} уп.{% endif %}
+            </td>
+            <td data-title="Quantity">
+                <span>{{ selectedproduct.amount }}</span>
+            </td>
+            <td data-title="Total">
+
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+
+
+    </table>
+</div>
+{% endfor %}
+        {% include 'products/include/paginations.html' with items=applications %}
+{% endblock content %}
+{% block footer %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    // Найти все элементы с атрибутом for="copy"
+    var copyButtons = document.querySelectorAll('[for="copy"]');
+
+    copyButtons.forEach(function(button) {
+        button.addEventListener('click', function(e) {
+            e.preventDefault(); // Предотвратить стандартное действие ссылки
+
+            // Получить URL из атрибута href
+            var url = this.getAttribute('href');
+
+            // Создать временный элемент input
+            var tempInput = document.createElement('input');
+            tempInput.value = url;
+            document.body.appendChild(tempInput);
+
+            // Выбрать текст
+            tempInput.select();
+            tempInput.setSelectionRange(0, 99999); // Для мобильных устройств
+
+            // Скопировать текст
+            document.execCommand('copy');
+
+            // Удалить временный элемент
+            document.body.removeChild(tempInput);
+
+            // Опционально: показать уведомление пользователю
+            alert('URL скопирован в буфер обмена!');
+        });
+    });
+});
+</script>
+{% endblock footer %}

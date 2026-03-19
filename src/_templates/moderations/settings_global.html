@@ -1,0 +1,582 @@
+{% extends 'moderations/base.html' %}
+{% load generals_tag static i18n %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{% static 'ckeditor/ckeditor-init.js' %}"></script>
+<link rel="stylesheet" href="{% static 'ckeditor/ckeditor.css' %}">
+{% endblock head %}
+
+{% block content %}
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+        <a href="#home" data-bs-toggle="tab" aria-expanded="true" class="nav-link active">
+            <span class="d-block d-sm-none"><i class="bx bx-home"></i></span>
+            <span class="d-none d-sm-block">Общее</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="#profile" data-bs-toggle="tab" aria-expanded="false" class="nav-link ">
+            <span class="d-block d-sm-none"><i class="bx bx-user"></i></span>
+            <span class="d-none d-sm-block">SMTP</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="#messages" data-bs-toggle="tab" aria-expanded="false" class="nav-link">
+            <span class="d-block d-sm-none"><i class="ri-mail-line"></i></span>
+            <span class="d-none d-sm-block">Тонкие настройки</span>
+        </a>
+    </li>
+</ul>
+<form method="post" class="site-info" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="tab-content text-muted">
+        <div class="tab-pane show active" id="home">
+            {{ form.media }}
+            <h4 class="card-title mb-4">{% trans "Файлы" %}</h4>
+            <div class="col-md-12" style="display: flex">
+                <div class="col-md-6" style="padding-right: 10px;">
+                    <div class="row">
+                        <div class="mb-3">
+                            <h6 class="mb-2">{% trans "Лого" %}</h6>
+                        </div>
+                        {% if site.logo %}
+                        <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                            {% if site.logo %}
+                            <img src="{{site.logo.url}}" alt=""
+                                 style="max-height: 50px">
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                            <div style="height:50px; border: 0.0625rem solid #EEEEEE; border-radius:0.5rem;width: 311px;background: #fff;align-content: center;text-align: center;">
+                                <h5 style="  color: #ababab">{% trans 'Изображения нет' %}</h5>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <div class="mb-3 single-form">
+                            {{ form.logo }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="mb-3">
+                            <h6 class="mb-2">{% trans "Доп Лого без иконки" %}</h6>
+                        </div>
+                        {% if site.logo_lg %}
+                        <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                            {% if site.logo_lg %}
+                            <img src="{{site.logo_lg.url}}" alt=""
+                                 style="max-height: 50px">
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                            <div style="height:50px; border: 0.0625rem solid #EEEEEE; border-radius:0.5rem;width: 311px;background: #fff;align-content: center;text-align: center;">
+                                <h5 style="  color: #ababab">{% trans 'Изображения нет' %}</h5>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <div class="mb-3 single-form">
+                            {{ form.logo_lg }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="mb-3">
+                            <h6 class="mb-2">{% trans "Доп Лого маленький" %}</h6>
+                        </div>
+                        {% if site.logo_sm %}
+                        <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                            {% if site.logo_sm %}
+                            <img src="{{site.logo_sm.url}}" alt=""
+                                 style="max-height: 50px">
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                            <div style="height:50px; border: 0.0625rem solid #EEEEEE; border-radius:0.5rem;width: 311px;background: #fff;align-content: center;text-align: center;">
+                                <h5 style="  color: #ababab">{% trans 'Изображения нет' %}</h5>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <div class="mb-3 single-form">
+                            {{ form.logo_sm }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="mb-3">
+                            <h6 class="mb-2">{% trans "Фавикон" %}</h6>
+                        </div>
+                        {% if site.favicon %}
+                        <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                            {% if site.favicon %}
+                            <img src="{{site.favicon.url}}" alt=""
+                                 style="max-height: 50px">
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                            <div style="height:50px; border: 0.0625rem solid #EEEEEE; border-radius:0.5rem;width: 311px;background: #fff;align-content: center;text-align: center;">
+                                <h5 style="  color: #ababab">{% trans 'Изображения нет' %}</h5>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <div class="mb-3 single-form">
+                            {{ form.favicon }}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6" style="padding-left: 10px;">
+                    <div class="row">
+                        <div class="mb-3">
+                            <h6 class="mb-2">{% trans "Лого белый" %}</h6>
+                        </div>
+                        {% if site.logo_white %}
+                        <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                            {% if site.logo_white %}
+                            <img src="{{site.logo_white.url}}" alt=""
+                                 style="max-height: 50px">
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                            <div style="height:50px; border: 0.0625rem solid #EEEEEE; border-radius:0.5rem;width: 311px;background: #fff;align-content: center;text-align: center;">
+                                <h5 style="  color: #ababab">{% trans 'Изображения нет' %}</h5>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <div class="mb-3 single-form">
+                            {{ form.logo_white }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="mb-3">
+                            <h6 class="mb-2">{% trans "Доп Лого белый без иконки" %}</h6>
+                        </div>
+                        {% if site.logo_white_lg %}
+                        <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                            {% if site.logo_white_lg %}
+                            <img src="{{site.logo_white_lg.url}}" alt=""
+                                 style="max-height: 50px">
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                            <div style="height:50px; border: 0.0625rem solid #EEEEEE; border-radius:0.5rem;width: 311px;background: #fff;align-content: center;text-align: center;">
+                                <h5 style="  color: #ababab">{% trans 'Изображения нет' %}</h5>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <div class="mb-3 single-form">
+                            {{ form.logo_white_lg }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="mb-3">
+                            <h6 class="mb-2">{% trans "Доп Лого белый маленький" %}</h6>
+                        </div>
+                        {% if site.logo_white_sm %}
+                        <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                            {% if site.logo_white_sm %}
+                            <img src="{{site.logo_white_sm.url}}" alt=""
+                                 style="max-height: 50px">
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                            <div style="height:50px; border: 0.0625rem solid #EEEEEE; border-radius:0.5rem;width: 311px;background: #fff;align-content: center;text-align: center;">
+                                <h5 style="  color: #ababab">{% trans 'Изображения нет' %}</h5>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <div class="mb-3 single-form">
+                            {{ form.logo_white_sm }}
+                        </div>
+                    </div>
+                    <div class="row">
+
+                        <div class="mb-3">
+                            <h6 class="mb-2">{% trans "Метод оплаты" %}</h6>
+                        </div>
+                        {% if site.paymentmethod %}
+                        <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                            {% if site.paymentmethod %}
+                            <img src="{{site.paymentmethod.url}}" alt=""
+                                 style="max-height: 50px">
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                            <div style="height:50px; border: 0.0625rem solid #EEEEEE; border-radius:0.5rem;width: 311px;background: #fff;align-content: center;text-align: center;">
+                                <h5 style="  color: #ababab">{% trans 'Изображения нет' %}</h5>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <div class="mb-3 single-form">
+                            {{ form.paymentmethod }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <h4 class="mb-4 mt-4 card-title">{% trans "Общее" %}</h4>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-2">{% trans "Название" %}</h6>
+                </div>
+                <div class="mb-3">
+                    {{ form.name }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-2">{% trans "Описание" %}</h6>
+                </div>
+                <div class="mb-3">
+                    {{ form.description }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-2">{% trans "Яндекс Метрика" %}</h6>
+                </div>
+                <div class="mb-3">
+                    {{ form.yandex_metrica }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-2">{% trans "Google Аналитика" %}</h6>
+                </div>
+                <div class="mb-3">
+                    {{ form.google_analitic }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-2">{% trans "Копирайт" %}</h6>
+                </div>
+                <div class="mb-3">
+                    {{ form.content }}
+                </div>
+            </div>
+
+        </div>
+        <div class="tab-pane " id="profile">
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-2">{% trans "Заголовок сообщения" %}</h6>
+                </div>
+                <div class="mb-3">
+                    {{ form.message_header }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-2">{% trans "Подвал сообщения" %}</h6>
+                </div>
+                <div class="mb-3">
+                    {{ form.message_footer }}
+                </div>
+            </div>
+            <div class="col-md-12" style="display: flex">
+                <div class="col-xl-4" style="padding-right: 10px">
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <h6 class="mb-2" style="width: max-content">{% trans "Email Site HOST" %}</h6>
+                        </div>
+                        <div class="mb-3">
+                            {{ form.email_host }}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-4" style="padding-right: 10px; padding-left: 10px">
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <h6 class="mb-2" style="width: max-content">{% trans "Email Site HOST Default" %}</h6>
+                        </div>
+                        <div class="mb-3">
+                            {{ form.default_from_email }}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-4" style="padding-left: 10px">
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <h6 class="mb-2" style="width: max-content">{% trans "Email Site PORT" %}</h6>
+                        </div>
+                        <div class="mb-3">
+                            {{ form.email_port }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12" style="display: flex">
+                <div class="col-xl-4" style="padding-right: 10px">
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <h6 class="mb-2" style="width: max-content">{% trans "Email Site User" %}</h6>
+                        </div>
+                        <div class="mb-3">
+                            {{ form.email_host_user }}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-4" style="padding-right: 10px; padding-left: 10px">
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <h6 class="mb-2" style="width: max-content">{% trans "Email Site Password" %}</h6>
+                        </div>
+                        <div class="mb-3">
+                            {{ form.email_host_password }}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-2" style="padding-left: 10px">
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <h6 class="mb-2" style="width: max-content">{% trans "Use TLS" %}</h6>
+                        </div>
+                        <div class="mb-3">
+                            {{ form.email_use_tls }}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-2" style="padding-left: 10px">
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <h6 class="mb-2" style="width: max-content">{% trans "Use SSL" %}</h6>
+                        </div>
+                        <div class="mb-3">
+                            {{ form.email_use_ssl }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane " id="messages">
+            <div id="json-container">
+                {% for item in jsontemplate %}
+                <div class="json-fields">
+                    {% for key, field in item.fields.items %}
+                    <div class="json-field" data-key="{{ key }}">
+                        <div class="page-title-box mt-3">
+                            <h4 class="mb-0 fw-semibold">{{ key }}</h4>
+                            <ol class="breadcrumb mb-0">
+                                <button type="button" class="btn btn-danger btn-sm remove-block">Удалить</button>
+                            </ol>
+                        </div>
+                        <!-- Поле "Ключ" -->
+                        <div class="row mb-2">
+                            <div class="col-sm-3"><h6 class="mb-0">Ключ</h6></div>
+                            <div class="col-sm-9 text-secondary">
+                                <input type="text" name="{{ key }}_key" value="{{ key }}" placeholder="Key" class="form-control input-default">
+                            </div>
+                        </div>
+                        <!-- Поле "Значение" -->
+                        <div class="row mb-2">
+                            <div class="col-sm-3"><h6 class="mb-0">Значение</h6></div>
+                            <div class="col-sm-9 text-secondary">
+                                <input type="text" name="{{ key }}_field" value="{{ field.field }}" placeholder="Field" class="form-control input-default">
+                            </div>
+                        </div>
+                        <!-- Поле "Тип" -->
+                        <div class="row mb-2">
+                            <div class="col-sm-3"><h6 class="mb-0">Тип</h6></div>
+                            <div class="col-sm-9 text-secondary">
+                                <input type="text" name="{{ key }}_type" value="{{ field.type }}" placeholder="Type" class="form-control input-default">
+                            </div>
+                        </div>
+                        <!-- Поле "Выберите модель" (если type не "information") -->
+                        {% if field.type == "information" %}
+                        <div class="row mb-2">
+                            <div class="col-sm-3"><h6 class="mb-0">Значение</h6></div>
+                            <div class="col-sm-9 text-secondary">
+                                <input type="text" name="{{ key }}_field" value="{{ field.field }}" placeholder="Field" class="form-control input-default">
+                            </div>
+                        </div>
+
+                        {% elif field.type == "media" %}
+                        <div class="row mb-2">
+                            <div class="col-sm-3"><h6 class="mb-0">Файл</h6></div>
+                            <div class="col-sm-9 text-secondary">
+                                <input type="file" name="{{ key }}_file" class="form-control input-default">
+                                {% if field.info %}
+                                <div class="mt-2">
+                                    <p>Текущее изображение:</p>
+                                    <img src="{{ field.info }}" alt="Изображение" class="img-thumbnail" style="max-width: 200px;">
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% else %}
+
+                        <div class="row mb-2">
+                            <div class="col-sm-3"><h6 class="mb-0">Выберите модель</h6></div>
+                            <div class="col-sm-9 text-secondary">
+                                <select class="form-control" name="{{ key }}_info" id="choices-multiple-remove-button" data-choices multiple>
+                                    <option value="">Выберите</option>
+                                    {% with model_data|get_item:field.type as model_objects %}
+                                    {% if model_objects %}
+                                    {% for obj in model_objects %}
+                                    <option value="{{ obj.id }}" {% if obj.id in field.info %}selected{% endif %}>{{ obj }}</option>
+                                    {% endfor %}
+                                    {% else %}
+                                    <option disabled>Нет данных для выбора</option>
+                                    {% endif %}
+                                    {% endwith %}
+                                </select>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                <hr>
+                {% endfor %}
+            </div>
+            <!-- Кнопка добавления нового блока -->
+            <input type="hidden" id="json_data" name="json_data" value="">
+            <button type="button" id="add-block" class="btn btn-primary">Добавить блок</button>
+            <button type="submit" class="btn btn-success">Сохранить</button>
+            <!-- Alert (изначально скрыт) -->
+            <div id="alert-container" class="position-fixed top-0 end-0 p-3" style="z-index: 1050;"></div>
+            <script>
+                function showAlert(message, type = 'success') {
+                    const alertContainer = document.getElementById('alert-container');
+                    const alert = document.createElement('div');
+
+                    alert.className = `alert alert-${type} alert-dismissible fade show`;
+                    alert.setAttribute("role", "alert");
+                    alert.innerHTML = `
+                        ${message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    `;
+
+                    alertContainer.appendChild(alert);
+
+                    setTimeout(() => {
+                        alert.classList.remove("show");
+                        setTimeout(() => {
+                            alert.remove();
+                            if (type === 'success') location.reload(); // Перезагрузка страницы
+                        }, 500);
+                    }, 3000);
+                }
+
+                document.querySelector('form').addEventListener('submit', function (event) {
+                    event.preventDefault();
+                    const jsonData = [];
+                    const formData = new FormData(this); // Передаём файлы
+
+                    document.querySelectorAll('.json-field').forEach(field => {
+                        const key = field.querySelector('input[name$="_key"]').value.trim();
+                        const fieldValue = field.querySelector('input[name$="_field"]').value.trim();
+                        const typeValue = field.querySelector('input[name$="_type"]').value.trim();
+                        const fileInput = field.querySelector('input[type="file"]');
+                        const select = field.querySelector('select');
+                        const infoValue = select ? [...select.selectedOptions].map(opt => opt.value) : [];
+                        const fieldObject = {
+                            field: fieldValue,
+                            info: infoValue,
+                            type: typeValue
+                        };
+                        // Если файл загружен, добавляем его в formData
+                        if (fileInput && fileInput.files.length > 0) {
+                            formData.append(`${key}_file`, fileInput.files[0]);
+                            fieldObject.info = `${key}_file`;  // Передаём ключ файла в JSON
+                        }
+                        jsonData.push({ [key]: fieldObject });
+                    });
+                    formData.append('json_data', JSON.stringify(jsonData));
+                    console.log("Отправляем JSON:", JSON.stringify(jsonData));
+                    console.log("Отправляем файлы:", formData);
+                    fetch(this.action, {
+                        method: 'POST',
+                        body: formData,  // Отправляем FormData, а не JSON
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("Ответ сервера:", data);
+                        if (data.success) {
+                            showAlert("✅ Данные сохранены!", "success");
+                        } else {
+                            showAlert("❌ Ошибка: " + (data.error || "Неизвестная ошибка"), "danger");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Ошибка запроса:", error);
+                        showAlert("❌ Ошибка сети: " + error, "danger");
+                    });
+                });
+            </script>
+            <script>
+                document.getElementById('add-block').addEventListener('click', function () {
+                    const container = document.getElementById('json-container');
+                    const newBlock = document.createElement('div');
+                    const uniqueKey = `new_${Date.now()}`;
+
+                    newBlock.classList.add('json-field');
+                    newBlock.dataset.key = uniqueKey;
+                    newBlock.innerHTML = `
+                        <div class="page-title-box mt-3">
+                            <h4 class="mb-0 fw-semibold">${uniqueKey}</h4>
+                            <ol class="breadcrumb mb-0">
+                                <button type="button" class="btn btn-danger btn-sm remove-block">Удалить</button>
+                            </ol>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-sm-3"><h6 class="mb-0">Ключ</h6></div>
+                            <div class="col-sm-9 text-secondary">
+                                <input type="text" name="${uniqueKey}_key" value="${uniqueKey}" class="form-control input-default">
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-sm-3"><h6 class="mb-0">Значение</h6></div>
+                            <div class="col-sm-9 text-secondary">
+                                <input type="text" name="${uniqueKey}_field" class="form-control input-default">
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-sm-3"><h6 class="mb-0">Тип</h6></div>
+                            <div class="col-sm-9 text-secondary">
+                                <input type="text" name="${uniqueKey}_type" class="form-control input-default">
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(newBlock);
+                });
+
+                // Удаление блока
+                document.addEventListener('click', function (event) {
+                    if (event.target.classList.contains('remove-block')) {
+                        event.target.closest('.json-field').remove();
+                    }
+                });
+            </script>
+        </div>
+
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12 form-btn mt-8">
+            <button type="submit"
+                    class="btn btn-primary"
+                    style=" margin-top: 10px; width: 150px">
+                {% trans "Сохранить" %}
+            </button>
+        </div>
+    </div>
+</form>
+
+
+{% endblock content %}
+<script>
+    CKEDITOR.replace('message_header');
+    CKEDITOR.replace('message_footer');
+</script>
+{% block footer %}
+{% endblock footer %}

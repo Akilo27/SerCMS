@@ -1,0 +1,1838 @@
+{% extends 'site/trendsup/base.html' %}
+{% load static generals_tag  shop_tags i18n %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<style>
+    .product-title {
+  font-size: 18px;           /* размер текста */
+  font-weight: 600;          /* жирность */
+  line-height: 1.4;          /* высота строки */
+  max-height: calc(1.4em * 3); /* ровно три строки */
+  overflow: hidden;          /* скрываем лишнее */
+  display: -webkit-box;      /* блочная модель для ограничения строк */
+  -webkit-line-clamp: 2;     /* ограничиваем 3 строками */
+  -webkit-box-orient: vertical;
+}
+
+    .product-image {
+    overflow: hidden;
+    position: relative;
+}
+
+.product-image img {
+    transition: transform 0.3s ease;
+    cursor: zoom-in;
+}
+
+   /* Общая обертка галереи */
+.product-gallery {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+/* Большие изображения */
+.product-single-swiper {
+    flex: 1 1 auto;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    position: relative;
+}
+
+.product-gallery .product-image {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.product-gallery .product-image img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+    cursor: zoom-in;
+}
+
+.product-gallery .product-image img:hover {
+    transform: scale(1.05);
+}
+
+/* Миниатюры слева */
+.product-thumbs-wrap {
+    flex: 0 0 100px; /* ширина ленты превью */
+    max-height: 500px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.product-thumbs {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.product-thumb {
+    cursor: pointer;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: border-color 0.3s ease, transform 0.2s ease;
+    width: 80px;
+    height: 80px;
+    flex: 0 0 auto;
+}
+
+.product-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.product-thumb:hover {
+    border-color: #7E5539; /* фирменный цвет */
+    transform: scale(1.05);
+}
+.swiper-slide{
+margin: -10px;
+}
+
+.product-thumb.swiper-slide-thumb-active {
+    border-color: #7E5539;
+}
+
+/* Стрелки на большом изображении */
+.swiper-button-next,
+.swiper-button-prev {
+    color: #333;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+}
+
+.swiper-button-next:hover,
+.swiper-button-prev:hover {
+    background: #7E5539;
+    color: #fff;
+}
+
+/* На мобильных — миниатюры сверху */
+@media (max-width: 768px) {
+    .product-gallery {
+        flex-direction: column;
+    }
+
+    .product-thumbs-wrap {
+        order: -1; /* поднимаем вверх */
+        flex: 0 0 auto;
+        width: 100%;
+        max-height: none;
+        overflow-y: visible;
+    }
+
+    .product-thumbs {
+        flex-direction: row;
+        justify-content: center;
+    }
+}
+
+</style>
+<link rel="stylesheet" href="{% static 'site/wolmart/assets/vendor/swiper/swiper-bundle.min.css' %}">
+<style>
+    button.qtyminus.dec.qty-btn.quantity-minus.w-icon-minus.qty {
+        height: 25px!important;
+        width: 25px!important;
+        position: absolute;
+        bottom: 0;
+        right: 0;
+    }
+    button.qtyplus.inc.qty-btn.quantity-plus.w-icon-plus.qty {
+            height: 25px!important;
+        width: 25px!important;
+
+    }
+button.btn.btn-primary.mobile-button {
+    height: 44px;
+    margin: 4px;
+}
+    .woocommerce-product-rating{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      margin-top:6px;
+      font-size:14px;
+    }
+    .woocommerce-product-rating .stars i{
+      color:#f6b01e;
+      margin-right:2px;
+    }
+    .swiper-button-next, .swiper-button-prev {
+    border:0px;
+color: #dcb996;
+border-radius: 0%;
+    box-shadow:none!important;
+    background: rgb(255 255 255 / 0%);
+     }
+    .swiper-wrapper.row{
+margin: 10px;
+    }
+</style>
+
+{% endblock head %}
+{% block content %}
+<!-- Start of Main -->
+<main class="main mb-10 pb-1 mt-4">
+
+    <!-- Start of Page Content -->
+    <div class="page-content">
+        <div class="container">
+            <div class="product product-single row">
+                <div class="col-md-6 mb-6">
+                    <div class="product-gallery product-gallery-sticky product-gallery-vertical">
+                        <div class="product-thumbs-wrap swiper-container" data-swiper-options="{
+                                    'navigation': {
+                                        'nextEl': '.swiper-button-next',
+                                        'prevEl': '.swiper-button-prev'
+                                    },
+                                    'breakpoints': {
+                                        '992': {
+                                            'direction': 'vertical',
+                                            'slidesPerView': 'auto'
+                                        }
+                                    }
+                                }">
+                            <div class="product-thumbs swiper-wrapper row cols-lg-1 cols-4 gutter-sm">
+                                <div class="product-thumb swiper-slide">
+                                    <img src="{% if product.image %}{{ product.image.url }}{% else %}{% static 'site/furbar/images/nophotoyeti.jpg' %}{% endif %}" alt="{{ product.name }} gallery thumb {{ forloop.counter }}"
+                                         width="800" height="900">
+                                </div>
+                                {% for gallery_image in product.productsgallery_set.all %}
+                                <div class="product-thumb swiper-slide">
+                                    <img src="{% if gallery_image.image %}{{ gallery_image.image.url }}{% else %}{% static 'site/furbar/images/nophotoyeti.jpg' %}{% endif %}" alt="{{ product.name }} gallery thumb {{ forloop.counter }}"
+                                         width="800" height="900">
+                                </div>
+                                {% endfor %}
+
+                            </div>
+                        </div>
+                        <div class="swiper-container product-single-swiper swiper-theme nav-inner" data-swiper-options="{
+                                    'navigation': {
+                                        'nextEl': '.swiper-button-next',
+                                        'prevEl': '.swiper-button-prev'
+                                    }
+                                }">
+                            <div class="swiper-wrapper row cols-1 gutter-no">
+                                <div class="swiper-slide">
+                                    <figure class="product-image">
+                                        <img src="{% if product.image %}{{ product.image.url }}{% else %}{% static 'site/furbar/images/nophotoyeti.jpg' %}{% endif %}"
+                                             data-zoom-image="{% if product.image %}{{ product.image.url }}{% else %}{% static 'site/furbar/images/nophotoyeti.jpg' %}{% endif %}"
+                                             alt="{{ product.name }}" width="800" height="900">
+                                    </figure>
+                                </div>
+                                {% for gallery_image in product.productsgallery_set.all %}
+                                <div class="swiper-slide">
+                                    <figure class="product-image">
+                                        <img src="{% if gallery_image.image %}{{ gallery_image.image.url }}{% else %}{% static 'site/furbar/images/nophotoyeti.jpg' %}{% endif %}"
+                                             data-zoom-image="{% if gallery_image.image %}{{ gallery_image.image.url }}{% else %}{% static 'site/furbar/images/nophotoyeti.jpg' %}{% endif %}"
+                                             alt="{{ product.name }} gallery image {{ forloop.counter }}" width="488" height="549">
+                                    </figure>
+                                </div>
+                                {% endfor %}
+
+                            </div>
+                            <button class="swiper-button-next"></button>
+                            <button class="swiper-button-prev"></button>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4 mb-md-6">
+                    <div class="product-details">
+                        <h1 class="product-title">{{ product.name }}</h1>
+                        <h1 class="product-title">
+                            <a href="{% url 'shop:manufacturers' product.manufacturers.all.0.slug %}">{{ product.manufacturers.all.0.name }}</a>
+                        </h1>
+                        <div class="product-bm-wrapper">
+                            {% with m=product.manufacturers.first %}
+                            {% if m and m.image %}
+                            <figure class="brand">
+
+                                <img src="{{ m.image.url }}" alt="{{ m.name }}" width="105" height="48">
+
+
+
+                            </figure>
+                            {% endif %}
+                            {% endwith %}
+                            <div class="product-meta">
+                                <div class="product-categories">
+                                    Category:
+                                    <span class="product-category">
+                                        {% for category in product.category.all %}
+                                            {% if forloop.last %}
+                                                {{ category.name }}
+                                            {% endif %}
+                                        {% endfor %}
+                                    </span>
+                                </div>
+                                <div class="product-sku">
+                                    SKU: <span>{{product.article}}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="product-divider">
+
+                        <div class="product-meta d-flex align-items-center gap-3">
+                            <!-- QR-код -->
+                            {% if product.qr_code %}
+                            <div class="product-qr">
+                                <img src="{{ product.qr_code.url }}" alt="QR {{ product.name }}" width="80" height="80" class="img-fluid">
+                            </div>
+                            {% endif %}
+
+                            <!-- Цена + рейтинг -->
+                            <div class="product-info">
+                                <div class="product-price"
+                                     data-valute-default="rub"
+                                     data-valute-this="{{cart_products.9 }}"
+                                     data-valute-relationship="{{cart_products.7 }}"
+                                     data-valute-defaallowanceult="{{cart_products.8 }}">
+
+                                    {% if product_variable.price %}
+                                    {% if valute != product.valute %}
+                                    {% if product.type == 1 %}
+                                    <span class="sale-price" >{% currency_conversion_for_products request product_variable.price product.valute.id %} {{valute.icon_code}}</span>
+                                    {% else %}
+                                    <span class="sale-price">{% currency_conversion_for_products request product_variable.price product.valute.id  %}</span> {{valute.icon_code}}
+                                    {% endif %}
+                                    {% else %}
+                                    {% if product.type == 1 %}
+                                    <span class="sale-price" >{{ product.price }} </span>{{valute.icon_code}}
+                                    {% else %}
+                                    <span class="sale-price" >{{ product_variable.price }}&nbsp;</span>{{valute.icon_code}}
+                                    {% endif %}
+                                    {% endif %}
+                                    {% else %}
+                                    {% if valute != product.valute %}
+                                    {% if product.type == 1 %}
+                                    <span class="sale-price" >{% currency_conversion_for_products request product.price product.valute.id %} {{valute.icon_code}}</span>
+                                    {% else %}
+                                    <span class="sale-price" >{% currency_conversion_for_products request product.productsvariable_set.all.first.price product.valute.id  %} {{valute.icon_code}}</span>
+                                    {% endif %}
+                                    {% else %}
+                                    {% if product.type == 1 %}
+                                    <span class="sale-price">{{ product.price }} {{valute.icon_code}}</span>
+                                    {% else %}
+                                    <span class="sale-price">{{ product.productsvariable_set.all.first.price }} {{valute.icon_code}}</span>
+                                    {% endif %}
+                                    {% endif %}
+                                    {% endif %}
+                                </div>
+
+                                <div class="ratings-container">
+                                    <div class="ratings-full">
+                                        <span class="ratings" style="width: {{ product.review_all_sum }}0%;"></span>
+                                        <span class="tooltiptext tooltip-top"></span>
+                                    </div>
+                                    <a href="#" class="rating-reviews">({{ product.review_count }} {% trans "Отзывов" %})</a>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <hr class="product-divider">
+                        <div class="product-variable" data-variale="{{variable_json|escape}}">
+                            {% for variable, attributes in attributes_by_variable.items %}
+                            {% if variable.type == 1 %}
+                            <div class="product-color">
+                                <ul>
+                                    {% for attribute in attributes %}
+                                    <li>
+                                        <input type="radio" {% if attribute.slug in selected_attributes %} checked {% endif %}
+                                               name="{{ variable.slug }}" id="attribute_{{ attribute.id }}"
+                                               value="{{ attribute.id }}" data-variable-slug="{{ variable.slug }}"
+                                               data-attribute-slug="{{ attribute.slug }}" class="attribute-radio">
+                                        <label for="attribute_{{ attribute.id }}">
+                                                    <span class="attribute-image">
+                                                        {% if attribute.image %}
+                                                            <img src="{{ attribute.image.url }}" alt="{{ attribute.slug }}">
+                                                        {% else %}
+                                                            {{ attribute.content }}
+                                                        {% endif %}
+                                                    </span>
+                                        </label>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+
+
+                            </div>
+                            {% else %}
+                            <div class="single-select2">
+                                <div class="form-select2">
+                                    <span class="label">{{ variable.name }} *</span>
+                                    <select class="select2" id="attribute_{{ variable.slug }}" name="{{ variable.slug }}"
+                                            data-variable-slug="{{ variable.slug }}">
+                                        {% for attribute in attributes %}
+                                        <option value="{{ attribute.id }}" {% if attribute.slug in selected_attributes%}
+                                                selected {% endif %} data-attribute-slug="{{ attribute.slug }}">
+                                            {{ attribute.name }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                        <hr class="product-divider">
+
+
+                        <div class="fix-bottom  sticky-content">
+                            {% if not user.type == 2 %}
+                            {% if product.quantity == 0 and product.order %}
+                            {% include 'site/shop4/include/form_applications.html' %}
+                            {% else %}
+                            <div class="product-form container" style="padding-left: 0px;">
+                                <form method="post" action="{% url 'shop:add_to_cart' %}" data-product-id="{{ product.id }}" class="add-to-cart-form">
+                                    {% csrf_token %}
+
+                                    <div class="row">
+                                        <div class="col-xl-6" style="max-width: 150px">
+                                            <div class="product-qty-form product-quantity qty-wrap"  data-product="{{ product.id }}">
+                                                <div class="quantity input-group pro-qty">
+                                                    <input name="quantity" class="qty-input quantity form-control" id="quantityvalue" data-product="{{ product.id }}" maxlength="{{ product.quantity }}" value="1" min="1" max="{{ product.quantity }}" type="number">
+                                                    <button type="button" class="qtyplus inc qty-btn quantity-plus w-icon-plus qty" ><i class="far fa-chevron-up"></i></button>
+                                                    <button type="button" class="qtyminus dec qty-btn quantity-minus w-icon-minus qty"><i class="far fa-chevron-down"></i></button>
+                                                </div>
+                                            </div>
+                                            <input type="hidden" name="variation_slug" value="{{ product.productsvariable_set.all.first.slug }}">
+                                        </div>
+                                        <div class="col-xl-6">
+                                            <button class="btn btn-primary mobile-button" type="submit">
+                                                <span>{% trans 'В корзину' %}</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+
+                            {% endif %}
+                            {% endif %}
+                        </div>
+
+                        <div class="social-links-wrapper">
+                            <div class="social-links">
+                                <div class="social-icons social-no-color border-thin">
+                                    <a href="#" class="social-icon social-facebook w-icon-facebook"
+                                       onclick="shareFacebook(); return false;"></a>
+
+                                    <a href="#" class="social-icon social-twitter w-icon-twitter"
+                                       onclick="shareTwitter(); return false;"></a>
+
+                                    <a href="#" class="social-icon social-pinterest fab fa-pinterest-p"
+                                       onclick="sharePinterest(); return false;"></a>
+
+                                    <a href="#" class="social-icon social-whatsapp fab fa-whatsapp"
+                                       onclick="shareWhatsapp(); return false;"></a>
+
+                                    <a href="#" class="social-icon social-linkedin fab fa-linkedin-in"
+                                       onclick="shareLinkedin(); return false;"></a>
+                                </div>
+                            </div>
+
+                            <script>
+                                const pageUrl   = encodeURIComponent(window.location.href);
+                                const pageTitle = encodeURIComponent(document.title);
+
+                                function popup(url) {
+                                  window.open(url, "_blank", "width=600,height=500");
+                                }
+
+                                function shareFacebook() {
+                                  popup("https://www.facebook.com/sharer/sharer.php?u=" + pageUrl);
+                                }
+
+                                function shareTwitter() {
+                                  popup("https://twitter.com/intent/tweet?url=" + pageUrl + "&text=" + pageTitle);
+                                }
+
+                                function sharePinterest() {
+                                  popup("https://pinterest.com/pin/create/button/?url=" + pageUrl + "&description=" + pageTitle);
+                                }
+
+                                function shareWhatsapp() {
+                                  popup("https://api.whatsapp.com/send?text=" + pageTitle + "%20" + pageUrl);
+                                }
+
+                                function shareLinkedin() {
+                                  popup("https://www.linkedin.com/shareArticle?mini=true&url=" + pageUrl + "&title=" + pageTitle);
+                                }
+                            </script>
+
+                            <span class="divider d-xs-show"></span>
+                            <div class="product-link-wrapper d-flex">
+                                {% if user.is_authenticated %}
+                                <div class="meta-action" id="bookmark_button_{{ product.id }}" data-product="{{ product.id }}">
+                                    {% if product in is_bookmarked %}
+                                    <button class=" bookmark icon-btn btn-product-icon btn-wishlist" type="button" style="cursor: pointer; border-radius: 35px;   margin: 15px" data-type="bookmarkDelete" data-product="{{ product.id }}" >
+                                        <i class="fas fa-heart" ></i>
+                                    </button>
+                                    {% else %}
+                                    <button class=" bookmark icon-btn btn-product-icon btn-wishlist w-icon-heart" style="cursor: pointer;  border-radius: 35px;   margin: 15px;" type="button" data-type="bookmarkAdd" data-product="{{ product.id }}" >
+                                        <i class="far fa-heart"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                                <button class="btn th-btn ml-5 add-to-compare" style="    margin: 10px;"
+                                        data-id="{{ product.id }}">{% trans "В сравнение" %}</button>
+                                <button class="btn ml-5 follow-price" style="margin-top: 10px; border: 1px solid #d1d1d1; border-radius: 26px; height: 66px;"
+                                        data-id="{{ product.id }}">
+                                    {% if product in user.price_reduction.all %}
+                                    Вы следите за ценой
+                                    {% else %}
+                                    Следить за ценой
+                                    {% endif %}
+                                </button>
+
+                                <script>
+                                    document.addEventListener("click", async (e) => {
+                                      const btn = e.target.closest(".add-to-compare");
+                                      if (!btn) return;
+                                      const id = btn.dataset.id;
+                                      try {
+                                        const resp = await fetch("{% url 'shop:compare_add' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', id), {
+                                          method: "POST",
+                                          headers: {"X-CSRFToken": "{{ csrf_token }}"}
+                                        });
+                                        const data = await resp.json();
+                                        if (data.ok) {
+                                          // обнови бейдж сравнения, покажи тост
+                                          console.log("Добавлено в сравнение. Кол-во:", data.count);
+                                        } else {
+                                          alert(data.message);
+                                        }
+                                      } catch(err) {
+                                        console.error(err);
+                                      }
+                                    });
+                                </script>
+                                <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                                <script>
+                                    $(document).ready(function() {
+                                        $(".follow-price").click(function(e) {
+                                            e.preventDefault();
+                                            var productId = $(this).data('id');
+                                            var button = $(this);
+
+                                            $.ajax({
+                                                url: "{% url 'shop:toggle_price_reduction' %}",
+                                                method: "POST",
+                                                data: {
+                                                    'product_id': productId,
+                                                    'csrfmiddlewaretoken': "{{ csrf_token }}"
+                                                },
+                                                success: function(response) {
+                                                    if (response.is_added) {
+                                                        button.text('Вы следите за ценой');
+                                                    } else {
+                                                        button.text('Следить за ценой');
+                                                    }
+                                                },
+                                                error: function() {
+                                                    alert("Ошибка при изменении статуса товара.");
+                                                }
+                                            });
+                                        });
+                                    });
+                                </script>
+
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab tab-nav-boxed tab-nav-outline pt-3">
+                <ul class="nav nav-tabs" id="ReviewTab" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="information-tab" data-bs-toggle="pill"
+                           href="#description" role="tab" aria-controls="information"
+                           aria-selected="true">{% trans 'Описание' %}</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="description-tab" data-bs-toggle="pill"
+                           href="#information" role="tab" aria-controls="description"
+                           aria-selected="false">{% trans 'Характеристики' %}</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="reviews-tab" data-bs-toggle="pill" href="#reviews"
+                           role="tab" aria-controls="reviews" aria-selected="false">{% trans 'Отзывы' %}</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="faq-tab" data-bs-toggle="pill" href="#faq"
+                           role="tab" aria-controls="faq" aria-selected="false">{% trans 'Вопросы' %}</a>
+                    </li>
+                </ul>
+                <div class="tab-content product-tab-content" id="ReviewTabContent">
+                    <div class="tab-pane fade show active" id="description" role="tabpanel"
+                         aria-labelledby="information-tab">
+                        <div class="product-information">
+                            <p>{{product.description|safe}}</p>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="information" role="tabpanel"
+                         aria-labelledby="description-tab">
+                        <div class="product-description">
+
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                <tr>
+                                    <th scope="col">№</th>
+                                    <th scope="col">{% trans 'Название' %}</th>
+                                    <th scope="col">{% trans 'Значение' %}</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for atribute in product.atribute.all%}
+                                <tr>
+                                    <th scope="row">{{ forloop.counter }}</th>
+                                    <td>{{atribute.variable.name }}</td>
+                                    <td>{{atribute.name }}</td>
+                                </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="reviews" role="tabpanel"
+                         aria-labelledby="reviews-tab">
+
+                        <div id="reviews-list">
+                            {% include 'site/shop4/include/form_reviews.html' %}
+                            <div id="review-list" data-products-id="{{ product.id }}">
+                                <div class="review-filters mb-3">
+                                    <button type="button" class="btn btn-sm btn-primary" data-sort="new">Новые</button>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" data-sort="popular">Популярные</button>
+                                </div>
+
+                                <div id="reviews-container"></div>
+
+                                <!-- Кнопка ВСЕГДА под списком -->
+                                <div class="text-center mt-3">
+                                    <button id="load-more-btn" class="btn btn-sm btn-secondary">Загрузить ещё</button>
+                                </div>
+                            </div>
+                            <script>
+                                (function() {
+                                  let page = 1;
+                                  let sort = 'new';
+                                  const wrap = document.getElementById('review-list');
+                                  const productId = wrap.dataset.productsId;
+                                  const container = document.getElementById('reviews-container');
+                                  const loadMoreBtn = document.getElementById('load-more-btn');
+
+                                  function reviewItemHTML(review) {
+                                    const imagesHTML = (review.images && review.images.length)
+                                      ? `<div class="review-images">
+                                           ${review.images.map(img => `<img src="${img.url}" alt="" class="review-img">`).join('')}
+                                         </div>`
+                                      : '';
+
+                                    return `
+                                      <div class="review-item">
+                                        <div class="review-head">
+                                          <div class="review-author">${review.author}</div>
+                                          <div class="review-stars">${'★'.repeat(review.starvalue || 0)}</div>
+                                        </div>
+                                        <div class="review-text">${review.text}</div>
+                                        ${imagesHTML}
+                                        <div class="review-date">${review.created_at}</div>
+                                      </div>
+                                    `;
+                                  }
+
+                                  function loadReviews() {
+                                    const url = `/product/${productId}/load-reviews/?page=${page}&sort=${encodeURIComponent(sort)}`;
+                                    fetch(url)
+                                      .then(r => r.json())
+                                      .then(data => {
+                                        // Для отладки можно раскрыть:
+                                        // console.log('reviews response', data);
+
+                                        (data.reviews || []).forEach(rv => {
+                                          container.insertAdjacentHTML('beforeend', reviewItemHTML(rv));
+                                        });
+
+                                        if (data.has_next) {
+                                          loadMoreBtn.disabled = false;
+                                          loadMoreBtn.dataset.nextPage = data.next_page;
+                                          loadMoreBtn.style.visibility = 'visible';
+                                        } else {
+                                          // Кнопку не скрываем, но делаем неактивной
+                                          loadMoreBtn.disabled = true;
+                                          loadMoreBtn.style.visibility = 'visible';
+                                        }
+                                      })
+                                      .catch(() => {
+                                        loadMoreBtn.disabled = false;
+                                      });
+                                  }
+
+                                  // сортировка кнопками
+                                  wrap.querySelectorAll('.review-filters [data-sort]').forEach(btn => {
+                                    btn.addEventListener('click', () => {
+                                      sort = btn.dataset.sort;
+                                      page = 1;
+                                      container.innerHTML = '';         // очистка списка
+                                      loadMoreBtn.disabled = false;     // активируем кнопку
+                                      loadMoreBtn.style.visibility = 'visible';
+                                      loadReviews();
+                                    });
+                                  });
+
+                                  // первая загрузка
+                                  loadReviews();
+
+                                  // загрузка ещё
+                                  loadMoreBtn.addEventListener('click', () => {
+                                    loadMoreBtn.disabled = true;
+                                    page += 1;
+                                    loadReviews();
+                                  });
+                                })();
+                            </script>
+                        </div>
+
+                    </div>
+                    <div class="tab-pane fade" id="faq" role="tabpanel" aria-labelledby="faq-tab">
+
+                        {% include 'site/shop4/include/form_faqs.html' %}
+                        <div id="faqs-list" data-products-id="{{ product.id }}">
+                            <div id="faqs-container"></div>
+
+                            <div class="text-center mt-3">
+                                <button id="load-more-faqs" class="btn btn-sm btn-secondary">Загрузить ещё</button>
+                            </div>
+                        </div>
+                        <script>
+                            (function() {
+                              let faqPage = 1;
+                              const faqWrap = document.getElementById('faqs-list');
+                              const faqProductId = faqWrap.dataset.productsId;
+                              const faqContainer = document.getElementById('faqs-container');
+                              const faqBtn = document.getElementById('load-more-faqs');
+
+                              function faqItemHTML(faq) {
+                                return `
+                                  <div class="comment-author d-flex mb-3">
+                                    <div class="comment-thumb me-2">
+                                      <img src="${faq.avatar || '/_static/default-avatar.png'}" width="60" height="60" alt="${faq.author}">
+                                    </div>
+                                    <div class="comment-content">
+                                      <h4 class="title">
+                                        <span style="text-transform:none;">${faq.author}</span>
+                                        ${faq.created_at}
+                                      </h4>
+                                      <p class="desc"><strong>Вопрос:</strong> ${faq.question || ''}</p>
+                                      ${faq.answer ? `<p class="desc text-muted"><strong>Ответ:</strong> ${faq.answer}</p>` : ''}
+                                    </div>
+                                  </div>
+                                `;
+                              }
+
+                              function loadFaqs() {
+                                const url = `/product/${faqProductId}/load-faqs/?page=${faqPage}`;
+                                fetch(url)
+                                  .then(r => r.json())
+                                  .then(data => {
+                                    (data.faqs || []).forEach(faq => {
+                                      faqContainer.insertAdjacentHTML('beforeend', faqItemHTML(faq));
+                                    });
+
+                                    if (data.has_next) {
+                                      faqBtn.disabled = false;
+                                      faqBtn.style.visibility = 'visible';
+                                      faqBtn.dataset.nextPage = data.next_page;
+                                    } else {
+                                      faqBtn.disabled = true;
+                                      faqBtn.style.visibility = 'visible';
+                                    }
+                                  });
+                              }
+
+                              // первая загрузка
+                              loadFaqs();
+
+                              // обработчик кнопки
+                              faqBtn.addEventListener('click', () => {
+                                faqBtn.disabled = true;
+                                faqPage += 1;
+                                loadFaqs();
+                              });
+                            })();
+                        </script>
+
+
+                    </div>
+                </div>
+            </div>
+
+            <section class="mt-4">
+                <div class="container">
+                    <div class="row justify-content-lg-between justify-content-center align-items-end">
+                        <div class="col-lg">
+                            <div class="title-area text-center text-lg-start">
+
+                                <h2 class="sec-title">{% trans "Товары от этого продавца" %}</h2>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" role="tabpanel" aria-labelledby="nav-one-tab">
+                            <div class="slider-area">
+                                <div class="swiper th-slider has-shadow productSlider1"
+                                     data-slider-options='{"breakpoints":{"0":{"slidesPerView":1},"576":{"slidesPerView":"2"},"768":{"slidesPerView":"2"},"992":{"slidesPerView":"3"},"1200":{"slidesPerView":"4"}}}'>
+                                    <div class="swiper th-slider has-shadow" id="productSlider6"
+                                         data-slider-options='{"breakpoints":{"0":{"slidesPerView":1},"576":{"slidesPerView":"2"},"768":{"slidesPerView":"1"},"992":{"slidesPerView":"2"},"1200":{"slidesPerView":"3"}}}'>
+                                        <div class="swiper-wrapper" id="for-top_product" data-product-id="{% for product in top_product %}{{product.id}},{% endfor %}">
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <button data-slider-prev=".productSlider1" class="slider-arrow slider-prev"><i
+                                        class="far fa-arrow-left"></i></button>
+                                <button data-slider-next=".productSlider1" class="slider-arrow slider-next"><i
+                                        class="far fa-arrow-right"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+            <section class="mt-4">
+                <div class="container">
+                    <div class="row justify-content-lg-between justify-content-center align-items-end">
+                        <div class="col-lg">
+                            <div class="title-area text-center text-lg-start">
+
+                                <h2 class="sec-title">{% trans "Наши популярные продукты" %}</h2>
+                            </div>
+                        </div>
+
+                    </div>
+                   <div class="tab-content">
+                        <div class="tab-pane fade show active" id="nav-one" role="tabpanel" aria-labelledby="nav-one-tab">
+                            <div class="slider-area">
+                                <div class="swiper th-slider has-shadow productSlider1"
+                                     data-slider-options='{"breakpoints":{"0":{"slidesPerView":1},"576":{"slidesPerView":"2"},"768":{"slidesPerView":"2"},"992":{"slidesPerView":"3"},"1200":{"slidesPerView":"4"}}}'>
+                                    <div class="swiper th-slider has-shadow" id="productSlider7"
+                                         data-slider-options='{"breakpoints":{"0":{"slidesPerView":1},"576":{"slidesPerView":"2"},"768":{"slidesPerView":"1"},"992":{"slidesPerView":"2"},"1200":{"slidesPerView":"3"}}}'>
+                                        <div class="swiper-wrapper" id="for-trends-product" data-product-id="{% for product in trends_product %}{{product.id}},{% endfor %}">
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <button data-slider-prev=".productSlider1" class="slider-arrow slider-prev"><i
+                                        class="far fa-arrow-left"></i></button>
+                                <button data-slider-next=".productSlider1" class="slider-arrow slider-next"><i
+                                        class="far fa-arrow-right"></i></button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+        </div>
+    </div>
+    <!-- End of Page Content -->
+</main>
+
+<script src="{% static 'site/wolmart/js/plugins/select2.min.js' %}"></script>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const select = document.querySelector(".product-variable select");
+        const priceSpan = document.querySelector(".sale-price");
+
+        if (!select || !priceSpan) {
+            console.error("❌ Не найден селект или блок .sale-price");
+            return;
+        }
+
+        // Парсим вариации
+        const productVariables = JSON.parse(
+            document.querySelector(".product-variable").getAttribute("data-variale")
+        );
+
+        console.log("📦 Вариации:", productVariables);
+
+        function updatePrice() {
+            const selectedAttr = select.value;
+            const selectedVariation = productVariables.find(
+                v => v.attributes == selectedAttr
+            );
+
+            if (selectedVariation) {
+                console.log("✅ Найдена вариация:", selectedVariation);
+
+                // 👉 Обновляем цену (только число)
+                priceSpan.textContent = selectedVariation.price;
+
+                // 👉 Обновляем скрытое поле с slug (если есть)
+                const slugInput = document.querySelector('input[name="variation_slug"]');
+                if (slugInput) slugInput.value = selectedVariation.slug;
+
+                // 👉 Лог в консоль
+                console.log("💰 Итоговая цена:", selectedVariation.price);
+            } else {
+                console.warn("⚠️ Вариация не найдена для атрибута", selectedAttr);
+            }
+        }
+
+        // Первый запуск
+        updatePrice();
+
+        // Перерасчёт при смене селекта
+        select.addEventListener("change", updatePrice);
+        select.addEventListener("input", updatePrice);
+    });
+</script>
+
+
+
+{% endblock content %}
+
+{% block footer %}
+<script src="{% static 'site/script.js' %}"></script>
+<script src="{% static 'site/wolmart/assets/vendor/sticky/sticky.min.js' %}"></script>
+<script src="{% static 'site/wolmart/assets/vendor/jquery.plugin/jquery.plugin.min.js' %}"></script>
+<script src="{% static 'site/wolmart/assets/vendor/imagesloaded/imagesloaded.pkgd.min.js' %}"></script>
+<script src="{% static 'site/wolmart/assets/vendor/magnific-popup/jquery.magnific-popup.min.js' %}"></script>
+<script src="{% static 'site/wolmart/assets/vendor/swiper/swiper-bundle.min.js' %}"></script>
+<script src="{% static 'site/wolmart/assets/vendor/zoom/jquery.zoom.js' %}"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+    // === CSRF ===
+    function getCSRFToken(name = "csrftoken") {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+            const cookies = document.cookie.split(";");
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // === Рисуем звёзды ===
+    function buildStarsHTML(rating) {
+        const r = Math.max(0, Math.min(5, Number(rating) || 0));
+        const full = Math.floor(r);
+        const half = (r - full) >= 0.5 ? 1 : 0;
+        const empty = 5 - full - half;
+        let html = "";
+        for (let i = 0; i < full; i++) html += '<i class="fas fa-star"></i>';
+        if (half) html += '<i class="fas fa-star-half-alt"></i>';
+        for (let i = 0; i < empty; i++) html += '<i class="far fa-star"></i>';
+        return html;
+    }
+
+    // === Bookmark ===
+    function handleBookmark(event) {
+        event.preventDefault();
+        const button = event.currentTarget;
+        const product_id = button.dataset.product;
+        const aType = button.dataset.type;
+        const csrfToken = getCSRFToken();
+
+        const url = (aType === "bookmarkAdd")
+            ? window.urls.bookmarkAdd
+            : window.urls.bookmarkDelete;
+
+        fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-CSRFToken": csrfToken,
+            },
+            body: new URLSearchParams({ product_id }).toString(),
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === "success") {
+                if (aType === "bookmarkAdd") {
+                    button.dataset.type = "bookmarkDelete";
+                    button.innerHTML = '<i class="fas fa-heart"></i>';
+                } else {
+                    button.dataset.type = "bookmarkAdd";
+                    button.innerHTML = '<i class="far fa-heart"></i>';
+                }
+                const bookmarkCount = document.getElementById("bookmark-count");
+                if (bookmarkCount) bookmarkCount.textContent = data.count;
+            }
+        })
+        .catch(err => console.error("Ошибка при обновлении закладки:", err));
+    }
+
+    function bindBookmarkButtonHandler() {
+        document.querySelectorAll(".bookmark").forEach(button => {
+            button.removeEventListener("click", handleBookmark);
+            button.addEventListener("click", handleBookmark);
+        });
+    }
+
+    // === Add to Cart ===
+    function handleAddToCartFormSubmit(event) {
+        event.preventDefault();
+        const form = event.currentTarget;
+        const productId = form.dataset.productId;
+        const quantity = form.querySelector("input[name='quantity']").value;
+        const variation_slug = form.querySelector("input[name='variation_slug']").value;
+        const csrfToken = form.querySelector("input[name='csrfmiddlewaretoken']").value;
+
+        const data = new FormData();
+        data.append("product_id", productId);
+        data.append("quantity", quantity);
+        data.append("variation_slug", variation_slug);
+        data.append("csrfmiddlewaretoken", csrfToken);
+
+        fetch(form.action, { method: "POST", body: data })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                showCustomAlert("{% trans 'Товар добавлен в корзину' %}!");
+            } else {
+                alert(data.message || "Ошибка добавления в корзину");
+            }
+        })
+        .catch(error => console.error("Ошибка при добавлении товара в корзину:", error));
+    }
+
+    function bindAddToCartHandler() {
+        document.querySelectorAll("form.add-to-cart-form").forEach(form => {
+            form.removeEventListener("submit", handleAddToCartFormSubmit);
+            form.addEventListener("submit", handleAddToCartFormSubmit);
+        });
+    }
+
+    // === Compare ===
+    function handleCompare(event) {
+        event.preventDefault();
+        const button = event.currentTarget;
+        const product_id = button.dataset.id;
+        const csrfToken = getCSRFToken();
+
+        fetch(window.urls.compareAdd, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-CSRFToken": csrfToken,
+            },
+            body: new URLSearchParams({ product_id }).toString(),
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert("Товар добавлен в сравнение!");
+            } else {
+                alert(data.message || "Ошибка при добавлении в сравнение");
+            }
+        })
+        .catch(err => console.error("Ошибка сравнения:", err));
+    }
+
+    function bindCompareHandler() {
+        document.querySelectorAll(".add-to-compare").forEach(button => {
+            button.removeEventListener("click", handleCompare);
+            button.addEventListener("click", handleCompare);
+        });
+    }
+
+    // === + / - количества ===
+    document.addEventListener("click", (e) => {
+        const plusBtn = e.target.closest(".quantity-plus");
+        const minusBtn = e.target.closest(".quantity-minus");
+        if (!plusBtn && !minusBtn) return;
+
+        const group = (plusBtn || minusBtn).closest(".pro-qty");
+        if (!group) return;
+        const input = group.querySelector("input.quantity, input.qty-input");
+        if (!input) return;
+
+        const min = parseInt(input.getAttribute("min") || "1", 10);
+        const max = parseInt(input.getAttribute("max") || "51", 10);
+        let val = parseInt(input.value || "1", 10);
+        if (isNaN(val) || val < min) val = min;
+
+        if (plusBtn) val = Math.min(max, val + 1);
+        if (minusBtn) val = Math.max(min, val - 1);
+        input.value = val;
+    });
+
+    // === Загрузка товаров по id ===
+    function loadProductsByIds(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        const rawIds = container.dataset.productId || "";
+        const ids = rawIds.split(",").map(id => id.trim()).filter(id => id).join(",");
+        if (!ids) {
+            container.innerHTML = "<p>⚠️ Нет товаров</p>";
+            return;
+        }
+
+        const prefix = window.location.pathname.startsWith("/ru/") ? "/ru" : "";
+        fetch(`${prefix}/products/by-ids/?ids=${encodeURIComponent(ids)}`, {
+            method: "GET",
+            headers: { "X-Requested-With": "XMLHttpRequest" },
+        })
+        .then(res => res.json())
+        .then(data => {
+            const currency = data.currency || "сом";
+            container.innerHTML = "";
+
+            data.products.forEach(product => {
+                const col = document.createElement("div");
+                col.className = "col-xl-4 col-lg-4 col-sm-6";
+
+                const card = document.createElement("div");
+                card.className = "th-product product-grid";
+
+                const imgWrapper = document.createElement("div");
+                imgWrapper.className = "product-img";
+
+                if (product.reklama) {
+                    imgWrapper.insertAdjacentHTML("afterbegin", `<span class="product-tag">{% trans "Реклама" %}</span>`);
+                }
+
+                if (product.images && product.images.length > 0) {
+                    const img = document.createElement("img");
+                    img.src = product.images[0];
+                    img.alt = product.name;
+                    imgWrapper.appendChild(img);
+                } else if (product.image) {
+                    const img = document.createElement("img");
+                    img.src = product.image;
+                    img.alt = product.name;
+                    imgWrapper.appendChild(img);
+                }
+
+                // Actions (compare + bookmark)
+                const actions = document.createElement("div");
+                actions.className = "actions";
+                const bookmarkType = product.is_bookmarked ? "bookmarkDelete" : "bookmarkAdd";
+                const bookmarkIcon = product.is_bookmarked ? "fas fa-heart" : "far fa-heart";
+                actions.innerHTML = `
+                    <a class="icon-btn add-to-compare" data-id="${product.id}" title="Compare">
+                        <i class="fa fa-balance-scale"></i>
+                    </a>
+                    <span id="bookmark_button_${product.id}"
+                          class="icon-btn bookmark btn-wishlist"
+                          data-type="${bookmarkType}"
+                          data-product="${product.id}">
+                          <i class="${bookmarkIcon}"></i>
+                    </span>
+                `;
+                imgWrapper.appendChild(actions);
+                card.appendChild(imgWrapper);
+
+                const content = document.createElement("div");
+                content.className = "product-content";
+
+                const csrf = getCSRFToken();
+                const variationSlug = product.variation_slug || "";
+                content.insertAdjacentHTML("beforeend", `
+<div class="product-form container">
+  <form method="post" action="{% url 'shop:add_to_cart' %}" data-product-id="${product.id}" class="add-to-cart-form">
+    <input type="hidden" name="csrfmiddlewaretoken" value="${csrf}">
+    <input type="hidden" name="product_id" value="${product.id}">
+    <input type="hidden" name="variation_slug" value="${variationSlug}">
+    <div class="row">
+      <div class="col-6">
+        <div class="quantity input-group pro-qty">
+          <input name="quantity" class="form-control qty-input quantity"
+                 value="1" min="1" max="51" type="number">
+          <button type="button" class="qtyplus inc qty-btn quantity-plus"><i class="far fa-chevron-up"></i></button>
+          <button type="button" class="qtyminus dec qty-btn quantity-minus"><i class="far fa-chevron-down"></i></button>
+        </div>
+      </div>
+      <div class="col-6">
+        <button class="btn btn-primary" type="submit">{% trans "В корзину" %}</button>
+      </div>
+    </div>
+  </form>
+</div>
+                `);
+
+                const title = document.createElement("h3");
+                title.className = "product-title";
+                title.innerHTML = `<a href="${product.url || "#"}">${product.name}</a>`;
+
+                const price = document.createElement("span");
+                price.className = "price";
+                price.textContent = product.price != null ? `${product.price} ${currency}` : "{% trans "Цена не указана" %}";
+
+                const ratingWrap = document.createElement("div");
+                ratingWrap.className = "woocommerce-product-rating";
+                ratingWrap.innerHTML = `
+                    <span class="count">(${product.review_count || 0})</span>
+                    <span class="stars">${buildStarsHTML(product.rating || 0)}</span>
+                `;
+
+                content.appendChild(title);
+                content.appendChild(price);
+                content.appendChild(ratingWrap);
+
+                card.appendChild(content);
+                col.appendChild(card);
+                container.appendChild(col);
+            });
+
+            bindBookmarkButtonHandler();
+            bindAddToCartHandler();
+            bindCompareHandler();
+        })
+        .catch(err => {
+            console.error("Ошибка загрузки продуктов:", err);
+            container.innerHTML = "<p>❌ Ошибка загрузки</p>";
+        });
+    }
+
+    // Загружаем товары для всех блоков с data-product-id
+    document.querySelectorAll("[data-product-id]").forEach(el => {
+        loadProductsByIds(el.id);
+    });
+
+});
+
+
+     function showCustomAlert(message) {
+        let alertBox = document.getElementById("custom-alert");
+        if (!alertBox) {
+            alertBox = document.createElement("div");
+            alertBox.id = "custom-alert";
+            alertBox.style.position = "fixed";
+            alertBox.style.top = "20px";
+            alertBox.style.right = "20px";
+            alertBox.style.background = "#28a745";
+            alertBox.style.color = "#fff";
+            alertBox.style.padding = "10px 15px";
+            alertBox.style.borderRadius = "4px";
+            alertBox.style.opacity = "0";
+            alertBox.style.transition = "opacity .5s";
+            document.body.appendChild(alertBox);
+        }
+        alertBox.textContent = message;
+        alertBox.style.display = "block";
+        setTimeout(() => { alertBox.style.opacity = "1"; }, 10);
+        setTimeout(() => {
+            alertBox.style.opacity = "0";
+            setTimeout(() => { alertBox.style.display = "none"; }, 500);
+        }, 2000);
+    }
+
+
+
+<!--document.addEventListener("click", (e) => {-->
+<!--    const plusBtn = e.target.closest(".quantity-plus");-->
+<!--    const minusBtn = e.target.closest(".quantity-minus");-->
+<!--    if (!plusBtn && !minusBtn) return;-->
+
+<!--    const group = (plusBtn || minusBtn).closest(".pro-qty");-->
+<!--    if (!group) return;-->
+<!--    const input = group.querySelector("input.quantity, input.qty-input");-->
+<!--    if (!input) return;-->
+
+<!--    const min = parseInt(input.getAttribute("min") || "1", 10);-->
+<!--    const max = parseInt(input.getAttribute("max") || "51", 10);-->
+<!--    let val = parseInt(input.value || "1", 10);-->
+<!--    if (isNaN(val) || val < min) val = min;-->
+
+<!--    if (plusBtn) val = Math.min(max, val + 1);-->
+<!--    if (minusBtn) val = Math.max(min, val - 1);-->
+<!--    input.value = val;-->
+<!--});-->
+
+</script>
+
+<script src="{% static 'site/wolmart/assets/vendor/photoswipe/photoswipe.min.js' %}"></script>
+<script src="{% static 'site/wolmart/assets/vendor/photoswipe/photoswipe-ui-default.min.js' %}"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Миниатюры
+        const thumbsSwiper = new Swiper(".product-thumbs-wrap", {
+            direction: "vertical",
+            slidesPerView: "auto",
+            spaceBetween: 10,
+            watchSlidesProgress: true,
+            watchSlidesVisibility: true,
+            breakpoints: {
+                0: { direction: "horizontal" },
+                992: { direction: "vertical" }
+            }
+        });
+
+        // Основное изображение
+        const mainSwiper = new Swiper(".product-single-swiper", {
+            spaceBetween: 10,
+            navigation: {
+                nextEl: ".swiper-button-next",
+                prevEl: ".swiper-button-prev",
+            },
+            thumbs: {
+                swiper: thumbsSwiper,
+            },
+        });
+
+        // Навешиваем активный класс на выбранный thumbnail
+        const thumbs = document.querySelectorAll(".product-thumb");
+        thumbs.forEach((thumb, index) => {
+            thumb.addEventListener("click", () => {
+                mainSwiper.slideTo(index);
+                thumbs.forEach(t => t.classList.remove("active"));
+                thumb.classList.add("active");
+            });
+        });
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const images = document.querySelectorAll(".product-image img");
+
+        images.forEach(img => {
+            img.addEventListener("mousemove", function (e) {
+                const { left, top, width, height } = img.getBoundingClientRect();
+                const x = ((e.pageX - left - window.scrollX) / width) * 100;
+                const y = ((e.pageY - top - window.scrollY) / height) * 100;
+
+                img.style.transformOrigin = `${x}% ${y}%`;
+                img.style.transform = "scale(1.25)";
+            });
+
+            img.addEventListener("mouseleave", function () {
+                img.style.transformOrigin = "center center";
+                img.style.transform = "scale(1)";
+            });
+        });
+    });
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    console.log("✅ Запуск скрипта для swiper-wrapper");
+
+    // Ищем все блоки с data-product-id
+    document.querySelectorAll(".swiper-wrapper[data-product-id]").forEach(wrapper => {
+        const ids = wrapper.dataset.productId
+            .split(",")                      // разделяем по запятой
+            .map(id => id.trim())            // убираем пробелы
+            .filter(Boolean);                // убираем пустые строки
+
+        console.log("📦 Найден wrapper:", wrapper.id, "ID товаров:", ids);
+
+        // Если ID есть — генерируем слайды
+        if (ids.length > 0) {
+            ids.forEach(id => {
+                const slide = document.createElement("div");
+                slide.className = "swiper-slide";
+
+                // ⚡ пока выводим просто ID
+                slide.innerHTML = `
+                    <div class="product-card">
+                        <p>Товар ID:</p>
+                        <strong>${id}</strong>
+                    </div>
+                `;
+
+                wrapper.appendChild(slide);
+            });
+        } else {
+            console.warn("⚠️ Нет ID товаров в wrapper:", wrapper.id);
+        }
+    });
+});
+</script>
+
+<script>
+(function () {
+  'use strict';
+
+  const LOG = true;
+  const L = (...a) => { if (LOG) console.log('[slider-fix]', ...a); };
+
+  function getContainerFromBtn(btn) {
+    const sel = btn.getAttribute('data-slider-next') || btn.getAttribute('data-slider-prev');
+    return sel ? document.querySelector(sel) : null;
+  }
+
+  function getWrapper(container) {
+    if (!container) return null;
+    return (
+      container.querySelector('#for-trends-product') ||
+      container.querySelector('#for-top_product') ||
+      container.querySelector('.swiper-wrapper')
+    );
+  }
+
+  function killSwiper(container) {
+    try {
+      if (container && container.swiper && typeof container.swiper.destroy === 'function') {
+        container.swiper.destroy(true, true);
+        L('Swiper destroyed');
+      }
+    } catch (e) { L('destroy error:', e); }
+    if (container) container.classList.remove('swiper-initialized');
+  }
+
+  function resetWrapper(wrapper) {
+    if (!wrapper) return;
+    wrapper.style.transform = 'translate3d(0,0,0)';
+    wrapper.style.transitionDuration = '0ms';
+  }
+
+  function rotate(wrapper, dir) {
+    if (!wrapper) return;
+    const kids = Array.from(wrapper.children).filter(n => n.nodeType === 1);
+    if (kids.length < 2) { L('nothing to rotate'); return; }
+    if (dir === 1) {
+      wrapper.appendChild(kids[0]);
+      L('next: first -> end');
+    } else {
+      wrapper.insertBefore(kids[kids.length - 1], kids[0]);
+      L('prev: last -> start');
+    }
+    // reflow
+    void wrapper.offsetHeight;
+  }
+
+  function handleArrow(ev) {
+    const btn = ev.target.closest('[data-slider-next], [data-slider-prev]');
+    if (!btn) return;
+
+    const container = getContainerFromBtn(btn);
+    if (!container) { L('container not found'); return; }
+
+    const wrapper = getWrapper(container);
+    if (!wrapper) { L('wrapper not found'); return; }
+
+    // Гасим тему/Swiper
+    ev.preventDefault();
+    if (ev.stopImmediatePropagation) ev.stopImmediatePropagation();
+    ev.stopPropagation();
+
+    // Убираем любые сдвиги/инициализацию
+    killSwiper(container);
+    resetWrapper(wrapper);
+
+    const dir = btn.hasAttribute('data-slider-next') ? 1 : -1;
+
+    // Выполняем после возможных хендлеров темы
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => rotate(wrapper, dir));
+    });
+  }
+
+  // Перехватываем максимально рано
+  document.addEventListener('click', handleArrow, true);
+  document.addEventListener('pointerdown', handleArrow, true);
+  document.addEventListener('mousedown', handleArrow, true);
+
+  // Инициализация и защита от повторной авто-инициализации темы
+  document.addEventListener('DOMContentLoaded', function () {
+    const container = document.querySelector('#productSlider7');
+    if (!container) { L('no #productSlider7'); return; }
+    const wrapper = getWrapper(container);
+
+    killSwiper(container);
+    resetWrapper(wrapper);
+    L('init ok');
+
+    // Если тема вдруг снова инициализирует Swiper — убьём его
+    const mo = new MutationObserver(() => {
+      if (container.classList.contains('swiper-initialized') || container.swiper) {
+        L('theme re-initialized swiper -> killing');
+        killSwiper(container);
+        resetWrapper(getWrapper(container));
+      }
+    });
+    mo.observe(container, { attributes: true, attributeFilter: ['class'] });
+  });
+})();
+
+
+    $('.swiper-slide[data-info]').on('click', function() {
+    const url = $(this).data('info');
+    window.location.href = url;
+}).css('cursor', 'pointer');
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        console.log("DOM полностью загружен и разобран");
+
+        // Находим все кнопки увеличения и уменьшения количества
+        var minusButtons = document.querySelectorAll('.qtyminus');
+        var plusButtons = document.querySelectorAll('.qtyplus');
+
+        console.log("Найдено кнопок минус:", minusButtons.length);
+        console.log("Найдено кнопок плюс:", plusButtons.length);
+
+        // Добавляем обработчики событий для кнопок уменьшения
+        minusButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                console.log("Кнопка минус нажата");
+                var input = this.parentNode.querySelector('.qty');
+                var value = parseInt(input.value, 10);
+                if (value > 1) {
+                    input.value = value - 1;
+                }
+                console.log("Новое значение:", input.value);
+            });
+        });
+
+        // Добавляем обработчики событий для кнопок увеличения
+        plusButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                console.log("Кнопка плюс нажата");
+                var input = this.parentNode.querySelector('.qty');
+                var value = parseInt(input.value, 10);
+                var max = parseInt(input.getAttribute('maxlength'), 10);
+                if (value < max) {
+                    input.value = value + 1;
+                }
+                console.log("Новое значение:", input.value);
+            });
+        });
+    });
+</script>
+<script>
+    window.urls = {
+        bookmarkAdd: "{% url 'shop:bookmark-add' %}",
+        faqsAdd: "{% url 'shop:add_faq' %}",
+        bookmarkDelete: "{% url 'shop:bookmark-delete' %}",
+        deleteSelectedProductCart: "{% url 'shop:delete_selected_product' %}"
+    };
+</script>
+<script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+
+        // === CSRF ===
+        function getCSRFToken(name = "csrftoken") {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== "") {
+                const cookies = document.cookie.split(";");
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // === Рисуем звёзды ===
+        function buildStarsHTML(rating) {
+            const r = Math.max(0, Math.min(5, Number(rating) || 0));
+            const full = Math.floor(r);
+            const half = (r - full) >= 0.5 ? 1 : 0;
+            const empty = 5 - full - half;
+            let html = "";
+            for (let i = 0; i < full; i++) html += '<i class="fas fa-star"></i>';
+            if (half) html += '<i class="fas fa-star-half-alt"></i>';
+            for (let i = 0; i < empty; i++) html += '<i class="far fa-star"></i>';
+            return html;
+        }
+
+        // === Bookmark ===
+        function handleBookmark(event) {
+            event.preventDefault();
+            const button = event.currentTarget;
+            const product_id = button.dataset.product;
+            const aType = button.dataset.type;
+            const csrfToken = getCSRFToken();
+
+            const url = (aType === "bookmarkAdd")
+                ? window.urls.bookmarkAdd
+                : window.urls.bookmarkDelete;
+
+            fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRFToken": csrfToken,
+                },
+                body: new URLSearchParams({ product_id }).toString(),
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    if (aType === "bookmarkAdd") {
+                        button.dataset.type = "bookmarkDelete";
+                        button.innerHTML = '<i class="fas fa-heart"></i>';
+                    } else {
+                        button.dataset.type = "bookmarkAdd";
+                        button.innerHTML = '<i class="far fa-heart"></i>';
+                    }
+                    const bookmarkCount = document.getElementById("bookmark-count");
+                    if (bookmarkCount) bookmarkCount.textContent = data.count;
+                }
+            })
+            .catch(err => console.error("Ошибка при обновлении закладки:", err));
+        }
+
+        function bindBookmarkButtonHandler() {
+            document.querySelectorAll(".bookmark").forEach(button => {
+                button.removeEventListener("click", handleBookmark);
+                button.addEventListener("click", handleBookmark);
+            });
+        }
+
+        // === Add to Cart ===
+        function handleAddToCartFormSubmit(event) {
+            event.preventDefault();
+            const form = event.currentTarget;
+            const productId = form.dataset.productId;
+            const quantity = form.querySelector("input[name='quantity']").value;
+            const variation_slug = form.querySelector("input[name='variation_slug']").value;
+            const csrfToken = form.querySelector("input[name='csrfmiddlewaretoken']").value;
+
+            const data = new FormData();
+            data.append("product_id", productId);
+            data.append("quantity", quantity);
+            data.append("variation_slug", variation_slug);
+            data.append("csrfmiddlewaretoken", csrfToken);
+
+            fetch(form.action, { method: "POST", body: data })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Товар добавлен в корзину!");
+                } else {
+                    alert(data.message || "Ошибка добавления в корзину");
+                }
+            })
+            .catch(error => console.error("Ошибка при добавлении товара в корзину:", error));
+        }
+
+        function bindAddToCartHandler() {
+            document.querySelectorAll("form.add-to-cart-form").forEach(form => {
+                form.removeEventListener("submit", handleAddToCartFormSubmit);
+                form.addEventListener("submit", handleAddToCartFormSubmit);
+            });
+        }
+
+        // === Compare ===
+        function handleCompare(event) {
+            event.preventDefault();
+            const button = event.currentTarget;
+            const product_id = button.dataset.id;
+            const csrfToken = getCSRFToken();
+
+            fetch(window.urls.compareAdd, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRFToken": csrfToken,
+                },
+                body: new URLSearchParams({ product_id }).toString(),
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Товар добавлен в сравнение!");
+                } else {
+                    alert(data.message || "Ошибка при добавлении в сравнение");
+                }
+            })
+            .catch(err => console.error("Ошибка сравнения:", err));
+        }
+
+        function bindCompareHandler() {
+            document.querySelectorAll(".add-to-compare").forEach(button => {
+                button.removeEventListener("click", handleCompare);
+                button.addEventListener("click", handleCompare);
+            });
+        }
+
+        // === + / - количества ===
+        document.addEventListener("click", (e) => {
+            const plusBtn = e.target.closest(".quantity-plus");
+            const minusBtn = e.target.closest(".quantity-minus");
+            if (!plusBtn && !minusBtn) return;
+
+            const group = (plusBtn || minusBtn).closest(".pro-qty");
+            if (!group) return;
+            const input = group.querySelector("input.quantity, input.qty-input");
+            if (!input) return;
+
+            const min = parseInt(input.getAttribute("min") || "1", 10);
+            const max = parseInt(input.getAttribute("max") || "51", 10);
+            let val = parseInt(input.value || "1", 10);
+            if (isNaN(val) || val < min) val = min;
+
+            if (plusBtn) val = Math.min(max, val + 1);
+            if (minusBtn) val = Math.max(min, val - 1);
+            input.value = val;
+        });
+
+        // === Загрузка товаров по id ===
+        function loadProductsByIds(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            const rawIds = container.dataset.productId || "";
+            const ids = rawIds.split(",").map(id => id.trim()).filter(id => id).join(",");
+            if (!ids) {
+                container.innerHTML = "<p>⚠️ {% trans 'Нет товаров' %}</p>";
+                return;
+            }
+
+            const prefix = window.location.pathname.startsWith("/ru/") ? "/ru" : "";
+            fetch(`${prefix}/products/by-ids/?ids=${encodeURIComponent(ids)}`, {
+                method: "GET",
+                headers: { "X-Requested-With": "XMLHttpRequest" },
+            })
+            .then(res => res.json())
+            .then(data => {
+                const currency = data.currency || "сом";
+                container.innerHTML = "";
+
+                data.products.forEach(product => {
+                    const col = document.createElement("div");
+                    col.className = "col-xl-4 col-lg-4 col-sm-6";
+
+                    const card = document.createElement("div");
+                    card.className = "th-product product-grid";
+
+                    const imgWrapper = document.createElement("div");
+                    imgWrapper.className = "product-img";
+
+                    if (product.reklama) {
+                        imgWrapper.insertAdjacentHTML("afterbegin", `<span class="product-tag">{% trans "Реклама" %}</span>`);
+                    }
+
+                    if (product.images && product.images.length > 0) {
+                        const img = document.createElement("img");
+                        img.src = product.images[0];
+                        img.alt = product.name;
+                        imgWrapper.appendChild(img);
+                    } else if (product.image) {
+                        const img = document.createElement("img");
+                        img.src = product.image;
+                        img.alt = product.name;
+                        imgWrapper.appendChild(img);
+                    }
+
+                    // Actions (compare + bookmark)
+                    const actions = document.createElement("div");
+                    actions.className = "actions";
+                    const bookmarkType = product.is_bookmarked ? "bookmarkDelete" : "bookmarkAdd";
+                    const bookmarkIcon = product.is_bookmarked ? "fas fa-heart" : "far fa-heart";
+                    actions.innerHTML = `
+                        <a class="icon-btn add-to-compare" data-id="${product.id}" title="Compare">
+                            <i class="fa fa-balance-scale"></i>
+                        </a>
+                        <span id="bookmark_button_${product.id}"
+                              class="icon-btn bookmark btn-wishlist"
+                              data-type="${bookmarkType}"
+                              data-product="${product.id}">
+                              <i class="${bookmarkIcon}"></i>
+                        </span>
+                    `;
+                    imgWrapper.appendChild(actions);
+                    card.appendChild(imgWrapper);
+
+                    const content = document.createElement("div");
+                    content.className = "product-content";
+
+                    const csrf = getCSRFToken();
+                    const variationSlug = product.variation_slug || "";
+                    content.insertAdjacentHTML("beforeend", `
+    <div class="product-form container">
+      <form method="post" action="/ru/addcart/" data-product-id="${product.id}" class="add-to-cart-form">
+        <input type="hidden" name="csrfmiddlewaretoken" value="${csrf}">
+        <input type="hidden" name="product_id" value="${product.id}">
+        <input type="hidden" name="variation_slug" value="${variationSlug}">
+        <div class="row">
+          <div class="col-6">
+            <div class="quantity input-group pro-qty">
+              <input name="quantity" class="form-control qty-input quantity"
+                     value="1" min="1" max="51" type="number">
+              <button type="button" class="qtyplus inc qty-btn quantity-plus"><i class="far fa-chevron-up"></i></button>
+              <button type="button" class="qtyminus dec qty-btn quantity-minus"><i class="far fa-chevron-down"></i></button>
+            </div>
+          </div>
+          <div class="col-6">
+            <button class="btn btn-primary" type="submit">{% trans "В корзину" %}</button>
+          </div>
+        </div>
+      </form>
+    </div>
+                    `);
+
+                    const title = document.createElement("h3");
+                    title.className = "product-title";
+                    title.innerHTML = `<a href="${product.url || "#"}">${product.name}</a>`;
+
+                    const price = document.createElement("span");
+                    price.className = "price";
+                    price.textContent = product.price != null ? `${product.price} ${currency}` : "{% trans 'Цена не указана' %}";
+
+                    const ratingWrap = document.createElement("div");
+                    ratingWrap.className = "woocommerce-product-rating";
+                    ratingWrap.innerHTML = `
+                        <span class="count">(${product.review_count || 0})</span>
+                        <span class="stars">${buildStarsHTML(product.rating || 0)}</span>
+                    `;
+
+                    content.appendChild(title);
+                    content.appendChild(price);
+                    content.appendChild(ratingWrap);
+
+                    card.appendChild(content);
+                    col.appendChild(card);
+                    container.appendChild(col);
+                });
+
+                bindBookmarkButtonHandler();
+                bindAddToCartHandler();
+                bindCompareHandler();
+            })
+            .catch(err => {
+                console.error("Ошибка загрузки продуктов:", err);
+                container.innerHTML = "<p>❌ Ошибка загрузки</p>";
+            });
+        }
+
+        // Загружаем товары для всех блоков с data-product-id
+        document.querySelectorAll("[data-product-id]").forEach(el => {
+            loadProductsByIds(el.id);
+        });
+
+    });
+</script>
+{% endblock footer %}

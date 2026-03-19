@@ -1,0 +1,117 @@
+{% extends 'products/base_profile.html' %}
+{% load static generals_tag shop_tags %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+{% block content %}
+
+
+<aside class="sidebar-area">
+    <div class="widget widget_categories">
+        <div class="container">
+            {% for order in orders %}
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-body p-4">
+                        <div class="row">
+                            <div class="col-lg-8" id="list-order-product">
+                                {% for selected in order.selectedproduct.all %}
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="d-flex flex-row align-items-center">
+                                                    <div>
+                                                        <img src="{% if selected.product.image.url %}{{ selected.product.image.url }}{% else %}{% static 'site/furbar/images/product_4_market.jpg' %}{% endif %}" class="img-fluid rounded-3" alt="Shopping item" style="width: 105px;">
+                                                    </div>
+                                                    <div class="ms-3">
+                                                        <h5 data-link="{% url 'shop:products' selected.product.slug %}">{{ selected.product.name }}</h5>
+                                                        <p class="small mb-0">
+                                                            {% if valute != selected.product.valute %}
+                                                            <span data-product="{{ selected.id }}" data-price="{{ selected.product.price }}">{% currency_conversion_for_products request selected.product.price selected.product.valute.id %} {{valute.icon_code}}</span>
+                                                            {% else %}
+                                                            <span data-product="{{ selected.id }}" data-price="{{ selected.product.price }}">{{ selected.product.price }} {{valute.icon_code}}</span>
+                                                            {% endif %}
+                                                            - Сумма: <span data-product="{{ selected.id }}" data-amount="{{ selected.amount }}">{% currency_conversion_for_products request selected.amount selected.product.valute.id %} {{valute.icon_code}}</span>
+
+                                                        </p>
+                                                        <br>
+                                                        <a href="{% url 'shop:orderdetail' selected.id %}" class="btn " >
+                                                            <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+                                                            Подробнее о покупке
+                                                        </a>
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="card text-white rounded-3">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center mb-4">
+                                            <h5 class="mb-0">Детали заказа</h5>
+                                            <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/avatar-6.webp"
+                                                 class="img-fluid rounded-3" style="width: 45px;" alt="Avatar">
+                                        </div>
+                                        <hr class="my-4">
+                                        <div class="d-flex justify-content-between">
+                                            <p class="mb-2">Товаров</p>
+                                            <p class="mb-2" >{{order.selectedproduct.count}}</p>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <p class="mb-2">Статус оплаты</p>
+                                            <p class="mb-2" >{{order.get_type_display}}</p>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <p class="mb-2">Статус Доставки</p>
+                                            <p class="mb-2" >{{order.get_status_display}}</p>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <p class="mb-2">Адрес доставки</p>
+                                            <p class="mb-2" >{{order.delivery_address}}</p>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <p class="mb-2">ИТОГО</p>
+                                            <p class="mb-2" >{% currency_conversion request order.all_amount %} {{valute.icon_code}}</p>
+                                        </div>
+                                        {% if order.purchase_url %}
+                                        <a href="{{order.purchase_url}}" data-mdb-button-init data-mdb-ripple-init class="th-btn btn-sm style4">
+
+                                            {% if order.type == 1 %}
+                                            Оплатить <i class="fas fa-long-arrow-alt-right ms-2"></i>
+                                            {% else %}
+                                            Оплачено
+                                            {% endif %}
+
+                                        </a>
+                                        {% else %}
+                                        <span class="th-btn btn-sm style4">Наш Менеджер свяжется с вами</span>
+                                        {% endif %}
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+    {% include 'products/include/paginations.html' with items=is_bookmarked %}
+</aside>
+
+{% endblock content %}
+{% block footer %}{% endblock footer %}

@@ -1,0 +1,128 @@
+{% extends 'products/base.html' %}
+{% load static generals_tag %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+{% block content %}
+
+<div class="th-cart-wrapper space-top space-extra-bottom">
+    <div class="container">
+        <div class="row justify-content-end">
+            <div class="col-md-8 col-lg-7 col-xl-8 ">
+                <div class="woocommerce-notices-wrapper">
+                    <div class="woocommerce-message">Ваша корзина</div>
+                </div>
+
+                    <table class="cart_table"><thead>
+                    <tr>
+                        <th class="cart-col-image">Картинка</th>
+                        <th class="cart-col-productname" style="width:230px">Название</th>
+                        <th class="cart-col-price">Цена</th>
+                        <th class="cart-col-quantity">Количество</th>
+                        <th class="cart-col-total">Cумма</th>
+                        <th class="cart-col-remove">Удалить</th>
+                    </tr>
+                    </thead>
+                        <tbody id="list-cart-product">
+                         {% for selected in cart.selectedproduct.all %}
+                        <tr class="cart_item">
+                            <td data-title="Картинка">
+                                <a class="cart-productimage" href="{{selected.product.get_absolute_url}}">
+                                    <img width="91" height="91" src="{% if selected.product.image %}{{ selected.product.image.url }}{% else %} {% static 'site/image.jpg' %}{% endif %}" alt="Image"></a>
+                            </td>
+                            <td data-title="Название">
+                                <a class="cart-productname" href="{{selected.product.get_absolute_url}}">{{selected.product.name}}</a>
+                            </td>
+                            <td data-title="Цена">
+                                <span class="amount">
+                                    <bdi>
+                                         <span class="sale-price" data-product="{{ selected.id }}" data-price="
+                                         {% if valute != selected.product.valute %}{% currency_conversion_for_products request selected.product.price selected.product.valute.id %}{% else %}{{ selected.product.price }}{% endif %}">
+                                             {% if selected.variety %}
+                                                 {% if valute != selected.product.valute %}
+                                                        <span class="sale-price">{% currency_conversion_for_products request selected.variety.price selected.product.valute.id %} {{valute.icon_code}}</span>
+                                                    {% else %}
+                                                       <span class="sale-price">{{ selected.variety.price }} {{valute.icon_code}}</span>
+                                                {% endif %}
+                                             {% else %}
+                                                 {% if valute != selected.product.valute %}
+                                                        <span class="sale-price">{% currency_conversion_for_products request selected.product.price selected.product.valute.id %} {{valute.icon_code}}</span>
+                                                    {% else %}
+                                                       <span class="sale-price">{{ selected.product.price }} {{valute.icon_code}}</span>
+                                                {% endif %}
+                                             {% endif %}
+                                        </span>
+
+                                    </bdi>
+                                </span>
+                            </td>
+                            <td data-title="Количество">
+                                 {% include 'products/include/update_count_button.html' %}
+                            </td>
+                            <td data-title="Cумма">
+                                <span class="amount">
+                                <bdi>
+                                     <span data-product="{{ selected.id }}" data-price="
+                                     {% if selected.variety %}
+                                         {% if valute != selected.product.valute %}
+                                         {% currency_conversion_for_products request selected.variety.price  selected.product.valute.id %}
+                                         {% else %}
+                                         {{ selected.variety.price  }}
+                                         {% endif %}
+                                     {% else %}
+                                         {% if valute != selected.product.valute %}
+                                         {% currency_conversion_for_products request selected.product.price selected.product.valute.id %}
+                                         {% else %}
+                                         {{ selected.product.price }}
+                                         {% endif %}
+                                     {% endif %}
+                                    " data-inter-amount="true">
+
+                                        {% currency_conversion_for_products request selected.amount selected.product.valute.id %}
+                                    </span>{{valute.icon_code}}
+                                </bdi>
+                                </span>
+                            </td>
+                            <td data-title="Удалить">
+                                {% include 'products/include/delete_button.html' %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+
+                        </tbody>
+                    </table>
+
+            </div>
+
+            <div class="col-md-4 col-lg-5 col-xl-4">
+                <h2 class="h4 summary-title">Детали Корзины</h2>
+                <table class="cart_totals"><tbody>
+                <tr>
+                    <td>Сумма Корзины</td>
+                    <td data-title="Cart Subtotal">
+                         <span class="amount" id="amount">{% currency_conversion request cart.amount %} {{valute.icon_code}}</span>
+                    </td>
+                </tr>
+                </tbody>
+
+                </table>
+
+                <div class="wc-proceed-to-checkout mb-30">
+                    {% if cart.amount != 0 %}
+                    <a href="{% url 'payment:checkout' %}" class="th-btn">Оплатить корзину</a>
+                    {% else %}
+                     <a href="{% url 'shop:catalogs' %}" class="th-btn">К покупкам</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+{% block footer %}
+
+{% endblock footer %}

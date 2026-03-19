@@ -1,0 +1,4 @@
+- Run without creating any folders or files
+- Add README.md
+- Remove sensitive data (From comments or .env.tmpl)
+- Optimize Dockerfile

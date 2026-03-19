@@ -1,0 +1,18 @@
+{% extends 'moderations/base.html' %}
+{% load i18n %}
+{% load static %}
+{% block title %}{% trans "Список сотрудников" %}{% endblock title %}
+{% block description %}{% trans "Управление сотрудниками организации" %}{% endblock description %}
+{% block head %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+{% endblock head %}
+
+{% block content %}
+<h1>{% if object %}{% trans "Редактирование сотрудника" %}{% else %}{% trans "Добавление сотрудника" %}{% endif %}</h1>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-success">{% trans "Сохранить" %}</button>
+    <a href="{% url 'kpi:employee_list' %}" class="btn btn-secondary">{% trans "Отмена" %}</a>
+</form>
+{% endblock %}

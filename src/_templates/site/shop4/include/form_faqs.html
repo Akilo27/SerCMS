@@ -1,0 +1,15 @@
+{% load static generals_tag i18n%}
+
+<!-- Форма -->
+<div class="panel">
+    {% if user.is_authenticated %}
+    <div class="panel-body" id="faqs-form" data-product="{{product.id}}">
+        <textarea class="form-control" rows="2" placeholder="{% trans 'У вас есть вопросы?' %}"></textarea>
+        <div class="mar-top clearfix" style="padding-top: 10px">
+            <button class="btn btn-sm btn-primary pull-right" onclick="submitQuestion()" type="submit">{% trans 'Написать' %}</button>
+        </div>
+    </div>
+    {% else %}
+    {% trans 'Задать вопрос могут только авторизованные пользователи' %}
+    {% endif %}
+</div>

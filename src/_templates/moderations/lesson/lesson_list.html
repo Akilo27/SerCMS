@@ -1,0 +1,302 @@
+{% extends 'moderations/base.html' %}
+{% load i18n %}
+{% load static  %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+{% endblock head %}
+
+{% block content %}
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            <div class="col-12">
+                <div class="page-title-box">
+                    <h4 class="mb-0 fw-semibold">{% trans 'Уроки' %}</h4>
+                    <ol class="breadcrumb mb-0">
+                        <div class="toolbar" role="toolbar">
+                            <div class="btn-group mb-1">
+                                <button type="button" class="btn btn-primary light px-3" onclick="location.href=`{% url 'moderation:lesson_create' %}`">
+                                    <iconify-icon icon="solar:add-circle-linear"></iconify-icon> {% trans "Создать курс" %}
+                                </button>
+
+                            </div>
+                        </div>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xl-3 col-lg-12">
+            <div class="card">
+                <div class="card-header border-bottom">
+                    <div>
+                        <h4 class="card-title">{% trans "Курсов" %}</h4>
+                        <p class="mb-0">{{lessons.count}} {% trans "Всего" %}</p>
+                    </div>
+                </div>
+                <form method="get">
+
+                <div class="card-body border-light">
+                    <div class="mb-3">
+                        <label for="typeplace" class="form-label">{% trans "Название" %}</label>
+                        <input type="text" id="typeplace" class="form-control" name="search" value="{{ request.GET.search }}">
+                    </div>
+                    <div class="d-none">
+                        <label for="choices-single-groups" class="form-label">{% trans "Категории" %}</label>
+                        <select class="form-control" id="choices-single-groups" data-choices data-choices-groups data-placeholder="Select City" name="choices-single-groups">
+                            <option value="">{% trans "Первая категория" %}</option>
+                        </select>
+                        <h5 class="text-dark fw-medium my-3">{% trans "Теги" %} :</h5>
+                        <div class="" role="group" aria-label="Basic checkbox toggle button group">
+                            <input type="checkbox" class="btn-check" id="btncheck1">
+                            <label class="btn btn-outline-primary" for="btncheck1">{% trans "Первый тег" %}</label>
+
+                            <input type="checkbox" class="btn-check" id="btncheck2">
+                            <label class="btn btn-outline-primary" for="btncheck2">{% trans "Второй тег" %}</label>
+
+                            <input type="checkbox" class="btn-check" id="btncheck3" checked>
+                            <label class="btn btn-outline-primary" for="btncheck3">{% trans "Третий тег" %}</label>
+
+                            <input type="checkbox" class="btn-check" id="btncheck4">
+                            <label class="btn btn-outline-primary my-1" for="btncheck4">{% trans "Четвертый тег" %}</label>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-primary w-100">{% trans "Применить" %}</button>
+                </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-xl-9 col-lg-12">
+            <div class="row">
+                {% for lesson in lessons %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="card overflow-hidden">
+                        <div class="position-relative">
+                            <img src="{% if lesson.image %}{{lesson.image.url}}{% else %}assets/images/properties/p-1.jpg{% endif %}" alt="" class="img-fluid rounded-top">
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="avatar bg-light rounded">
+                                    <iconify-icon icon="solar:square-academic-cap-2-outline" class="fs-24 text-primary avatar-title"></iconify-icon>
+                                </div>
+                                <div>
+                                    <a href="property-grid.html#!" class="text-dark fw-medium fs-16">{{lesson.name}}</a>
+                                    <p class="text-muted mb-0">{{lesson.time}} {% trans "минут" %}</p>
+                                </div>
+                            </div>
+                            <div class="row mt-2 g-2">
+                                <div class="col-lg-4 col-4">
+                                     <span class="badge bg-light-subtle text-muted border fs-12">
+                                         <span class="fs-16">
+                                             <iconify-icon icon="solar:checklist-broken" class="align-middle"></iconify-icon>
+                                         </span>
+                                         {{lesson.quantity_tests}}
+                                     </span>
+                                </div>
+                                <div class="col-lg-4 col-4">
+                                     <span class="badge bg-light-subtle text-muted border fs-12">
+                                          <span class="fs-16">
+                                              <iconify-icon icon="solar:video-library-bold" class="align-middle"></iconify-icon>
+                                          </span>
+                                         {{lesson.quantity_video}}
+                                     </span>
+                                </div>
+                                <div class="col-lg-4 col-4">
+                                     <span class="badge bg-light-subtle text-muted border fs-12">
+                                          <span class="fs-16">
+                                              <iconify-icon icon="solar:folder-with-files-broken" class="align-middle"></iconify-icon>
+                                          </span>
+                                          {{lesson.quantity_files}}
+                                     </span>
+                                </div>
+
+                            </div>
+
+                        </div>
+                        <div class="card-footer bg-light-subtle d-flex justify-content-between align-items-center border-top">
+                            <p class="fw-medium text-dark fs-16 mb-0">
+                                {% with 0 as zero %}
+                                {% if lesson.price|floatformat > zero %}
+                                {{ lesson.price }}
+                                {% endif %}
+                                {% endwith %}
+
+                            </p>
+                            <div>
+                                {% if lesson.is_contributor %}
+                                <a href="{% url 'moderation:lesson_edit' lesson.id %}" class="link-primary fw-medium">{% trans "Редактировать" %} <i class='ri-arrow-right-line align-middle'></i></a>
+                                {% else %}
+                                <a href="{% url 'moderation:lesson_detail' lesson.id %}" class="link-primary fw-medium">{% trans "Перейти" %} <i class='ri-arrow-right-line align-middle'></i></a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="p-3 border-top">
+                {% include 'moderations/include/paginations.html' with items=categorys_list %}
+
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="searchModalLabel">{% trans 'Поиск' %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="idSearchName" style="display: none;">
+                    <input type="text" id="searchInputName" class="form-control" placeholder="{% trans 'Введите название' %}">
+                </div>
+                <div id="categorySearch" style="display: none;">
+                    <select id="categorySelect" class="form-control">
+                        <option value="">{% trans 'Выберите категорию' %}</option>
+                        {% for category in categorys_settings %}
+                        <option value="{{ category.id }}">{{ category.name }} {% if category.parent %} ({{ category.parent.name }}) {% endif %}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans 'Закрыть' %}</button>
+                <button type="button" class="btn btn-primary" onclick="performSearch()">{% trans 'Поиск' %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .table{
+        width: 100%;
+    }
+    .card{
+        margin-top: 1.25rem;
+    }
+</style>
+<script>
+    function openSearch(type) {
+        const modalLabel = document.getElementById('searchModalLabel');
+        modalLabel.textContent = type === 'name' ? '{% trans "Поиск по названию" %}' :
+            type === 'category' ? '{% trans "Поиск по категории" %}' : '';
+
+        document.getElementById('idSearchName').style.display = 'none';
+        document.getElementById('categorySearch').style.display = 'none';
+
+        switch (type) {
+            case 'category':
+                document.getElementById('categorySearch').style.display = 'block';
+                break;
+            case 'name':
+                document.getElementById('idSearchName').style.display = 'block';
+                break;
+        }
+
+        $('#searchModal').modal('show');
+    }
+
+    function performSearch() {
+        const searchCategory = document.getElementById('categorySelect').value;
+        const searchName = document.getElementById('searchInputName').value;
+
+        // Формируем URL для запроса
+        const url = new URL(window.location.href);
+        if (searchName) {
+            url.searchParams.set('search_name', searchName);
+        } else if (searchCategory) {
+            url.searchParams.set('search_category', searchCategory);
+        }
+
+        console.log(url.toString()); // Проверяем, что URL сформирован правильно
+
+        // Перезагружаем страницу с новыми параметрами
+        window.location.href = url.toString();
+
+        // Закрыть модальное окно после выполнения поиска
+        $('#searchModal').modal('hide');
+    }
+</script>
+<script>
+    function toggleCheckboxes(source) {
+        const checkboxes = document.querySelectorAll('input[name="categorysblogs_ids"]');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = source.checked;
+        });
+    }
+
+    function deleteSelected() {
+        const selectedIds = Array.from(document.querySelectorAll('input[name="categorysblogs_ids"]:checked')).map(checkbox => checkbox.value);
+        if (selectedIds.length === 0) {
+            alert("{% trans 'Выберите хотя бы один элемент для удаления.' %}");
+            return;
+        }
+
+        if (confirm("{% trans 'Вы уверены, что хотите удалить выбранные элементы?' %}")) {
+            const csrfToken = '{{ csrf_token }}'; // Получаем CSRF-токен
+
+            fetch("{% url 'moderation:categorys_product_delete' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json', // Измените на 'application/json'
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    categorysblogs_ids: selectedIds // Отправляем массив ID как JSON
+                })
+            })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.reload(); // Перезагрузка страницы
+                    } else {
+                        alert("{% trans 'Ошибка при удалении элементов.' %}");
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    alert("{% trans 'Ошибка при удалении элементов.' %}");
+                });
+        }
+    }
+
+    function deleteCategorys(categorysId) {
+        if (confirm("{% trans 'Вы уверены, что хотите удалить этот элемент?' %}")) {
+            const csrfToken = '{{ csrf_token }}'; // Получаем CSRF-токен
+
+            fetch("{% url 'moderation:categorys_product_delete' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json', // Изменяем на application/json
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    categorysblogs_ids: [categorysId] // Оборачиваем categorysId в массив
+                })
+            })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.reload(); // Перезагрузка страницы
+                    } else {
+                        alert("{% trans 'Ошибка при удалении элемента.' %}");
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    alert("{% trans 'Ошибка при удалении элемента.' %}");
+                });
+        }
+    }
+</script>
+{% endblock content %}

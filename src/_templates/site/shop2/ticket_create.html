@@ -1,0 +1,50 @@
+{% extends 'site/shop2/base.html' %}
+{% load static generals_tag %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+{% block content %}
+<main class="main">
+    <div class="page-content mb-8 mt-5">
+        <div class="container">
+            <h1>ЛИЧНЫЙ КАБИНЕТ</h1>
+            {% include 'site/shop2/include/profile_menu.html' %}
+                <div class="tab-content" id="nav-tabContent">
+                    <div class="reviews-content" style=" margin-top: -40px; ">
+                        <!-- Review Form Start  -->
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="single-form">
+                                        <label for="id_themas">Тема:</label>
+                                        {{ form.themas }}
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="single-form">
+                                        <label for="id_content">Обращение:</label>
+                                        <textarea name="content" cols="40" rows="10" required="" id="id_content"></textarea>
+
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="single-form">
+                                        <button type="submit" class="btn btn-dark btn-hover-primary" style="margin-top: 5%;">
+                                            Отправить
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock content %}

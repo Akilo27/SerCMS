@@ -1,0 +1,669 @@
+{% extends 'site/website/base.html' %}
+{% load static generals_tag %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<link rel="stylesheet" href="{% static 'site/website/css/search.css' %}">
+<link rel="stylesheet" href="{% static 'site/website/css/datedropper.css' %}">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.css" rel="stylesheet">
+<script src="https://api-maps.yandex.ru/2.1/?apikey=78851096-f5ca-4b77-b7db-3a200b45f233&lang=ru_RU" type="text/javascript"></script>
+<style>
+    #map {
+        width: 100%;
+        height: 800px;
+    }
+    .aos-animate.sidebar-fiter{
+        position: absolute;
+        top: 60px;
+        right:0;
+    }
+    .ui-elements .button-tabs .tabs > li {
+        margin-bottom: 0px;
+        float: right;
+        margin-left: 5px;
+        border-radius: 9px;
+    }
+    .ui-elements .button-tabs .tabs > li:hover {
+        border: 1px solid #fff!important;
+
+    }
+    .ui-elements .button-tabs .active .tab-title {
+        background: none!important;
+        border: 1px solid #fff;
+    }
+    .ui-elements .button-tabs .active .tab-title:hover {
+        background: none!important;
+        border: 1px solid #fff!important;
+    }
+    div#advertisements-list {
+        height: 450px;
+        overflow-y: scroll;
+        border: 1px solid #ccc; /* Обводка для визуального выделения */
+        padding: 10px; /* Внутренний отступ для содержимого */
+
+        border-radius: 5px; /* Закругленные углы */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Тень для объёма */
+    }
+
+    /* Стилизация скроллбара для Webkit (Chrome, Safari) */
+    div#advertisements-list::-webkit-scrollbar {
+        width: 8px; /* Ширина скроллбара */
+    }
+
+    div#advertisements-list::-webkit-scrollbar-track {
+        background: #f1f1f1; /* Цвет фона скроллбара */
+        border-radius: 5px; /* Закругленные края */
+    }
+
+    div#advertisements-list::-webkit-scrollbar-thumb {
+        background: #888; /* Цвет "ползунка" */
+        border-radius: 5px; /* Закругленные края "ползунка" */
+    }
+
+    div#advertisements-list::-webkit-scrollbar-thumb:hover {
+        background: #555; /* Цвет "ползунка" при наведении */
+    }
+
+    /* Для Firefox */
+    div#advertisements-list {
+        scrollbar-width: thin; /* Уменьшает ширину скроллбара */
+        scrollbar-color: #274abb #dae3ff; /* Цвет "ползунка" и фона */
+        margin-right: -20px;
+    }
+
+    /* Стилизация текста внутри */
+    div#advertisements-list p,
+    div#advertisements-list div.advertisement-item {
+        margin-bottom: 10px;
+        padding: 5px;
+        border-bottom: 1px solid #ddd; /* Разделитель между элементами */
+        font-size: 14px;
+        color: #ffffff;
+        line-height: 1.5;
+    }
+
+    div#advertisements-list div.advertisement-item:last-child {
+        border-bottom: none; /* Убираем разделитель у последнего элемента */
+    }
+    .advertisement-item {
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        transition: background-color 0.3s ease;
+    }
+    .advertisement-item.highlight {
+        background-color: #f0f8ff; /* Цвет фона при выделении */
+        border-color: #1e90ff; /* Синий цвет обводки */
+        box-shadow: 0 4px 8px rgba(30, 144, 255, 0.2); /* Лёгкая тень */
+    }
+    .advertisement-item.active {
+        background: #96b4d740;
+    }
+
+</style>
+{% endblock head %}
+
+{% block content %}
+
+<!-- STAR HEADER GOOGLE MAP -->
+<section class="google-maps pull-top ">
+    <div id="map"></div>
+    <div class="aos-animate sidebar-fiter ui-elements">
+        <div class="filter" style="width: 360px; height: 720px;    padding-left: 0px;">
+            <div class="tabbed-content button-tabs">
+                <ul class="tabs">
+                    <li class="active">
+                        <div class="tab-title">
+                            <i class="fa fa-search"></i>
+                            <span>Поиск</span>
+                        </div>
+                        <div class="tab-content" style=" margin-left: 15px; ">
+                            <form  class="form">
+
+                                <!-- Form Lookin for -->
+                                <div class="form-group looking">
+                                    <div class="first-select wide">
+                                        <div class="main-search-input-item">
+                                            <input type="text" name="search" placeholder="Поиск..." value="{{ request.GET.search }}">
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <!--/ End Form Lookin for -->
+                                <div class="form-group looking">
+                                    <label>Город</label>
+                                    <div class="first-select wide">
+                                        <div class="main-search-input-item" >
+                                            <input type="text" name="address" placeholder="&nbsp;&nbsp;&nbsp; Город..." value="{{ request.GET.address }}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <!--/ End Form Location -->
+                                <div class="form-group beds" style="display:none;">
+                                    <label>Свободные даты</label>
+                                    <input type="text"
+                                           id="reservation-date"
+                                           data-lock="from"
+                                           data-lang="ru"
+                                           data-large-mode="true"
+                                           data-min-year="{{min_year}}"
+                                           data-max-year="{{max_year}}"
+                                           data-theme="my-style"
+                                           class="form-control"
+                                           readonly>
+                                    <div class="clear"></div>
+                                </div>
+                                <!-- Form Categories -->
+                                <div class="form-group">
+                                    <label>Категории</label>
+                                    <select name="category" class="form-control" style="width: 100%">
+                                        <option value="">Все категории</option>
+                                        {% for category in categories %}
+                                        <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ category.name }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+
+                                </div>
+                                <!--/ End Form Categories -->
+                                <!-- Form Property Status -->
+                                <div class="form-group">
+                                    <label>Комнат</label>
+                                    <select name="rooms" class="form-control" style="width: 100%">
+                                        <option value="">Количество комнат</option>
+                                        {% for i in settings.rooms|range_list %}
+                                        <option value="{{ i }}" {% if request.GET.rooms == i|stringformat:"s" %}selected{% endif %}>
+                                        {{ i }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Спален</label>
+                                    <select name="bedrooms" class="form-control" style="width: 100%">
+                                        <option value="">Количество спален</option>
+                                        {% for i in settings.bedrooms|range_list %}
+                                        <option value="{{ i }}" {% if request.GET.rooms == i|stringformat:"s" %}selected{% endif %}>
+                                        {{ i }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <!--/ End Form Property Status -->
+                                <!-- Form Bedrooms -->
+
+                                <!--/ End Form Bedrooms -->
+                                <div class="clear"></div>
+                                <div class="form-group beds">
+                                    <label for="priceRange">Цена</label>
+                                    <div id="priceRange" class="mb-3"></div>
+                                    <div class="d-flex justify-content-between">
+                                        <input type="number" id="priceMin" name="price_min" class="form-control me-2" value="{{ request.GET.price_min }}" placeholder="От">
+                                        <input type="number" id="priceMax" name="price_max" class="form-control" value="{{ request.GET.price_max }}" placeholder="До">
+                                    </div>
+                                </div>
+                                <!-- More Search Options -->
+                                <a href="#" class="more-search-options-trigger margin-bottom-10 margin-top-30" data-open-title="Дополнительно" data-close-title="Дополнительно"></a>
+
+                                <div class="more-search-options relative">
+                                    <!-- Checkboxes -->
+                                    <div class="checkboxes one-in-row margin-bottom-10">
+                                        {% for tag in tags %}
+                                        <input type="checkbox" name="tags" value="{{ tag.id }}"
+                                               {% if tag.id|stringformat:"s" in selected_tags %}checked{% endif %}>
+                                        <label for="check-{{ forloop.counter }}">{{ tag.name }}</label>
+                                        {% endfor %}
+                                    </div>
+                                    <!-- Checkboxes / End -->
+                                </div>
+                                <!-- More Search Options / End -->
+                                <div class="col-lg-12 no-pds">
+                                    <div class="at-col-default-mar">
+                                        <button class="btn btn-default hvr-bounce-to-right" type="submit">Найти</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="tab-title">
+                            <i class="fa fa-bars"></i>
+                            <span>&nbsp; Объвления</span>
+                        </div>
+                        <div class="tab-content" id="advertisements-list">
+
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- END HEADER GOOGLE MAP -->
+
+
+{% endblock content %}
+{% block footerbottom %}
+<script src="{% static 'site/website/js/range-slider.js' %}"></script>
+<script src="{% static 'site/website/js/datedropper.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.js"></script>
+<script src="{% static 'site/website/js/ui-lement.js' %}"></script>
+<script src="{% static 'site/website/js/search.js' %}"></script>
+<script src="{% static 'site/website/js/searched.js' %}"></script>
+<script src="{% static 'site/website/js/rangeSlider.js' %}"></script>
+<script src="{% static 'site/website/js/smooth-scroll.min.js' %}"></script>
+<script src="{% static 'site/website/js/light.js' %}"></script>
+<script src="{% static 'site/website/js/ajaxchimp.min.js' %}"></script>
+<script src="{% static 'site/website/js/newsletter.js' %}"></script>
+<script src="{% static 'site/website/js/inner.js' %}"></script>
+<script src="{% static 'site/website/js/datedropper.js' %}"></script>
+<script src="{% static 'site/website/js/slick4.js' %}"></script>
+<script src="{% static 'site/website/js/tether.min.js' %}"></script>
+<style>
+    .nice-select.form-control {
+        width: 100%;
+    }
+    .nice-select.open .list {
+        width: 99% !important;
+    }
+    .noUi-connect {
+        background: #274abb!important;
+        height: 2px!important;
+    }
+    .noUi-horizontal .noUi-handle {
+        width: 15px;
+        height: 15px;
+        right: -10px;
+        top: -6px;
+        border-radius: 50%;
+    }
+    .noUi-target {
+        background: none;
+        border-radius: none;
+        border: none;
+        box-shadow: none;
+    }
+    .aos-animate.sidebar-fiter{
+        position: absolute;
+        top: 60px;
+        right:0;
+    }
+    .ui-elements .button-tabs .tabs > li {
+        margin-bottom: 0px;
+        float: right;
+        margin-left: 5px;
+        border-radius: 9px;
+    }
+    .ui-elements .button-tabs .tabs > li:hover {
+        border: 1px solid #fff!important;
+
+    }
+    .ui-elements .button-tabs .active .tab-title {
+        background: none!important;
+        border: 1px solid #fff;
+    }
+    .ui-elements .button-tabs .active .tab-title:hover {
+        background: none!important;
+        border: 1px solid #fff!important;
+    }
+    div#advertisements-list {
+        height: 650px;
+        overflow-y: scroll;
+        border: 1px solid #ccc; /* Обводка для визуального выделения */
+        padding: 10px; /* Внутренний отступ для содержимого */
+
+        border-radius: 5px; /* Закругленные углы */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Тень для объёма */
+    }
+
+    /* Стилизация скроллбара для Webkit (Chrome, Safari) */
+    div#advertisements-list::-webkit-scrollbar {
+        width: 8px; /* Ширина скроллбара */
+    }
+
+    div#advertisements-list::-webkit-scrollbar-track {
+        background: #f1f1f1; /* Цвет фона скроллбара */
+        border-radius: 5px; /* Закругленные края */
+    }
+
+    div#advertisements-list::-webkit-scrollbar-thumb {
+        background: #888; /* Цвет "ползунка" */
+        border-radius: 5px; /* Закругленные края "ползунка" */
+    }
+
+    div#advertisements-list::-webkit-scrollbar-thumb:hover {
+        background: #555; /* Цвет "ползунка" при наведении */
+    }
+
+    /* Для Firefox */
+    div#advertisements-list {
+        scrollbar-width: thin; /* Уменьшает ширину скроллбара */
+        scrollbar-color: #274abb #dae3ff; /* Цвет "ползунка" и фона */
+        margin-right: -20px;
+    }
+
+    /* Стилизация текста внутри */
+    div#advertisements-list p,
+    div#advertisements-list div.advertisement-item {
+        margin-bottom: 10px;
+        padding: 5px;
+        border-bottom: 1px solid #ddd; /* Разделитель между элементами */
+        font-size: 14px;
+        color: #ffffff;
+        line-height: 1.5;
+    }
+
+    div#advertisements-list div.advertisement-item:last-child {
+        border-bottom: none; /* Убираем разделитель у последнего элемента */
+    }
+    .advertisement-item {
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        transition: background-color 0.3s ease;
+    }
+    .advertisement-item.highlight {
+        background-color: #f0f8ff; /* Цвет фона при выделении */
+        border-color: #1e90ff; /* Синий цвет обводки */
+        box-shadow: 0 4px 8px rgba(30, 144, 255, 0.2); /* Лёгкая тень */
+    }
+    .advertisement-item.active {
+        background: #96b4d740;
+    }
+    .nice-select.form-control {
+        width: 100%;
+    }
+    .nice-select.open .list {
+        width: 99% !important;
+    }
+    input#priceMax {
+        margin-left: 10px;
+    }
+    input#priceMin {
+        margin-right: 10px;
+    }
+    .noUi-connect {
+        background: #a7bcff !important;
+        height: 2px!important;
+    }
+    .noUi-horizontal .noUi-handle {
+        width: 15px;
+        height: 15px;
+        right: -10px;
+        top: -6px;
+        border-radius: 50%;
+    }
+    .noUi-target {
+        background: none;
+        border-radius: none;
+        border: none;
+        box-shadow: none;
+    }
+    .filter .noUi-horizontal {
+        background: #c14e4e00!important;
+    }
+</style>
+<!-- Date Dropper Script-->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Получаем элементы
+        const slider = document.getElementById('priceRange');
+        const inputMin = document.getElementById('priceMin');
+        const inputMax = document.getElementById('priceMax');
+
+        // Значения, поступающие с сервера
+        let minPrice = {{ settings.min_price }};
+        let maxPrice = {{ settings.max_price }};
+
+        // Проверяем, что minPrice <= maxPrice
+        if (minPrice > maxPrice) {
+            console.warn(`Некорректные значения: minPrice (${minPrice}) > maxPrice (${maxPrice}). Переставляем значения.`);
+            [minPrice, maxPrice] = [maxPrice, minPrice];
+        }
+
+        // Проверяем, существуют ли элементы
+        if (slider && inputMin && inputMax) {
+            console.log('Инициализация слайдера');
+
+            // Создаем слайдер noUiSlider
+            noUiSlider.create(slider, {
+                start: [minPrice, maxPrice], // Начальные значения
+                connect: true, // Линия соединения между ползунками
+                range: {
+                    min: minPrice, // Минимальное значение
+                    max: maxPrice  // Максимальное значение
+                },
+                step: 10, // Шаг изменения
+                format: {
+                    to: value => Math.round(value),
+                    from: value => Number(value)
+                }
+            });
+
+            // Логируем начальные значения для проверки
+            console.log('Min price:', minPrice);
+            console.log('Max price:', maxPrice);
+
+            // Обновление полей ввода при изменении слайдера
+            slider.noUiSlider.on('update', function (values, handle) {
+                console.log('Слайдер обновлен:', values);
+                if (handle === 0) {
+                    inputMin.value = values[0]; // Значение левого ползунка
+                    console.log('Input Min обновлено:', values[0]);
+                } else {
+                    inputMax.value = values[1]; // Значение правого ползунка
+                    console.log('Input Max обновлено:', values[1]);
+                }
+            });
+
+            // Обновление слайдера при изменении полей ввода
+            inputMin.addEventListener('input', function () {
+                const minValue = Number(this.value);
+                const maxValue = Number(inputMax.value);
+                console.log('Input Min изменен:', minValue);
+
+                // Проверяем границы и обновляем значения
+                if (minValue < minPrice) {
+                    inputMin.value = minPrice;
+                } else if (minValue > maxValue) {
+                    inputMin.value = maxValue;
+                }
+                slider.noUiSlider.set([
+                    Math.max(minValue, minPrice), null
+                ]);
+            });
+
+            inputMax.addEventListener('input', function () {
+                const minValue = Number(inputMin.value);
+                const maxValue = Number(this.value);
+                console.log('Input Max изменен:', maxValue);
+
+                // Проверяем границы и обновляем значения
+                if (maxValue > maxPrice) {
+                    inputMax.value = maxPrice;
+                } else if (maxValue < minValue) {
+                    inputMax.value = minValue;
+                }
+                slider.noUiSlider.set([
+                    null, Math.min(maxValue, maxPrice)]);
+            });
+        } else {
+            console.error('Не удалось найти элементы для слайдера');
+        }
+    });
+
+</script>
+<script>
+    $(document).ready(function () {
+        // Подключаем DateDropper
+        $('#reservation-date').dateDropper({
+            largeMode: true,
+            lang: 'ru'
+        });
+    });
+
+</script>
+
+<script>
+    ymaps.ready(function () {
+        console.log("Yandex Map initialized");
+
+        const map = new ymaps.Map("map", {
+            center: [55.751244, 37.618423], // Центр карты
+            zoom: 10,
+            controls: ['zoomControl', 'typeSelector', 'fullscreenControl']
+        });
+
+        map.behaviors.enable('default');
+
+        // Функция для извлечения параметров из URL
+        function getUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            const filters = {};
+            for (const [key, value] of params.entries()) {
+                filters[key] = decodeURIComponent(value).trim(); // Декодируем параметры
+            }
+            return filters;
+        }
+
+        // Функция для формирования URL с фильтрами
+        function buildApiUrl(bounds, filters) {
+            const baseUrl = '/api/advertisements-filter/';
+            const params = new URLSearchParams(filters);
+            params.append('lat_min', bounds[0][0]);
+            params.append('lat_max', bounds[1][0]);
+            params.append('lon_min', bounds[0][1]);
+            params.append('lon_max', bounds[1][1]);
+            return `${baseUrl}?${params.toString()}`;
+        }
+
+        // Загрузка объявлений при инициализации карты
+        navigator.geolocation.getCurrentPosition(
+            position => {
+                const userCoords = [position.coords.latitude, position.coords.longitude];
+                map.setCenter(userCoords, 12);
+                loadAdvertisements(getUrlParams());
+                map.events.add('boundschange', () => {
+                    loadAdvertisements(getUrlParams());
+                });
+            },
+            error => {
+                console.error("Unable to retrieve location:", error);
+                loadAdvertisements(getUrlParams());
+                map.events.add('boundschange', () => {
+                    loadAdvertisements(getUrlParams());
+                });
+            }
+        );
+
+        // Функция для загрузки объявлений
+        function loadAdvertisements(filters) {
+            const bounds = map.getBounds();
+            const url = buildApiUrl(bounds, filters);
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Filtered advertisements:", data);
+                    updateMapAndList(data);
+                })
+                .catch(error => console.error("Error loading advertisements:", error));
+        }
+
+        // Функция для обновления карты и списка
+        function updateMapAndList(advertisements) {
+            const advertisementsList = document.getElementById('advertisements-list');
+            advertisementsList.innerHTML = ""; // Очищаем список
+
+            const clusterer = new ymaps.Clusterer({
+                preset: 'islands#invertedBlueClusterIcons',
+                clusterNumbers: [10, 50, 100],
+                groupByCoordinates: false,
+                clusterDisableClickZoom: false,
+                clusterOpenBalloonOnClick: false
+            });
+
+            // Создаём массив меток
+            const placemarks = advertisements.map(ad => {
+                if (ad.latitude && ad.longitude) {
+                    try {
+                        const lat = parseFloat(ad.latitude);
+                        const lon = parseFloat(ad.longitude);
+
+                        console.log(`Creating placemark for: ${ad.name}, lat: ${lat}, lon: ${lon}`);
+                        const placemark = new ymaps.Placemark(
+                            [lat, lon],
+                            {},
+                            ad.category?.icon
+                                ? {
+                                    iconLayout: 'default#image',
+                                    iconImageHref: ad.category.icon,
+                                    iconImageSize: [32, 32],
+                                    iconImageOffset: [-16, -16]
+                                }
+                                : {}
+                        );
+                        placemark.events.add('click', () => setActiveClass(ad.id));
+                        return placemark;
+                    } catch (error) {
+                        console.error(`Error creating placemark for ${ad.name}:`, error);
+                        return null;
+                    }
+                } else {
+                    console.warn(`Invalid coordinates for ad: ${ad.name}`);
+                    return null;
+                }
+            }).filter(Boolean);
+
+            // Добавляем метки в кластеризатор
+            clusterer.add(placemarks);
+            map.geoObjects.removeAll(); // Очищаем старые метки
+            map.geoObjects.add(clusterer); // Добавляем кластеризатор
+
+            // Обновляем список объявлений
+            advertisements.forEach(ad => {
+                const adElement = document.createElement('div');
+                adElement.classList.add('advertisement-item');
+                adElement.dataset.adId = ad.id;
+                adElement.innerHTML = `
+            <div class="advertisement-content">
+                <img src="${ad.gallery_image || '/static/default_image.png'}" alt="${ad.name}" class="advertisement-image" />
+                <div class="advertisement-details">
+                    <h3>${ad.name}</h3>
+                    <p>${ad.description}</p>
+                    <strong>Цена:</strong> ${ad.price}<br>
+                    <strong>Адрес:</strong> ${ad.address}<br>
+                    <a href="/advertisement/${ad.slug}/" target="_blank">Посмотреть объявление</a>
+                </div>
+            </div>`;
+                advertisementsList.appendChild(adElement);
+            });
+        }
+
+        // Установка активного элемента
+        function setActiveClass(adId) {
+            const advertisementsList = document.getElementById('advertisements-list');
+            const items = Array.from(advertisementsList.querySelectorAll('.advertisement-item'));
+            items.forEach(item => {
+                item.classList.remove('active');
+                if (item.dataset.adId === adId) {
+                    item.classList.add('active');
+                    item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
+        }
+    });
+
+
+</script>
+
+{% endblock footerbottom %}

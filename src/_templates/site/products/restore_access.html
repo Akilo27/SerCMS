@@ -1,0 +1,43 @@
+{% extends 'products/base_no_header.html' %}
+{% load static generals_tag %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+{% block content %}
+<!-- Login Section Start -->
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="form-group col-md-6">
+            <br>
+
+            <form method="post" class="contact-form input-smoke ajax-contact">
+                {% csrf_token %}
+                <div class="mobile-logo">
+                    <a href="{% url 'webmain:home' %}">
+                        <img class="justify-content-center" src="{% with request|get_settings as settings %}{% if settings.logo %}{{ settings.logo.url }}{% endif %}{% endwith %}" alt="Frutin">
+                    </a>
+                </div>
+                <h4 class="title">Востановить доступ к учетной записи</h4>
+                <div class="form-group col-md-12">
+                    {{ form.email }}
+                </div>
+                <div class="form-btn col-12">
+                    <button type="submit" class="th-btn btn-fw">
+                        Сбросить пароль<i class="fas fa-chevrons-right ms-2"></i>
+                    </button>
+                </div>
+            </form>
+            <p><a href="{% url 'useraccount:login' %}">Войти</a></p>
+            <p>
+                У вас нет аккаунта?
+                <a href="{% url 'useraccount:signup' %}">Зарегистрироваться.</a>
+            </p>
+        </div>
+    </div>
+</div>
+<!-- Login & Register End -->
+{% endblock content %}
+{% block footer %}{% endblock footer %}

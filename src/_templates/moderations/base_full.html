@@ -1,0 +1,48 @@
+{% load static generals_tag user_tags  i18n %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Title Meta -->
+    <meta charset="utf-8" />
+    <title></title>
+    <meta content="{% block description %}{% endblock description %}" name="description">
+    <meta property="og:title" content="{% block propertytitle %} {% endblock propertytitle %}">
+    <meta property="og:description" content="{% block propertydescription %}{% endblock propertydescription %}">
+    <meta property="og:image" content="{% block propertyimage %}{% endblock propertyimage %}">
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="{% if settings.favicon %}{{settings.favicon.url}}{% endif %}" />
+
+    <!-- App favicon -->
+    <link rel="shortcut icon" href="{% static 'site/moderations/assets/images/favicon.ico' %}">
+
+    <!-- Vendor css (Require in all Page) -->
+    <link href="{% static 'site/moderations/assets/css/vendor.min.css' %}" rel="stylesheet" type="text/css" />
+
+    <!-- Icons css (Require in all Page) -->
+    <link href="{% static 'site/moderations/assets/css/icons.min.css' %}" rel="stylesheet" type="text/css" />
+
+    <!-- App css (Require in all Page) -->
+    <link href="{% static 'site/moderations/assets/css/app.min.css' %}" rel="stylesheet" type="text/css" />
+
+    {% block head %} {% endblock head %}
+
+</head>
+<!-- START Wrapper -->
+
+<body class="authentication-bg">
+<div class="account-pages pt-2 pt-sm-5 pb-4 pb-sm-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            {% block content %}{% endblock content %}
+
+        </div> <!-- end row -->
+    </div>
+</div>
+
+<!-- END Wrapper -->
+{% block footertop %}{% endblock footertop %}
+{% block footerbottom %}{% endblock footerbottom %}
+
+</body>
+
+</html>

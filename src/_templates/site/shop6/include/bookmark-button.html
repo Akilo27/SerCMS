@@ -1,0 +1,13 @@
+{% if user.is_authenticated %}
+<div class="meta-action" id="bookmark_button_{{ product.id }}" data-product="{{ product.id }}">
+    {% if product in is_bookmarked %}
+        <button class=" bookmark btn-product-icon btn-wishlist" type="button" style="cursor: pointer" data-type="bookmarkDelete" data-product="{{ product.id }}" >
+            <i class="fas fa-times" style="color: #336699"></i>
+        </button>
+    {% else %}
+        <button class=" bookmark btn-product-icon btn-wishlist w-icon-heart" style="cursor: pointer" type="button" data-type="bookmarkAdd" data-product="{{ product.id }}" >
+            <i class="pe-7s-like"></i>
+        </button>
+    {% endif %}
+</div>
+{% endif %}

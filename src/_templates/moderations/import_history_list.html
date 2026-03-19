@@ -1,0 +1,80 @@
+{% extends 'moderations/base.html' %}
+{% load i18n %}
+{% load static  %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+    <link rel="stylesheet" href="{% static 'profile/css/font-awesome/css/all.min.css' %}">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+{% endblock head %}
+
+{% block content %}
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title" style="margin-right: 20px">{% trans 'История загрузок' %}</h4>
+            <div class="toolbar" role="toolbar" style="text-align: -webkit-right;">
+                <div class="btn-group mb-1">
+                    <a class="btn btn-primary light px-3" href="{% url 'moderation:mymanufacturers' %}">
+                        {% trans 'Назад' %}
+                    </a>
+                    <a class="btn btn-primary light px-3" href="{% url 'moderation:import_history_create' %}">
+                        {% trans 'Загрузить файл' %}
+                    </a>
+                </div>
+
+            </div>
+        </div>
+        <div class="card-body">
+            <div>
+                <table class="table table-sm mb-2">
+                    <thead style="text-align: center;">
+                    <tr>
+                        <th class="align-middle">
+                            <div class="form-check custom-checkbox">
+                                <input type="checkbox" class="form-check-input" id="checkAll">
+                                <label class="form-check-label" for="checkAll"></label>
+                            </div>
+                        </th>
+                        <th>{% trans "ID" %}</th>
+                        <th>{% trans "Файл" %}</th>
+                        <th>{% trans "Тип" %}</th>
+                        <th>{% trans "Статус" %}</th>
+                        <th>{% trans "Дата создания" %}</th>
+                        <th>{% trans "Дата начала" %}</th>
+                        <th>{% trans "Дата завершения" %}</th>
+                    </tr>
+                    </thead>
+                    <tbody style="text-align: center;">
+                    {% for history in import_histories %}
+                    <tr class="btn-reveal-trigger">
+                        <td class="py-2">
+                            <div class="form-check custom-checkbox checkbox-success">
+                                <input type="checkbox" name="import_history_ids" value="{{ history.id }}" class="form-check-input" id="checkbox_{{ history.id }}">
+                                <label class="form-check-label" for="checkbox_{{ history.id }}"></label>
+                            </div>
+                        </td>
+                        <td class="py-2"><strong>{{ history.id }}</strong></td>
+                        <td class="py-2"><strong>{{ history.file.name }}</strong></td>
+                        <td class="py-2"><strong>{{ history.get_file_type_display }}</strong></td>
+                        <td class="py-2"><strong>{{ history.get_status_display }}</strong></td>
+                        <td class="py-2"><strong>{{ history.created_at }}</strong></td>
+                        <td class="py-2"><strong>{{ history.started_at }}</strong></td>
+                        <td class="py-2"><strong>{{ history.finished_at }}</strong></td>
+
+
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% include 'moderations/include/paginations.html' with items=import_histories %}
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

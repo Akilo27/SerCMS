@@ -1,0 +1,680 @@
+{% extends 'moderations/base.html' %}
+{% load static %}
+
+{% block title %}{{ seo_title }}{% endblock %}
+{% block description %}{{ seo_description }}{% endblock %}
+
+{% block content %}
+<div class="container my-4" id="body-table">
+    <h1 class="mb-3">Смены пользователя: {{ user_obj.get_full_name|default:user_obj.username }}</h1>
+    <p class="text-muted">ID: {{ user_obj.id }}</p>
+    {% if shifts %}
+    <table class="table table-bordered table-striped table-hover">
+        <thead class="thead-dark">
+        <tr>
+            <th>Дата/время выхода</th>
+            <th>Дата/время ухода</th>
+            <th>Фото (принятия /сдачи рабочего места)</th>
+            <th>Фото (выхода/ухода с рабочего места)</th>
+            <th>Собственное Фото (приход/уход)</th>
+            <th>Видео фиксации прихода/ухода</th>
+            <th>Действия</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for s in shifts %}
+        <tr id="shift_{{ s.id }}"  class="{% if forloop.first %}table-success{% else %}table-secondary{% endif %}">
+            <td>{{ s.date_start }} {{ s.time_start }}</td>
+            <td>{{ s.date_end }} {{ s.time_end }}</td>
+            <td>
+                <div class="d-flex">
+                    {% if s.photo_accept_place %}
+                    <a href="#" data-toggle="modal" data-target="#carouselModal_{{ s.id }}">
+                        <img src="{{ s.photo_accept_place.url }}" alt="Принятие" class="img-thumbnail" style="max-width: 100px; margin-right: 5px;">
+                    </a>
+                    {% endif %}
+                    {% if s.photo_handover_place %}
+                    <a href="#" data-toggle="modal" data-target="#carouselModal_{{ s.id }}">
+                        <img src="{{ s.photo_handover_place.url }}" alt="Сдача" class="img-thumbnail" style="max-width: 100px; margin-right: 5px;">
+                    </a>
+                    {% endif %}
+                </div>
+            </td>
+            <td>
+                <div class="d-flex">
+                    {% if s.photo_entry_place %}
+                    <a href="#" data-toggle="modal" data-target="#carouselModal_{{ s.id }}">
+                        <img src="{{ s.photo_entry_place.url }}" alt="Выход" class="img-thumbnail" style="max-width: 100px; margin-right: 5px;">
+                    </a>
+                    {% endif %}
+                    {% if s.photo_exit_place %}
+                    <a href="#" data-toggle="modal" data-target="#carouselModal_{{ s.id }}">
+                        <img src="{{ s.photo_exit_place.url }}" alt="Уход" class="img-thumbnail" style="max-width: 100px; margin-right: 5px;">
+                    </a>
+                    {% endif %}
+                </div>
+            </td>
+            <td>
+                <div class="d-flex">
+                    {% if s.selfie_entry %}
+                    <a href="#" data-toggle="modal" data-target="#carouselModal_{{ s.id }}">
+                        <img src="{{ s.selfie_entry.url }}" alt="Фото (приход)" class="img-thumbnail" style="max-width: 100px; margin-right: 5px;">
+                    </a>
+                    {% endif %}
+                    {% if s.selfie_exit %}
+                    <a href="#" data-toggle="modal" data-target="#carouselModal_{{ s.id }}">
+                        <img src="{{ s.selfie_exit.url }}" alt="Фото (уход)" class="img-thumbnail" style="max-width: 100px; margin-right: 5px;">
+                    </a>
+                    {% endif %}
+                </div>
+            </td>
+            <td>
+                <div class="">
+                    {% if s.video_entry %}
+                    <a href="#" data-toggle="modal" data-target="#carouselModal_{{ s.id }}" class="btn btn-sm btn-success w-100" style="margin-right: 5px;">Видео (приход)</a>
+                    {% endif %}
+                    <br>
+                    <br>
+                    {% if s.video_exit %}
+                    <a href="#" data-toggle="modal" data-target="#carouselModal_{{ s.id }}" class="btn btn-sm btn-success w-100">Видео (уход)</a>
+                    {% endif %}
+                </div>
+            </td>
+            <td class="text-center">
+                {% if forloop.first %}
+                <button type="button" class="btn btn-primary" style="margin-top:12px;" data-shift-id="{{ s.id }}" id="editShiftButton_{{ s.id }}">
+                    {% if s.work_status == '1' %}
+                    Выйти на смену
+                    {% else %}
+                    Уйти со смены
+                    {% endif %}
+                </button>
+                {% endif %}
+            </td>
+        </tr>
+        <div class="modal fade" id="carouselModal_{{ s.id }}" tabindex="-1" role="dialog" aria-labelledby="carouselModalLabel_{{ s.id }}" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="carouselModalLabel_{{ s.id }}">Просмотр фото и видео</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Карусель для фото и видео -->
+                        <div id="carousel_{{ s.id }}" class="carousel slide" data-ride="carousel">
+                            <div class="carousel-inner">
+                                <!-- Фото принятия рабочего места -->
+                                {% if s.photo_accept_place %}
+                                <div class="carousel-item active">
+                                    <img src="{{ s.photo_accept_place.url }}" class="d-block w-100" alt="Фото принятия рабочего места">
+                                </div>
+                                {% endif %}
+                                <!-- Фото сдачи рабочего места -->
+                                {% if s.photo_handover_place %}
+                                <div class="carousel-item">
+                                    <img src="{{ s.photo_handover_place.url }}" class="d-block w-100" alt="Фото сдачи рабочего места">
+                                </div>
+                                {% endif %}
+                                <!-- Фото выхода на рабочее место -->
+                                {% if s.photo_entry_place %}
+                                <div class="carousel-item">
+                                    <img src="{{ s.photo_entry_place.url }}" class="d-block w-100" alt="Фото выхода на рабочее место">
+                                </div>
+                                {% endif %}
+                                <!-- Фото ухода с рабочего места -->
+                                {% if s.photo_exit_place %}
+                                <div class="carousel-item">
+                                    <img src="{{ s.photo_exit_place.url }}" class="d-block w-100" alt="Фото ухода с рабочего места">
+                                </div>
+                                {% endif %}
+                                <!-- Собственное фото (приход) -->
+                                {% if s.selfie_entry %}
+                                <div class="carousel-item">
+                                    <img src="{{ s.selfie_entry.url }}" class="d-block w-100" alt="Собственное фото (приход)">
+                                </div>
+                                {% endif %}
+                                <!-- Собственное фото (уход) -->
+                                {% if s.selfie_exit %}
+                                <div class="carousel-item">
+                                    <img src="{{ s.selfie_exit.url }}" class="d-block w-100" alt="Собственное фото (уход)">
+                                </div>
+                                {% endif %}
+                                <!-- Видео (приход) -->
+                                {% if s.video_entry %}
+                                <div class="carousel-item">
+                                    <video controls class="d-block w-100">
+                                        <source src="{{ s.video_entry.url }}" type="video/mp4">
+                                        Ваш браузер не поддерживает видео.
+                                    </video>
+                                </div>
+                                {% endif %}
+                                <!-- Видео (уход) -->
+                                {% if s.video_exit %}
+                                <div class="carousel-item">
+                                    <video controls class="d-block w-100">
+                                        <source src="{{ s.video_exit.url }}" type="video/mp4">
+                                        Ваш браузер не поддерживает видео.
+                                    </video>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <!-- Контролы слайдера -->
+                            <a class="carousel-control-prev" href="#carousel_{{ s.id }}" role="button" data-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="sr-only">Предыдущий</span>
+                            </a>
+                            <a class="carousel-control-next" href="#carousel_{{ s.id }}" role="button" data-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="sr-only">Следующий</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        </tbody>
+    </table>
+
+
+
+
+    {% else %}
+    <div class="alert alert-warning">Нет смен за сегодня/прошедшие дни.</div>
+    {% endif %}
+</div>
+<!-- Модальное окно для редактирования смены -->
+<div id="editShiftModal" class="container" enctype="multipart/form-data" style="display:none;">
+    <div class="modal-content">
+        <span class="close-btn" id="closeModal">&times;</span>
+        <h2>Редактировать смену</h2>
+        <form id="editShiftForm" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="shift_id" id="shift_id">
+
+            <!-- Блок для выхода на смену -->
+            <div id="entry_fields">
+                <h4>Данные выхода на смену</h4>
+
+                <div class="form-group">
+                    <label for="photo_accept_place">Фото принятия рабочего места</label>
+                    <input type="file" class="form-control" id="photo_accept_place" name="photo_accept_place"
+                           accept="image/*" capture="environment">
+                    <small class="form-text text-muted">Сделайте фото камерой</small>
+                    <button type="button" class="btn btn-outline-secondary btn-sm mt-1" onclick="capturePhoto('photo_accept_place', 'environment')">
+                        📷 Сделать фото
+                    </button>
+                </div>
+
+                <div class="form-group">
+                    <label for="photo_entry_place">Фото выхода на рабочее место</label>
+                    <input type="file" class="form-control" id="photo_entry_place" name="photo_entry_place"
+                           accept="image/*" capture="environment">
+                    <small class="form-text text-muted">Сделайте фото камерой</small>
+                    <button type="button" class="btn btn-outline-secondary btn-sm mt-1" onclick="capturePhoto('photo_entry_place', 'environment')">
+                        📷 Сделать фото
+                    </button>
+                </div>
+
+                <div class="form-group">
+                    <label for="selfie_entry">Собственное фото (приход)</label>
+                    <input type="file" class="form-control" id="selfie_entry" name="selfie_entry"
+                           accept="image/*" capture="user">
+                    <small class="form-text text-muted">Сделайте селфи (фронтальная камера)</small>
+                    <button type="button" class="btn btn-outline-secondary btn-sm mt-1" onclick="capturePhoto('selfie_entry', 'user')">
+                        📷 Сделать селфи
+                    </button>
+                </div>
+
+                <div class="form-group">
+                    <label for="video_entry">Видео фиксации прихода</label>
+                    <input type="file" class="form-control" id="video_entry" name="video_entry"
+                           accept="video/*">
+                    <small class="form-text text-muted">Запишите видео (до 30 секунд)</small>
+                    <button type="button" class="btn btn-outline-primary btn-sm mt-1" onclick="startVideoRecording('video_entry', 'environment')">
+                        🎥 Начать запись
+                    </button>
+                    <div id="video_entry_recording" style="display: none; color: red; margin-top: 5px;">
+                        ● Запись... <span id="video_entry_timer">0s</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Блок для ухода со смены -->
+            <div id="exit_fields" style="display: none;">
+                <h4>Данные ухода со смены</h4>
+
+                <div class="form-group">
+                    <label for="photo_handover_place">Фото сдачи рабочего места</label>
+                    <input type="file" class="form-control" id="photo_handover_place" name="photo_handover_place"
+                           accept="image/*" capture="environment">
+                    <small class="form-text text-muted">Сделайте фото камерой</small>
+                    <button type="button" class="btn btn-outline-secondary btn-sm mt-1" onclick="capturePhoto('photo_handover_place', 'environment')">
+                        📷 Сделать фото
+                    </button>
+                </div>
+
+                <div class="form-group">
+                    <label for="photo_exit_place">Фото ухода с рабочего места</label>
+                    <input type="file" class="form-control" id="photo_exit_place" name="photo_exit_place"
+                           accept="image/*" capture="environment">
+                    <small class="form-text text-muted">Сделайте фото камерой</small>
+                    <button type="button" class="btn btn-outline-secondary btn-sm mt-1" onclick="capturePhoto('photo_exit_place', 'environment')">
+                        📷 Сделать фото
+                    </button>
+                </div>
+
+                <div class="form-group">
+                    <label for="selfie_exit">Собственное фото (уход)</label>
+                    <input type="file" class="form-control" id="selfie_exit" name="selfie_exit"
+                           accept="image/*" capture="user">
+                    <small class="form-text text-muted">Сделайте селфи (фронтальная камера)</small>
+                    <button type="button" class="btn btn-outline-secondary btn-sm mt-1" onclick="capturePhoto('selfie_exit', 'user')">
+                        📷 Сделать селфи
+                    </button>
+                </div>
+
+                <div class="form-group">
+                    <label for="video_exit">Видео фиксации ухода</label>
+                    <input type="file" class="form-control" id="video_exit" name="video_exit"
+                           accept="video/*">
+                    <small class="form-text text-muted">Запишите видео (до 30 секунд)</small>
+                    <button type="button" class="btn btn-outline-primary btn-sm mt-1" onclick="startVideoRecording('video_exit', 'environment')">
+                        🎥 Начать запись
+                    </button>
+                    <div id="video_exit_recording" style="display: none; color: red; margin-top: 5px;">
+                        ● Запись... <span id="video_exit_timer">0s</span>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-success">Сохранить</button>
+        </form>
+    </div>
+</div>
+
+<!-- Модальное окно для камеры -->
+<div id="cameraModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000;">
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+        <video id="cameraPreview" autoplay muted style="max-width: 100%; max-height: 80vh;"></video>
+        <div style="text-align: center; margin-top: 20px;">
+            <button id="captureBtn" class="btn btn-primary" style="display: none;">📸 Сделать фото</button>
+            <button id="startRecordBtn" class="btn btn-danger" style="display: none;">● Начать запись</button>
+            <button id="stopRecordBtn" class="btn btn-secondary" style="display: none;">⏹️ Остановить</button>
+            <button id="closeCameraBtn" class="btn btn-warning">✖️ Закрыть</button>
+        </div>
+        <div id="recordingTimer" style="color: white; text-align: center; font-size: 18px; margin-top: 10px; display: none;">
+            Запись: <span id="timer">0s</span>
+        </div>
+    </div>
+</div>
+
+<script>
+// Функция для определения типа смены при открытии
+function determineShiftType(workStatus) {
+    const entryFields = document.getElementById('entry_fields');
+    const exitFields = document.getElementById('exit_fields');
+
+    if (workStatus === '1') {
+        entryFields.style.display = 'block';
+        exitFields.style.display = 'none';
+    } else {
+        entryFields.style.display = 'none';
+        exitFields.style.display = 'block';
+    }
+}
+
+// Функция для загрузки данных смены
+function loadShiftData(shiftId) {
+    fetch(`/ru/moderation/work_shift_update/?shift_id=${shiftId}`, {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            const shiftData = data.data;
+
+            // Автоматически определяем тип смены на основе данных
+            determineShiftType(shiftData.work_status);
+
+            // Заполняем информацию о типе смены в заголовке
+            const modalTitle = document.querySelector('#editShiftModal h2');
+            if (shiftData.work_status === '1') {
+                modalTitle.textContent = 'Редактировать выход на смену';
+            } else {
+                modalTitle.textContent = 'Редактировать уход со смену';
+            }
+
+        } else {
+            alert('Ошибка загрузки данных: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+        alert('Ошибка загрузки данных смены');
+    });
+}
+
+// Обновляем обработчик открытия модального окна
+document.addEventListener('DOMContentLoaded', function() {
+    const editButtons = document.querySelectorAll('[id^="editShiftButton_"]');
+    const editShiftModal = document.getElementById('editShiftModal');
+    const closeModalButton = document.getElementById('closeModal');
+    const editShiftForm = document.getElementById('editShiftForm');
+    const bodyTable = document.getElementById('body-table');
+
+    // Открытие модального окна с заполненными данными
+    editButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const shiftId = this.getAttribute('data-shift-id');
+            const workStatus = this.getAttribute('data-work-status');
+
+            console.log("Edit button clicked for shift ID:", shiftId, "Work status:", workStatus);
+
+            if (!shiftId) {
+                alert("Ошибка: отсутствует ID смены");
+                return;
+            }
+
+            // Скрыть тело таблицы
+            bodyTable.style.display = 'none';
+
+            // Показать модальное окно
+            editShiftModal.style.display = 'block';
+
+            // Заполняем скрытое поле shift_id в форме
+            document.getElementById('shift_id').value = shiftId;
+
+            // Автоматически определяем и показываем соответствующие поля
+            determineShiftType(workStatus);
+
+            // Загрузка данных для редактирования
+            loadShiftData(shiftId);
+        });
+    });
+
+    // Обработка отправки формы
+    editShiftForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        const formData = new FormData(editShiftForm);
+
+        fetch('/ru/moderation/work_shift_update/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert('Смена обновлена');
+                editShiftModal.style.display = 'none';
+                location.reload();
+            } else {
+                alert('Ошибка: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка отправки формы:', error);
+            alert('Ошибка отправки данных');
+        });
+    });
+
+    // Закрытие модального окна
+    closeModalButton.addEventListener('click', function() {
+        editShiftModal.style.display = 'none';
+        bodyTable.style.display = 'block';
+    });
+});
+
+// Код для работы с камерой
+let mediaStream = null;
+let mediaRecorder = null;
+let recordedChunks = [];
+let recordingTimer = null;
+let currentInputId = null;
+let recordingType = null;
+let recordingStartTime = null;
+
+// Функция для захвата фото
+async function capturePhoto(inputId, cameraType) {
+    try {
+        currentInputId = inputId;
+        recordingType = 'photo';
+        const modal = document.getElementById('cameraModal');
+        const video = document.getElementById('cameraPreview');
+        const captureBtn = document.getElementById('captureBtn');
+        const startRecordBtn = document.getElementById('startRecordBtn');
+        const stopRecordBtn = document.getElementById('stopRecordBtn');
+
+        // Показываем нужные кнопки
+        captureBtn.style.display = 'block';
+        startRecordBtn.style.display = 'none';
+        stopRecordBtn.style.display = 'none';
+        document.getElementById('recordingTimer').style.display = 'none';
+
+        // Запускаем камеру
+        if (mediaStream) {
+            mediaStream.getTracks().forEach(track => track.stop());
+        }
+
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: cameraType,
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            },
+            audio: false
+        });
+
+        video.srcObject = mediaStream;
+        modal.style.display = 'block';
+
+    } catch (error) {
+        console.error('Ошибка доступа к камере:', error);
+        alert('Не удалось получить доступ к камере. Разрешите доступ к камере в настройках браузера.');
+    }
+}
+
+// Функция для записи видео
+async function startVideoRecording(inputId, cameraType) {
+    try {
+        currentInputId = inputId;
+        recordingType = 'video';
+        const modal = document.getElementById('cameraModal');
+        const video = document.getElementById('cameraPreview');
+        const captureBtn = document.getElementById('captureBtn');
+        const startRecordBtn = document.getElementById('startRecordBtn');
+        const stopRecordBtn = document.getElementById('stopRecordBtn');
+
+        // Показываем нужные кнопки
+        captureBtn.style.display = 'none';
+        startRecordBtn.style.display = 'block';
+        stopRecordBtn.style.display = 'none';
+        document.getElementById('recordingTimer').style.display = 'none';
+
+        // Запускаем камеру
+        if (mediaStream) {
+            mediaStream.getTracks().forEach(track => track.stop());
+        }
+
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: cameraType,
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            },
+            audio: true
+        });
+
+        video.srcObject = mediaStream;
+        modal.style.display = 'block';
+
+    } catch (error) {
+        console.error('Ошибка доступа к камере:', error);
+        alert('Не удалось получить доступ к камере. Разрешите доступ к камере в настройках браузера.');
+    }
+}
+
+// Сделать фото
+document.getElementById('captureBtn').addEventListener('click', function() {
+    const video = document.getElementById('cameraPreview');
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    canvas.toBlob(function(blob) {
+        const file = new File([blob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' });
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        document.getElementById(currentInputId).files = dataTransfer.files;
+
+        // Закрываем камеру
+        closeCamera();
+    }, 'image/jpeg', 0.9);
+});
+
+// Начать запись видео
+document.getElementById('startRecordBtn').addEventListener('click', function() {
+    recordedChunks = [];
+
+    try {
+        mediaRecorder = new MediaRecorder(mediaStream, {
+            mimeType: 'video/webm; codecs=vp9,opus',
+            videoBitsPerSecond: 2500000
+        });
+
+        mediaRecorder.ondataavailable = function(event) {
+            if (event.data.size > 0) {
+                recordedChunks.push(event.data);
+            }
+        };
+
+        mediaRecorder.onstop = function() {
+            const blob = new Blob(recordedChunks, { type: 'video/webm' });
+            const file = new File([blob], `video_${Date.now()}.webm`, { type: 'video/webm' });
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            document.getElementById(currentInputId).files = dataTransfer.files;
+        };
+
+        mediaRecorder.start();
+        recordingStartTime = Date.now();
+
+        // Обновляем UI
+        document.getElementById('startRecordBtn').style.display = 'none';
+        document.getElementById('stopRecordBtn').style.display = 'block';
+        document.getElementById('recordingTimer').style.display = 'block';
+
+        // Запускаем таймер
+        updateRecordingTimer();
+        recordingTimer = setInterval(updateRecordingTimer, 1000);
+
+        // Авто-остановка через 30 секунд
+        setTimeout(() => {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                stopRecording();
+            }
+        }, 30000);
+
+    } catch (error) {
+        console.error('Ошибка записи видео:', error);
+        alert('Ошибка записи видео. Попробуйте другой браузер.');
+    }
+});
+
+// Остановить запись
+document.getElementById('stopRecordBtn').addEventListener('click', stopRecording);
+
+function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+        clearInterval(recordingTimer);
+        closeCamera();
+    }
+}
+
+function updateRecordingTimer() {
+    if (recordingStartTime) {
+        const seconds = Math.floor((Date.now() - recordingStartTime) / 1000);
+        document.getElementById('timer').textContent = `${seconds}s`;
+    }
+}
+
+// Закрыть камеру
+document.getElementById('closeCameraBtn').addEventListener('click', closeCamera);
+
+function closeCamera() {
+    const modal = document.getElementById('cameraModal');
+    modal.style.display = 'none';
+
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+    }
+
+    if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+    }
+
+    if (recordingTimer) {
+        clearInterval(recordingTimer);
+    }
+
+    mediaStream = null;
+    mediaRecorder = null;
+    recordedChunks = [];
+    recordingStartTime = null;
+}
+
+// Предпросмотр файлов
+document.querySelectorAll('input[type="file"]').forEach(input => {
+    input.addEventListener('change', function(e) {
+        const file = this.files[0];
+        if (!file) return;
+
+        if (file.type.startsWith('image/')) {
+            alert(`Фото "${file.name}" успешно загружено!`);
+        } else if (file.type.startsWith('video/')) {
+            alert(`Видео "${file.name}" успешно загружено!`);
+        }
+    });
+});
+</script>
+<style>
+.form-group {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.form-text {
+    display: block;
+    margin-top: 0.25rem;
+    color: #666;
+}
+
+.btn-sm {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.875rem;
+    margin-right: 0.5rem;
+}
+
+#cameraModal video {
+    background: #000;
+    border-radius: 10px;
+}
+</style>
+<!-- Подключите Bootstrap 4 или 5 (если еще не подключен) -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+{% endblock %}

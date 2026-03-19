@@ -1,0 +1,203 @@
+{% extends 'products/base_profile.html' %}
+{% load static generals_tag %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+{% block content %}
+<div class="row">
+    <div style=" margin: 10px 0px; ">
+        <button  id="toggle-button"  class="btn btn-primary btn-sm" style="float: right; line-height: 10px; height: 26px;">Развернуть <i class="fa fa-angle-double-down" aria-hidden="true"></i>
+        </button>
+    </div>
+    <div class="col-12 col-lg-12 hidden" style="margin-bottom: 50px;" id="edit-shop">
+        <form method="post" enctype="multipart/form-data" action="{% url 'useraccount:shop_edit' %}">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="single-form">
+                        {{ manufacturers_form.name }}
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="single-form">
+                        {{ manufacturers_form.slug }}
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="single-form">
+                        {{ manufacturers_form.description }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="single-form">
+                        {{ manufacturers_form.image }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="single-form">
+                        {{ manufacturers_form.cover }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="single-form">
+                        {{ manufacturers_form.categories }}
+                    </div>
+                </div>
+                <hr>
+                <div class="col-md-6">
+                    <div class="single-form">
+                        {{ manufacturers_form.title }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="single-form">
+                        {{ manufacturers_form.content }}
+                    </div>
+                </div>
+                <hr>
+                <div class="col-md-6">
+                    <div class="single-form">
+                        {{ manufacturers_form.email }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="single-form">
+                        {{ manufacturers_form.phone }}
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="single-form">
+                        {{ manufacturers_form.company_name }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="single-form">
+                        {{ manufacturers_form.company_inn }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="single-form">
+                        {{ manufacturers_form.company_director }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="single-form">
+                        {{ manufacturers_form.company_adress }}
+                    </div>
+                </div>
+            </div>
+            <br>
+            <button type="submit" class="btn btn-primary btn-sm">Сохранить</button>
+        </form>
+    </div>
+    <div class="col-4 col-lg-4">
+        <div class="card">
+            <div class="card-body justify-content-between align-items-center">
+                <div class="justify-content-between align-items-center">
+                    <h3 class="widget_title">Загрузка CSV-файла</h3>
+                    <a href="https://docs.google.com/spreadsheets/d/1S3uK0BWfnsA6BiDOdMo8154-U4YtW_PUdeReVv_h6js/edit?usp=sharing" previewlistener="true" target="_blank">Образец CSV-файла</a>
+                </div>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <br>
+                    {{ form.csv_file }}
+                    <br>
+                    <br>
+                    <button type="submit" class="btn btn-primary btn-sm">Загрузить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-8 col-lg-8">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="widget_title">История</h3>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th scope="col">Дата</th>
+                        <th scope="col">Статус</th>
+                        <th scope="col">Количество</th>
+                        <th scope="col">Создано/Обновлено</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for item in import_csv %}
+                    <tr>
+                        <td>{{ item.create|date:"d.m.Y" }}</td>
+                        <td>{% if item.status %}Закончен{% else %}Не закончен{% endif %}</td>
+
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.added_element }}/{{ item.upload_element }}</td>
+                    </tr>
+                    {% endfor %}
+
+                    </tbody>
+                </table>
+                <ul class="pagination pagination-sm m-0 float-right">
+                    {% if import_csv.has_previous %}
+                    <li class="page-item previous ">
+                        <a class="page-link" href="?page={{ import_csv.previous_page_number }}" data-dt-idx="0" tabindex="0" previewlistener="true">«</a>
+                    </li>
+                    {% endif %}
+
+
+                    {% for i in import_csv.paginator.page_range %}
+                    {% if import_csv.number == i %}
+                    <li class="page-item active">
+                        <a class="page-link" href="#">{{ i }}</a>
+                    </li>
+                    {% elif i > import_csv.number|add:'-2' and i < import_csv.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+
+                    {% if import_csv.has_next %}
+                    <li class="page-item next disabled">
+                        <a class="page-link" href="?page={{ import_csv.paginator.num_pages }}" data-dt-idx="7" tabindex="0">»</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .new_ticket {
+        background: #f2a100;
+        height: 20px;
+        display: inline-flex;
+        width: 20px;
+        justify-content: center;
+        border-radius: 15px;
+        color: #fff;
+        left: -13px;
+        position: relative;
+    }
+    i.pe-7s-info {
+        font-size: 28px;
+        position: relative;
+        top: 10px;
+    }
+    .hidden {
+            display: none;
+        }
+</style>
+    <script>
+        document.getElementById('toggle-button').addEventListener('click', function() {
+            var editShopDiv = document.getElementById('edit-shop');
+            if (editShopDiv.classList.contains('hidden')) {
+                editShopDiv.classList.remove('hidden');
+                this.innerHTML = 'Свернуть <i class="fa fa-angle-double-up" aria-hidden="true"></i>';
+            } else {
+                editShopDiv.classList.add('hidden');
+                this.innerHTML = 'Развернуть <i class="fa fa-angle-double-down" aria-hidden="true"></i>';
+            }
+        });
+    </script>
+{% endblock content %}

@@ -1,0 +1,313 @@
+{% extends 'site/useraccount/base.html' %}
+{% load i18n %}
+{% load static  %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<!-- FullCalendar CSS -->
+<link href="https://fullcalendar.io/releases/core/4.1.0/main.min.css" rel="stylesheet">
+<link href="https://fullcalendar.io/releases/daygrid/4.1.0/main.min.css" rel="stylesheet">
+<link href="https://fullcalendar.io/releases/timegrid/4.1.0/main.min.css" rel="stylesheet">
+<style>
+
+    div#external-events {
+        overflow-y: scroll;
+        height: calc(100vh - 210px);
+    }
+    #calendar-container {
+        position: relative;
+        z-index: 1;
+    }
+
+    #calendar {
+        max-width: 900px;
+        margin: 20px auto;
+    }
+</style>
+{% endblock head %}
+
+{% block content %}
+<!-- Start right Content here -->
+
+
+
+
+
+
+<div id="wrapper" class="inner-pages ui-elements hd-white">
+    <div class="row mt-5">
+
+        <div class="col-lg-3 col-md-12 col-xs-12" id='external-events'>
+            <h5 class="card-title mb-3 anchor" id="range-calendar">
+                фильтр
+            </h5>
+            <div class="d-none">
+                <input type="text" id="basic-datepicker" class="form-control" placeholder="Basic datepicker">
+                <input type="text" id="datetime-datepicker" class="form-control" placeholder="Date and Time">
+                <input type="text" id="humanfd-datepicker" class="form-control" placeholder="October 9, 2018">
+                <input type="text" id="minmax-datepicker" class="form-control" placeholder="mindate - maxdate">
+                <input type="text" id="disable-datepicker" class="form-control" placeholder="Disabling dates">
+                <input type="text" id="multiple-datepicker" class="form-control" placeholder="Multiple dates">
+            </div>
+            <div class="mb-3">
+                <form id="date-filter-form">
+                    <label for="conjunction-datepicker">Выберите диапазон дат:</label>
+                    <input type="text" id="conjunction-datepicker" class="form-control" placeholder="2018-10-10 :: 2018-10-11">
+                    <button type="submit" class="btn btn-primary mt-3">Применить фильтр</button>
+                </form>
+
+            </div>
+            <div id="booking-container"></div>
+            <p>
+                <button id="load-more" type="button" data-next-page="2">Загрузить</button>
+            </p>
+
+        </div>
+
+        <div class="col-lg-9 col-md-12 col-xs-12" id='calendar-container'>
+            <div id='calendar'></div>
+        </div>
+    </div>
+</div>
+<div id="event-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000; background: white; padding: 20px; border: 1px solid #ccc; border-radius: 5px;">
+    <div class="card-body">
+        <div class="d-flex align-items-center gap-2 border-bottom pb-3">
+            <img id="modal-image" src="" alt="" class="avatar-lg rounded-3 border border-light border-3">
+            <div class="d-block">
+                <a href="agents-add.html#!" class="text-dark fw-medium fs-16" id="modal-title"></a>
+                <p class="mb-0" id="modal-start"></p>
+                <p class="mb-0" id="modal-end"></p>
+            </div>
+        </div>
+        <p class="mt-3 d-flex align-items-center gap-2 mb-2">
+            <iconify-icon icon="solar:home-bold-duotone"  class="fs-18 text-primary"></iconify-icon>
+            <span id="modal-name"></span>
+
+        </p>
+        <p class="d-flex align-items-center gap-2 mt-2">
+            <iconify-icon icon="solar:map-point-wave-bold-duotone" class="fs-18 text-primary"></iconify-icon>
+            <span id="modal-address"></span>
+        </p>
+        <div class="row mt-3 justify-content-between">
+            <div class="col-lg-3">
+                <p class="fw-medium mb-2"><i class="ri-group-line"></i></p>
+                <h5 class="mb-0 fw-semibold text-dark" id="modal-people"></h5>
+            </div>
+            <div class="col-lg-3">
+                <p class="fw-medium mb-2"><i class="ri-moon-line"></i></p>
+                <h5 class="mb-0 fw-semibold text-dark" id="modal-days"></h5>
+            </div>
+            <div class="col-lg-4">
+                <p class="fw-medium mb-2"><i class='bx bx-ruble'></i></p>
+                <h5 class="mb-0 fw-semibold text-dark" id="booking-amount"></h5>
+            </div>
+        </div>
+    </div>
+    <button onclick="closeModal()">Закрыть</button>
+</div>
+
+<div id="modal-backdrop" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 999;" onclick="closeModal()"></div>
+
+{% endblock content %}
+
+{% block footertop %}
+<script>
+    function openModal(event) {
+        const { extendedProps } = event;
+
+        document.getElementById('modal-title').textContent = event.title || 'Без названия';
+        document.getElementById('modal-start').textContent = event.start ? event.start.toLocaleString() : 'Не указано';
+        document.getElementById('modal-end').textContent = event.end ? event.end.toLocaleString() : 'Не указано';
+
+        // Заполнение дополнительных данных из extendedProps
+        document.getElementById('modal-days').textContent = extendedProps.days || 'Не указано';
+        document.getElementById('modal-people').textContent = extendedProps.people || 'Не указано';
+        document.getElementById('modal-address').textContent = extendedProps.advertisement_address || 'Не указано';
+        document.getElementById('modal-name').textContent = extendedProps.advertisement_name || 'Не указано';
+        document.getElementById('booking-amount').textContent = extendedProps.amount ? `${extendedProps.amount} руб.` : 'Не указано';
+
+        // Установка аватара
+        const avatarElement = document.getElementById('modal-image');
+        avatarElement.src = extendedProps.author?.avatar || '/static/img/default-avatar.png';
+
+        // Отображение модального окна
+        document.getElementById('event-modal').style.display = 'block';
+        document.getElementById('modal-backdrop').style.display = 'block';
+    }
+
+    function closeModal() {
+        document.getElementById('event-modal').style.display = 'none';
+        document.getElementById('modal-backdrop').style.display = 'none';
+    }
+
+
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const bookingContainer = document.getElementById('booking-container');
+        const loadMoreButton = document.getElementById('load-more');
+        const advertisementId = '{{ advertisement.id }}'; // ID объявления
+
+        // Инициализация Flatpickr
+        flatpickr("#conjunction-datepicker", {
+            mode: "range",
+            dateFormat: "Y-m-d",
+            locale: "ru",
+            altInput: true,
+            altFormat: "d.m.Y",
+        });
+
+        // Функция для загрузки данных (с пагинацией или фильтром по дате)
+        function loadBookings({ page = 1, dateRange = null } = {}) {
+            let url = `/advertisements/${advertisementId}/bookings/?page=${page}`;
+            if (dateRange) {
+                url = `/advertisements/${advertisementId}/bookings/?date_range=${dateRange}`;
+            }
+
+            fetch(url, {
+                headers: { 'x-requested-with': 'XMLHttpRequest' },
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error(`Ошибка HTTP: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    if (!data.bookings || !Array.isArray(data.bookings)) {
+                        throw new Error('Некорректный формат ответа');
+                    }
+
+                    // Если загрузка с фильтром, очищаем контейнер
+                    if (dateRange) {
+                        bookingContainer.innerHTML = '';
+                        if (data.bookings.length === 0) {
+                            bookingContainer.innerHTML = '<p>Нет бронирований за указанный период.</p>';
+                            return;
+                        }
+                    }
+
+                    // Рендер карточек
+                    data.bookings.forEach((booking) => {
+                        const card = document.createElement('div');
+                        card.className = 'card';
+                        card.innerHTML = `
+                    <div class="card-body">
+                        <div class="d-flex align-items-center gap-2 border-bottom pb-3">
+                            <img src="${booking.author.avatar}" alt="" class="avatar-lg rounded-3 border border-light border-3">
+                            <div class="d-block">
+                                <a href="agents-add.html#!" class="text-dark fw-medium fs-16">${booking.author.first_name}</a>
+                                <p class="mb-0">Заезд: ${booking.start}</p>
+                                <p class="mb-0">Выезд: ${booking.end}</p>
+                            </div>
+                        </div>
+                        <p class="mt-3 d-flex align-items-center gap-2 mb-2">
+                            <iconify-icon icon="solar:home-bold-duotone" class="fs-18 text-primary"></iconify-icon>${booking.advertisement_name}
+                        </p>
+                        <p class="d-flex align-items-center gap-2 mt-2">
+                            <iconify-icon icon="solar:map-point-wave-bold-duotone" class="fs-18 text-primary"></iconify-icon>${booking.advertisement_address}
+                        </p>
+                        <div class="row mt-3 justify-content-between">
+                            <div class="col-lg-3">
+                                <p class="fw-medium mb-2"><i class="ri-group-line"></i></p>
+                                <h5 class="mb-0 fw-semibold text-dark">${booking.people}</h5>
+                            </div>
+                            <div class="col-lg-3">
+                                <p class="fw-medium mb-2"><i class="ri-moon-line"></i></p>
+                                <h5 class="mb-0 fw-semibold text-dark">${booking.days}</h5>
+                            </div>
+                            <div class="col-lg-4">
+                                <p class="fw-medium mb-2"><i class='bx bx-ruble'></i></p>
+                                <h5 class="mb-0 fw-semibold text-dark">${booking.amount}</h5>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                        bookingContainer.appendChild(card);
+                    });
+
+                    // Если есть следующая страница, обновляем data-next-page, иначе скрываем кнопку
+                    if (data.has_next_page && !dateRange) {
+                        loadMoreButton.setAttribute('data-next-page', parseInt(page) + 1);
+                    } else if (!dateRange) {
+                        loadMoreButton.style.display = 'none'; // Скрываем кнопку
+                    }
+                })
+                .catch((error) => console.error('Ошибка загрузки:', error));
+        }
+
+        // Загрузка первой страницы при загрузке страницы
+        loadBookings({ page: 1 });
+
+        // Загрузка следующей страницы при клике на кнопку
+        loadMoreButton.addEventListener('click', function () {
+            const nextPage = loadMoreButton.getAttribute('data-next-page');
+            loadBookings({ page: nextPage });
+        });
+
+        // Обработчик формы фильтрации по дате
+        document.getElementById('date-filter-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const dateRange = document.getElementById('conjunction-datepicker').value.split(' to ').join('::');
+            loadBookings({ dateRange });
+
+            // Обновление событий на календаре
+            calendar.refetchEvents();
+        });
+
+        // Инициализация FullCalendar
+        const calendarEl = document.getElementById('calendar');
+
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            plugins: ['dayGrid', 'timeGrid', 'interaction'],
+            locale: 'ru',
+            headerToolbar: {
+
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay',
+            },
+            events: function (info, successCallback, failureCallback) {
+                const dateRange = document.getElementById('conjunction-datepicker').value.split(' to ').join('::');
+                const url = dateRange
+                    ? `/advertisements/${advertisementId}/bookings/?date_range=${dateRange}`
+                    : `/advertisements/${advertisementId}/bookings/`;
+
+                fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                })
+                    .then((response) => response.json())
+                    .then((data) => successCallback(data.bookings))
+                    .catch((error) => failureCallback(error));
+            },
+            editable: false,
+            eventClick: function (info) {
+                openModal(info.event);
+            },
+        });
+
+        calendar.render();
+    });
+
+
+
+</script>
+
+<script src="https://fullcalendar.io/releases/core/4.1.0/main.min.js"></script>
+<script src="https://fullcalendar.io/releases/interaction/4.1.0/main.min.js"></script>
+<script src="https://fullcalendar.io/releases/daygrid/4.1.0/main.min.js"></script>
+<script src="https://fullcalendar.io/releases/timegrid/4.1.0/main.min.js"></script>
+
+{% endblock footertop %}
+{% block footerbottom %}
+<!-- Flatepicker Demo Js -->
+<script src="{% static 'site/moderations/assets/js/components/form-flatepicker.js' %}"></script>
+
+{% endblock footerbottom %}
+

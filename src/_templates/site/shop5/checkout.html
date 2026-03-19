@@ -1,0 +1,953 @@
+{% extends 'site/shop5/base.html' %}
+{% load static generals_tag shop_tags i18n %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<script src="https://api-maps.yandex.ru/2.1/?apikey=78851096-f5ca-4b77-b7db-3a200b45f233&lang=ru_RU" type="text/javascript"></script>
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- DaData styles -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/suggestions-jquery@21.12.0/dist/css/suggestions.min.css">
+
+<!-- DaData script -->
+<script src="https://cdn.jsdelivr.net/npm/suggestions-jquery@21.12.0/dist/js/jquery.suggestions.min.js"></script>
+
+{% endblock head %}
+{% block content %}
+<style>
+    .col-md-6{
+        padding: 5px;
+    }
+    input[type="radio"] {
+    visibility: unset;
+    opacity: unset;
+    display: unset;
+    vertical-align: unset;
+    width: unset;
+    height: unset;
+    display: unset;
+}
+    .hidden{
+        display:none!important;
+    }
+    .show{
+        display: block;
+        position: relative!important;
+    }
+
+    .manufacturers-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    padding-top: 20px;
+}
+
+.manufacturers-grid li {
+    padding: 0;
+}
+
+.manufacturer-item {
+    display: block;
+    cursor: pointer;
+    height: 100%;
+}
+
+.manufacturer-item input[type="radio"] {
+    display: none;
+}
+
+/* Общий вид карточки */
+.manufacturer-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    transition: 0.3s ease;
+}
+
+/* Если radio выбран, меняем фон */
+.manufacturer-item input[type="radio"]:checked + .manufacturer-content {
+    background-color: #ffc0cb; /* розовый */
+    box-shadow: 0 0 0 3px #ff69b4;
+}
+span#deliverytext {
+    font-size: 19px;
+}
+    i.fas.fa-box-open {
+    color: #ca5444;
+    font-size: 19px;
+    padding-top: 5px;
+    padding-right: 5px;
+}
+</style>
+<style>
+    .payment-option {
+        border: 2px solid #ccc;
+        border-radius: 12px;
+        padding: 10px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .payment-option img {
+        height: 50px;
+        margin-right: 15px;
+    }
+    .payment-option.active {
+        border-color: #ba4877;
+        box-shadow: 0 0 10px rgb(167 40 77 / 30%);
+        background-color: #fff8fb;
+    }
+    .payment-option input[type="radio"] {
+        display: none;
+    }
+        .checkout-shipping.show {
+        padding-top: 20px;
+    }
+    span.,item-lat{
+    display: none!important;
+    }
+    span.,item-lon{
+    display: none!important;
+    }
+
+ span#deliverytext {
+    font-size: 19px;
+    width: 500px;
+    display: flex
+;
+    padding-left: 60px;
+}
+.address-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.address-option {
+  display: block;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 12px 16px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+/* Скрываем радио */
+.address-option input[type="radio"] {
+  opacity: 0;
+  position: absolute;
+  pointer-events: none;
+}
+
+/* Стиль содержимого блока */
+.address-option .address-label {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Выделение при выборе */
+.address-option input[type="radio"]:checked + .address-label {
+  border: 2px solid #ca5444;
+  background-color: #fdf1ef;
+  border-radius: 6px;
+  padding: 10px;
+  font-weight: 600;
+      margin: -15px;
+}
+.address-options {
+    padding-bottom: 10px;
+}
+    div#delivery {
+    display: none !important;
+}
+    #delivery-radio .form-check {
+        border: 1px solid transparent;
+        padding: 15px;
+        transition: all 0.2s ease;
+
+    }
+
+    #delivery-radio .form-check.selected {
+        border: 3px solid red;
+        background-color: red;
+        transform: scale(2.05);
+        color: white;
+    }
+
+    #delivery-radio .form-check-input {
+        accent-color: red; /* Чтобы кружок radio не стал красным */
+         border: 2px solid red;
+    }
+</style>
+<script>
+    document.querySelectorAll('input[name="payment_type"]').forEach(function(input) {
+        input.addEventListener('change', function () {
+            document.querySelectorAll('.payment-option').forEach(function(option) {
+                option.classList.remove('active');
+            });
+            input.closest('.payment-option').classList.add('active');
+        });
+    });
+</script>
+
+{% for message in messages%}
+{{message}}!
+{% endfor%}
+<div class="th-cart-wrapper space-top space-extra-bottom">
+    <div class="container">
+        <form method="post" action="{% url 'payment:purchase' %}" id="info_form">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-lg-7">
+                    <!-- Checkout Form Start -->
+                    <div class="checkout-form">
+                        <div class="checkout-title">
+                            <h4 class="title">{% trans 'Данные получателя' %}</h4>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="single-form">
+                                    <input type="text" name="customer_name" class="form-control" required placeholder="{% trans 'Введите имя' %}..." />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="single-form">
+                                    <input type="text" name="customer_surname" class="form-control" required placeholder="{% trans 'Введите фамилию' %}..." />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="single-form">
+                                    <input type="text"  name="customer_phone" class="form-control" id="id_phone" required placeholder="{% trans 'Введите телефон' %}..." />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="single-form">
+                                    <input type="text" name="customer_email" class="form-control" required placeholder="{% trans 'Введите email' %}..." />
+
+                                </div>
+                            </div>
+                            <input type="hidden" name="delivery-price"  id="delivery_price_input" value=""/>
+                        </div>
+                        {% if deliverytype %}
+
+                        <div class="single-form checkbox-checkbox" style="margin-top:20px" id="delivery-radio">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="delivery_method" id="pickup" value="pickup" checked>
+                                Самовывоз
+
+                            </div>
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="radio" name="delivery_method" id="courier" value="courier">
+                                Доставка курьером
+
+                            </div>
+                        </div>
+
+                        <div class="single-form checkbox-checkbox" style="margin-top:20px" id="delivery">
+                            <input type="checkbox" id="shipping">
+                            <label for="shipping">
+        <span id="deliverytext">
+            <i class="fas fa-box-open"></i>
+            Доставка курьером
+        </span>
+                            </label>
+                        </div>
+
+                        <script>
+document.addEventListener("DOMContentLoaded", function () {
+    const pickupRadio = document.getElementById("pickup");
+    const courierRadio = document.getElementById("courier");
+
+    function updateShippingCheckboxAndSection() {
+        const checkbox = document.getElementById("shipping");
+        const shippingSection = document.querySelector(".checkout-shipping[data-delivery='true']");
+        const productInfoTabs = document.querySelector(".product-info-tabs[data-delivery='true']");
+
+        if (!checkbox) {
+            console.warn("❌ Чекбокс #shipping не найден");
+            return;
+        }
+
+        if (!shippingSection) {
+            console.warn("❌ Блок .checkout-shipping[data-delivery='true'] не найден");
+            return;
+        }
+
+        if (!productInfoTabs) {
+            console.warn("❌ Блок .product-info-tabs[data-delivery='true'] не найден");
+            return;
+        }
+
+        if (courierRadio.checked) {
+            checkbox.checked = true;
+
+            // Показать блоки
+            shippingSection.classList.remove("hidden");
+            shippingSection.classList.add("show");
+
+            productInfoTabs.classList.remove("hidden");
+            productInfoTabs.classList.add("show");
+
+            console.log("✅ Курьер выбран — чекбокс активен, блоки показаны");
+        } else {
+            checkbox.checked = false;
+
+            // Скрыть блоки
+            shippingSection.classList.remove("show");
+            shippingSection.classList.add("hidden");
+
+            productInfoTabs.classList.remove("show");
+            productInfoTabs.classList.add("hidden");
+
+            console.log("✅ Самовывоз выбран — чекбокс снят, блоки скрыты");
+        }
+    }
+
+    if (pickupRadio && courierRadio) {
+        pickupRadio.addEventListener("change", updateShippingCheckboxAndSection);
+        courierRadio.addEventListener("change", updateShippingCheckboxAndSection);
+    }
+
+    // Обновить при загрузке страницы
+    updateShippingCheckboxAndSection();
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const addressOptions = document.querySelectorAll(".address-option input[type='radio']");
+    const addressField = document.getElementById("id_address");
+    const porchField = document.querySelector("input[name='porch']");
+    const sfloorField = document.querySelector("input[name='sfloor']");
+    const sflatField = document.querySelector("input[name='sflat']");
+    const latField = document.getElementById("id_latitude");
+    const lonField = document.getElementById("id_longitude");
+
+    addressOptions.forEach(option => {
+        option.addEventListener("change", function () {
+            if (!this.checked) return;
+
+            const parent = this.closest(".address-option");
+
+            const address = parent.querySelector(".item-address")?.textContent.trim() || "";
+            const porch = parent.querySelector(".item-porch")?.textContent.trim() || "";
+            const sfloor = parent.querySelector(".item-sfloor")?.textContent.trim() || "";
+            const sflat = parent.querySelector(".item-sflat")?.textContent.trim() || "";
+            const lat = parent.querySelector(".item-lat")?.textContent.trim() || "";
+            const lon = parent.querySelector(".item-lon")?.textContent.trim() || "";
+
+            // Заполнение формы
+            if (addressField) addressField.value = address;
+            if (porchField) porchField.value = porch;
+            if (sfloorField) sfloorField.value = sfloor;
+            if (sflatField) sflatField.value = sflat;
+            if (latField) latField.value = lat;
+            if (lonField) lonField.value = lon;
+
+            console.log("✅ Адрес выбран:", {
+                address, porch, sfloor, sflat, lat, lon
+            });
+        });
+    });
+});
+</script>
+
+
+
+
+
+                        <div class=" checkout-shipping hidden" data-delivery="true">
+                            <form id="shipping-form" method="post" action="{% url 'payment:calculate_the_shipping_cost' %}">
+                                {% csrf_token %}
+                                <div class="row">
+                                    <div class="col-sm-6 d-none" style="padding: 5px;">
+                                        <div class="single-form">
+                                            <input type="text" name="city" id="id_city" class="form-control" placeholder="{% trans 'Город' %}" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-12" style="padding: 5px;">
+                                        <div class="single-form">
+                                            <input type="text" name="address" id="id_address" class="form-control" placeholder="{% trans 'Город/Улица/Дом' %}" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4" style="padding: 5px;">
+                                        <div class="single-form">
+                                            <input type="text" name="porch" class="form-control" placeholder="{% trans 'Подьезд' %}"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4" style="padding: 5px;">
+                                        <div class="single-form">
+                                            <input type="text" name="sfloor" class="form-control" placeholder="{% trans 'Этаж' %}"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4" style="padding: 5px;">
+                                        <div class="single-form">
+                                            <input type="text" name="sflat" class="form-control" placeholder="{% trans 'Квартира' %}"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-12" style="padding: 5px;">
+                                        <div class="single-form">
+                                            <input type="text" name="user_comment" class="form-control" placeholder="{% trans 'Комментарий курьеру' %}" />
+                                        </div>
+                                    </div>
+                                    <h4>Адреса</h4>
+                                    <div class="address-options">
+                                        {% for item in adresses %}
+                                        <label class="address-option">
+                                            <input type="radio" class="hidden"
+                                                   name="selected_address"
+                                                   value="{{ item.address }}">
+                                            <div class="address-label">
+                                                <strong>{{ item.label }}</strong><br>
+                                                <span class="item-address">{{ item.address }}</span>
+                                                <span class="">Подъезд</span>
+                                                <span class="item-porch">{{ item.porch }}</span>
+                                                <span class="">Этаж</span>
+                                                <span class="item-sfloor">{{ item.sfloor }}</span>
+                                                <span class="">Квартира</span>
+                                                <span class="item-sflat">{{ item.sflat }}</span>
+                                                <span class="item-lat">{{ item.lat }}</span>
+                                                <span class="item-lon">{{ item.lon }}</span>
+                                            </div>
+                                        </label>
+                                        {% endfor %}
+                                    </div>
+
+                                    <br>
+                                    <input type="hidden" name="latitude" id="id_latitude">
+                                    <input type="hidden"  name="longitude" id="id_longitude">
+                                    <br><br><br>
+                                    <div class="product-info-tabs hidden" data-delivery="true">
+                                        <nav>
+                                            <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                                                {%  for delivery in deliverytype %}
+                                                {% if delivery.type == 1 %}
+                                                <button class="nav-link active" id="nav-yandex-tab" data-bs-toggle="tab" data-bs-target="#nav-pochta" type="button" role="tab" aria-controls="nav-pochta" aria-selected="true">{% trans 'Яндекс Доставка' %}</button>
+                                                {% elif delivery.type == 2 %}
+                                                <button class="nav-link" id="nav-pochta-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">{% trans 'Почта России' %}</button>
+                                                {% endif%}
+                                                {% endfor %}
+                                            </div>
+                                        </nav>
+                                        <div class="tab-content" id="nav-tabContent" style="margin-top: 20px">
+                                            {%  for delivery in deliverytype %}
+                                            {% if delivery.type == 1 %}
+                                            <div class="tab-pane fade show active" id="nav-yandex" role="tabpanel" aria-labelledby="nav-yandex-tab">
+                                                <span class="d-block py-2" id="delivery_price_error">{{checkout.delivery_price}}  </span>
+                                                <button type="button" id="calculate-shipping"  class="th-btn" style=" background: #d14a40; border: 0px; color: #fff; padding: 10px 20px; border-radius: 10px; ">{% trans 'Рассчитать стоимость Доставки по Городу' %}</button>
+                                            </div>
+                                            {% elif delivery.type == 2 %}
+                                            <div class="tab-pane fade" id="nav-pochta" role="tabpanel" aria-labelledby="nav-pochta-tab">
+                                                {% trans 'Рассчитать стоимость' %}
+                                            </div>
+                                            {% endif%}
+                                            {% endfor%}
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <!-- Checkout Form End -->
+
+                    <ul class="manufacturers-grid" id="manufacturers" data-gabarite="{{product_data}}">
+                        {% for manufacturer in manufacturers %}
+                        <li>
+                            <label class="manufacturer-item">
+                                <input type="radio" name="selected_manufacturer" value="{{ manufacturer.id }}"
+                                       data-coordinates="{{ manufacturer.company_coordinates }}"
+                                       data-name="{{ manufacturer.name }}"
+                                       data-address="{{ manufacturer.address }}">
+                                <div class="manufacturer-content">
+                                    <h5>{{ manufacturer.name }}</h5>
+                                    <p>{{ manufacturer.company_chart }}</p>
+                                    <p>{{ manufacturer.company_adress }}</p>
+                                    <h5>{{ manufacturer.phone }}</h5>
+                                    <span id="manufacturer-coordinates-{{manufacturer.id}}" style="display:none;">{{ manufacturer.company_coordinates }}</span>
+                                </div>
+                            </label>
+                        </li>
+                        {% endfor %}
+                    </ul>
+
+                </div>
+                <div class="col-lg-5">
+                    <div class="checkout-order">
+                        <div class="h8">
+                            <div class="row m-0 border mb-3">
+                                <div class="col-6 h8 pe-0 ps-2">
+                                    <p class="textmuted py-2"> &nbsp;	</p>
+                                    <span class="d-block py-2 border-bottom" style="font-size: 16px;"> {% trans 'Покупка' %}</span>
+                                    <span class="d-block py-2" style="font-size: 16px;">{% trans 'Самовывоз' %}</span>
+                                </div>
+                                <div class="col-2 text-center p-0">
+                                    <p class="textmuted p-2">&nbsp;</p>
+                                    <span class="d-block p-2 border-bottom">&nbsp;</span>
+                                    <span class="d-block p-2">&nbsp;</span>
+                                </div>
+                                <div class="col-2 p-0 text-center h8 border-end">
+                                    <p class="textmuted p-2" style="font-size: 16px;">{% trans 'Кол' %}.</p>
+                                    <span class="d-block border-bottom py-2" style="font-size: 16px;" id="selectedproduct">{{checkout.selectedproduct.count}}</span>
+                                    <span class="d-block py-2 "></span>
+                                </div>
+                                <div class="col-2 p-0 text-center">
+                                    <p class="textmuted p-2" style="font-size: 16px;">{% trans 'Цена' %}</p>
+                                    <span class="d-block py-2 border-bottom" id="price" style="font-size: 16px;">{% currency_conversion request checkout.amount %} {{checkout.amount}}</span>
+                                    <span class="d-block py-2" id="delivery_price" style="font-size: 16px;">{{checkout.delivery_price}}  </span>
+                                </div>
+                            </div>
+                            <div class="d-flex h7 mb-2">
+                                <p class="" style="font-size: 16px;">{% trans 'Общая сумма' %}</p>
+                                {% if not checkout.delivery_price %}
+                                <input type="hidden" id="amounthidden" value="{{checkout.amount}}" >
+                                <p class="ms-auto" id="all_amount"  style="font-size: 16px;">{% currency_conversion request checkout.amount %}</p>
+                                {% else %}
+                                <input type="hidden" id="amounthidden" value="{{checkout.amount}}">
+                                <p class="ms-auto" id="all_amount" style="font-size: 16px;">{{checkout.all_amount}}</p>
+                                {% endif  %}
+                            </div>
+                            <br>
+                        </div>
+                        <div class="">
+
+                            <div class="form">
+                                {% if enabled_payment_types %}
+                                <p class="h7 fw-bold mb-1" style="font-size: 16px;"><i class='fa fa-bank'></i> {% trans 'Платежные системы' %}</p>
+                                <p class="textmuted h8 mb-2">{% trans 'Вы можете выбрать любой из доступных платежных терминалов' %}</p>
+                                <br>
+                                <div class="row">
+                                    {% if enabled_payment_types %}
+                                    <div id="payment-options-list">
+                                        {% for payment_type in enabled_payment_types %}
+                                        <label class="payment-option {% if forloop.first %}active{% endif %}" for="payment_type{{ payment_type.type }}">
+                                            <input type="radio" name="payment_type" value="{{ payment_type.type }}" id="payment_type{{ payment_type.type }}" {% if forloop.first %}checked{% endif %}>
+                                            <img src="{{ payment_type.image.url }}" alt="Оплата">
+                                            <div>
+                                                <p class="mb-1 font-weight-bold">{{ payment_type.name }}</p>
+                                                <p class="mb-0 text-muted">{{ payment_type.content }}</p>
+                                            </div>
+                                        </label>
+                                        {% endfor %}
+                                    </div>
+                                    {% else %}
+                                    <p>{% trans 'Нет доступных способов оплаты' %}.</p>
+                                    {% endif %}
+                                </div>
+                                <br>
+                                {% endif %}
+                                {% if checkout.all_amount != 0 %}
+                                <div class="single-form">
+                                    <button class="th-btn"  style="padding:0; width: 100%;height: 45px; border: 0px; background: #d14a40; color: #fff; border-radius: 15px; ">{% trans 'Оформить заказ' %} {{ payment_type.all_amount }}</button>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    document.getElementById("all_amount_checkout").addEventListener("click", function() {
+        // Находим выбранный чекбокс
+        var selectedPaymentType = document.querySelector('input[name^="radio"]:checked');
+        if (selectedPaymentType) {
+            // Создаем ссылку для отправки формы с параметром чекбокса
+            var actionUrl = "{% url 'payment:purchase' %}?radio" + "=" + selectedPaymentType.getAttribute("name").slice(5)
+            // Устанавливаем новый URL в атрибут action формы
+            document.getElementById("info_form").setAttribute("action", actionUrl);
+            // Сабмитим форму
+            document.getElementById("info_form").submit();
+        } else {
+            // Если чекбокс не выбран, вы можете добавить здесь сообщение об ошибке или другую логику
+            console.log("Выберите способ оплаты");
+        }
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const checkbox = document.getElementById('shipping');
+        const grid = document.getElementById('manufacturers');
+
+        // Скрытие / показ
+        checkbox.addEventListener('change', function () {
+            grid.style.display = this.checked ? 'none' : 'grid';
+        });
+
+        // Выбор одного <li> как радио
+        const items = grid.querySelectorAll('li');
+        items.forEach(item => {
+            item.addEventListener('click', function () {
+                // Убираем выделение у всех
+                items.forEach(i => i.classList.remove('selected'));
+                // Добавляем текущему
+                this.classList.add('selected');
+            });
+        });
+    });
+</script>
+
+
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Находим все div с атрибутом data-payment-type
+        var paymentDivs = document.querySelectorAll("[data-payment-type]");
+
+        paymentDivs.forEach(function(div) {
+            div.addEventListener("click", function() {
+                var paymentTypeId = div.getAttribute("data-payment-type");  // Получаем тип платежа
+                var radioInput = document.getElementById("payment_type" + paymentTypeId);
+
+                if (radioInput) {
+                    radioInput.checked = true;  // Устанавливаем checked для соответствующей радиокнопки
+                }
+
+                // Снимаем выбор у всех других радиокнопок
+                paymentDivs.forEach(function(otherDiv) {
+                    if (otherDiv !== div) {
+                        var otherPaymentTypeId = otherDiv.getAttribute("data-payment-type");
+                        var otherRadioInput = document.getElementById("payment_type" + otherPaymentTypeId);
+
+                        if (otherRadioInput) {
+                            otherRadioInput.checked = false;  // Снимаем checked у других радиокнопок
+                        }
+                    }
+                });
+            });
+        });
+    });
+
+    document.addEventListener("DOMContentLoaded", function() {
+        // Найдем все радиокнопки
+        var radioButtons = document.querySelectorAll("input[type='radio']");
+
+        radioButtons.forEach(function(radioButton) {
+            radioButton.addEventListener("click", function() {
+                // Получаем значение data-for-stok
+                var group = radioButton.closest("tr").getAttribute("data-for-stok");
+
+                // Если у радио кнопки есть группа, снимаем checked у всех радиокнопок в этой группе
+                if (group) {
+                    var groupRadioButtons = document.querySelectorAll("tr[data-for-stok='" + group + "'] input[type='radio']");
+
+                    groupRadioButtons.forEach(function(groupRadioButton) {
+                        groupRadioButton.checked = false;  // Снимаем checked у всех в группе
+                    });
+
+                    // Устанавливаем checked для выбранной радиокнопки
+                    radioButton.checked = true;
+                }
+            });
+        });
+    });
+
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    const deliveryToggle = document.getElementById("delivery");
+    const checkbox = document.getElementById("shipping");
+    const deliveryText = document.getElementById("deliverytext");
+    const deliveryElements = document.querySelectorAll("[data-delivery='true']");
+    const nonDeliveryElements = document.querySelectorAll("[data-delivery='false']");
+
+    if (deliveryToggle && checkbox && deliveryText) {
+        deliveryToggle.addEventListener("click", function (e) {
+            // Отменяем стандартное поведение
+            e.preventDefault();
+
+            // Переключаем вручную чекбокс
+            checkbox.checked = !checkbox.checked;
+
+            // Меняем текст
+            deliveryText.innerHTML = checkbox.checked
+                ? '<i class="fas fa-box-open"></i> Доставка курьером'
+                : '<i class="fas fa-box-open"></i> Самовывоз';
+
+            // Переключаем видимость элементов
+            deliveryElements.forEach(el => {
+                el.classList.toggle("hidden", !checkbox.checked);
+                el.classList.toggle("show", checkbox.checked);
+            });
+
+            nonDeliveryElements.forEach(el => {
+                el.classList.toggle("hidden", checkbox.checked);
+                el.classList.toggle("show", !checkbox.checked);
+            });
+        });
+    }
+});
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/suggestions-jquery@21.12.0/dist/js/jquery.suggestions.min.js"></script>
+<script src="https://api-maps.yandex.ru/2.1/?apikey=78851096-f5ca-4b77-b7db-3a200b45f233&lang=ru_RU" type="text/javascript"></script>
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+
+      document.getElementById('id_city').addEventListener('change', function() {
+            geocodeAndSetCoordinates();
+        });
+
+        document.getElementById('id_address').addEventListener('change', function() {
+            geocodeAndSetCoordinates();
+        });
+
+        // Функция для отправки запроса на геокодирование и обновления координат
+        function geocodeAndSetCoordinates() {
+            var city = document.getElementById('id_city').value;
+            var adress = document.getElementById('id_address').value;
+
+            // Отправить запрос на геокодирование
+            ymaps.geocode(city + ', ' + adress ).then(function (res) {
+                var firstGeoObject = res.geoObjects.get(0);
+                var coordinates = firstGeoObject.geometry.getCoordinates();
+
+                // Обновить поля координат в форме
+                document.getElementById('id_latitude').value = coordinates[0];
+                document.getElementById('id_longitude').value = coordinates[1];
+            }, function (err) {
+                console.error(err);
+            });
+        }
+    });
+</script>
+<script >
+    document.getElementById('calculate-shipping').addEventListener('click', function () {
+      const csrfToken = '{{csrf_token}}';
+
+      const city = document.getElementById('id_city').value;
+      const address = document.getElementById('id_address').value;
+      const latitude = parseFloat(document.getElementById('id_latitude').value);
+      const longitude = parseFloat(document.getElementById('id_longitude').value);
+
+      let start_lat = null;
+      let start_lon = null;
+
+      // Проверка, выбрана ли радиокнопка для адреса отправления
+      const selectedManufacturerRadio = document.querySelector('input[name="selected_manufacturer"]:checked');
+
+      if (selectedManufacturerRadio) {
+          const coordinates = selectedManufacturerRadio.dataset.coordinates;
+          const [manufacturer_lat, manufacturer_lon] = coordinates.split(',').map(coord => parseFloat(coord.trim()));
+          start_lat = manufacturer_lat;
+          start_lon = manufacturer_lon;
+      } else {
+          // Если не выбран адрес, находим ближайший склад/производителя
+          alert("Адрес не выбран, ищем ближайший склад...");
+          const manufacturers = document.querySelectorAll('[name="selected_manufacturer"]');
+          let minDistance = Infinity;
+
+          manufacturers.forEach(manufacturer => {
+              const coordinates = manufacturer.dataset.coordinates;
+              const [lat, lon] = coordinates.split(',').map(coord => parseFloat(coord.trim()));
+
+              // Рассчитываем расстояние (гипотетическое, упрощенное)
+              const dist = Math.sqrt(Math.pow(lat - latitude, 2) + Math.pow(lon - longitude, 2));
+              if (dist < minDistance) {
+                  minDistance = dist;
+                  start_lat = lat;
+                  start_lon = lon;
+              }
+          });
+
+          if (start_lat === null || start_lon === null) {
+              alert("Не удалось найти ближайший адрес для отправки.");
+              return;
+          }
+      }
+
+      // Получаем данные из data-gabarite
+      const productData = document.getElementById('manufacturers').getAttribute('data-gabarite');
+
+      let products = [];
+      try {
+          // Заменяем одинарные кавычки на двойные
+          const correctedProductData = productData
+              .replace(/'/g, '"')
+              .replace(/<Products:(.*?)>/g, '"$1"');  // Преобразуем <Products: ...> в строку
+
+          products = JSON.parse(correctedProductData);
+      } catch (error) {
+          console.error("Ошибка при парсинге JSON данных: ", error);
+          alert("Ошибка при обработке данных товара.");
+          return;
+      }
+
+      // Убедимся, что каждый товар имеет поле 'quantity'
+      products.forEach(product => {
+          if (!product.quantity) {
+              product.quantity = 1;  // Присваиваем дефолтное значение, если quantity не задано
+          }
+      });
+
+      // Рассчитываем общий вес и объем товаров
+      let totalWeight = 0;
+      let totalVolume = 0;
+
+      products.forEach(product => {
+          const weight = product.weight || 1;  // Дефолтный вес
+          const width = product.width || 10;
+          const height = product.height || 10;
+          const length = product.length || 10;
+
+          totalWeight += weight * product.quantity; // Умножаем на количество товара
+          totalVolume += (width / 100) * (height / 100) * (length / 100) * product.quantity; // Умножаем на количество товара
+      });
+
+      if (totalWeight === 0 && totalVolume === 0) {
+          alert("Ошибка: Товары не имеют веса или объема.");
+          return;
+      }
+
+      console.log("Общий вес товаров:", totalWeight);
+      console.log("Общий объем товаров:", totalVolume);
+
+      // Подготовка данных для отправки
+      const cargoOptions = [];
+      const thermobagElement = document.getElementById('thermobag');
+      const autoCourierElement = document.getElementById('auto_courier');
+
+      if (thermobagElement && thermobagElement.checked) {
+          cargoOptions.push('thermobag');
+      }
+
+      if (autoCourierElement && autoCourierElement.checked) {
+          cargoOptions.push('auto_courier');
+      }
+
+      const formData = {
+          city: city,
+          address: address,
+          latitude: latitude,
+          longitude: longitude,
+          start_latitude: start_lat,
+          start_longitude: start_lon,
+          total_weight: totalWeight,
+          total_volume: totalVolume,
+          cargo_options: cargoOptions,  // Дополнительные опции
+          items: products,  // Товары с обязательным полем 'quantity'
+      };
+
+      console.log("Данные, отправляемые на сервер:", formData);  // Логируем данные, чтобы увидеть, что отправляется
+
+      fetch("{% url 'payment:calculate_the_shipping_cost' %}", {
+          method: 'POST',
+          headers: {
+              'X-CSRFToken': csrfToken,
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
+      })
+          .then(response => response.json())
+          .then(data => {
+              if (data.status) {
+                  document.getElementById('delivery_price').innerHTML = `${data.message} `;
+                  document.getElementById('delivery_price_error').innerHTML = `Цена доставки: от ${data.message} Руб.`;
+                  document.getElementById('delivery_price_input').value = data.message;
+
+                  const hiddenAmount = parseFloat(document.getElementById('amounthidden').value);
+                  const deliveryPrice = parseFloat(data.message);
+                  const totalAmount = hiddenAmount + deliveryPrice;
+                  document.getElementById('all_amount').innerHTML = `${totalAmount} Руб.`;
+              } else {
+                  document.getElementById('delivery_price_error').innerHTML = `Ошибка: ${data.message}`;
+              }
+          })
+          .catch(error => {
+              console.error('Ошибка:', error);
+              document.getElementById('delivery_price').innerHTML = 'Ошибка при расчете стоимости.';
+          });
+  });
+
+
+
+
+
+
+
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Функция для блокировки ввода букв
+        function allowOnlyNumbers(inputElement) {
+            inputElement.addEventListener('input', function() {
+                // Оставляем только цифры, удаляя все нецифровые символы
+                this.value = this.value.replace(/\D/g, '');
+            });
+        }
+
+        // Применяем функцию только для полей с name="porch", "sfloor" и "sflat"
+        var numberInputs = document.querySelectorAll('input[name="porch"], input[name="sfloor"], input[name="sflat"]');
+
+        numberInputs.forEach(function(inputElement) {
+            allowOnlyNumbers(inputElement);
+        });
+    });
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/suggestions-jquery@21.12.0/dist/js/jquery.suggestions.min.js"></script>
+<script>
+    // Подключение скрипта DaData
+    const script = document.createElement('script');
+    script.src = "https://cdn.jsdelivr.net/npm/suggestions-jquery@21.12.0/dist/js/jquery.suggestions.min.js";
+    document.head.appendChild(script);
+
+    // Подключение стилей DaData
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = "https://cdn.jsdelivr.net/npm/suggestions-jquery@21.12.0/dist/css/suggestions.min.css";
+    document.head.appendChild(link);
+
+    // Функция инициализации подсказок
+    function initDaDataSuggestions() {
+        const token = "7db09bb0395c841302f179d85a8dc4f5d32090f2";
+
+        // Инициализация подсказок для одного поля: город + адрес
+        $("#id_address").suggestions({
+            token: token,
+            type: "ADDRESS",
+            bounds: "street-house",
+            restrict_value: true,
+            formatResult: function(value, currentValue, suggestion) {
+                return suggestion.value;
+            },
+            formatSelected: function(suggestion) {
+                return suggestion.value;
+            },
+            onSelect: function(suggestion) {
+                console.log(suggestion);
+            }
+        });
+    }
+
+    // Ожидание загрузки jQuery и DaData
+    function checkJQuery() {
+        if (window.jQuery && jQuery.fn.suggestions) {
+            initDaDataSuggestions();
+        } else {
+            setTimeout(checkJQuery, 100);
+        }
+    }
+
+    // Запуск проверки наличия jQuery и DaData
+    checkJQuery();
+
+</script>
+
+
+{% endblock content %}

@@ -1,0 +1,62 @@
+<ul class="nav nav-tabs mb-6" role="tablist">
+    {% with app_name=request.resolver_match.namespace url_name=request.resolver_match.url_name %}
+    {% if not user.type == 2 %}
+
+    <li class="nav-item">
+        <a href="{% url 'shop:bookmark_list' %}" class="nav-link {% if url_name == 'bookmark_list' %}active{% endif %}"
+           class="{% if app_name == 'shop' and url_name == 'bookmark_list' %} active {% endif %}"><i
+                class="w-icon-heart"></i> &nbsp;  Закладки</a>
+    </li>
+    {% else %}
+    <li class="nav-item">
+        <a class="nav-link"
+           class="{% if app_name == 'shop' and url_name == 'manufacturerapplications' %} active {% endif %}"
+           href="{% url 'shop:manufacturerapplications' %}">
+            <i class="fa fa-magnet"></i> &nbsp;  Запросы</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link"
+           class="{% if app_name == 'shop' and url_name == 'manufacturerorder' %} active {% endif %}"
+           href="{% url 'shop:manufacturerorder' %}">
+            <i class="fa fa-shopping-bag"></i> &nbsp; Продажи</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link"
+           class="{% if app_name == 'shop' and url_name == 'manufacturerapplications' %} active {% endif %}"
+           href="{% url 'shop:manufacturerapplications' %}">
+            <i class="fa fa-magnet"></i> &nbsp; Заявки</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link"
+           class="{% if app_name == 'useraccount' and url_name == 'shop_edit' %} active {% endif %}"
+           href="{% url 'useraccount:shop_edit' %}">
+            <i class="fa fa-table"></i>&nbsp; Мои магазин</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link"
+           class="{% if app_name == 'shop' and url_name == 'manufacturerreviews' %} active {% endif %}"
+           href="{% url 'shop:manufacturerreviews' %}">
+            <i class="fa fa-star-o"></i>&nbsp; Отзывы</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link"
+           class="{% if app_name == 'shop' and url_name == 'manufacturerfaqs' %} active {% endif %}"
+           href="{% url 'shop:manufacturerfaqs' %}">
+            <i class="fa fa-question-circle-o"></i> &nbsp; Вопросы</a>
+    </li>
+    {% endif %}
+    <li class="nav-item">
+        <a class="nav-link {% if url_name == 'tickets' %} active {% endif %}"
+           href="{% url 'useraccount:tickets' %}">
+            <i class="fa fa-life-ring"></i>&nbsp; Поддержка</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if url_name == 'edit_profile' %} active {% endif %}"
+           href="{% url 'useraccount:edit_profile' %}">
+            <i class="fa fa-user"></i>&nbsp; Мой профиль</a>
+    </li>
+    {% endwith %}
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'webmain:logout' %}"><i class="fa fa-sign-out"></i>Выйти</a>
+    </li>
+</ul>

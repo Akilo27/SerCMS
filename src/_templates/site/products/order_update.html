@@ -1,0 +1,40 @@
+{% extends 'products/base_profile.html' %}
+{% load static generals_tag %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+{% block content %}
+<h2>Редактирование заказа</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <h3>Выбранные Товары</h3>
+    {{ selectedproduct_formset.management_form }}
+    <table>
+      {% for form in selectedproduct_formset %}
+        <tr>
+          <td>{{ form.as_p }}</td>
+
+        </tr>
+      {% endfor %}
+    </table>
+    <button class="th-btn" type="submit">Сохранить</button>
+  </form>
+
+{% endblock content %}
+{% block footer %}
+<style>
+    input[type="checkbox"] {
+    visibility: visible!important;
+    opacity: 1!important;;
+    display: inline-block!important;;
+    vertical-align: middle;
+    width: 20px!important;;
+    height: 20px!important;;
+}
+</style>
+{% endblock footer %}

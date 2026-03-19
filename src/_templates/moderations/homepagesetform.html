@@ -1,0 +1,304 @@
+{% extends 'moderations/base.html' %}
+{% load generals_tag static i18n %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+{% endblock head %}
+{% block content %}
+<div class="row">
+
+
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a href="#home" data-bs-toggle="tab" aria-expanded="false" class="nav-link">
+                <span class="d-block d-sm-none"><i class="bx bx-home"></i></span>
+                <span class="d-none d-sm-block">SEO</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="#profile" data-bs-toggle="tab" aria-expanded="true" class="nav-link active">
+                <span class="d-block d-sm-none"><i class="bx bx-user"></i></span>
+                <span class="d-none d-sm-block">{% trans "Шаблон" %}</span>
+            </a>
+        </li>
+
+    </ul>
+
+
+
+    <form method="post"  class="account__main-info" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="tab-content text-muted">
+            <div class="tab-pane" id="home">
+            <div class="row mb-2">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">{% trans 'Мета-заголовок' %}</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    {{ form.title }}
+                </div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">{% trans 'Мета-описание' %}</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    {{ form.metadescription }}
+                </div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">{% trans 'Мета-заголовок ссылки' %}</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    {{ form.propertytitle }}
+                </div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">{% trans 'Мета-описание ссылки' %}</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    {{ form.propertydescription }}
+                </div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">{% trans 'Превью' %}</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    {% if homepage.previev %}
+                    <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                        {% if homepage.previev %}
+                        <img src="{{homepage.previev.url}}" alt="" style="max-height: 300px">
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                        <div style="height:300px; border: 0.0625rem solid #EEEEEE; border-radius:0.5rem;width: 500px;background: #fff;align-content: center;text-align: center;">
+                            <h1 style="transform: rotate(20deg); color: #ababab">{% trans 'Изображения нет' %}</h1>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {{ form.previev }}
+                </div>
+            </div>
+            </div>
+            <div class="tab-pane show active" id="profile">
+                <div id="json-container">
+                {% for item in jsontemplate %}
+                <div class="json-fields">
+                    {% for key, field in item.fields.items %}
+                    <div class="json-field" data-key="{{ key }}">
+                        <div class="page-title-box mt-3">
+                            <h4 class="mb-0 fw-semibold">{{ key }}</h4>
+                            <ol class="breadcrumb mb-0">
+                                <button type="button" class="btn btn-danger btn-sm remove-block">{% trans "Удалить" %}</button>
+                            </ol>
+                        </div>
+                        <!-- Поле "Ключ" -->
+                        <div class="row mb-2">
+                            <div class="col-sm-3"><h6 class="mb-0">{% trans "Ключ" %}</h6></div>
+                            <div class="col-sm-9 text-secondary">
+                                <input type="text" name="{{ key }}_key" value="{{ key }}" placeholder="Key" class="form-control input-default">
+                            </div>
+                        </div>
+                        <!-- Поле "Значение" -->
+                        <div class="row mb-2">
+                            <div class="col-sm-3"><h6 class="mb-0">{% trans "Значение" %}</h6></div>
+                            <div class="col-sm-9 text-secondary">
+                                <input type="text" name="{{ key }}_field" value="{{ field.field }}" placeholder="Field" class="form-control input-default">
+                            </div>
+                        </div>
+                        <!-- Поле "Тип" -->
+                        <div class="row mb-2">
+                            <div class="col-sm-3"><h6 class="mb-0">{% trans "Тип" %}</h6></div>
+                            <div class="col-sm-9 text-secondary">
+                                <input type="text" name="{{ key }}_type" value="{{ field.type }}" placeholder="Type" class="form-control input-default">
+                            </div>
+                        </div>
+                        <!-- Поле "Выберите модель" (если type не "information") -->
+                        {% if field.type == "information" %}
+                        <div class="row mb-2">
+                            <div class="col-sm-3"><h6 class="mb-0">{% trans "Значение" %}</h6></div>
+                            <div class="col-sm-9 text-secondary">
+                                <input type="text" name="{{ key }}_field" value="{{ field.field }}" placeholder="Field" class="form-control input-default">
+                            </div>
+                        </div>
+
+                        {% elif field.type == "media" %}
+                        <div class="row mb-2">
+                            <div class="col-sm-3"><h6 class="mb-0">{% trans "Файл" %}</h6></div>
+                            <div class="col-sm-9 text-secondary">
+                                <input type="file" name="{{ key }}_file" class="form-control input-default">
+                                {% if field.info %}
+                                <div class="mt-2">
+                                    <p>{% trans "Текущее изображение" %}:</p>
+                                    <img src="{{ field.info }}" alt="Изображение" class="img-thumbnail" style="max-width: 200px;">
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% else %}
+
+                        <div class="row mb-2">
+                            <div class="col-sm-3"><h6 class="mb-0">{% trans "Выберите модель" %}</h6></div>
+                            <div class="col-sm-9 text-secondary">
+                                <select class="form-control" name="{{ key }}_info" id="choices-multiple-remove-button" data-choices multiple>
+                                    <option value="">{% trans "Выберите" %}</option>
+                                    {% with model_data|get_item:field.type as model_objects %}
+                                    {% if model_objects %}
+                                    {% for obj in model_objects %}
+                                    <option value="{{ obj.id }}" {% if obj.id in field.info %}selected{% endif %}>{{ obj }}</option>
+                                    {% endfor %}
+                                    {% else %}
+                                    <option disabled>{% trans "Нет данных для выбора" %}</option>
+                                    {% endif %}
+                                    {% endwith %}
+                                </select>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                <hr>
+                {% endfor %}
+            </div>
+            <!-- Кнопка добавления нового блока -->
+            <input type="hidden" id="json_data" name="json_data" value="">
+            <button type="button" id="add-block" class="btn btn-primary">{% trans "Добавить блок" %}</button>
+            <button type="submit" class="btn btn-success">{% trans "Сохранить" %}</button>
+            <!-- Alert (изначально скрыт) -->
+            <div id="alert-container" class="position-fixed top-0 end-0 p-3" style="z-index: 1050;"></div>
+            <script>
+                function showAlert(message, type = 'success') {
+                    const alertContainer = document.getElementById('alert-container');
+                    const alert = document.createElement('div');
+
+                    alert.className = `alert alert-${type} alert-dismissible fade show`;
+                    alert.setAttribute("role", "alert");
+                    alert.innerHTML = `
+                        ${message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    `;
+
+                    alertContainer.appendChild(alert);
+
+                    setTimeout(() => {
+                        alert.classList.remove("show");
+                        setTimeout(() => {
+                            alert.remove();
+                            if (type === 'success') location.reload(); // Перезагрузка страницы
+                        }, 500);
+                    }, 3000);
+                }
+
+                document.querySelector('form').addEventListener('submit', function (event) {
+                    event.preventDefault();
+                    const jsonData = [];
+                    const formData = new FormData(this); // Передаём файлы
+
+                    document.querySelectorAll('.json-field').forEach(field => {
+                        const key = field.querySelector('input[name$="_key"]').value.trim();
+                        const fieldValue = field.querySelector('input[name$="_field"]').value.trim();
+                        const typeValue = field.querySelector('input[name$="_type"]').value.trim();
+                        const fileInput = field.querySelector('input[type="file"]');
+                        const select = field.querySelector('select');
+                        const infoValue = select ? [...select.selectedOptions].map(opt => opt.value) : [];
+                        const fieldObject = {
+                            field: fieldValue,
+                            info: infoValue,
+                            type: typeValue
+                        };
+                        // Если файл загружен, добавляем его в formData
+                        if (fileInput && fileInput.files.length > 0) {
+                            formData.append(`${key}_file`, fileInput.files[0]);
+                            fieldObject.info = `${key}_file`;  // Передаём ключ файла в JSON
+                        }
+                        jsonData.push({ [key]: fieldObject });
+                    });
+                    formData.append('json_data', JSON.stringify(jsonData));
+                    console.log("Отправляем JSON:", JSON.stringify(jsonData));
+                    console.log("Отправляем файлы:", formData);
+                    fetch(this.action, {
+                        method: 'POST',
+                        body: formData,  // Отправляем FormData, а не JSON
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("Ответ сервера:", data);
+                        if (data.success) {
+                            showAlert("✅ Данные сохранены!", "success");
+                        } else {
+                            showAlert("❌ Ошибка: " + (data.error || "Неизвестная ошибка"), "danger");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Ошибка запроса:", error);
+                        showAlert("❌ Ошибка сети: " + error, "danger");
+                    });
+                });
+            </script>
+            <script>
+                document.getElementById('add-block').addEventListener('click', function () {
+                    const container = document.getElementById('json-container');
+                    const newBlock = document.createElement('div');
+                    const uniqueKey = `new_${Date.now()}`;
+
+                    newBlock.classList.add('json-field');
+                    newBlock.dataset.key = uniqueKey;
+                    newBlock.innerHTML = `
+                        <div class="page-title-box mt-3">
+                            <h4 class="mb-0 fw-semibold">${uniqueKey}</h4>
+                            <ol class="breadcrumb mb-0">
+                                <button type="button" class="btn btn-danger btn-sm remove-block">Удалить</button>
+                            </ol>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-sm-3"><h6 class="mb-0">Ключ</h6></div>
+                            <div class="col-sm-9 text-secondary">
+                                <input type="text" name="${uniqueKey}_key" value="${uniqueKey}" class="form-control input-default">
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-sm-3"><h6 class="mb-0">Значение</h6></div>
+                            <div class="col-sm-9 text-secondary">
+                                <input type="text" name="${uniqueKey}_field" class="form-control input-default">
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-sm-3"><h6 class="mb-0">Тип</h6></div>
+                            <div class="col-sm-9 text-secondary">
+                                <input type="text" name="${uniqueKey}_type" class="form-control input-default">
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(newBlock);
+                });
+
+                // Удаление блока
+                document.addEventListener('click', function (event) {
+                    if (event.target.classList.contains('remove-block')) {
+                        event.target.closest('.json-field').remove();
+                    }
+                });
+            </script>
+            </div>
+            <div class="tab-pane" id="messages">
+                <p class="mb-0">Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium,
+                    totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.
+                    Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui
+                    ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci
+                    velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem?
+                </p>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock content %}

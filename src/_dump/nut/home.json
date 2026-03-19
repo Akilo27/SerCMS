@@ -1,0 +1,499 @@
+[
+  {
+    "page": "home",
+    "fields": {
+      "slide_1_image": {
+        "field": "",
+        "info": "/_static/site/frutin/img/hero/hero_bg_3_1.jpg",
+        "type": "media"
+      },
+      "slide_1_title_small": {
+        "field": "%100 Organik gıda ürünleri",
+        "info": [],
+        "type": "information"
+      },
+      "slide_1_title": {
+        "field": "Taze ve organik",
+        "info": [],
+        "type": "information"
+      },
+      "slide_1_title_bottom": {
+        "field": "Kuruyemişler",
+        "info": [],
+        "type": "information"
+      },
+      "slide_1_description": {
+        "field": "Organik gıda ürünleri, belirli organik standartlara uygunluğu sağlamak için düzenleyici kurumlar tarafından sertifikalandırılır.",
+        "info": [],
+        "type": "information"
+      },
+      "slide_1_button": {
+        "field": "Şimdi satın al",
+        "info": [],
+        "type": "information"
+      },
+      "slide_1_button_link": {
+        "field": "/catalog",
+        "info": [],
+        "type": "information"
+      },
+      "slide_2_image": {
+        "field": "",
+        "info": "/_static/site/frutin/img/hero/hero_bg_3_2.jpg",
+        "type": "media"
+      },
+      "slide_2_title_small": {
+        "field": "%100 Organik gıda ürünleri",
+        "info": [],
+        "type": "information"
+      },
+      "slide_2_title": {
+        "field": "Taze ve organik",
+        "info": [],
+        "type": "information"
+      },
+      "slide_2_title_bottom": {
+        "field": "Kurutulmuş meyveler",
+        "info": [],
+        "type": "information"
+      },
+      "slide_2_description": {
+        "field": "Organik gıda ürünleri, belirli organik standartlara uygunluğu sağlamak için düzenleyici kurumlar tarafından sertifikalandırılır.",
+        "info": [],
+        "type": "information"
+      },
+      "slide_2_button": {
+        "field": "Şimdi satın al",
+        "info": [],
+        "type": "information"
+      },
+      "slide_2_button_link": {
+        "field": "/catalog",
+        "info": [],
+        "type": "information"
+      },
+      "slide_3_image": {
+        "field": "",
+        "info": "/_static/site/frutin/img/hero/hero_bg_3_3.jpg",
+        "type": "media"
+      },
+      "slide_3_title_small": {
+        "field": "%100 Organik gıda ürünleri",
+        "info": [],
+        "type": "information"
+      },
+      "slide_3_title": {
+        "field": "Taze ve organik",
+        "info": [],
+        "type": "information"
+      },
+      "slide_3_title_bottom": {
+        "field": "Tatlılar",
+        "info": [],
+        "type": "information"
+      },
+      "slide_3_description": {
+        "field": "Organik gıda ürünleri, belirli organik standartlara uygunluğu sağlamak için düzenleyici kurumlar tarafından sertifikalandırılır.",
+        "info": [],
+        "type": "information"
+      },
+      "slide_3_button": {
+        "field": "Şimdi satın al",
+        "info": [],
+        "type": "information"
+      },
+      "slide_3_button_link": {
+        "field": "/catalog",
+        "info": [],
+        "type": "information"
+      },
+      "top_information_1_image": {
+        "field": "",
+        "info": "/_static/site/frutin/img/icon/feature_list_1.svg",
+        "type": "media"
+      },
+      "top_information_1_itle": {
+        "field": "Geniş ürün yelpazesi",
+        "info": [],
+        "type": "information"
+      },
+      "top_information_1_description": {
+        "field": "",
+        "info": [],
+        "type": "information"
+      },
+      "top_information_2_image": {
+        "field": "",
+        "info": "/_static/site/frutin/img/icon/feature_list_2.svg",
+        "type": "media"
+      },
+      "top_information_2_title": {
+        "field": "Kalite garantisi",
+        "info": [],
+        "type": "information"
+      },
+      "top_information_2_description": {
+        "field": "",
+        "info": [],
+        "type": "information"
+      },
+      "top_information_3_image": {
+        "field": "",
+        "info": "/_static/site/frutin/img/icon/feature_list_3.svg",
+        "type": "media"
+      },
+      "top_information_3_title": {
+        "field": "Benzersiz ürünler",
+        "info": [],
+        "type": "information"
+      },
+      "top_information_3_description": {
+        "field": "",
+        "info": [],
+        "type": "information"
+      },
+      "top_information_4_image": {
+        "field": "",
+        "info": "/_static/site/frutin/img/icon/feature_list_4.svg",
+        "type": "media"
+      },
+      "top_information_4_title": {
+        "field": "Kârlı ve kullanışlı",
+        "info": [],
+        "type": "information"
+      },
+      "top_information_4_description": {
+        "field": "",
+        "info": [],
+        "type": "information"
+      },
+      "category_title": {
+        "field": "Ürün kategorileri",
+        "info": [],
+        "type": "information"
+      },
+      "category_title_2": {
+        "field": "Kategoriye göre mağaza",
+        "info": [],
+        "type": "information"
+      },
+      "category_list": {
+        "field": "",
+        "info": ["1","14","47","73","82","131"],
+        "type": "categorys"
+      },
+      "top_product_title": {
+        "field": "Organik ürünler",
+        "info": [],
+        "type": "information"
+      },
+      "top_product_title_2": {
+        "field": "Popüler ürünlerimiz",
+        "info": [],
+        "type": "information"
+      },
+      "top_product": {
+        "field": "",
+        "info": [
+          "ffdb9941-adfb-40da-a5f5-6dc4c8ff1f24",
+          "ff2372d4-00ed-42a0-9df2-0eaa61e0a919",
+          "fe76bdb2-3fe2-4e20-ac81-1ef5cb786587",
+          "fe10756a-77d6-4be6-a2fc-f7e3f7513754",
+          "fe063617-8bf5-413b-974b-34aa515d3bdb"
+        ],
+        "type": "products"
+      },
+      "two_banner_image_1": {
+        "field": "",
+        "info": "/_static/site/frutin/img/bg/cta_5_1.png",
+        "type": "media"
+      },
+      "two_banner_1_title_1": {
+        "field": "KURU MEYVE: PORTAKAL",
+        "info": [],
+        "type": "information"
+      },
+      "two_banner_2_title_1": {
+        "field": "Organik temiz",
+        "info": [],
+        "type": "information"
+      },
+      "two_banner_3_title_1": {
+        "field": "Portakal",
+        "info": [],
+        "type": "information"
+      },
+      "two_banner_4_title_1": {
+        "field": "Bu ay %30 indirim",
+        "info": [],
+        "type": "information"
+      },
+      "two_banner_bottom_title_1": {
+        "field": "Şimdi satın al",
+        "info": [],
+        "type": "information"
+      },
+      "two_banner_bottom_link_1": {
+        "field": "/catalog",
+        "info": [],
+        "type": "information"
+      },
+      "two_banner_image_2": {
+        "field": "",
+        "info": "/_static/site/frutin/img/bg/cta_5_2.png",
+        "type": "media"
+      },
+      "two_banner_1_title_2": {
+        "field": "KURUYEMİŞ: ANTEP FISTIĞI",
+        "info": [],
+        "type": "information"
+      },
+      "two_banner_2_title_2": {
+        "field": "Organik temiz",
+        "info": [],
+        "type": "information"
+      },
+      "two_banner_3_title_2": {
+        "field": "Antep fıstığı",
+        "info": [],
+        "type": "information"
+      },
+      "two_banner_4_title_2": {
+        "field": "Bu ay %30 indirim",
+        "info": [],
+        "type": "information"
+      },
+      "two_banner_bottom_title_2": {
+        "field": "Şimdi satın al",
+        "info": [],
+        "type": "information"
+      },
+      "two_banner_bottom_link_2": {
+        "field": "/catalog",
+        "info": [],
+        "type": "information"
+      },
+      "trends_product_title": {
+        "field": "Trend ürünler",
+        "info": [],
+        "type": "information"
+      },
+      "trends_products": {
+        "field": "",
+        "info": [
+          "ffdb9941-adfb-40da-a5f5-6dc4c8ff1f24",
+          "ff2372d4-00ed-42a0-9df2-0eaa61e0a919",
+          "fe76bdb2-3fe2-4e20-ac81-1ef5cb786587",
+          "fe10756a-77d6-4be6-a2fc-f7e3f7513754",
+          "fe063617-8bf5-413b-974b-34aa515d3bdb"
+        ],
+        "type": "products"
+      },
+      "trends_product_banner_image": {
+        "field": "",
+        "info": "/_static/site/frutin/img/bg/cta_bg_4_2.jpg",
+        "type": "media"
+      },
+      "trends_product_banner_title_small": {
+        "field": "Trend ürünler",
+        "info": [],
+        "type": "information"
+      },
+      "trends_product_banner_title": {
+        "field": "Daha sağlıklı olun<br>doğru beslenin",
+        "info": [],
+        "type": "information"
+      },
+      "trends_product_banner_bottom_title": {
+        "field": "Şimdi satın al",
+        "info": [],
+        "type": "information"
+      },
+      "trends_product_banner_bottom_link": {
+        "field": "/catalog",
+        "info": [],
+        "type": "information"
+      },
+      "bottom_product_banner_title_small": {
+        "field": "%100 Organik ürünler",
+        "info": [],
+        "type": "information"
+      },
+      "bottom_product_banner_title": {
+        "field": "Her zaman taze ürünler <br>GDO'suz<br>",
+        "info": [],
+        "type": "information"
+      },
+      "bottom_product_banner_image": {
+        "field": "",
+        "info": "/_static/site/frutin/img/bg/cta_bg_4_3.jpg",
+        "type": "media"
+      },
+      "bottom_product_banner_bottom_title": {
+        "field": "Şimdi satın al",
+        "info": [],
+        "type": "information"
+      },
+      "bottom_product_banner_bottom_link": {
+        "field": "/catalog",
+        "info": [],
+        "type": "information"
+      },
+      "bottom_product_title_1": {
+        "field": "Önerilen ürünler",
+        "info": [],
+        "type": "information"
+      },
+      "bottom_products_1": {
+        "field": "",
+        "info": [
+          "ffdb9941-adfb-40da-a5f5-6dc4c8ff1f24",
+          "ff2372d4-00ed-42a0-9df2-0eaa61e0a919",
+          "fe76bdb2-3fe2-4e20-ac81-1ef5cb786587",
+          "fe10756a-77d6-4be6-a2fc-f7e3f7513754",
+          "fe063617-8bf5-413b-974b-34aa515d3bdb"
+        ],
+        "type": "products"
+      },
+      "bottom_product_title_2": {
+        "field": "Önerilen ürünler",
+        "info": [],
+        "type": "information"
+      },
+      "bottom_products_2": {
+        "field": "",
+        "info": [
+          "ffdb9941-adfb-40da-a5f5-6dc4c8ff1f24",
+          "ff2372d4-00ed-42a0-9df2-0eaa61e0a919",
+          "fe76bdb2-3fe2-4e20-ac81-1ef5cb786587",
+          "fe10756a-77d6-4be6-a2fc-f7e3f7513754",
+          "fe063617-8bf5-413b-974b-34aa515d3bdb"
+        ],
+        "type": "products"
+      },
+      "bottom_product_title_3": {
+        "field": "Önerilen ürünler",
+        "info": [],
+        "type": "information"
+      },
+      "bottom_products_3": {
+        "field": "",
+        "info": [
+          "ffdb9941-adfb-40da-a5f5-6dc4c8ff1f24",
+          "ff2372d4-00ed-42a0-9df2-0eaa61e0a919",
+          "fe76bdb2-3fe2-4e20-ac81-1ef5cb786587",
+          "fe10756a-77d6-4be6-a2fc-f7e3f7513754",
+          "fe063617-8bf5-413b-974b-34aa515d3bdb"
+        ],
+        "type": "products"
+      },
+      "one_banner_image_1": {
+        "field": "",
+        "info": "/_static/site/frutin/img/bg/cta_bg_5_1.jpg",
+        "type": "media"
+      },
+      "one_banner_1_title_1": {
+        "field": "Kara Cuma",
+        "info": [],
+        "type": "information"
+      },
+      "one_banner_2_title_1": {
+        "field": "%30 İndirim tüm<br>meyvelerde",
+        "info": [],
+        "type": "information"
+      },
+      "reviews_image_1": {
+        "field": "",
+        "info": "/_static/site/frutin/img/testimonial/testi_3_1.jpg",
+        "type": "media"
+      },
+      "reviews_title_1": {
+        "field": "Mükemmel kaliteli yiyecek",
+        "info": [],
+        "type": "information"
+      },
+      "reviews_description_1": {
+        "field": "Organik gıda ürünleri, belirli organik standartlara uygunluğu sağlamak için düzenleyici kurumlar tarafından sertifikalandırılır",
+        "info": [],
+        "type": "information"
+      },
+      "reviews_name_1": {
+        "field": "Alex Hamilton",
+        "info": [],
+        "type": "information"
+      },
+      "reviews_status_1": {
+        "field": "Doktor",
+        "info": [],
+        "type": "information"
+      },
+      "reviews_image_2": {
+        "field": "",
+        "info": "/_static/site/frutin/img/testimonial/testi_3_2.jpg",
+        "type": "media"
+      },
+      "reviews_title_2": {
+        "field": "Taze organik ürünler",
+        "info": [],
+        "type": "information"
+      },
+      "reviews_description_2": {
+        "field": "Organik gıda ürünleri, belirli organik standartlara uygunluğu sağlamak için düzenleyici kurumlar tarafından sertifikalandırılır",
+        "info": [],
+        "type": "information"
+      },
+      "reviews_name_2": {
+        "field": "Jasemin Jui",
+        "info": [],
+        "type": "information"
+      },
+      "reviews_status_2": {
+        "field": "Danışman",
+        "info": [],
+        "type": "information"
+      },
+      "reviews_image_3": {
+        "field": "",
+        "info": "/_static/site/frutin/img/testimonial/testi_3_3.jpg",
+        "type": "media"
+      },
+      "reviews_title_3": {
+        "field": "%100 Organik ürünler",
+        "info": [],
+        "type": "information"
+      },
+      "reviews_description_3": {
+        "field": "Organik gıda ürünleri, belirli organik standartlara uygunluğu sağlamak için düzenleyici kurumlar tarafından sertifikalandırılır",
+        "info": [],
+        "type": "information"
+      },
+      "reviews_name_3": {
+        "field": "Martin Danial",
+        "info": [],
+        "type": "information"
+      },
+      "reviews_status_3": {
+        "field": "Doktor",
+        "info": [],
+        "type": "information"
+      },
+      "blog_title": {
+        "field": "Haberler",
+        "info": [],
+        "type": "information"
+      },
+      "blog_bottom_title": {
+        "field": "Daha fazla gönderi gör",
+        "info": [],
+        "type": "information"
+      },
+      "blog_bottom_Link": {
+        "field": "/blogs",
+        "info": [],
+        "type": "information"
+      },
+      "type": "blogs"
+      }
+    }
+
+]

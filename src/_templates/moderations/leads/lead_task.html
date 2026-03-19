@@ -1,0 +1,1137 @@
+{% extends 'moderations/base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }}{% endif %}{% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+
+{% block head %}
+<style>
+    #id_image {
+    display:none;
+    }
+    .save-form {
+    right: 0;
+    position: fixed;
+    z-index: 2;
+    margin: 10px 20px 0px 0px;
+}
+
+    .flow-containers {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .step {
+      position: relative;
+      background: #00a99d;
+      color: white;
+      padding: 8px 26px;
+      border-radius: 5px;
+      font-weight: bold;
+          margin-right: 20px;
+    }
+
+    .step::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      right: -16px;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-top: 19px solid transparent;
+      border-bottom: 19px solid transparent;
+      border-left: 19px solid #00a99d;
+    }
+
+    .step:last-child::after {
+      display: none;
+    }
+
+</style>
+<style>
+.custom-alert-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-alert-box {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 400px;
+  width: 80%;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  text-align: center;
+}
+</style>
+
+{% endblock head %}
+
+{% block content %}
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#dealModal" style="z-index: 1000000;position: absolute;  bottom: 70px;   right: 70px;">
+    {% trans "Добавить" %}
+</button>
+<div class="card">
+
+    <div class="card-header">
+        {% include 'moderations/leads/top-menu.html' %}
+    </div>
+    <div class="card-body">
+
+<div class="scroll-container-wrapper">
+  <!-- ВЕРХНЯЯ прокрутка -->
+  <div class="scrollbar-top">
+    <div class="fake-content"></div>
+  </div>
+      <div id="tasks-container" class="tasks-list horizontal-scroll-wrapper d-flex flex-nowrap" id="scrollMain">
+        {% for task in lead.task_set.all %}
+        <div class="col-xl-4 col-lg-6 m-2 task-item" data-task-id="{{ task.id }}">
+            <div class="card " style="border: solid 1px;">
+                <div class="card-body">
+                    <h5>{{ task.title }}</h5>
+                    <div class="d-flex flex-wrap align-items-center gap-2 border-bottom pb-3">
+                        <img src="{{ task.assigned_to.avatar.url }}" alt="" class="avatar-lg rounded-3 border border-light border-3">
+                        <div class="d-block">
+                            <a href="#!" class="fw-medium fs-16"> {{ task.assigned_to.get_full_name }}</a>
+                            <p class="mb-0">{{ task.due_date|date:"d.m.Y H:i" }}</p>
+                            <p class="mb-0 text-primary"># {{ task.amount }} р</p>
+                        </div>
+                        <div class="ms-auto">
+                            <div class="dropdown">
+                                <a href="#" class="dropdown-toggle btn btn-sm btn-outline-light rounded arrow-none fs-16 bg-white" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="ri-more-2-fill"></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-end">
+                                    <!-- item-->
+                                    <a href="#!" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#editdealModal" data-url="{% url 'crm:get_task_data' task.id %}" data-save-url="{% url 'crm:get_task_data' task.id %}">{% trans "Изменить" %}</a>
+                                    <!-- item-->
+                                    <a href="#!" class="dropdown-item pay-task" data-payment-url="{% url 'crm:get_task_payment' task.id %}">{% trans "Оплатить" %}</a>
+                                    <!-- item-->
+                                    <a href="#!" class="dropdown-item btn-delete-task" data-url="{% url 'crm:delete_task' task.id %}" >{% trans "Удалить" %}</a>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p><strong>{% trans "Тип" %}:</strong>     <select class="form-select task-status-select" data-task-id="{{ task.id }}">
+      {% for value, label in task.TASK_TYPE_CHOICES %}
+        <option value="{{ value }}" {% if task.type == value %}selected{% endif %}>
+          {{ label }}
+        </option>
+      {% endfor %}
+    </select>
+</p>
+                    <p><strong>{% trans "Приоритет" %}:</strong> {{ task.get_priority_display }}</p>
+
+                </div>
+                <div class="card-footer border-top">
+                    <div class="row g-2">
+                        <div class="col-lg-6">
+                            <a href="#!" class="btn btn-primary w-100"><iconify-icon icon="solar:outgoing-call-rounded-broken" class="align-middle fs-18"></iconify-icon> {% trans "Позвонить" %}</a>
+                        </div>
+                        <div class="col-lg-6">
+                            <a href="#!" class="btn btn-light w-100 start-chat" data-user-id="{{ user.id }}"><iconify-icon icon="solar:chat-round-dots-broken" class="align-middle fs-16"></iconify-icon> {% trans "Написать" %}</a>
+                        </div>
+                    </div>
+                </div>
+                <div id="deals-container-{{ task.id }}" class="deals-list" style="padding:20px;">
+                    {% for deal in task.deal_set.all %}
+                        {% if not deal.parent %}
+                            {% include 'moderations/leads/deals_item.html' with deal=deal level=0 %}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
+    </div>
+    </div>
+</div>
+<!-- Модальное окно -->
+<div class="modal fade" id="dealModal" tabindex="-1" aria-labelledby="dealModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="post" id="form-task">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="dealModalLabel">{% trans "Создание сделки и задачи" %}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+
+                <div class="modal-body">
+                    <h5 class="mb-3">{% trans "Задача" %}</h5>
+                    <input type="hidden" class="form-control" id="task_lead" name="task_lead" required value="{{lead.id}}">
+
+                    <div class="mb-3">
+                        <label for="task_title" class="form-label">{% trans "Заголовок задачи" %}</label>
+                        <input type="text" class="form-control" id="task_title" name="task_title" required>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-3">
+                            <div class="mb-3">
+                                <label for="task_priority" class="form-label">{% trans "Приоритет" %}</label>
+                                <select class="form-select" id="task_priority" name="task_priority">
+                                    <option value="low">{% trans "Низкий" %}</option>
+                                    <option value="medium" selected>{% trans "Средний" %}</option>
+                                    <option value="high">{% trans "Высокий" %}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="mb-3">
+                                <label for="due_date" class="form-label">{% trans "Срок исполнения" %}</label>
+                                <input type="datetime-local" class="form-control" id="due_date" name="due_date" required>
+                            </div>
+                        </div>
+                        <div class="col-2">
+                            <div class="mb-3">
+                                <label for="amount" class="form-label">{% trans "Стоимость" %}</label>
+                                <input type="number" step="0.01" class="form-control" id="amount" name="amount" required>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="mb-3">
+                                <label for="id_assigned_to" class="form-label">{% trans "Ответственный" %}</label>
+                                <select name="assigned_to" class="form-select" id="id_assigned_to">
+                                    {% for user in users_worker %}
+                                    <option value="{{ user.id }}">{{ user.username }} | {{ user.get_full_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">{% trans "Комментарий" %}</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">{% trans "Параметры" %}</h5>
+                        <button type="button" class="btn btn-outline-primary btn-sm" id="add-deal">{% trans "Добавить параметры" %}</button>
+                    </div>
+
+                    <div id="deals" class="mt-3">
+                        <div class="row deal-item">
+                            <div class="col-9">
+                                <div class="mb-3">
+                                    <label class="form-label">{% trans "Заголовок параметра" %}</label>
+                                    <input type="text" class="form-control deal-title" name="deal_title_1" required>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="mb-3">
+                                    <label class="form-label">{% trans "Ожидаемая дата закрытия" %}</label>
+                                    <input type="datetime-local" class="form-control deal-date" name="expected_close_date_1">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div> <!-- modal-body -->
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Отмена" %}</button>
+                    <button type="button" class="btn btn-primary" id="submit-task">{% trans "Сохранить" %}</button>
+
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- Модальное окно редактирования -->
+<div class="modal fade" id="editdealModal" tabindex="-1" aria-labelledby="editdealModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="post" id="form-edit-task" data-task-id="">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editdealModalLabel">{% trans "Создание сделки и задачи" %}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Закрыть' %}"></button>
+                </div>
+
+                <div class="modal-body">
+                    <h5 class="mb-3">{% trans "Задача" %}</h5>
+                    <input type="hidden" class="form-control" id="edit_task_lead" name="edit_task_lead" required value="{{lead.id}}">
+
+                    <div class="mb-3">
+                        <label for="edit_task_title" class="form-label">{% trans "Заголовок задачи" %}</label>
+                        <input type="text" class="form-control" id="edit_task_title" name="edit_task_title" required>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-3">
+                            <div class="mb-3">
+                                <label for="edit_task_priority" class="form-label">{% trans "Приоритет" %}</label>
+                                <select class="form-select" id="edit_task_priority" name="edit_task_priority">
+                                    <option value="low">{% trans "Низкий" %}</option>
+                                    <option value="medium" selected>{% trans "Средний" %}</option>
+                                    <option value="high">{% trans "Высокий" %}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="mb-3">
+                                <label for="edit_due_date" class="form-label">{% trans "Срок исполнения" %}</label>
+                                <input type="datetime-local" class="form-control" id="edit_due_date" name="edit_due_date" required>
+                            </div>
+                        </div>
+                        <div class="col-2">
+                            <div class="mb-3">
+                                <label for="edit_amount" class="form-label">{% trans "Стоимость" %}</label>
+                                <input type="number" step="0.01" class="form-control" id="edit_amount" name="edit_amount" required>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="mb-3">
+                                <label for="edit_id_assigned_to" class="form-label">{% trans "Ответственный" %}</label>
+                                <select name="edit_assigned_to" class="form-select" id="edit_id_assigned_to">
+                                    {% for user in users_worker %}
+                                    <option value="{{ user.id }}">{{ user.username }} | {{ user.get_full_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_notes" class="form-label">{% trans "Комментарий" %}</label>
+                        <textarea class="form-control" id="edit_notes" name="notes" rows="3"></textarea>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">{% trans "Параметры" %}</h5>
+                        <button type="button" class="btn btn-outline-primary btn-sm" id="add-edit_deal">{% trans "Добавить параметры" %}</button>
+                    </div>
+
+                    <div id="edit_deals" class="mt-3">
+                        <div class="row deal-item">
+                            <div class="col-9">
+                                <div class="mb-3">
+                                    <label class="form-label">{% trans "Заголовок параметра" %}</label>
+                                    <input type="text" class="form-control edit_deal-title" name="edit_deal_title_1" required>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="mb-3">
+                                    <label class="form-label">{% trans "Ожидаемая дата закрытия" %}</label>
+                                    <input type="date" class="form-control edit_deal-date" name="edit_expected_close_date_1">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div> <!-- modal-body -->
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Отмена" %}</button>
+                    <button type="button" class="btn btn-primary" id="submit-edit_task">{% trans "Сохранить" %}</button>
+
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Кастомное окно алерта -->
+<div id="customAlert" class="custom-alert-overlay" style="display:none;">
+  <div class="custom-alert-box">
+    <div class="custom-alert-message" id="customAlertMessage"></div>
+    <button id="customAlertOk" class="btn btn-primary mt-3">OK</button>
+  </div>
+</div>
+
+
+{% endblock content %}
+
+{% block footerbottom %}
+<style>
+.scroll-container-wrapper {
+  position: relative;
+}
+
+/* Верхняя полоса прокрутки */
+.scrollbar-top {
+  overflow-x: auto;
+  overflow-y: hidden;
+  height: 16px; /* Высота скроллбара */
+}
+
+/* Прозрачный дубликат содержимого */
+.scrollbar-top .fake-content {
+  height: 1px;
+}
+
+/* Основной контейнер */
+.horizontal-scroll-wrapper {
+  overflow-x: auto;
+  white-space: nowrap;
+}
+</style>
+<style>
+/* Стили для WebKit-браузеров (Chrome, Safari, Edge Chromium) */
+.scrollbar-top::-webkit-scrollbar,
+.horizontal-scroll-wrapper::-webkit-scrollbar {
+  height: 8px;
+}
+
+.scrollbar-top::-webkit-scrollbar-thumb,
+.horizontal-scroll-wrapper::-webkit-scrollbar-thumb {
+  background-color: #604ae3;
+  border-radius: 4px;
+}
+
+.scrollbar-top::-webkit-scrollbar-track,
+.horizontal-scroll-wrapper::-webkit-scrollbar-track {
+  background-color: #f0f0f0;
+}
+
+/* Firefox */
+.scrollbar-top,
+.horizontal-scroll-wrapper {
+  scrollbar-color: #604ae3 #f0f0f0; /* thumb color | track color */
+  scrollbar-width: thin;
+}
+</style>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll('.task-status-select').forEach(select => {
+    select.addEventListener('change', function () {
+      const taskId = this.dataset.taskId;
+      const newStatus = this.value;
+
+      if (!taskId || !newStatus) {
+        showCustomAlert"Недостаточно данных для смены статуса");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('task_id', taskId);
+      formData.append('new_status', newStatus);
+
+      fetch("{% url 'crm:update_task_status' %}", {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": getCookie("csrftoken")
+        },
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          showCustomAlert("Статус задачи обновлён: " + data.new_status);
+        } else {
+          showCustomAlert("Ошибка: " + data.error);
+        }
+      })
+      .catch(error => {
+        console.error("Ошибка при отправке:", error);
+        showCustomAlert("Ошибка при обновлении статуса задачи");
+      });
+    });
+  });
+
+  // Получение CSRF-токена из cookie
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let cookie of cookies) {
+        cookie = cookie.trim();
+        if (cookie.startsWith(name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+});
+</script>
+
+
+<script>
+// Синхронизация прокрутки
+const scrollbarTop = document.querySelector('.scrollbar-top');
+const fakeContent = scrollbarTop.querySelector('.fake-content');
+const scrollMain = document.getElementById('scrollMain');
+
+// Установим ширину фейк-контейнера = содержимому
+function syncWidths() {
+  fakeContent.style.width = scrollMain.scrollWidth + 'px';
+}
+syncWidths();
+
+// Синхронизация прокрутки
+scrollbarTop.addEventListener('scroll', () => {
+  scrollMain.scrollLeft = scrollbarTop.scrollLeft;
+});
+scrollMain.addEventListener('scroll', () => {
+  scrollbarTop.scrollLeft = scrollMain.scrollLeft;
+});
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".start-chat").forEach(function (btn) {
+        btn.addEventListener("click", function (e) {
+            e.preventDefault();
+
+            const userId = this.dataset.userId;
+            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            fetch("{% url 'chat:create_private_chat' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrftoken,
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: new URLSearchParams({
+                    user_id: userId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.chat_url) {
+                    window.location.href = data.chat_url;
+                } else {
+                    showCustomAlert("Ошибка при создании чата");
+                }
+            })
+            .catch(err => {
+                console.error("Ошибка:", err);
+                showCustomAlert("Ошибка соединения");
+            });
+        });
+    });
+});
+
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".pay-task").forEach(function (btn) {
+            btn.addEventListener("click", function (e) {
+                e.preventDefault();
+
+                const url = btn.dataset.paymentUrl;
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showCustomAlert("Платеж успешно создан. ID: " + data.payment_id);
+                        // Можешь здесь обновить DOM или страницу, если нужно:
+                        location.reload();
+                    } else {
+                        showCustomAlert("Ошибка: " + data.error);
+                    }
+                })
+                .catch(err => {
+                    console.error("Ошибка:", err);
+                    showCustomAlert("Произошла ошибка при создании платежа.");
+                });
+            });
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".toggle-deal").forEach(function (checkbox) {
+            checkbox.addEventListener("change", function () {
+                const dealId = this.dataset.dealId;
+
+                fetch("{% url 'crm:toggle_deal_stage' %}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "X-CSRFToken": "{{ csrf_token }}",
+                    },
+                    body: new URLSearchParams({ deal_id: dealId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log("Стадия обновлена:", data.new_stage);
+                    } else {
+                        showCustomAlert("Ошибка: " + data.error);
+                        // откатить checkbox, если ошибка
+                        checkbox.checked = !checkbox.checked;
+                    }
+                })
+                .catch(error => {
+                    console.error("Ошибка запроса:", error);
+                    checkbox.checked = !checkbox.checked;
+                    showCustomAlert("Произошла ошибка при обновлении стадии сделки.");
+                });
+            });
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".btn-delete-task").forEach(button => {
+        button.addEventListener("click", function () {
+            const url = this.getAttribute("data-url");
+            if (!url) {
+                showCustomAlert("URL для удаления не указан.");
+                return;
+            }
+
+            if (!confirm("{% trans 'Вы уверены, что хотите удалить эту задачу' %}?")) {
+                return;
+            }
+
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+            const csrftoken = getCookie('csrftoken');
+
+            fetch(url, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrftoken,
+                    "Accept": "application/json",
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    showCustomAlert("Задача успешно удалена.");
+                    location.reload();  // перезагрузка страницы
+                } else {
+                    showCustomAlert("Ошибка удаления: " + data.message);
+                }
+            })
+            .catch(error => {
+                console.error("Ошибка удаления задачи:", error);
+                showCustomAlert("Ошибка при удалении задачи.");
+            });
+        });
+    });
+});
+
+
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    const modalElement = document.getElementById("editdealModal");
+    const modal = new bootstrap.Modal(modalElement);
+    const form = document.getElementById("form-edit-task");
+    const submitBtn = document.getElementById("submit-edit_task");
+    const editDealsContainer = document.getElementById("edit_deals");
+
+    // Кнопка "Добавить параметры" — добавляет новый блок сделки
+    document.getElementById("add-edit_deal").addEventListener("click", function () {
+        const dealCount = editDealsContainer.querySelectorAll(".deal-item").length + 1;
+        const dealHTML = `
+            <div class="row deal-item">
+                <input type="hidden" class="edit_deal-id" name="edit_deal_id_${dealCount}" value="">
+                <div class="col-9">
+                    <div class="mb-3">
+                        <label class="form-label">{% trans 'Заголовок параметра' %}</label>
+                        <input type="text" class="form-control edit_deal-title" name="edit_deal_title_${dealCount}" required>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="mb-3">
+                        <label class="form-label">{% trans 'Ожидаемая дата закрытия' %}</label>
+                        <input type="date" class="form-control edit_deal-date" name="edit_expected_close_date_${dealCount}">
+                    </div>
+                </div>
+            </div>`;
+        editDealsContainer.insertAdjacentHTML("beforeend", dealHTML);
+    });
+
+    // При открытии модалки — подгружаем данные задачи
+    document.querySelectorAll('[data-bs-target="#editdealModal"]').forEach(link => {
+        link.addEventListener("click", function (e) {
+            e.preventDefault();
+            const url = this.getAttribute("data-url");
+            if (!url) {
+                showCustomAlert("Ошибка: URL для загрузки данных не указан.");
+                return;
+            }
+
+            form.setAttribute("data-url", url);
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        const task = data.task;
+
+                        document.getElementById("edit_task_title").value = task.title || "";
+                        document.getElementById("edit_task_priority").value = task.priority || "medium";
+                        document.getElementById("edit_due_date").value = task.due_date || "";
+                        document.getElementById("edit_amount").value = task.amount || 0;
+                        document.getElementById("edit_notes").value = task.notes || "";
+                        document.getElementById("edit_id_assigned_to").value = task.assigned_to || "";
+                        document.getElementById("edit_task_lead").value = task.lead_id || "";
+
+                        editDealsContainer.innerHTML = "";
+
+                        if (task.deals && task.deals.length > 0) {
+                            task.deals.forEach((deal, index) => {
+                                const dealHTML = `
+                                    <div class="row deal-item">
+                                        <input type="hidden" class="edit_deal-id" name="edit_deal_id_${index + 1}" value="${deal.id}">
+                                        <div class="col-9">
+                                            <div class="mb-3">
+                                                <label class="form-label">{% trans "Заголовок параметра" %}</label>
+                                                <input type="text" class="form-control edit_deal-title" name="edit_deal_title_${index + 1}" value="${deal.title || ''}" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="mb-3">
+                                                <label class="form-label">{% trans "Ожидаемая дата закрытия" %}</label>
+                                                <input type="date" class="form-control edit_deal-date" name="edit_expected_close_date_${index + 1}" value="${deal.expected_close_date || ''}">
+                                            </div>
+                                        </div>
+                                    </div>`;
+                                editDealsContainer.insertAdjacentHTML("beforeend", dealHTML);
+                            });
+                        } else {
+                            const dealHTML = `
+                                <div class="row deal-item">
+                                    <input type="hidden" class="edit_deal-id" name="edit_deal_id_1" value="">
+                                    <div class="col-9">
+                                        <div class="mb-3">
+                                            <label class="form-label">Заголовок параметра</label>
+                                            <input type="text" class="form-control edit_deal-title" name="edit_deal_title_1" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-3">
+                                        <div class="mb-3">
+                                            <label class="form-label">Ожидаемая дата закрытия</label>
+                                            <input type="date" class="form-control edit_deal-date" name="edit_expected_close_date_1">
+                                        </div>
+                                    </div>
+                                </div>`;
+                            editDealsContainer.insertAdjacentHTML("beforeend", dealHTML);
+                        }
+
+                        modal.show();
+                    } else {
+                        showCustomAlert("Ошибка загрузки задачи: " + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error("Ошибка при загрузке задачи:", error);
+                    showCustomAlert("Ошибка при загрузке задачи.");
+                });
+        });
+    });
+
+    // Отправка формы (сохранение задачи и сделок)
+    submitBtn.addEventListener("click", function () {
+        const url = form.getAttribute("data-url");
+        if (!url) {
+            showCustomAlert("Ошибка: URL для сохранения не указан.");
+            return;
+        }
+
+        const deals = [];
+        editDealsContainer.querySelectorAll(".deal-item").forEach(dealItem => {
+            const id = dealItem.querySelector(".edit_deal-id")?.value || null;
+            const title = dealItem.querySelector(".edit_deal-title").value.trim();
+            const expectedCloseDate = dealItem.querySelector(".edit_deal-date").value;
+
+            if (title.length > 0) {
+                deals.push({
+                    id: id,
+                    title: title,
+                    expected_close_date: expectedCloseDate || null
+                });
+            }
+        });
+
+        const dataToSend = {
+            task_title: document.getElementById("edit_task_title").value.trim(),
+            task_priority: document.getElementById("edit_task_priority").value,
+            due_date: document.getElementById("edit_due_date").value,
+            amount: parseFloat(document.getElementById("edit_amount").value) || 0,
+            notes: document.getElementById("edit_notes").value.trim(),
+            assigned_to: document.getElementById("edit_id_assigned_to").value || null,
+            lead_id: document.getElementById("edit_task_lead").value || null,
+            deals: deals
+        };
+
+        fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": form.querySelector('[name=csrfmiddlewaretoken]').value,
+                "Accept": "application/json",
+            },
+            body: JSON.stringify(dataToSend),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success") {
+                showCustomAlert("Задача успешно сохранена");
+                modal.hide();
+                location.reload();
+            } else {
+                showCustomAlert("Ошибка сохранения: " + data.message);
+            }
+        })
+        .catch(error => {
+            console.error("Ошибка при сохранении задачи:", error);
+            showCustomAlert("Произошла ошибка при сохранении задачи.");
+        });
+    });
+});
+
+
+</script>
+
+
+
+
+<script>
+    // Обработчик для кнопки добавления под-сделки
+document.querySelectorAll('.add-subdeal').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const dealId = this.dataset.dealId;
+        const form = document.createElement('form');
+        form.innerHTML = `
+            <div class="input-group mt-2">
+                <input type="text" class="form-control" placeholder="Название под-сделки">
+                <button class="btn btn-primary" type="submit">Добавить</button>
+            </div>
+        `;
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const title = this.querySelector('input').value;
+
+            fetch("{% url 'crm:add_subdeal' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+                body: JSON.stringify({
+                    parent_id: dealId,
+                    title: title
+                }),
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    location.reload();
+                } else {
+                    showCustomAlert('Ошибка при создании под-сделки');
+                }
+            });
+        });
+
+        // Проверяем существование контейнера .subdeals
+        const dealItem = this.closest('.deal-item');
+        let subdealsContainer = dealItem.querySelector('.subdeals');
+
+        // Если контейнера нет - создаем его
+        if (!subdealsContainer) {
+            subdealsContainer = document.createElement('div');
+            subdealsContainer.className = 'subdeals mt-2';
+            dealItem.appendChild(subdealsContainer);
+        }
+
+        // Добавляем форму в контейнер
+        subdealsContainer.appendChild(form);
+    });
+});
+
+
+    document.addEventListener("DOMContentLoaded", function () {
+        let dealCount = 1;
+
+        document.getElementById("add-deal").addEventListener("click", function () {
+            dealCount++;
+
+            const dealsContainer = document.getElementById("deals");
+            const newDeal = document.createElement("div");
+            newDeal.classList.add("row", "deal-item");
+
+            newDeal.innerHTML = `
+                <div class="col-9">
+                    <div class="mb-3">
+                        <label class="form-label">Заголовок сделки</label>
+                        <input type="text" class="form-control deal-title" name="deal_title_${dealCount}" required>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="mb-3">
+                        <label class="form-label">Ожидаемая дата закрытия</label>
+                        <input type="date" class="form-control deal-date" name="expected_close_date_${dealCount}">
+                    </div>
+                </div>
+            `;
+
+            dealsContainer.appendChild(newDeal);
+        });
+    });
+</script>
+<script>
+    function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.startsWith(name + "=")) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+document.getElementById("submit-task").addEventListener("click", function (e) {
+    e.preventDefault(); // остановим поведение формы
+
+    const form = document.getElementById("form-task");
+    const formData = {
+        task_title: form.querySelector("#task_title").value,
+        task_priority: form.querySelector("#task_priority").value,
+        due_date: form.querySelector("#due_date").value,
+        notes: form.querySelector("#notes").value,
+        amount: form.querySelector("#amount").value,
+        assigned_to: form.querySelector("#id_assigned_to").value,
+        lead_id: form.querySelector("#task_lead").value,  // если нужно
+        deals: []
+    };
+
+    document.querySelectorAll("#deals .deal-item").forEach((item) => {
+        const title = item.querySelector(".deal-title").value;
+        const date = item.querySelector(".deal-date").value;
+
+        formData.deals.push({
+            title: title,
+            expected_close_date: date || null
+        });
+    });
+
+    fetch("{% url 'crm:create_task_and_deals' %}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken")
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === "success") {
+            showCustomAlert("Успешно!");
+            location.reload();
+        } else {
+            showCustomAlert("Ошибка: " + data.message);
+        }
+    });
+});
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Инициализация сортировки задач
+  const tasksContainer = document.getElementById('tasks-container');
+  if (tasksContainer) {
+    new Sortable(tasksContainer, {
+      animation: 150,
+      handle: '.card', // или другой селектор, по которому можно перетаскивать
+      onEnd: function (evt) {
+        // Получаем порядок задач
+        const taskItems = tasksContainer.querySelectorAll('.task-item');
+        taskItems.forEach((item, index) => {
+          const taskId = item.dataset.taskId;
+          // Отправляем позицию на сервер
+          fetch("{% url 'crm:update_task_position' %}", {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body: JSON.stringify({
+              task_id: taskId,
+              position: index,
+            }),
+          })
+          .then(res => res.json())
+          .then(data => {
+            if (data.status !== 'success') {
+              showCustomAlert('Ошибка при сохранении порядка задач');
+            }
+          });
+        });
+      }
+    });
+  }
+
+  // Инициализация сортировки сделок для каждой задачи
+  {% for task in lead.task_set.all %}
+  const dealsContainer{{ task.id }} = document.getElementById('deals-container-{{ task.id }}');
+  if (dealsContainer{{ task.id }}) {
+    new Sortable(dealsContainer{{ task.id }}, {
+      animation: 150,
+      group: {
+        name: 'deals',
+        put: function(to, from, dragEl) {
+          // Разрешаем перемещение только между элементами одного уровня
+          return to.el === from.el;
+        }
+      },
+      onEnd: function(evt) {
+        const dealId = evt.item.dataset.dealId;
+        const newIndex = evt.newIndex;
+        const parentDeal = evt.to.closest('.deal-item');
+        const parentId = parentDeal ? parentDeal.dataset.dealId : null;
+
+        fetch("{% url 'crm:update_deal_position' %}", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
+          },
+          body: JSON.stringify({
+            deal_id: dealId,
+            position: newIndex,
+            parent_id: parentId
+          }),
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.status !== 'success') {
+            showCustomAlert('Ошибка при сохранении порядка сделок');
+            // Возвращаем элемент на место в случае ошибки
+            evt.from.insertBefore(evt.item, evt.from.children[evt.oldIndex]);
+          }
+        });
+      }
+    });
+  }
+  {% endfor %}
+
+  // Обработчик для кнопки добавления под-сделки
+  document.querySelectorAll('.add-subdeal').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const dealId = this.dataset.dealId;
+      const form = document.createElement('form');
+      form.innerHTML = `
+        <div class="input-group mt-2">
+          <input type="text" class="form-control" placeholder="Название под-сделки">
+          <button class="btn btn-primary" type="submit">Добавить</button>
+        </div>
+      `;
+
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const title = this.querySelector('input').value;
+
+        fetch("{% url 'crm:add_subdeal' %}", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
+          },
+          body: JSON.stringify({
+            parent_id: dealId,
+            title: title
+          }),
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === 'success') {
+            location.reload();
+          } else {
+            showCustomAlert('Ошибка при создании под-сделки');
+          }
+        });
+      });
+
+      this.closest('.deal-item').querySelector('.subdeals').appendChild(form);
+    });
+  });
+});
+
+// Функция для получения CSRF токена
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.startsWith(name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+</script>
+<script>
+function showCustomAlert(message) {
+  const alertOverlay = document.getElementById('customAlert');
+  const alertMessage = document.getElementById('customAlertMessage');
+  const alertOkBtn = document.getElementById('customAlertOk');
+
+  alertMessage.innerText = message;
+  alertOverlay.style.display = 'flex';
+
+  return new Promise((resolve) => {
+    alertOkBtn.onclick = () => {
+      alertOverlay.style.display = 'none';
+      resolve();
+    };
+  });
+}
+</script>
+
+
+{% endblock footerbottom %}

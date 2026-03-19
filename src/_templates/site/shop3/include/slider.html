@@ -1,0 +1,83 @@
+<style>
+    li {
+    list-style: none;
+}
+.banner .banner-content {
+    position: relative;
+    z-index: 1;
+    WIDTH: 50%;
+    LEFT: 30PX;
+}
+.banner-content.y-50 h5{
+ color: #fff!important;
+
+}
+.banner-content.y-50 h3{
+ color: #fff!important;
+
+}
+.banner-content.y-50 a {
+    border: solid 1px #5373ba !important;
+    color: #fff !important;
+}
+</style>
+
+
+
+<section class="intro-section">
+                <div class="swiper-container swiper-theme nav-inner pg-inner swiper-nav-lg animation-slider pg-xxl-hide nav-xxl-show nav-hide"
+                    data-swiper-options="{
+                    'slidesPerView': 1,
+                    'autoplay': {
+                        'delay': 8000,
+                        'disableOnInteraction': false
+                    }
+                }">
+                    <div class="swiper-wrapper">
+                        {% for slide in sliders %}
+                        <div class="swiper-slide banner banner-fixed intro-slide intro-slide1"
+                            style="background-image: url({% if slide.slide_image %}{{slide.slide_image.url}}{% endif %}) background-color: #ebeef2;">
+                            <div class="container" style="background-image: url('{% if slide.slide_image %}{{slide.slide_image.url}}{% endif %}')">
+
+                                <div class="banner-content y-50 ">
+                                    <h5 class="banner-subtitle font-weight-normal text-default ls-50 lh-1 mb-2 slide-animate"
+                                        data-animation-options="{
+                                    'name': 'fadeInRightShorter',
+                                    'duration': '1s',
+                                    'delay': '.2s'
+                                }" style="font-size: 26px;color:#336699!important">
+                                        {{slide.slide_title|safe}}
+                                    </h5>
+                                    <h3 class="banner-title font-weight-bolder ls-25 lh-1 slide-animate"
+                                        data-animation-options="{
+                                    'name': 'fadeInRightShorter',
+                                    'duration': '1s',
+                                    'delay': '.4s'
+                                }">
+                                        {{slide.slide_description|safe}}
+                                    </h3>
+                                    <br>
+
+                                    {% if slide.slide_button_link_one %}
+                                    <a href="{{slide.slide_button_link_one}}"
+                                        class="btn btn-dark btn-outline btn-rounded btn-icon-right slide-animate"
+                                        data-animation-options="{
+                                    'name': 'fadeInRightShorter',
+                                    'duration': '1s',
+                                    'delay': '.8s'
+                                }">{{slide.slide_button_title_one}}<i class="w-icon-long-arrow-right"></i></a>
+                            {% endif %}
+
+                                </div>
+                                <!-- End of .banner-content -->
+                            </div>
+                            <!-- End of .container -->
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="swiper-pagination"></div>
+                    <button class="swiper-button-next"></button>
+                    <button class="swiper-button-prev"></button>
+                </div>
+                <!-- End of .swiper-container -->
+            </section>

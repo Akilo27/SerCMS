@@ -1,0 +1,325 @@
+{% extends 'site/shop2/base.html' %}
+{% load static generals_tag %}
+{% block title %}{{ page.name }}{% endblock title %}
+{% block description %}{{ page.name }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ page.name }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ page.name }}{% endblock propertydescription %}
+{% block propertyimage %}{{ page.name }}{% endblock propertyimage %}
+
+{% block head %}
+<style>
+    .application{
+        position: fixed!important;
+        top: 260px!important;
+        right:  -60px!important;
+        transform: rotate(270deg);
+    }
+a {
+    color: blue;
+}
+
+/* Модальное окно */
+.white-popup {
+    position: relative;
+    background: #fff;
+    padding: 30px;
+    width: auto;
+    margin: 40px auto;
+    border-radius: 10px;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.2);
+}
+
+/* Закрыть кнопку */
+.mfp-closes {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 24px;
+    color: #333;
+    border: none;
+    cursor: pointer;
+    z-index: 100;
+}
+
+/* Кнопка отправки формы */
+.th-btn {
+    background-color: #222;
+    color: #fff;
+    padding: 10px 25px;
+    border: none;
+    border-radius: 4px;
+    transition: background 0.3s ease;
+}
+
+.th-btn:hover {
+    background-color: #0056b3;
+    color: #fff;
+}
+.form-control, textarea{
+    margin-top: 10px;
+    display: block;
+    width: 100%;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #212529;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border-radius: .375rem;
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+input, textarea {
+    background-color: #F6F6F6;
+    font-family: 'Montserrat';
+}
+    textarea {
+    font-style: ;
+    font-variant-ligatures: ;
+    font-variant-caps: ;
+    font-variant-numeric: ;
+    font-variant-east-asian: ;
+    font-variant-alternates: ;
+    font-variant-position: ;
+    font-variant-emoji: ;
+    font-weight: ;
+    font-stretch: ;
+    font-size: ;
+    font-family: monospace;
+    font-optical-sizing: ;
+    font-size-adjust: ;
+    font-kerning: ;
+    font-feature-settings: ;
+    font-variation-settings: ;
+    text-rendering: auto;
+    color: fieldtext;
+    letter-spacing: normal;
+    word-spacing: normal;
+    line-height: normal;
+    text-transform: none;
+    text-indent: 0px;
+    text-shadow: none;
+    display: inline-block;
+    text-align: start;
+    appearance: auto;
+    -webkit-rtl-ordering: logical;
+    resize: -internal-textarea-auto;
+    cursor: text;
+    overflow-wrap: break-word;
+    background-color: field;
+    column-count: initial !important;
+    box-sizing: border-box;
+    margin: 0em;
+    border-width: 1px;
+    border-style: solid;
+    border-color: light-dark(rgb(118, 118, 118), rgb(133, 133, 133));
+    border-image: initial;
+    padding: 2px;
+    white-space: pre-wrap;
+}
+    .modal-body {
+    margin: 30px;
+}
+  /* Скрываем модалку изначально */
+.mfp-hide {
+    display: none !important;
+}
+
+/* Фон-подложка — затемнение всей страницы */
+#QuickView {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.5); /* полупрозрачный черный фон */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1050;
+}
+
+/* Само окно */
+.white-popup {
+    background: #fff;
+    padding: 30px 25px;
+    border-radius: 10px;
+    width: 100%;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.3);
+    position: relative;
+    animation: popupFadeIn 0.3s ease forwards;
+}
+
+/* Анимация появления */
+@keyframes popupFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Кнопка закрытия */
+.mfp-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: transparent;
+    border: none;
+    font-size: 28px;
+    font-weight: bold;
+    color: #333;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.2s ease;
+}
+
+.mfp-close:hover {
+    color: #007bff;
+}
+
+/* Кнопки внутри попапа */
+.th-btn {
+    background-color: #222;
+    color: #fff;
+    padding: 10px 25px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-size: 1rem;
+}
+
+.th-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Поля формы */
+.form-control, textarea {
+    margin-top: 10px;
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 1rem;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-family: 'Montserrat', sans-serif;
+    background-color: #f6f6f6;
+    box-sizing: border-box;
+    resize: vertical;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus, textarea:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 6px rgba(0, 123, 255, 0.4);
+}
+
+/* Отступ внутри попапа */
+.modal-body {
+    margin-top: 20px;
+}
+
+/* Дополнительная стилизация текста */
+.white-popup p, .white-popup h2, .white-popup label {
+    color: #333;
+    font-family: 'Montserrat', sans-serif;
+    margin-bottom: 10px;
+}
+
+/* Чтобы кнопка не съезжала при маленьком экране */
+@media (max-width: 480px) {
+    .white-popup {
+        padding: 20px 15px;
+        width: 95%;
+    }
+}
+
+</style>
+{% endblock head %}
+{% block content %}
+
+  <main class="main-content">
+    <!--== Start Page Header Area Wrapper ==-->
+    <div class="page-header-area" style="background-image: url({% static 'site/wolmart/podlozhka.jpg'%});">
+      <div class="container pt--0 pb--0">
+        <div class="row">
+          <div class="col-12">
+            <div class="page-header-content">
+              <h2 class="title" style="display: flex;; text-transform: uppercase; color: white;     margin-top: 55px;">{{ page.name }}</h2>
+              <nav class="breadcrumb-area">
+                <ul class="breadcrumb">
+                  <li><a href="{% url 'webmain:home' %}">Главная</a></li>
+                  <li class="breadcrumb-sep" style="display: block; color: white;">// {{ page.name }}</li>
+                  <li></li>
+                </ul>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--== End Page Header Area Wrapper ==-->
+
+    <!--== Start Area Wrapper ==-->
+    <section class="blog-details-area">
+      <div class="container">
+        <div class="row flex-md-row-reverse justify-content-between">
+            <p>{{ page.description|safe }}</p>
+        </div>
+      </div>
+    </section>
+    <!--== End Area Wrapper ==-->
+  </main>
+{% if page.pagetype == 6 or page.pagetype == 7 %}
+<div class="action btn btn-dark btn-hover-primary application">
+    <a href="#QuickView" class="banner-btn def-btn anchor-link wow fadeIn" style="color:#fff;">
+        Оставить заявку
+    </a>
+</div>
+{% endif %}
+<div class="white-popup mfp-hide" id="QuickView" style="padding-left: 0px;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <button title="Close (Esc)" type="button" class="mfp-closes">×</button>
+            <div class="modal-body">
+                {% if page.pagetype == 6 %}
+                {% include 'site/shop5/include/partnership.html' %}
+                {% elif page.pagetype == 7 %}
+                {% include 'site/shop5/include/cooperation.html' %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock content %}
+{% block bottomfooter %}
+<script>
+$(document).ready(function () {
+    console.log("jQuery работает!");
+});
+</script>
+
+<script>
+$(document).ready(function() {
+  $('.anchor-link').on('click', function(e) {
+    e.preventDefault(); // чтобы страница не прыгала по якорю
+    $('#QuickView').removeClass('mfp-hide').show();
+  });
+
+  // Добавим возможность закрыть окно по кнопке
+  $('.mfp-closes').on('click', function() {
+    $('#QuickView').addClass('mfp-hide').hide();
+  });
+});
+
+</script>
+
+
+{% endblock bottomfooter %}

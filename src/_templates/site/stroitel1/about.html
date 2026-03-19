@@ -1,0 +1,56 @@
+{% extends 'site/stroitel1/base.html' %}
+{% load static generals_tag  shop_tags %}
+{% block title %}{{ aboutpage.title }}{% endblock title %}
+{% block description %}{{ aboutpage.metadescription }}{% endblock description %}
+{% block propertytitle %}{{ aboutpage.propertytitle }}{% endblock propertytitle %}
+{% block propertydescription %}{{ aboutpage.propertydescription }}{% endblock propertydescription %}
+{% block propertyimage %}{% if aboutpage.previev %}{{ aboutpage.previev.url }}{% endif %}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+{% block content %}
+
+<section class="s-about" id="s-about">
+	<div class="container">
+
+		<div class="about-row">
+			<div class="about-left">
+				<h2 class="def-title wow fadeInLeft" data-wow-delay="0.2s">{{ json_fields.about_title.field }}</h2>
+				<div class="def-desc wow fadeInLeft" data-wow-delay="0.3s">
+					{{ json_fields.about_description.field|safe }}
+				</div>
+				<a href="{{ json_fields.about_button_link.field }}" class="def-btn anchor-link wow fadeInLeft" data-wow-delay="0.4s">{{ json_fields.about_button.field }}</a>
+			</div>
+
+			<div class="about-right">
+				<img src="{{ json_fields.about_image.info }}" alt="О нас" class="wow fadeIn" data-wow-delay="0.5s">
+			</div>
+		</div>
+
+	</div>
+</section>
+
+
+<section class="s-services" id="s-services">
+	<div class="container">
+		<h2 class="center-title wow fadeIn" data-wow-delay="0.1s">{{ json_fields.service_title.field }}</h2>
+
+		<div class="services-row">
+			{% for item in blogs %}
+			<div class="services-item wow fadeIn" data-wow-delay="0.1s">
+				<div class="services-thumb">
+					<img src="{% if item.image %}{{item.image.url}}{% else %}{% static 'site/stroitel1/images/service-3.jpg' %}{% endif %}" alt="Construction of houses">
+				</div>
+				<div class="services-body">
+					<h4 class="services-title">{{item.name}}</h4>
+					<div class="services-desc">
+						{{item.description|truncatechars:150|safe}}
+					</div>
+					<a href="{url 'webmain:blog' blog.slug }" data-effect="mfp-zoom-in" class="def-btn services-btn">Посмотреть</a>
+				</div>
+			</div>
+			{% endfor %}
+		</div>
+	</div>
+</section>
+
+
+{% endblock content %}

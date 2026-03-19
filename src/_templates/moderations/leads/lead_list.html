@@ -1,0 +1,412 @@
+{% extends 'moderations/base.html' %}
+{% load static  %}
+{% load i18n %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+{% block content %}
+<div id="status-alert" class="alert alert-success position-fixed top-0 end-0 m-3 d-none" role="alert" style="z-index: 9999;">
+</div>
+
+<div class="row">
+    <div class="col-xl-5 col-lg-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row align-items-center">
+
+                    <h4 class="text-dark mb-1">{% trans "Статистика прибыли" %}</h4>
+                    <p class="fs-14">{% trans "Расчет пополнения и расчетов по проектам" %}</p>
+                    <div class="row align-items-center text-center mb-2">
+                        <div class="col-lg-7 border-end border-light">
+                            <div class="row align-items-center">
+                                <div class="col-lg-6">
+                                    <div id="grid-chart" class="apex-charts"></div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <h5>{% trans "Сдано" %}</h5>
+                                    <h2 class="fw-semibold text-dark">{{ count_passed }}</h2>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-5">
+                            <div class="ps-2">
+                                <p class="d-flex align-items-center mb-2 gap-2"><i class='ri-circle-fill text-primary'></i>{{ total_amount }} {% trans "Выручка" %}</p>
+                                <p class="d-flex align-items-center gap-2 mb-2"><i class='ri-circle-fill text-success'></i>{{ total_profit }} {% trans "Прибыль" %}</p>
+                                <p class="d-flex align-items-center mb-2 gap-2"><i class='ri-circle-fill text-warning'></i>{{ total_expenditure }} {% trans "Расход" %}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-muted mb-0 d-flex align-items-center gap-1">{% trans "За период" %} <span>:</span>
+                        <span class="text-dark">{% trans "Текущий месяц" %}</span>
+                        <div class="dropdown">
+                            <a href="agents-grid.html#" class="dropdown-toggle drop-arrow-none card-drop p-0" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="ti ti-dots-vertical"></i>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-end">
+                                <a href="javascript:void(0);" class="dropdown-item">{% trans "Предудыщей месяц" %}</a>
+                                <a href="javascript:void(0);" class="dropdown-item">{% trans "Два месяца назад" %}</a>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-4 col-lg-6">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-5">
+                        <h5 class="text-dark fw-medium mb-1">{{ count_passed }}</h5>
+                        <p class="text-muted mb-0">{% trans "Выполненых" %} </p>
+                    </div>
+                    <div class="col-lg-4 col-3 text-center">
+                        <h5 class="text-dark fw-medium mb-1">{{ count_at_work }}</h5>
+                        <p class="text-muted mb-0">{% trans "В работе" %}</p>
+                    </div>
+                    <div class="col-xl-3 col-3 text-end">
+                        <h5 class="text-dark fw-medium mb-1">{{ count_lost }}</h5>
+                        <p class="text-muted mb-0">{% trans "Не здано" %}</p>
+                    </div>
+                </div>
+                <div class="progress progress-lg bg-light-subtle rounded-0 gap-1 overflow-visible mt-2" style="height: 10px">
+                    <div class="progress-bar bg-primary rounded-pill" role="progressbar" style="width: 40%">
+                    </div>
+                    <div class="progress-bar bg-warning rounded-pill" role="progressbar" style="width: 30%">
+                    </div>
+                    <div class="progress-bar bg-info rounded-pill" role="progressbar" style="width: 30%">
+                    </div>
+                </div>
+                <p class="mb-0 mt-3"><span class="text-success fw-medium mb-0"><i class="ri-arrow-up-line"></i>{{ percent_passed }}%</span> {% trans "рост" %}</p>
+            </div>
+            <div class="card-footer d-flex justify-content-between  py-2">
+                <p class="text-muted mb-0 d-flex align-items-center gap-1">{% trans "Обновление каждые" %} <span>:</span> <span class="text-dark">12 {% trans "часов" %}</span></p>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-lg-6">
+        <div class="card bg-primary bg-gradient">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div>
+                        <h4 class="card-title mb-2 text-white">{% trans "Всего проектов" %} </h4>
+                        <p class="text-white fw-medium fs-24 mb-0">{{ total_count }}</p>
+                    </div>
+                    <div>
+                        <div class="avatar-md bg-light rounded">
+                            <iconify-icon icon="solar:home-bold-duotone" class="fs-32 text-primary avatar-title"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+                <div id="seal_properties" data-colors="#ffffff" class="apex-charts"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Add Project -->
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title"  style="margin-right: 20px">{% trans 'Лиды' %}</h4>
+        <div class="toolbar" role="toolbar" style="text-align: -webkit-right;">
+            <div class="btn-group mb-1">
+                <button type="button" class="btn btn-primary light px-3" onclick="location.href=`{% url 'crm:lead_create_redirect' %}`">
+                    <iconify-icon icon="solar:add-circle-linear"></iconify-icon>
+                </button>
+                <button type="button" class="btn btn-primary light px-3" onclick="location.href=`{% url 'crm:leadlist' %}`">
+                    <iconify-icon icon="solar:refresh-broken"></iconify-icon>
+                </button>
+                <button type="button" class="btn btn-primary light px-3" id="deleteButton" onclick="deleteSelected()">
+                    <iconify-icon icon="solar:trash-bin-minimalistic-broken"></iconify-icon>
+                </button>
+            </div>
+            <div class="btn-group mb-1">
+                <button type="button" class="btn btn-primary light dropdown-toggle v" data-bs-toggle="dropdown">
+                    {% trans 'Поиск по' %}
+                    <span class="caret m-l-5"></span>
+                </button>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="javascript:void(0);" onclick="openSearch('name')">{% trans 'Название' %}</a>
+                    <a class="dropdown-item" href="javascript:void(0);" onclick="openSearch('date')">{% trans 'Дата' %}</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <table class="table table-responsive-md ck-table">
+            <thead style="text-align: center;">
+            <tr>
+                <th class="align-middle">
+                    <div class="form-check custom-checkbox">
+                        <input type="checkbox" class="form-check-input" id="checkAll">
+                        <label class="form-check-label" for="checkAll"></label>
+                        <strong>{% trans "Информация" %}</strong>
+                    </div>
+                </th>
+                <th><strong>{% trans "Бюджет" %}</strong></th>
+                <th><strong>{% trans "Документы" %}</strong></th>
+                <th><strong>{% trans "Заказчик" %}</strong></th>
+                <th><strong>{% trans "Сотрудники" %}</strong></th>
+                <th><strong>{% trans "Процентов" %}</strong></th>
+                <th><strong>{% trans "Задачи" %}</strong></th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody style="text-align: center;" id="list-task">
+            {% for lead in leads %}
+            <tr>
+                <td class="py-2 align-middle">
+                    <a href="{% url 'crm:lead_update' lead.id %}">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="form-check custom-checkbox checkbox-success">
+                                <input type="checkbox" name="lead_ids" value="{{ lead.id }}" class="form-check-input" id="checkbox_{{ lead.id }}">
+                                <label class="form-check-label" for="checkbox_{{ lead.id }}"></label>
+                            </div>
+                            <img src="{% if lead.image %}{{ lead.image.url }}{% else %}{% static 'site/moderations/assets/images/trophy.png' %}{% endif %}" alt="" class="rounded-circle avatar-md">
+                            <div>
+                                <h5 class="fw-semibold text-dark mb-1"> {{lead.name}}</h5>
+                                <p class="m-0">{{lead.description|safe}}</p>
+                            </div>
+                        </div>
+                    </a>
+                </td>
+                <td class="py-2 align-middle">{{lead.amount}}</td>
+                <td class="py-2 align-middle">{% trans "Документов" %} ({{lead.deal_set.count}})</td>
+                <td class="py-2 align-middle">
+                    {% if lead.client %}
+                    <div class="d-flex align-items-center gap-2">
+                        <a href="#!" class="rounded-circle">
+                            <div class="position-relative">
+                                <img src="{{lead.client.avatar.url}}" alt="" class="avatar-sm rounded-circle flex-shrink-0 ">
+                                <span class="position-absolute bottom-0 end-0  rounded-circle">
+                                    <span class=""><i class="ri-circle-fill fs-10 align-bottom text-success bg-light rounded-circle"></i></span>
+                                </span>
+                            </div>
+                        </a>
+                        <div>
+                            <a href="#!" class="text-dark fw-medium fs-15">{{lead.client.username}}</a>
+                        </div>
+                    </div>
+                    {% else %}
+                    {% trans "Нет заказчика" %}
+                    {% endif %}
+                </td>
+                <td class="py-2 align-middle">
+                    {% if lead.users %}
+                    <div class="swiper-wrapper" id="swiper-wrapper-{{lead.id}}" aria-live="polite" style="height: 48px; transform: translate3d(0px, 0px, 0px); transition-duration: 0ms;">
+                        {% for user in lead.users.all %}
+                        <div class="swiper-slide avatar swiper-slide-active" role="group" aria-label="{{ forloop.counter }} / {{ lead.users.count }}" style="margin-right: 8px;">
+                            <a href="#!" class="rounded-circle" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                <div class="position-relative">
+                                    <img src="{{ user.avatar.url }}" alt="" class="avatar rounded-circle flex-shrink-0">
+                                    <span class="position-absolute bottom-0 end-0  p-1 bg-success border border-light border-2 rounded-circle">
+                                        <span class="visually-hidden">{{ user.username }}</span>
+                                    </span>
+                                </div>
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    {% trans "Нет cотрудники" %}
+                    {% endif %}
+                </td>
+                <td class="py-2 align-middle">{{lead.procent}}</td>
+                <td class="py-2 align-middle">{% trans "В работе" %} {{lead.at_work_tasks_count}}/ <span>{% trans "Завершено" %} {{lead.complite_tasks_count}}</span></td>
+                <td class="py-2 align-middle">
+                    <select class="form-select status-select" data-lead-id="{{ lead.id }}">
+                        {% for key, label in lead.STATUS_CHOICES %}
+                        <option value="{{ key }}" {% if lead.status == key %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+
+    </div>
+</div>
+<div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="searchModalLabel">{% trans 'Поиск' %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="idSearchName" style="display: none;">
+                    <input type="text" id="searchInputName" class="form-control" placeholder="{% trans 'Введите название' %}">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans 'Закрыть' %}</button>
+                <button type="button" class="btn btn-primary" onclick="performSearch()">{% trans 'Поиск' %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .table{
+        width: 100%;
+    }
+    .card{
+        margin-top: 1.25rem;
+    }
+</style>
+<script>
+    function openSearch(type) {
+        const modalLabel = document.getElementById('searchModalLabel');
+        modalLabel.textContent = type === 'name' ? '{% trans "Поиск по названию" %}' : '';
+
+        document.getElementById('idSearchName').style.display = 'none';
+
+        switch (type) {
+            case 'name':
+                document.getElementById('idSearchName').style.display = 'block';
+                break;
+        }
+
+        $('#searchModal').modal('show');
+    }
+
+    function performSearch() {
+        const searchName = document.getElementById('searchInputName').value;
+
+        // Формируем URL для запроса
+        const url = new URL(window.location.href);
+        if (searchName) {
+            url.searchParams.set('search_name', searchName);
+        }
+
+        console.log(url.toString()); // Проверяем, что URL сформирован правильно
+
+        // Перезагружаем страницу с новыми параметрами
+        window.location.href = url.toString();
+
+        // Закрыть модальное окно после выполнения поиска
+        $('#searchModal').modal('hide');
+    }
+</script>
+
+
+{% endblock content %}
+{% block footerbottom %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const selects = document.querySelectorAll('.status-select');
+
+        selects.forEach(function(select) {
+            select.addEventListener('change', function () {
+                const leadId = this.dataset.leadId;
+                const newStatus = this.value;
+
+                if (!leadId) return;
+
+                const url = `/ru/crm/leads/update_status/${leadId}/`;
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    body: `status=${newStatus}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert("{% trans 'Статус успешно обновлён' %}: " + data.new_status, 'success');
+                    } else {
+                        showAlert("{% trans 'Ошибка обновления' %}: " + data.error, 'danger');
+                    }
+                })
+                .catch(() => {
+                    showAlert("{% trans 'Ошибка соединения с сервером' %}", 'danger');
+                });
+            });
+        });
+
+        function showAlert(message, type = 'success') {
+            const alertBox = document.getElementById('status-alert');
+            alertBox.textContent = message;
+            alertBox.className = `alert alert-${type} position-fixed top-0 end-0 m-3`;
+            alertBox.classList.remove('d-none');
+
+            setTimeout(() => {
+                alertBox.classList.add('d-none');
+            }, 4000);
+        }
+    });
+</script>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const listTask = document.getElementById("list-task");
+
+        listTask.addEventListener("click", function (event) {
+            const deleteBtn = event.target.closest(".deleteButton");
+            if (!deleteBtn) return;
+
+            console.log("🟡 {% trans 'Нажата кнопка удаления' %}");
+
+            const leadId = deleteBtn.dataset.leadId;
+            console.log("🔍 {% trans 'Получен' %} leadId:", leadId);
+
+            if (!leadId) {
+                console.warn("❌ {% trans 'Не удалось определить ID лида' %}");
+                return;
+            }
+
+            console.log(`📡 {% trans "Отправка" %}  POST {% trans "запроса на" %} /ru/crm/leads/delete/${leadId}/`);
+
+            fetch(`/ru/crm/leads/delete/${leadId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                }
+            })
+            .then(response => {
+                console.log("✅ Сервер ответил");
+                return response.json();
+            })
+            .then(data => {
+                console.log("📦 Ответ сервера:", data);
+
+                if (data.success) {
+                    console.log("🟢 Успешное удаление на сервере");
+
+                    const cardToDelete = document.querySelector(`[data-item-task-id="${leadId}"]`);
+                    if (cardToDelete) {
+                        console.log("🔎 Найден элемент с data-item-task-id:", cardToDelete);
+                        cardToDelete.remove();
+                        console.log("🧹 Элемент удалён из DOM");
+                    } else {
+                        console.warn("⚠️ Элемент с таким leadId не найден в DOM");
+                    }
+                } else {
+                    console.error("❌ Ошибка с сервера:", data.error);
+                }
+            })
+            .catch(error => {
+                console.error("🚫 Ошибка сети или сервера:", error);
+            });
+        });
+    });
+</script>
+
+
+
+
+
+
+
+
+{% endblock footerbottom %}

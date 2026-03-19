@@ -1,0 +1,138 @@
+{% load static shop_tags generals_tag %}
+
+<style>
+    .category-wrapper {
+        display: flex !important;
+        justify-content: center !important;
+    }
+
+    .inner-wrap {
+        text-align: center !important;
+    }
+
+    .category-menu {
+        display: inline-block !important;
+        padding: 0 !important;
+        margin: 0 auto !important;
+        list-style: none !important;
+        width: 825px !important;
+        text-align: center !important;
+    }
+
+    .category-menu li {
+        display: inline-block !important;
+        margin: 2px !important;
+    }
+
+    .category-link {
+    display: inline-flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 16px !important;
+    font-weight: bold !important;
+    text-align: center !important;
+    color: #000 !important;
+    text-decoration: none !important;
+    padding: 4px !important;
+    line-height: 1.2 !important;
+    gap: 6px !important;
+}
+
+.category-link > img {
+    height: 60px !important;
+    width: auto;
+    object-fit: contain !important;
+    display: block;
+    margin: 0 auto;
+}
+
+
+    @media screen and (max-width: 480px) {
+        .horizontal-menu {
+            width: auto !important;
+            height: auto !important;
+            padding: 10px 0 !important;
+            overflow-x: auto !important;
+            display: flex !important;
+            justify-content: center !important;
+            flex-wrap: wrap !important;
+        }
+
+        .category-link > img {
+            height: 36px !important;
+        }
+
+        .category-link {
+            font-size: 14px !important;
+            gap: 1px !important;
+        }
+    }
+  @media (max-width: 768px) {
+  .category-wrapper {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scroll-snap-type: x mandatory !important;
+    display: block !important;
+    padding-bottom: 10px !important;
+  }
+
+  .category-menu {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    white-space: nowrap !important;
+    gap: 12px !important;
+    padding: 10px !important;
+    margin: 0 !important;
+  }
+
+  .category-menu li {
+    flex: 0 0 auto !important;
+    scroll-snap-align: start !important;
+            border: 1px solid #9F9F9F;
+        border-radius: 10px;
+  }
+
+  .category-menu .category-link {
+    display: block !important;
+    padding: 10px 15px !important;
+    white-space: nowrap !important;
+    text-align: center !important;
+    font-size: 14px !important;
+  }
+.horizontal-menu > li:not(:last-child) > a {
+    border-bottom: none;
+    color: #9F9F9F !important;
+}
+.horizontal-menu > li:not(:last-child) > a .activate{
+    border-bottom: none;
+    color: #D83C3C !important;
+}
+
+  /* Скрыть скроллбар по желанию */
+  .category-wrapper::-webkit-scrollbar {
+    display: none !important;
+  }
+}
+
+
+
+</style>
+
+<div class=" category-wrapper ">
+    <div class="inner-wrap">
+        <ul class="menu horizontal-menu category-menu">
+            {% get_categories_without_parent as categories %}
+            {% for category in categories %}
+            <li data-category-id="{{ category.id }}">
+                <a href="{% url 'shop:menu' %}#{{ category.slug }}" class="category-link">
+                    {% if category.image %}
+                        <img src="{{ category.image.url }}" class="mobile-none" alt="{{ category.name }}">
+                    {% endif %}
+                    {{ category.name }}
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>

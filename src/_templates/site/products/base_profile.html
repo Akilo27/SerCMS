@@ -1,0 +1,744 @@
+{% load static generals_tag shop_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>{% with request|get_settings as settings %}{% if settings.name %}{{ settings.name }}{% endif %}{% endwith %} - {% block title %}{% endblock title %}</title>
+    <meta content="{% block description %}{% endblock description %}" name="description">
+    <meta property="og:title" content="{% block propertytitle %} {% endblock propertytitle %}">
+    <meta property="og:description" content="{% block propertydescription %}{% endblock propertydescription %}">
+    <meta property="og:image" content="{% block propertyimage %}{% endblock propertyimage %}">
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="{% with request|get_settings as settings %}{% if settings.favicon %}{{ settings.favicon.url }}{% endif %}{% endwith %}" />
+    <!-- Analitic link -->
+    {% with request|get_settings as settings %}{% if settings.yandex_metrica %}{{ settings.yandex_metrica|safe }}{% endif %}{% endwith %}
+    {% with request|get_settings as settings %}{% if settings.google_analitic %}{{ settings.google_analitic|safe }}{% endif %}{% endwith %}
+    <!-- Main Style CSS -->
+    <link rel="stylesheet" href="{% static 'site/frutin/css/app.min.css' %}">
+    <link rel="stylesheet" href="{% static 'site/frutin/css/fontawesome.min.css' %}">
+    <link rel="stylesheet" href="{% static 'site/frutin/css/style.css' %}">
+    <style>
+        .widget_nav_menu a::before, .widget_meta a::before, .widget_pages a::before, .widget_archive a::before, .widget_categories a::before, .wp-block-categories a::before {
+            content: none!important;
+        }
+        .widget_nav_menu a, .widget_meta a, .widget_pages a, .widget_archive a, .widget_categories a, .wp-block-categories a {
+            padding-left:0px!important;
+        }
+        .th-widget-about .about-logo {
+            margin-top: -70px!important;
+        }
+        button.closeButton.sideMenuCls {
+            z-index: 9999;
+        }
+        .menu-style1>ul>li {
+            margin: 0 7px;
+        }
+    </style>    {% block head %}{% endblock head %}
+</head>
+{% include 'products/include/cart_product.html' %}
+<div class="popup-search-box d-none d-lg-block">
+    <button class="searchClose">
+        <i class="fal fa-times"></i>
+    </button>
+    <form action="home-mega-shop.html#">
+        <input type="text" placeholder="What are you looking for?">
+        <button type="submit"><i class="fal fa-search"></i></button>
+    </form>
+</div>
+<div class="th-menu-wrapper">
+    <div class="th-menu-area text-center">
+        <button class="th-menu-toggle">
+            <i class="fal fa-times"></i>
+        </button>
+        <div class="mobile-logo">
+            <a href="{% url 'webmain:home' %}">
+                <img height="200px" src="{% with request|get_settings as settings %}{% if settings.logo %}{{ settings.logo.url }}{% endif %}{% endwith %}" alt="Frutin">
+            </a>
+        </div>
+        <div class="th-mobile-menu">
+            <ul>
+                 <li class="menu-item-has-children th-item-has-children th-active">
+                    <a href="{% url 'shop:catalogs' %}" previewlistener="true">
+                        Магазин
+                        <span class="th-mean-expand"></span>
+                    </a>
+                    <ul class="sub-menu th-submenu th-open" style="">
+                        <!---Категории mobile--->
+                          {%  get_categories_with_count_and_slug request.get_host as categories_with_count %}
+                        {% for category in categories_with_count %}
+                            {% if category.product_count != 0  %}
+                                <li class="category">
+                                    <a href="{% url 'shop:categories' category.slug %}">{{ category.name }}</a>
+
+                                </li>
+                                {% endif %}
+                        {% endfor %}
+
+                    </ul>
+                </li>
+                                <li><a href="{% url 'webmain:blogs' %}">Топ продаж</a></li>
+
+                <li><a href="/page/dostavka/">Доставка и Оплата</a></li>
+
+                <li><a href="{% url 'webmain:about' %}">О компании</a></li>
+                <li><a href="{% url 'webmain:contact' %}">Контакты</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+<header class="th-header header-layout3">
+    <div class="header-top">
+        <div class="container">
+            <div class="row justify-content-center justify-content-lg-between align-items-center gy-2">
+                <div class="col-auto d-none d-lg-block">
+                    <p class="header-notice">
+                        {% with request|get_settings as settings %}{% if settings.sleng %}{{ settings.sleng|safe }}{% endif %}{% endwith %}
+                    </p>
+                </div>
+
+                <div class="col-auto">
+                        <div class="call-btn" style="padding: 0px 5px;background-color: #FBF8F5;">
+                            <div class="box-icon" style="
+">
+                                <i style="color: var(--body-color);" class="far fa-headphones"></i>
+                            </div>
+                            <div class="media-body">
+                                <p class="box-subtitle" style="padding-top: 15px;color: var(--body-color);">Поддержка с 9 до 22<a style="color: var(--body-color);" href="tel:+79779769703">
+                                        +79779769703
+                                    </a></p>
+
+                            </div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+    <div class="menu-top">
+        <div class="container">
+            <div class="row align-items-center justify-content-between">
+                <div class="col-auto">
+                    <div class="header-logo">
+                        <a href="{% url 'webmain:home' %}">
+                            <img style="height:60px;"  src="
+                        {% with request|get_settings as settings %}{% if settings.logo %}{{ settings.logo.url }}{% endif %}{% endwith %}" alt="Frutin">
+                        </a>
+                    </div>
+                </div>
+                <div class="col-auto d-lg-block">
+                    <form method="get" class="header-search" action="{% url 'webmain:search' %}">
+                        <div class="search-form position-relative">
+                            <input id="search-input" name="q" type="text"value="{{ query }}" placeholder="Введи поисковую фразу..." aria-describedby="button-addon2">
+                            <button type="submit" id="button-addon2"><i class="far fa-search"></i></button>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-auto">
+                    <div class="header-icons">
+                        <a href="
+                        {% if user.is_authenticated %}
+                        {% url 'useraccount:edit_profile' %}
+                        {% else %}
+                        {% url 'useraccount:login' %}
+                        {% endif %}
+                        " class="icon-btn d-none d-sm-block">
+                            <i class="far fa-user"></i>
+                        </a>
+                        {% if user.is_authenticated%}
+                        <a href="{% url 'shop:bookmark_list' %}" class="icon-btn d-none d-sm-block">
+                            <span class="badge" id="bookmark-count">{% get_likes_count request.user %}</span>
+                            <i class="far fa-heart"></i>
+                        </a>
+                        {% endif %}
+                        <button type="button" class="icon-btn sideMenuToggler">
+                            <span class="badge" id="cart-count">{% get_user_cart_products request as cart_products %} {{cart_products.2}}</span>
+                            <i class="far fa-cart-shopping"></i>
+                        </button>
+                        <button type="button" class="icon-btn sideMenuInfo d-none d-lg-block">
+                            <span class="badge" id="notification-count">{% get_notifications_count request.user %}</span>
+                            <i class="far fa-bell"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="sticky-wrapper">
+        <div class="menu-area">
+            <div class="container">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-3 d-none d-xl-block">
+                        {% include 'products/include/category.html' %}
+                    </div>
+                    <div class="col-auto">
+                        <nav class="main-menu menu-style1 d-none d-lg-inline-block">
+                            <ul>
+                                <li style="margin-right: 40px"><a href="{% url 'shop:catalogs' %}">Магазин</a></li>
+                                <li style="margin-right: 40px"><a href="{% url 'webmain:blogs' %}">Топ продаж</a></li>
+                                <li style="margin-right: 40px"><a href="{% url 'webmain:delivery_payment' %}">Доставка и Оплата</a></li>
+                                <li style="margin-right: 40px"><a href="{% url 'webmain:about' %}">О компании</a></li>
+                                <li style="margin-right: 40px"><a href="{% url 'webmain:contact' %}">Контакты</a></li>
+                            </ul>
+                        </nav>
+                        <button type="button" class="th-menu-toggle d-block d-lg-none">
+                            <i class="far fa-bars"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+<section class="space-top space-extra-bottom">
+    <div class="container">
+        <div class="row">
+            <div class="col-xxl-3 col-lg-3">
+                <aside class="sidebar-area">
+                    <div class="widget widget_categories">
+                        <h3 class="widget_title">{{user.username}}</h3>
+                        <ul>
+                            {% with app_name=request.resolver_match.namespace url_name=request.resolver_match.url_name %}
+                            {% if not user.type == 2 %}
+                            <li>
+                                <a class="{% if app_name == 'shop' and url_name == 'my_order' %} active {% endif %}" href="{% url 'shop:my_order' %}">
+                                    <i class="fa fa-shopping-cart"></i>
+                                    Мои Покупки
+                                </a>
+                            </li>
+                            <li>
+                                <a class="{% if app_name == 'shop' and url_name == 'bookmark_list' %} active {% endif %}" href="{% url 'shop:bookmark_list' %}">
+                                    <i class="fa fa-heart"></i>
+                                    Закладки
+                                </a>
+                            </li>
+                            <li>
+                                <a class="{% if app_name == 'shop' and url_name == 'manufacturerapplications' %} active {% endif %}" href="{% url 'shop:manufacturerapplications' %}">
+                                    <i class="fa fa-magnet"></i>
+                                    Запросы
+                                </a>
+                            </li>
+                            {% else %}
+                            <li>
+                                <a class="{% if app_name == 'shop' and url_name == 'manufacturerorder' %} active {% endif %}" href="{% url 'shop:manufacturerorder' %}">
+                                    <i class="fa fa-shopping-bag"></i>
+                                    Продажи
+                                </a>
+                            </li>
+                            <li>
+                                <a class="{% if app_name == 'shop' and url_name == 'manufacturerapplications' %} active {% endif %}" href="{% url 'shop:manufacturerapplications' %}">
+                                    <i class="fa fa-magnet"></i>
+                                    Заявки
+                                </a>
+                            </li>
+                            <li>
+                                <a class="{% if app_name == 'useraccount' and url_name == 'shop_edit' %} active {% endif %}" href="{% url 'useraccount:shop_edit' %}">
+                                    <i class="fa fa-table"></i>
+                                    Мои магазин
+                                </a>
+                            </li>
+                            <li>
+                                <a class="{% if app_name == 'shop' and url_name == 'manufacturerreviews' %} active {% endif %}" href="{% url 'shop:manufacturerreviews' %}">
+                                    <i class="fa fa-star-o"></i>
+                                    Отзывы
+                                </a>
+                            </li>
+                            <li>
+                                <a class="{% if app_name == 'shop' and url_name == 'manufacturerfaqs' %} active {% endif %}" href="{% url 'shop:manufacturerfaqs' %}">
+                                    <i class="fa fa-question-circle-o"></i>
+                                    Вопросы
+                                </a>
+                            </li>
+                            {% endif %}
+
+                            <li>
+                                <a class="{% if app_name == 'useraccount' and url_name == 'tickets' %} active {% endif %}" href="{% url 'moderation:tickets' %}">
+                                    <i class="fa fa-life-ring"></i>
+                                    Поддержка
+                                </a>
+                            </li>
+                            <li>
+                                <a  class="{% if app_name == 'useraccount' and url_name == 'edit_profile' %} active {% endif %}"  href="{% url 'useraccount:edit_profile' %}">
+                                    <i class="fa fa-user"></i>
+                                    Мой профиль
+                                </a>
+                            </li>
+                            {% endwith %}
+                            <li>
+                                <a href="{% url 'useraccount:logout' %}"><i class="fa fa-sign-out"></i>
+                                    Выйти</a>
+                            </li>
+
+                        </ul>
+                    </div>
+
+                </aside>
+            </div>
+            <div class="col-xxl-9 col-lg-9">
+                {% block content %}
+                {% endblock content %}
+            </div>
+        </div>
+    </div>
+</section>
+<footer class="footer-wrapper footer-layout3">
+    <div class="shape-mockup" data-top="0" data-left="0">
+        <img src="{% static 'site/frutin/img/shape/footer_shape_3.png' %}" alt="shape">
+    </div>
+    <div class="shape-mockup" data-bottom="0" data-right="0">
+        <img src="{% static 'site/frutin/img/shape/footer_shape_4.png' %}" alt="shape">
+    </div>
+    <div class="widget-area">
+        <div class="container">
+            <div class="row justify-content-between">
+                <div class="col-md-6 col-xl-auto">
+                    <div class="widget footer-widget">
+                        <div class="th-widget-about">
+                            <div class="about-logo">
+                                <a href="{% url 'webmain:home' %}">
+                                    <img src="{% with request|get_settings as settings %}{% if settings.logo %}{{ settings.logo.url }}{% endif %}{% endwith %}" alt="Frutin">
+                                </a>
+                            </div>
+                            <p class="about-text">
+                                {% with request|get_settings as settings %}{% if settings.description %}{{ settings.description }}{% endif %}{% endwith %}
+                            </p>
+                            <div class="th-social">
+                                <!---Социальные сети--->
+                                {% get_sociallinks request.get_host as socilalinks %}
+                                {% for sociallink in socilalinks %}
+                                <a href="{{sociallink.link}}"><i class="{{sociallink.iconfa}}"></i></a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-auto">
+                    <div class="widget widget_nav_menu footer-widget"><h3 class="widget_title">
+                        <img src="{% static 'site/frutin/img/theme-img/title_icon.svg' %}" alt="Icon">О Нас</h3>
+                        <div class="menu-all-pages-container">
+                            <ul class="menu">
+                                <li><a href="{% url 'webmain:cooperations' %}">Сотрудничество</a></li>
+                                <li><a href="{% url 'webmain:partnerships' %}">Партнерство</a></li>
+                                {% get_pages as pages %}
+                                {% if pages %}{% for page in pages %}{% if page.pagetype == 2 %}
+                                <li><a href="{% url 'webmain:page' page.slug %}">Доставка</a></li>
+                                {% endif %}{% endfor %}{% endif %}
+                                {% if pages %}{% for page in pages %}{% if page.pagetype == 3 %}
+                                <li><a href="{% url 'webmain:page' page.slug %}">Оплата</a></li>
+                                {% endif %}{% endfor %}{% endif %}
+
+                                {% if pages %}{% for page in pages %}{% if page.pagetype == 4 %}
+                                <li><a href="{% url 'webmain:page' page.slug %}">Возврат</a></li>
+                                {% endif %}{% endfor %}{% endif %}
+                                {% if pages %}
+                                {% for page in pages %}
+                                {% if page.slug == 'kartochka-organizacii' %}
+                                <li><a href="{% url 'webmain:page' page.slug %}">{{page.name}}</a></li>
+                                {% endif %}
+                                {% endfor %}
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-auto">
+                    <div class="widget widget_nav_menu footer-widget">
+                        <h3 class="widget_title">
+                            <img src="{% static 'site/frutin/img/theme-img/title_icon.svg' %}" alt="Icon">Политики</h3>
+                        <div class="menu-all-pages-container">
+                            <ul class="menu">
+                                {% if pages %}{% for page in pages %}{% if page.pagetype == 5 %}
+                                <li><a href="{% url 'webmain:page' page.slug %}">Условия использования</a></li>
+                                {% endif %}{% endfor %}{% endif %}
+                                {% if pages %}{% for page in pages %}{% if page.pagetype == 6 %}
+                                <li><a href="{% url 'webmain:page' page.slug %}">Политика обработки персональных данных</a></li>
+                                {% endif %}{% endfor %}{% endif %}
+                                {% if pages %}{% for page in pages %}{% if page.pagetype == 7 %}
+                                <li><a href="{% url 'webmain:page' page.slug %}">Политика Cookie - Файлов</a></li>
+                                {% endif %}{% endfor %}{% endif %}
+                                {% if pages %}{% for page in pages %}{% if page.pagetype == 8 %}
+                                <li><a href="{% url 'webmain:page' page.slug %}">Согласия на обработку персональных данных</a></li>
+                                {% endif %}{% endfor %}{% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-auto">
+                    <div class="widget footer-widget">
+                        <h3 class="widget_title">
+                            <img src="{% static 'site/frutin/img/theme-img/title_icon.svg' %}" alt="Icon">
+                            Контакты
+                        </h3>
+                        <div class="th-widget-contact">
+                            <div class="info-box">
+                                <div class="info-box_icon">
+                                    <i class="fas fa-location-dot"></i>
+                                </div>
+                                <p class="info-box_text">
+                                    {% with request|get_contact as settings %}{% if settings.adress %}{{ settings.adress }}{% endif %}{%endwith%}
+                                </p>
+                            </div>
+                            <div class="info-box">
+                                <div class="info-box_icon"><i class="fas fa-phone"></i></div>
+                                <p class="info-box_text">
+                                    <a href="tel:+{% with request|get_contact as settings %}{% if settings.phone %}{{ settings.phone }}{% endif %}{%endwith%}" class="info-box_link">+{% with request|get_contact as settings %}{% if settings.phone %}{{ settings.phone }}{% endif %}{%endwith%}</a>
+                                </p>
+                            </div>
+                            <div class="info-box">
+                                <div class="info-box_icon"><i class="fas fa-envelope"></i></div>
+                                <p class="info-box_text"><a href="mailto:{% with request|get_contact as settings %}{% if settings.email %}{{ settings.email }}{% endif %}{%endwith%}" class="info-box_link">{% with request|get_contact as settings %}{% if settings.email %}{{ settings.email }}{% endif %}{%endwith%}</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="copyright-wrap" data-bg-src="{% static 'site/frutin/img/bg/copyright_bg_1.png' %}">
+        <div class="container">
+            <div class="row gy-2 align-items-center">
+                <div class="col-md-6">
+                    <p class="copyright-text">
+                        {% with request|get_settings as settings %}{% if settings.content %}{{ settings.content }}{% endif %}{%endwith%}
+
+                    </p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <div class="payment-img">
+                        <img style="height: 30px;" src="{% with request|get_settings as settings %}{% if settings.paymentmetod %}{{ settings.paymentmetod.url }}{% endif %}{% endwith %}" alt="Image">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+<div class="scroll-top">
+    <svg class="progress-circle svg-content" width="100%" height="100%" viewBox="-1 -1 102 102">
+        <path d="M50,1 a49,49 0 0,1 0,98 a49,49 0 0,1 0,-98"
+              style="transition: stroke-dashoffset 10ms linear 0s; stroke-dasharray: 307.919, 307.919; stroke-dashoffset: 307.919;"></path>
+    </svg>
+</div>
+{% block footer %}{% endblock footer %}
+
+<div class="sidemenu-wrapper sidemenu-info d-none d-lg-block">
+    <div class="sidemenu-content">
+        <button class="closeButton sideMenuCls">
+            <i class="far fa-times"></i>
+        </button>
+        <div class="widget">
+            <div class="th-widget-about">
+                <div class="about-logo">
+                    <a href="home-organic-farm.html">
+                        <img src="{% with request|get_settings as settings %}{% if settings.logo %}{{ settings.logo.url }}{% endif %}{% endwith %}" alt="Frutin">
+                    </a>
+                </div>
+
+            </div>
+        </div>
+        <div class="widget">
+            <h3 class="widget_title">Уведомления</h3>
+            {% include 'products/include/notification.html' %}
+        </div>
+        <button type="submit" class="th-btn">Все уведомления</button>
+    </div>
+</div>
+<script>
+    document.querySelector('.menu-expand').addEventListener('click', function() {
+        document.querySelector('.category-menu').classList.add('close-category'); // Add the class to the nav element
+    });
+
+    // Assuming you want to remove the class when the "Close" link is clicked
+    document.querySelector('.close-category').addEventListener('click', function() {
+        document.querySelector('.category-menu').classList.remove('close-category'); // Remove the class from the nav element
+    });
+</script>
+<script>
+    document.querySelector('.menu-expand').addEventListener('click', function() {
+        document.querySelector('.category-menu').classList.add('close-category'); // Add the class to the nav element
+    });
+
+    // Assuming you want to remove the class when the "Close" link is clicked
+    document.querySelector('.close-category').addEventListener('click', function() {
+        document.querySelector('.category-menu').classList.remove('close-category'); // Remove the class from the nav element
+    });
+</script>
+<script>// Добавление в корзину
+document.addEventListener("DOMContentLoaded", function() {
+    // Функция для обработки отправки формы добавления в корзину
+    function handleAddToCartFormSubmit(event) {
+        event.preventDefault();  // Останавливаем стандартное поведение отправки формы
+        event.stopPropagation(); // Останавливаем дальнейшее распространение события
+
+        const form = event.currentTarget;
+        const productId = form.dataset.productId;  // Идентификатор продукта
+        const quantity = form.querySelector("input[name='quantity']").value;  // Количество
+        const variation_slug = form.querySelector("input[name='variation_slug']").value;  // вариация
+        const csrfToken = form.querySelector("input[name='csrfmiddlewaretoken']").value;  // CSRF-токен
+
+        const data = new FormData();  // Создаем объект FormData для отправки данных
+        data.append("product_id", productId);  // Добавляем идентификатор продукта
+        data.append("quantity", quantity);  // Добавляем количество
+        data.append("variation_slug", variation_slug);  // Добавляем вариацию
+        data.append("csrfmiddlewaretoken", csrfToken);  // Добавляем CSRF-токен
+        showCustomAlert("Товар добавлен в корзину!");
+        // Отправляем POST-запрос для добавления товара в корзину
+        fetch(form.action, {
+            method: "POST",
+            body: data
+        })
+            .then(response => response.json())  // Парсим JSON-ответ
+            .then(data => {
+                console.log("Ответ сервера:", data);
+                if (data.success) {
+                    // Показываем кастомный alert
+
+
+                    // Обновляем содержимое корзины на основе данных с сервера
+                    updateAddCartContent(data.cart_html);
+                } else {
+                    console.error("Не удалось добавить товар в корзину:", data.message);
+                }
+            })
+            .catch(error => {
+                console.error("Ошибка при добавлении товара в корзину:", error);
+            });
+    }
+
+    // Функция для привязки обработчиков событий к формам добавления в корзину
+    function bindAddToCartHandler() {
+        document.querySelectorAll("form.add-to-cart-form").forEach(function(form) {
+            form.removeEventListener("submit", handleAddToCartFormSubmit); // Сначала удаляем, если уже был привязан
+            form.addEventListener("submit", handleAddToCartFormSubmit); // Привязываем обработчик
+        });
+    }
+
+    // Функция для показа кастомного alert
+    function showCustomAlert(message) {
+        const alertBox = document.getElementById("custom-alert");
+        alertBox.textContent = message;  // Устанавливаем текст сообщения
+        alertBox.style.display = "block";  // Показываем alert
+        setTimeout(() => {
+            alertBox.style.opacity = "1";  // Плавно показываем alert
+        }, 10);  // Небольшая задержка для запуска анимации
+
+        // Скрываем alert через 2 секунды с плавным исчезновением
+        setTimeout(() => {
+            alertBox.style.opacity = "0";  // Плавно скрываем alert
+            setTimeout(() => {
+                alertBox.style.display = "none";  // Полностью скрываем alert после завершения анимации
+            }, 500);  // Время плавного исчезновения совпадает с CSS transition
+        }, 2000);
+    }
+
+    // Изначально привязываем обработчики событий при загрузке страницы
+    bindAddToCartHandler();
+});
+function updateAddCartContent() {
+    fetch(location.href)
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            // Обновляем количество товаров в корзине
+            const newCartCount = doc.getElementById('cart-count');
+            if (newCartCount) {
+                const cartCount = document.getElementById('cart-count');
+                if (cartCount) {
+                    cartCount.textContent = newCartCount.textContent;
+                }
+            }
+            const newCartCountMobile = doc.getElementById('cart-count-mobile');
+            if (newCartCountMobile) {
+                const cartCountMobile = document.getElementById('cart-count-mobile');
+                if (cartCountMobile) {
+                    cartCountMobile.textContent = newCartCountMobile.textContent;
+                }
+            }
+
+            // Обновляем содержимое корзины
+            const newCartContent = doc.getElementById('cart_product_canvas');
+            if (newCartContent) {
+                const cartContent = document.getElementById('cart_product_canvas');
+                if (cartContent) {
+                    cartContent.innerHTML = newCartContent.innerHTML;
+                }
+            }
+
+            attachDeleteListeners(); // Повторно прикрепляем обработчики событий удаления
+            attachQuantityListeners(); // Прикрепляем обработчики изменения количества
+        })
+        .catch(error => {
+            console.error('Error updating cart content:', error);
+        });
+}
+
+
+
+</script>
+<script>
+
+    function handleBookmark(event) {
+        event.preventDefault(); // Prevent default action if needed
+        var button = event.currentTarget;
+        var product_id = button.getAttribute('data-product');
+        var type = button.getAttribute('data-type');
+        var csrfToken = '{{ csrf_token }}';
+
+        console.log('Button clicked:', button);
+        console.log('CSRF Token:', csrfToken);
+        console.log('Product ID:', product_id);
+        console.log('Type:', type);
+
+        var url = '';
+        if (type === 'bookmarkAdd') {
+            url = '/bookmark/add/';
+        } else if (type === 'bookmarkDelete') {
+            url = '/bookmark/delete/';
+        }
+
+        console.log('Sending request to URL:', url);
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrfToken,
+            },
+            body: new URLSearchParams({
+                'product_id': product_id,
+                'csrfmiddlewaretoken': csrfToken,
+            }).toString(),
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Response data:', data);
+                if (data.status === 'success') {
+                    // Обновление .bookmark-list
+                    var bookmarkList = document.querySelector('.bookmark-list');
+                    if (bookmarkList) {
+                        fetch(location.href)
+                            .then(response => response.text())
+                            .then(html => {
+                                var parser = new DOMParser();
+                                var doc = parser.parseFromString(html, 'text/html');
+                                var newBookmarkList = doc.querySelector('.bookmark-list');
+                                if (newBookmarkList) {
+                                    bookmarkList.innerHTML = newBookmarkList.innerHTML;
+                                    bindBookmarkButtonHandler(); // Повторная привязка обработчиков
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Fetch error:', error);
+                            });
+                    }
+
+                    // Обновление кнопки закладки
+                    var bookmarkButtonId = '#bookmark_button_' + product_id;
+                    var bookmarkButton = document.querySelector(bookmarkButtonId);
+                    if (bookmarkButton) {
+                        fetch(location.href)
+                            .then(response => response.text())
+                            .then(html => {
+                                var parser = new DOMParser();
+                                var doc = parser.parseFromString(html, 'text/html');
+                                var newBookmarkButton = doc.querySelector(bookmarkButtonId);
+                                if (newBookmarkButton) {
+                                    bookmarkButton.innerHTML = newBookmarkButton.innerHTML;
+                                    bindBookmarkButtonHandler(); // Повторная привязка обработчиков
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Fetch error:', error);
+                            });
+                    }
+
+                    const newBookmarkCount = document.getElementById('bookmark-count');
+                    if (newBookmarkCount) {
+                        const BookmarkCount = document.getElementById('bookmark-count');
+                        if (BookmarkCount) {
+                            BookmarkCount.textContent = data.count;
+                        }
+                    }
+
+                } else {
+                    console.error('Error:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+            });
+    }
+
+    function bindBookmarkButtonHandler() {
+        var buttons = document.querySelectorAll('.bookmark');
+        buttons.forEach(button => {
+            button.addEventListener('click', handleBookmark);
+        });
+    }
+
+    // Инициализация привязок обработчиков событий
+    bindBookmarkButtonHandler();
+
+</script>
+{% if messages %}
+    <div style="display:none;  width: 500px;
+        text-align: center;
+        position: fixed;
+        top: 200px;
+        padding: 10px 20px;
+        background-color: #5cb85c;
+        color: #fff;
+        border-radius: 5px;
+        z-index: 1000;
+        left: 50%;
+        transform: translateX(-50%);
+        opacity:0; transition: opacity 0.5s ease;" id="message-box">
+        {% for message in messages %}
+            {{ message }}
+        {% endfor %}
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("Страница загружена, скрипт начал работу");  // Проверка в консоли
+            var messageBox = document.getElementById("message-box");
+            if (messageBox) {
+                messageBox.style.display = "block";
+                setTimeout(function() {
+                    messageBox.style.opacity = "1";
+                }, 500);
+
+                // Скрываем через 5 секунд
+                setTimeout(function() {
+                    messageBox.style.opacity = "0";
+                    setTimeout(function() {
+                        messageBox.style.display = "none";
+                    }, 500);  // Даем время для завершения анимации
+                }, 5000);  // Время показа сообщения
+            }
+        });
+    </script>
+{% endif %}
+<p class="form-message"></p><div id="custom-alert" style="display:none;  width: 500px;
+    text-align: center;
+    position: fixed;
+    top: 20px;
+    padding: 10px 20px;
+    background-color: #5cb85c;
+    color: #fff;
+    border-radius: 5px;
+    z-index: 1000;
+    left: 50%;
+    transform: translateX(-50%);
+ opacity:0; transition: opacity 0.5s ease;">
+    Товар добавлен в корзину!
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+<script src="{% static 'site/script.js' %}"></script>
+
+<!-- Main Standart JS -->
+<script src="{% static 'site/frutin/js/vendor/jquery-3.6.0.min.js' %}"></script>
+
+<script src="{% static 'site/frutin/js/main.js' %}"></script>

@@ -1,0 +1,1523 @@
+{% extends 'site/website/base.html' %}
+{% load static i18n %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<link rel="stylesheet" href="{% static 'site/website/css/timedropper.css' %}">
+<link rel="stylesheet" href="{% static 'site/website/css/datedropper.css' %}">
+<link rel="stylesheet" href="{% static 'site/website/css/swiper.min.css' %}">
+<link rel="stylesheet" id="color" href="{% static 'site/website/css/default.css' %}">
+<link rel="stylesheet" href="{% static 'site/website/css/search.css' %}">
+
+
+{% endblock head %}
+{% block content %}
+<!-- Header Container / End -->
+
+<div id="wrapper" class="inner-pages sin-1 homepage-4 hd-white">
+    {% if advertisements.galleryadvertisement_set.count > 1 %}
+    <div class="swiper-container">
+        <div class="swiper-wrapper">
+            {% for gallery in advertisements.galleryadvertisement_set.all %}
+            <div class="swiper-slide">
+                <a href="{{ gallery.image.url }}" class="grid image-link">
+                    <img src="{{ gallery.image.url }}" class="img-fluid" alt="#">
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="swiper-pagination swiper-pagination-white"></div>
+
+        <div class="swiper-button-next swiper-button-white mr-3"></div>
+        <div class="swiper-button-prev swiper-button-white ml-3"></div>
+    </div>
+    {% endif %}
+
+    <!-- START SECTION PROPERTIES LISTING -->
+    <section class="single-proper blog details">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-md-12 blog-pots">
+                    {% if advertisements.galleryadvertisement_set.count < 2 %}
+                    <div id="carouselExampleIndicators" class="carousel slide pointer-event" data-ride="carousel">
+                        <ol class="carousel-indicators">
+                            <li data-target="#carouselExampleIndicators" data-slide-to="1" class="active"></li>
+                        </ol>
+                        <div class="carousel-inner carus" role="listbox">
+                            {% for gallery in advertisements.galleryadvertisement_set.all %}
+                            <div class="carousel-item active">
+                                <img class="d-block img-fluid" src="{{ gallery.image.url }}" alt="Second slide">
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    <div class="row">
+                        <div class="col-md-12">
+                            <section class="headings-2 pt-0">
+                                <div class="pro-wrapper">
+                                    <div class="detail-wrapper-body">
+                                        <div class="listing-title-bar">
+                                            <h3>{{advertisements.name}} </h3>
+                                            <div class="mt-0">
+                                                <a class="listing-address">
+                                                    <i class="fa fa-map-marker pr-2 ti-location-pin mrg-r-5"></i>{{advertisements.address}}
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="single detail-wrapper mr-2">
+                                        <div class="detail-wrapper-body">
+                                            <div class="listing-title-bar">
+                                                <h4>{{advertisements.price}}</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                            <!-- Star Description -->
+                            <div class="blog-info details mb-30">
+                                <h5 class="mb-4">{% trans 'Описание' %}</h5>
+                                {{advertisements.description|safe}}
+                            </div>
+                            <!-- End Description -->
+                        </div>
+                    </div>
+                    <!-- Star Property Details -->
+                    <div class="single homes-content details mb-30">
+                        <!-- title -->
+                        <h5 class="mb-4">{% trans 'Подробная информация' %}</h5>
+                        <ul class="homes-list clearfix">
+                            <li>
+                                <span class="font-weight-bold mr-1">{% trans 'ID объекта' %}:</span>
+                                <span class="det">{{advertisements.sky}}</span>
+                            </li>
+                            <li>
+                                <span class="font-weight-bold mr-1">{% trans 'Категория' %}:</span>
+                                <span class="det">{{advertisements.category.name}}</span>
+                            </li>
+                            <li>
+                                <span class="font-weight-bold mr-1">{% trans 'Тип' %}:</span>
+                                <span class="det">{{advertisements.get_pagetype_display}}</span>
+                            </li>
+                            <li>
+                                <span class="font-weight-bold mr-1">{% trans 'Стоимость' %}:</span>
+                                <span class="det">{{advertisements.price}}</span>
+                            </li>
+                            <li>
+                                <span class="font-weight-bold mr-1">{% trans 'Комнат' %}:</span>
+                                <span class="det">{{advertisements.rooms}}</span>
+                            </li>
+                            <li>
+                                <span class="font-weight-bold mr-1">{% trans 'Ванных комнат' %}:</span>
+                                <span class="det">{{advertisements.bathrooms}}</span>
+                            </li>
+                            <li>
+                                <span class="font-weight-bold mr-1">{% trans 'Спален' %}:</span>
+                                <span class="det">{{advertisements.bedrooms}}</span>
+                            </li>
+                            <li>
+                                <span class="font-weight-bold mr-1">{% trans 'Гаражей' %}:</span>
+                                <span class="det">{{advertisements.garages}}</span>
+                            </li>
+                            <li>
+                                <span class="font-weight-bold mr-1">{% trans 'Дата публикации' %}:</span>
+                                <span class="det">{{advertisements.create|date:"d/m/Y"}}</span>
+                            </li>
+                            <li>
+                                <span class="font-weight-bold mr-1">{% trans 'Время заезда' %}:</span>
+                                <span class="det">{{advertisements.time_check}}</span>
+                            </li>
+                            <li>
+                                <span class="font-weight-bold mr-1">{% trans 'Время выезда' %}:</span>
+                                <span class="det">{{advertisements.time_check_out}}</span>
+                            </li>
+                        </ul>
+                        <!-- title -->
+                        <h5 class="mt-5">{% trans 'Дополнительная информация' %}</h5>
+                        <!-- cars List -->
+                        <ul class="homes-list clearfix">
+                            {% for tag in advertisements.tags.all %}
+                            <li>
+                                <i class="{{tag.icon}}" aria-hidden="true"></i>
+                                <span>{{tag.name}}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% if advertisements.plansadvertisement_set.exists %}
+                    <div id="listingDetailsSlider" class="carousel listing-details-sliders slide mb-30">
+                        <h5 class="mb-4">Планировка</h5>
+                        <div class="carousel-inner">
+                            {% for plan in advertisements.plansadvertisement_set.all %}
+                            <div class="active item carousel-item" data-slide-number="0">
+                                <img src="{{plan.image.url}}" class="img-fluid" alt="slider-listing">
+                            </div>
+                            {% endfor %}
+                            {% if advertisements.plansadvertisement_set.count > 1 %}
+                            <a class="carousel-control left" href="#listingDetailsSlider" data-slide="prev"><i class="fa fa-angle-left"></i></a>
+                            <a class="carousel-control right" href="#listingDetailsSlider" data-slide="next"><i class="fa fa-angle-right"></i></a>
+                            {% endif %}
+                        </div>
+                        <!-- main slider carousel nav controls -->
+                        <ul class="carousel-indicators smail-listing list-inline">
+                            {% if advertisements.plansadvertisement_set.count > 1 %}
+                            {% for plan in advertisements.plansadvertisement_set.all %}
+                            <li class="list-inline-item active">
+                                <a id="carousel-selector-0" class="selected" data-slide-to="0" data-target="#listingDetailsSlider">
+                                    <img src="{{plan.image.url}}" class="img-fluid" alt="listing-small">
+                                </a>
+                            </li>
+                            {% endfor %}
+                            {% endif %}
+                        </ul>
+                        <!-- main slider carousel items -->
+                    </div>
+                    {% endif %}
+                    {% if advertisements.obraz_set.exists %}
+                    <div class="single homes-content details mb-30">
+                        <h5 class="mb-4">3d проект</h5>
+                        <div class="slider-container">
+                            {% for obraz in advertisements.obraz_set.all %}
+                            <model-viewer id="model{{ forloop.counter }}"
+                                          src="{{obraz.file.url}}"
+                                          alt="3D model of Nefertiti"
+                                          auto-rotate
+                                          camera-controls
+                                          shadow-intensity="1"
+                                          background-color="#ffffff"
+                                          {% if not forloop.first %}class="hidden"{% endif %}>
+                            </model-viewer>
+                            {% endfor %}
+                        </div>
+                        {% if advertisements.obraz_set.count > 1 %}
+                        <div class="controls">
+                            <button id="prevBtn" class="carousel-control left"><i class="fa fa-angle-left"></i></button>
+                            <button id="nextBtn" class="carousel-control right"><i class="fa fa-angle-right"></i></button>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                    {% endif %}
+                    {% if advertisements.video %}
+                    <div class="property wprt-image-video w50 pro vid-si2">
+                        <h5>Видео</h5>
+                        <video controls loop style="width: 100%;">
+                            <source src="{{ advertisements.video.url }}" type="video/mp4">
+                            Ваш браузер не поддерживает воспроизведение видео.
+                        </video>
+                    </div>
+                    {% endif %}
+
+                    <div class="property-location map">
+                        <h5>Карта</h5>
+                        <div id="map-yandex" data-longitude="{{advertisements.longitude}}" data-latitude="{{advertisements.width}}" class="contact-map" style="width: 100%; height: 400px;"></div>
+                    </div>
+                    <!-- Star Reviews -->
+                    <section class="reviews comments" id="reviews-list">
+                        <h3 class="mb-5">Отзывов: {{ advertisements.reviews_set.count }}</h3>
+                        {% for review in reviews %}
+                        <div class="row mb-5">
+                            <ul class="col-12 commented pl-0">
+                                <li class="comm-inf">
+                                    <div class="col-md-2">
+                                        <img src="{{review.author_review.avatar.url}}" class="img-fluid" alt="">
+                                    </div>
+                                    <div class="col-md-10 comments-info">
+                                        <div class="conra">
+                                            <h5 class="mb-2">{{review.author_review.username}}</h5>
+                                            <div class="rating-box">
+                                                <div class="detail-list-rating mr-0">
+                                                    {% for i in "12345" %}
+                                                    {% if forloop.counter <= review.starvalue %}
+                                                    <i class="fa fa-star"></i>
+                                                    {% else %}
+                                                    <i class="fa fa-star-o"></i>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <p class="mb-4">{{ review.created_at|date:"M d Y" }}</p>
+                                        <p>{{review.text}}</p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        {% endfor %}
+                        {% include 'site/publication/include/paginations.html' with paginator=reviews.paginator page_obj=reviews %}
+
+                    </section>
+                    <!-- End Reviews -->
+                    <!-- Star Add Review -->
+                    {% if user_booking %}
+                    <section class="single reviews leve-comments details">
+                        <div id="add-review" class="add-review-box">
+                            <form id="add-review-form" data-advertisement-id="{{ advertisements.id }}">
+                                {% csrf_token %}
+                                <div class="col-md-12 form-group">
+                                    <textarea class="form-control" name="text" id="exampleTextarea" rows="8" placeholder="Отзыв" required></textarea>
+                                </div>
+                                <div class="col-md-12 pb-4">
+                                    <div class="leave-rating margin-bottom-30">
+                                        <input type="radio" name="starvalue" id="rating-5" value="5" />
+                                        <label for="rating-5" class="fa fa-star"></label>
+                                        <input type="radio" name="starvalue" id="rating-4" value="4" />
+                                        <label for="rating-4" class="fa fa-star"></label>
+                                        <input type="radio" name="starvalue" id="rating-3" value="3" />
+                                        <label for="rating-3" class="fa fa-star"></label>
+                                        <input type="radio" name="starvalue" id="rating-2" value="2" />
+                                        <label for="rating-2" class="fa fa-star"></label>
+                                        <input type="radio" name="starvalue" id="rating-1" value="1" />
+                                        <label for="rating-1" class="fa fa-star"></label>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-lg mt-2" style="float: right; margin-top: -30px !important;">Отправить</button>
+                            </form>
+                        </div>
+
+                    </section>
+                    <!-- End Add Review -->
+                    {% endif %}
+                </div>
+                <aside class="col-lg-4 col-md-12 car">
+                    <div class="single widget">
+                        <!-- Start: Schedule a Tour -->
+                        <div class="schedule widget-boxed mt-0">
+                            <div class="widget-boxed-header">
+                                <div id="booking" class="hidden" data-days-off="{{ advertisements.date_booking }}">
+                                    <p>Доступно до <span id="days"></span></p>
+                                    <p>Максимум дней <span id="max-days"></span></p>
+                                </div>
+                                <h4><i class="fa fa-calendar pr-3 padd-r-10"></i>Забронировать</h4>
+                            </div>
+                            <div class="widget-boxed-body">
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 book">
+                                        <input type="text"
+                                               id="reservation-date"
+                                               data-lock="from"
+                                               data-advertisement-id="{{ advertisements.id }}"
+                                               data-lang="ru"
+                                               data-large-mode="true"
+                                               data-disabled-days="{{ advertisements.date_booking }}"
+                                               data-min-year="{{min_year}}"
+                                               data-max-year="{{max_year}}"
+                                               data-theme="my-style"
+                                               class="form-control"
+                                               readonly>
+
+                                    </div>
+                                </div>
+                                <div class="row mrg-top-15 mb-3">
+                                    <div class="col-lg-6 col-md-12 mt-4">
+                                        <label class="mb-4">Дней</label>
+                                        <div class="input-group">
+                                                <span class="input-group-btn">
+										 <button type="button" class="btn counter-btn theme-cl btn-number" disabled="disabled" data-type="minus" data-field="quant[1]">
+											 <i class="fa fa-minus"></i>
+										 </button>
+									        </span>
+                                            <input type="text" name="quant[1]" class="border-0 text-center form-control input-number" disabled data-min="1" data-max="3" value="1">
+                                            <span class="input-group-btn">
+											 <button type="button" class="btn counter-btn theme-cl btn-number" disabled="disabled" data-type="plus" data-field="quant[1]">
+											  <i class="fa fa-plus"></i>
+											 </button>
+									        </span>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6 col-md-12 mt-4">
+                                        <label class="mb-4">Людей</label>
+                                        <div class="input-group">
+                                                <span class="input-group-btn">
+										 <button type="button" class="btn counter-btn theme-cl btn-number" disabled="disabled" data-type="minus" data-field="quant[2]">
+											 <i class="fa fa-minus"></i>
+										 </button>
+									        </span>
+                                            <input type="text" name="quant[2]" class="border-0 text-center form-control input-number" data-min="1" data-max="10" value="1">
+                                            <span class="input-group-btn">
+											 <button type="button" class="btn counter-btn theme-cl btn-number" data-type="plus" data-field="quant[2]">
+											  <i class="fa fa-plus"></i>
+											 </button>
+									        </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn reservation btn-radius theme-btn full-width mrg-top-10">Забронировать</button>
+                            </div>
+                        </div>
+                        <!-- End: Schedule a Tour -->
+                        <!-- end author-verified-badge -->
+                        <div class="sidebar">
+                            <div class="widget-boxed mt-33 mt-5">
+
+                                <div class="widget-boxed-body">
+                                    <div class="sidebar-widget author-widget2" id="chats">
+                                        <div class="author-box clearfix" style=" position: relative; ">
+                                            <img src="{{advertisements.author.avatar.url}}" alt="author-image" class="author__img">
+                                            <h4 class="author__title">{{advertisements.author.username}}</h4>
+
+                                            <a href="{% if user_chat %} {% endif %}" id="writeMessageLink" style="{% if not user_chat %}display:none;{% endif %} position: absolute; bottom: 0;">
+                                                <span class="la la-phone">
+                                                    <i class="fa fa-send" aria-hidden="true"></i> К переписке
+                                                </span>
+                                            </a>
+
+                                        </div>
+                                        {% if not user_chat %}
+                                        {% include 'site/chat/add_chats.html' %}
+                                        {% endif %}
+                                        <ul class="author__contact">
+                                            <li><span class="la la-map-marker"><i class="fa fa-map-marker"></i></span>{{advertisements.address}}</li>
+                                            <li><span class="la la-phone">
+                                                <i class="fa fa-phone" aria-hidden="true"></i>
+                                            </span>
+                                                <a href="tel:{{advertisements.phone}}">{{advertisements.phone}}</a>
+                                            </li>
+                                        </ul>
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="main-search-field-2">
+                                <div class="widget-boxed mt-5">
+                                    <div class="widget-boxed-header">
+                                        <h4>Рекомендуем</h4>
+                                    </div>
+                                    <div class="widget-boxed-body">
+                                        <div class="recent-post">
+                                            {% for ad in nearest_ads_with_tariffs %}
+                                            <div class="recent-main">
+                                                <div class="recent-img">
+                                                    <a href="{% url 'publication:advertisement' ad.slug %}">
+                                                        <img src="{% if ad.gallery_image %}{{ ad.gallery_image.image.url }}{% else %}{% static 'site/website/images/blog/b-11.jpg' %}{% endif %}" alt="">
+                                                    </a>
+                                                </div>
+                                                <div class="info-img">
+                                                    <a href="{% url 'publication:advertisement' ad.slug %}">
+                                                        <h6>{{ad.name}}</h6>
+                                                    </a>
+                                                    <p>{{ad.price}}</p>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% if settings.reklama_image %}
+                                <!-- Start: Specials offer -->
+                                <div class="widget-boxed popular mt-5">
+
+                                    <div class="widget-boxed-body">
+                                        <a class="banner" href="{{settings.reklama_link}}" target="_blank" rel="noopener noreferrer">
+                                            <img src="{{settings.reklama_image.url}}" alt="">
+                                        </a>
+                                    </div>
+                                </div>
+                                <!-- End: Specials offer -->
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+            <!-- START SIMILAR PROPERTIES -->
+            <section class="similar-property featured portfolio p-0 bg-white-inner">
+                <div class="container">
+                    <h5>Объявления рядом</h5>
+                    <div class="row portfolio-items">
+                        {% for ad in nearest_ads %}
+                        <div class="item col-lg-4 col-md-6 col-xs-12 landscapes">
+                            <div class="project-single">
+                                <div class="project-inner project-head">
+                                    <div class="homes">
+                                        <!-- homes img -->
+                                        <a href="{% url 'publication:advertisement' ad.slug %}" class="homes-img">
+                                            <div class="homes-price">{{ad.price}}</div>
+                                            <img src="{% if ad.gallery_image %}{{ ad.gallery_image.image.url }}{% else %}{% static 'site/website/images/blog/b-11.jpg' %}{% endif %}" alt="home-1" class="img-responsive">
+                                        </a>
+                                    </div>
+                                </div>
+                                <!-- homes content -->
+                                <div class="homes-content">
+                                    <!-- homes address -->
+                                    <h3><a href="{% url 'publication:advertisement' ad.slug %}">{{ad.name}}</a></h3>
+                                    <p class="homes-address mb-3">
+                                        <a href="{% url 'publication:advertisement' ad.slug %}">
+                                            <i class="fa fa-map-marker"></i><span>{{ad.address}}</span>
+                                        </a>
+                                    </p>
+                                    <!-- homes List -->
+                                    <ul class="homes-list clearfix pb-3">
+                                        <li class="the-icons">
+                                            <i class="flaticon-bed mr-2" aria-hidden="true"></i>
+                                            <span>{{ad.bedrooms}} Спален</span>
+                                        </li>
+                                        <li class="the-icons">
+                                            <i class="flaticon-bathtub mr-2" aria-hidden="true"></i>
+                                            <span>{{ad.bathrooms}} Ванных</span>
+                                        </li>
+                                        <li class="the-icons">
+                                            <i class="flaticon-square mr-2" aria-hidden="true"></i>
+                                            <span>{{ad.area}} кв</span>
+                                        </li>
+                                        <li class="the-icons">
+                                            <i class="flaticon-car mr-2" aria-hidden="true"></i>
+                                            <span>{{ad.garages}} Гаражей</span>
+                                        </li>
+                                    </ul>
+                                    <div class="footer">
+                                        <a href="{% url 'publication:advertisement' ad.slug %}">
+                                            <img src="{{ad.author.avatar.url}}" alt="" class="mr-2"> {{ad.author.usernamel}}
+                                        </a>
+                                        <span>{{ad.create|date:"M d Y"}} </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+            <!-- END SIMILAR PROPERTIES -->
+        </div>
+    </section>
+</div>
+
+<!-- Modal --><!-- Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="successModalLabel">Бронь успешно создана!</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <p style="display: none;" id="booking-id"></p>
+                <div class="container">
+                    <!-- Описание товара -->
+                    <div class="row">
+                        <!-- Описание товара -->
+                        <div class="col-md-8">
+                            <div class="d-flex align-items-center mb-4">
+                                <img src="{{ advertisements.galleryadvertisement_set.first.image.url }}" alt="Изображение товара" class="img-thumbnail me-3" style="width: 100px; height: 100px;">
+                                <div>
+                                    <h4 id="productName">{{advertisements.name}}</h4>
+                                    <p id="productPrice">Стоимость: <strong>{{advertisements.price}} ₽</strong></p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Информация о дате и количестве -->
+                        <div class="col-md-4">
+                            <div class="border rounded p-2">
+                                <span>Дата заезда: <strong id="displayCheckInDate">—</strong></span></br>
+                                <span>Дата выезда: <strong id="displayCheckOutDate">—</strong></span></br>
+                                <span>Количество дней: <strong id="displayDays">0</strong></span></br>
+                                <span>Количество людей: <strong id="displayPeople">—</strong></span>
+                            </div>
+                        </div>
+                    </div>
+                    <form>
+                        <textarea name="informations" id="dopservice-information" rows="2" required="" ></textarea>
+                        <!-- Блок использования баланса и баллов -->
+                        <div class="d-flex justify-content-between mb-1 p-1 border rounded">
+                            <!-- Баланс -->
+                            <div class="col-6">
+                                <p class="mb-1">Ваш баланс: <strong id="balanceCash" data-balance-cash="{{user.balance}}">{{user.balance}}</strong> рублей</p>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="useBalance">
+                                    <label class="form-check-label" for="useBalance">Использовать баланс</label>
+                                </div>
+                            </div>
+                            <!-- Баллы -->
+                            <div class="col-6">
+                                <p class="mb-1">Ваши баллы: <strong id="balancePoints" data-balance-point="{{user.point}}">{{user.point}}</strong> баллов</p>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="usePoints">
+                                    <label class="form-check-label" for="usePoints">Использовать баллы</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Остаток к оплате -->
+
+                        <div class="banner-search-wrap">
+                            <div class="row">
+                                <div class="col-10">
+                                    <label for="remainingAmount" class="form-label">Остаток к оплате</label>
+                                    <input type="text" data-price="{{advertisements.price}}" class="form-control" id="remainingAmount" disabled>
+                                </div>
+                                <div class="col-2">
+                                    </br>
+                                    <button type="button" id="listsetvicebutton">Дополниельно</button>
+                                </div>
+                                <div class="col-12 hidden" id="listsetvice">
+                                    <div class="row">
+                                        <div class="col-12 mt-3 mb-3">
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" placeholder="Search for...">
+                                                <span class="input-group-btn">
+                                                    <button class="btn btn-primary" type="button"><i class="fa fa-search" aria-hidden="true"></i></button>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        {% for dop_servce in advertisements.dop_servce.all %}
+                                        <div class="col-4" data-dopservce-name="{{ dop_servce.name }}">
+                                            <div class="d-flex">
+                                                <div class="recent-img">
+                                                    <a>
+                                                        <img src="{% if dop_servce.image %}{{ dop_servce.image.url }}{% endif %}" alt="" style="height: 50px; margin-right: 5px;">
+                                                    </a>
+                                                </div>
+                                                <div class="info-img">
+                                                    <a>
+                                                        <h6>{{ dop_servce.name }}</h6>
+                                                    </a>
+
+                                                </div>
+                                            </div>
+                                            <hr>
+                                            <div class="row d-flex">
+                                                <div class="col-4">
+                                                    <p class="mt-1">₽ {{ dop_servce.price }}</p>
+                                                </div>
+                                                <div class="col-8">
+                                                    <div class="input-group">
+                                                        <input class="form-check-input  dopservice" type="checkbox" data-dopservice-id="{{ dop_servce.id }}"  data-dopservice-price="{{ dop_servce.price }}"  data-dopservice-amount="{{ dop_servce.price }}"  id="dop-тест админа">
+                                                        <span class="input-group-btn">
+                                                             <button type="button" class="btn counter-btn theme-cl btn-number" data-dopservice-id="{{ dop_servce.id }}" disabled="disabled" data-type="minus" data-field="quant[{{ dop_servce.id }}]">
+                                                                 <i class="fa fa-minus"></i>
+                                                             </button>
+                                                        </span>
+                                                        <input type="text"  data-dopservice-id="{{ dop_servce.id }}"  name="quant[{{ dop_servce.id }}]" class="border-0 text-center form-control input-number" data-min="0" data-max="1000000" value="0">
+                                                        <span class="input-group-btn">
+                                                             <button type="button" class="btn counter-btn theme-cl btn-number" data-dopservice-id="{{ dop_servce.id }}" data-type="plus" data-field="quant[{{ dop_servce.id }}]">
+                                                              <i class="fa fa-plus"></i>
+                                                             </button>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Личные данные -->
+                        <div id="personalDetails" class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="firstName" class="form-label">Имя</label>
+                                <input type="text" class="form-control" id="firstName" value="{{user.first_name}}" placeholder="Введите имя">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="lastName" class="form-label">Фамилия</label>
+                                <input type="text" class="form-control" id="lastName" value="{{user.last_name}}" placeholder="Введите фамилию">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="phoneNumber" class="form-label">Номер телефона</label>
+                                <input type="text" class="form-control" id="phoneNumber" value="{{user.phone}}" placeholder="Введите номер телефона">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">Электронная почта</label>
+                                <input type="email" class="form-control" id="email" value="{{user.email}}"  placeholder="Введите email">
+                            </div>
+                        </div>
+                        <div>
+
+                        </div>
+
+                        <!-- Кнопка оплаты -->
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary d-none">Оплатить</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Оплатить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- END SECTION PROPERTIES LISTING -->
+<!-- END SECTION BLOG -->
+{% endblock content %}
+{% block footerbottom %}
+<style>
+    div.datedropper.my-style .pick-lg-b .pick-sl:before, div.datedropper.my-style .pick-lg-h, div.datedropper.my-style .pick-m, div.datedropper.my-style .pick-submit, div.datedropper.my-style:before {
+        background-color: #274abb!important;
+    }
+    .btn {
+        position: relative;
+        z-index: 10;
+    }
+    .inner-pages .headings-2 .listing-title-bar h4 {
+        color: #274abb!important;
+    }
+    .widget-boxed-header h4 .fa {
+        color: #274abb!important;
+    }
+    .widget-boxed .input-group .fa {
+        color: #274abb!important;
+    }
+    .schedule .theme-btn, .theme-btn:focus, .theme-btn:hover, .theme-btn:active {
+        background: #274abb!important;
+    }
+    .sidebar-widget .author__contact li span i {
+        color: #274abb!important;
+    }
+    .inner-pages .blog .homes-content h5::after, .inner-pages .blog .blog-info.details h5::after, .inner-pages .blog .property-location h5::after, .inner-pages .blog .team.assigned h5::after, .inner-pages .carousel h5:after, .wprt-image-video.w50.pro h5:after, .similar-property h5:after, .ag-de .blog-section h5:after {
+        color: #274abb!important;
+        background-color: #274abb!important;
+    }
+
+    .slider-container {
+        height: 500px;
+        width: 100%;
+    }
+    model-viewer {
+        width: 100%;
+        height: -webkit-fill-available;
+
+        justify-content: center;
+        display: inline-flex
+    ;
+    }
+    .hidden {
+        display:none;
+        pointer-events: none;
+    }
+    .controls {
+        bottom: 20px;
+        display: flex;
+        padding: 0 20px;
+    }
+    button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    button:hover {
+        background-color: #0056b3;
+    }
+    div#booking {
+        background: #f5a4a44d;
+        margin: 0px -10px;
+        padding: 0px 10px;
+        border: 2px solid #f5a4a4ba;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        padding-top: 10px;
+    }
+    textarea#dopservice-information {
+        display: none;
+    }
+</style>
+
+<script src="{% static 'site/website/js/range-slider.js' %}"></script>
+
+<script src="{% static 'site/website/js/timedropper.js' %}"></script>
+<script src="{% static 'site/website/js/datedropper.js' %}"></script>
+<script src="{% static 'site/website/js/jqueryadd-count.js' %}"></script>
+
+<script src="{% static 'site/website/js/swiper.min.js' %}"></script>
+<script src="{% static 'site/website/js/inner.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    var swiper = new Swiper('.swiper-container', {
+        slidesPerView: 3,
+        slidesPerGroup: 1,
+        loop: true,
+        loopFillGroupWithBlank: true,
+        pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+        },
+        navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+        },
+        breakpoints: {
+            640: {
+                slidesPerView: 1,
+                spaceBetween: 20,
+            },
+            768: {
+                slidesPerView: 1,
+                spaceBetween: 40,
+            },
+            1024: {
+                slidesPerView: 5,
+                spaceBetween: 50,
+            },
+        }
+    });
+
+</script>
+
+<!-- Date Dropper Script-->
+<script>
+    document.getElementById('listsetvicebutton').addEventListener('click', function() {
+        var listsetvice = document.getElementById('listsetvice');
+        listsetvice.classList.toggle('hidden');  // Переключаем класс 'hidden'
+    });
+
+</script>
+<script>
+    $(document).ready(function () {
+        // Подключаем DateDropper
+        $('#reservation-date').dateDropper({
+            largeMode: true,
+            lang: 'ru',
+            disabledDays: ['12/12/2024', '12/13/2024'], // Прямо указываем запрещенные дни
+        });
+    });
+
+</script>
+<!-- Time Dropper Script-->
+<script>
+    this.$('#reservation-time').timeDropper({
+        setCurrentTime: false,
+        meridians: true,
+        primaryColor: "#e8212a",
+        borderColor: "#e8212a",
+        minutesInterval: '15'
+    });
+
+</script>
+
+<script>
+    $(document).ready(function() {
+        $('.popup-youtube, .popup-vimeo, .popup-gmaps').magnificPopup({
+            disableOn: 700,
+            type: 'iframe',
+            mainClass: 'mfp-fade',
+            removalDelay: 160,
+            preloader: false,
+            fixedContentPos: false
+        });
+    });
+
+</script>
+
+<script>
+    $('.slick-carousel').each(function() {
+        var slider = $(this);
+        $(this).slick({
+            infinite: true,
+            dots: false,
+            arrows: false,
+            centerMode: true,
+            centerPadding: '0'
+        });
+
+        $(this).closest('.slick-slider-area').find('.slick-prev').on("click", function() {
+            slider.slick('slickPrev');
+        });
+        $(this).closest('.slick-slider-area').find('.slick-next').on("click", function() {
+            slider.slick('slickNext');
+        });
+    });
+
+</script>
+
+<script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+<script>
+    // Собираем все элементы моделей, id которых начинаются с "model"
+    const models = Array.from(document.querySelectorAll('[id^="model"]'));
+    let currentIndex = 0;
+
+    // Функция для отображения текущей модели
+    function showModel(index) {
+        models.forEach((model, i) => {
+            model.classList.toggle('hidden', i !== index); // Скрываем все, кроме текущей
+        });
+    }
+
+    // Обработчики событий для кнопок
+    document.getElementById('prevBtn').addEventListener('click', () => {
+        currentIndex = (currentIndex - 1 + models.length) % models.length; // Уменьшаем индекс циклично
+        showModel(currentIndex);
+    });
+
+    document.getElementById('nextBtn').addEventListener('click', () => {
+        currentIndex = (currentIndex + 1) % models.length; // Увеличиваем индекс циклично
+        showModel(currentIndex);
+    });
+
+    // Изначально отображаем первую модель
+    showModel(currentIndex);
+
+</script>
+<script src="https://api-maps.yandex.ru/2.1/?apikey=78851096-f5ca-4b77-b7db-3a200b45f233&amp;lang=ru_RU" type="text/javascript"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const reservationDate = document.getElementById('reservation-date');
+        const bookingDiv = document.getElementById('booking');
+        const daysOff = bookingDiv.getAttribute('data-days-off').split(',').map(date => {
+            const [month, day, year] = date.trim().split('/');
+            return new Date(`${year}-${month}-${day}`);
+        });
+        const daysDisplay = document.getElementById('days');
+        const maxDaysDisplay = document.getElementById('max-days');
+        const inputNumber = document.querySelector('input[name="quant[1]"]');
+        const plusButton = document.querySelector('button[data-type="plus"]');
+        const minusButton = document.querySelector('button[data-type="minus"]');
+        const successModal = document.getElementById('successModal');
+        function parseInputDate(inputDate) {
+            const [day, month, year] = inputDate.split('/');
+            return new Date(`${year}-${month}-${day}`);
+        }
+        function findNextClosestDate(selectedDate) {
+            const selectedTimestamp = selectedDate.getTime();
+            let nextClosestDate = null;
+
+            daysOff.forEach(date => {
+                const dateTimestamp = date.getTime();
+                if (dateTimestamp > selectedTimestamp && (!nextClosestDate || dateTimestamp < nextClosestDate.getTime())) {
+                    nextClosestDate = date;
+                }
+            });
+
+            return nextClosestDate;
+        }
+        function calculateDaysBetween(startDate, endDate) {
+            const oneDay = 24 * 60 * 60 * 1000;
+            const differenceInTime = endDate.getTime() - startDate.getTime();
+            return Math.round(differenceInTime / oneDay);
+        }
+        function updateMaxDays(selectedDate) {
+            const parsedSelectedDate = parseInputDate(selectedDate.split('-').reverse().join('/'));
+            const nextClosestDate = findNextClosestDate(parsedSelectedDate);
+
+            if (nextClosestDate) {
+                const formattedDate = nextClosestDate.toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+                daysDisplay.textContent = formattedDate;
+
+                const daysDifference = calculateDaysBetween(parsedSelectedDate, nextClosestDate);
+                maxDaysDisplay.textContent = daysDifference;
+
+                // Устанавливаем значение data-max равным количеству дней
+                inputNumber.setAttribute('data-max', daysDifference);
+
+                // Убираем атрибут disabled из кнопок
+                plusButton.removeAttribute('disabled');
+                minusButton.removeAttribute('disabled');
+            } else {
+                // Если нет доступных дат после выбранной
+                daysDisplay.textContent = 'все даты свободны';
+                maxDaysDisplay.textContent = '10'; // Устанавливаем значение 10
+
+                // Устанавливаем data-max = 10
+                inputNumber.setAttribute('data-max', 10);
+
+                // Убираем атрибут disabled
+                plusButton.removeAttribute('disabled');
+                minusButton.removeAttribute('disabled');
+            }
+        }
+        reservationDate.addEventListener('change', () => {
+            const selectedDate = reservationDate.value;
+            if (selectedDate) {
+                updateMaxDays(selectedDate);
+            }
+        });
+        document.addEventListener('click', (event) => {
+            if (event.target.classList.contains('pick-submit')) {
+                const selectedDate = reservationDate.value;
+                if (selectedDate) {
+                    updateMaxDays(selectedDate);
+                    bookingDiv.classList.remove('hidden');
+
+                    // Заполнение модального окна
+                    const checkInDate = reservationDate.value;
+                    const numberOfDays = inputNumber.value;
+                    const totalPrice = parseFloat(numberOfDays) * parseFloat(document.getElementById('productPrice').textContent.split(':')[1].replace('₽', '').trim());
+
+                    document.getElementById('displayCheckInDate').textContent = checkInDate;
+                    document.getElementById('displayDays').textContent = numberOfDays;
+                    document.getElementById('remainingAmount').value = `${totalPrice.toFixed(2)} ₽`;
+                }
+            }
+        });
+        // Пример показа модального окна после клика
+        const showModalButton = document.querySelector('.pick-submit');
+        showModalButton.addEventListener('click', () => {
+            const bootstrapModal = new bootstrap.Modal(successModal);
+            bootstrapModal.show();
+        });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const mapElement = document.getElementById('map-yandex');
+        const longitude = parseFloat(mapElement.getAttribute('data-longitude'));
+        const latitude = parseFloat(mapElement.getAttribute('data-latitude'));
+
+        if (!isNaN(longitude) && !isNaN(latitude)) {
+            // Инициализация карты
+            ymaps.ready(function () {
+                const map = new ymaps.Map("map-yandex", {
+                    center: [longitude, latitude],
+                    zoom: 15
+                });
+
+                const placemark = new ymaps.Placemark([longitude, latitude], {
+                    hintContent: "Метка на карте",
+                    balloonContent: "Вы здесь"
+                });
+
+                map.geoObjects.add(placemark);
+            });
+        } else {
+            console.error('Некорректные координаты.');
+        }
+    });
+</script>
+
+<script>
+    // Обработчик для отправки данных бронирования
+    document.querySelector('.reservation').addEventListener('click', function (e) {
+        e.preventDefault();
+
+        // Получаем данные из формы
+        const advertisementId = document.getElementById('reservation-date').dataset.advertisementId;
+        let dataEntry = document.getElementById('reservation-date').value;
+        const days = parseInt(document.querySelector('input[name="quant[1]"]').value) || 1;
+        const people = parseInt(document.querySelector('input[name="quant[2]"]').value) || 1;
+
+        // Проверяем, указана ли дата въезда
+        if (!dataEntry) {
+            alert("Пожалуйста, выберите дату въезда.");
+            return;
+        }
+
+        // Преобразуем дату из DD/MM/YYYY в YYYY-MM-DD
+        const dateParts = dataEntry.split('/');
+        if (dateParts.length === 3) {
+            const day = dateParts[0];
+            const month = dateParts[1];
+            const year = dateParts[2];
+            dataEntry = `${year}-${month}-${day}`;
+        } else {
+            alert("Некорректный формат даты. Ожидается формат DD/MM/YYYY.");
+            return;
+        }
+
+        // Проверяем формат даты
+        const validDateRegex = /^\d{4}-\d{2}-\d{2}$/;
+        if (!validDateRegex.test(dataEntry)) {
+            alert("Ошибка преобразования даты. Пожалуйста, выберите корректную дату.");
+            return;
+        }
+
+        // AJAX POST запрос
+        fetch('/create-booking/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                advertisement_id: advertisementId,
+                days: days,
+                people: people,
+                data_entry: dataEntry
+            })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Ошибка при отправке данных: ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Передаем данные в модальное окно
+                    openBootstrapModal({
+                        bookingId: data.booking_id,
+                        checkInDate: dataEntry,
+                        checkOutDate: calculateCheckOutDate(dataEntry, days),
+                        days: days,
+                        people: people,
+                        amount: calculateAmount(days)
+                    });
+                } else {
+                    alert(`Ошибка: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert("Произошла ошибка при обработке запроса. Проверьте вводимые данные.");
+            });
+    });
+
+    // Функция для открытия модального окна Bootstrap
+    function openBootstrapModal({ bookingId, checkInDate, checkOutDate, days, people, amount }) {
+        const modalElement = document.getElementById('successModal');
+        const bookingIdElement = document.getElementById('booking-id');
+        const checkInDateElement = document.getElementById('displayCheckInDate');
+        const checkOutDateElement = document.getElementById('displayCheckOutDate');
+        const daysElement = document.getElementById('displayDays');
+        const peopleElement = document.getElementById('displayPeople');
+        const amountElement = document.getElementById('remainingAmount');
+
+        // Проверяем существование каждого элемента
+        if (!amountElement) {
+            console.error('Поле remainingAmount не найдено при обновлении');
+            return;
+        }
+
+        // Обновляем данные в модальном окне
+        bookingIdElement.textContent = bookingId;
+        checkInDateElement.textContent = checkInDate;
+        checkOutDateElement.textContent = checkOutDate;
+        daysElement.textContent = days;
+        peopleElement.textContent = people;
+
+        // Устанавливаем новое значение в поле remainingAmount
+        console.log('Устанавливаем новое значение в remainingAmount:', amount);
+        amountElement.value = amount; // Устанавливаем рассчитанную сумму
+
+        // Обновляем атрибут data-price
+        amountElement.setAttribute('data-price', amount); // Обновляем атрибут data-price
+
+        // Открываем модальное окно с помощью Bootstrap API
+        const modal = new bootstrap.Modal(modalElement);
+        modal.show();
+    }
+
+    // Функция для вычисления даты выезда
+    function calculateCheckOutDate(checkInDate, days) {
+        const date = new Date(checkInDate);
+        date.setDate(date.getDate() + days);
+        return date.toISOString().split('T')[0];
+    }
+
+    // Функция для расчета суммы
+    function calculateAmount(days) {
+        const amountElement = document.getElementById('remainingAmount');
+        const pricePerDay = parseFloat(amountElement.dataset.price) || 0; // Используем data-price для базовой цены
+        const totalAmount = (pricePerDay * days).toFixed(2);
+        console.log(`Рассчитанная сумма: ${totalAmount}`);
+        return totalAmount;
+    }
+
+    // Функция для получения CSRF токена из cookies
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+</script>
+<script>
+    $(".dropdown-filter").on('click', function() {
+
+        $(".explore__form-checkbox-list").toggleClass("filter-block");
+
+    });
+
+</script>
+
+
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Получаем все кнопки с data-type="minus" и data-type="plus"
+        const btnMinus = document.querySelectorAll('.btn-number[data-type="minus"]');
+        const btnPlus = document.querySelectorAll('.btn-number[data-type="plus"]');
+        const quantityInputs = document.querySelectorAll('.input-number'); // Все поля ввода с количеством
+        const dopservices = document.querySelectorAll('.dopservice'); // Все чекбоксы доп. услуг
+        const textarea = document.getElementById('dopservice-information'); // Получаем textarea для записи информации
+
+        // Массив для хранения информации об изменениях
+        let servicesData = [];
+
+        // Функция для обновления состояния чекбокса и изменения данных
+        function updateCheckboxState(input) {
+            const dopserviceId = input.getAttribute('data-dopservice-id');
+            const checkbox = document.querySelector(`input[data-dopservice-id="${dopserviceId}"]`); // Найдем чекбокс по dopservice-id
+            const quantity = parseInt(input.value) || 0;
+            const dopservice = document.querySelector(`input[data-dopservice-id="${dopserviceId}"]`);
+            const dopserviceAmount = parseFloat(dopservice.getAttribute('data-dopservice-amount'));
+
+            // Обновляем цену услуги на основе количества
+            const newPrice = dopserviceAmount * quantity; // Умножаем количество на базовую цену
+            dopservice.setAttribute('data-dopservice-price', newPrice.toFixed(2)); // Обновляем data-dopservice-price
+
+            // Если количество больше 0, ставим галочку в чекбокс
+            if (quantity > 0) {
+                checkbox.checked = true;
+            } else {
+                checkbox.checked = false;
+            }
+
+            console.log(`Чекбокс с data-dopservice-id: ${dopserviceId} обновлен, состояние: ${checkbox.checked ? 'отмечен' : 'неотмечен'}`);
+            console.log(`Цена доп. услуги с data-dopservice-id: ${dopserviceId} обновлена до: ${newPrice.toFixed(2)}`);
+
+            // Обновляем или добавляем информацию в массив
+            const existingService = servicesData.find(service => service.id === dopserviceId);
+            if (existingService) {
+                // Обновляем количество для существующего сервиса
+                existingService.count = quantity;
+                existingService.amount = newPrice.toFixed(2);
+            } else {
+                // Добавляем новый объект для нового сервиса
+                servicesData.push({
+                    id: dopserviceId,
+                    count: quantity,
+                    amount: newPrice.toFixed(2)
+                });
+            }
+
+            // Обновляем значение в textarea в формате JSON
+            textarea.value = JSON.stringify(servicesData);
+
+            // Вызываем updateRemainingAmount при изменении состояния чекбокса
+            updateRemainingAmount();
+        }
+
+        // Функция для отслеживания кликов на кнопку минус
+        btnMinus.forEach(button => {
+            button.addEventListener('click', function() {
+                const dopserviceId = button.getAttribute('data-dopservice-id');
+                const input = button.closest('.input-group').querySelector('.input-number');
+                console.log(`Нажата кнопка минус, data-dopservice-id: ${dopserviceId}, текущее количество: ${input.value}`);
+
+                // Обновляем состояние чекбокса и цену
+                updateCheckboxState(input);
+            });
+        });
+
+        // Функция для отслеживания кликов на кнопку плюс
+        btnPlus.forEach(button => {
+            button.addEventListener('click', function() {
+                const dopserviceId = button.getAttribute('data-dopservice-id');
+                const input = button.closest('.input-group').querySelector('.input-number');
+                console.log(`Нажата кнопка плюс, data-dopservice-id: ${dopserviceId}, текущее количество: ${input.value}`);
+
+                // Обновляем состояние чекбокса и цену
+                updateCheckboxState(input);
+            });
+        });
+
+        // Обработчик изменения вручную в поле ввода
+        quantityInputs.forEach(input => {
+            input.addEventListener('input', function() {
+                console.log(`Количество изменено вручную, data-dopservice-id: ${input.getAttribute('data-dopservice-id')}, текущее количество: ${input.value}`);
+
+                // Обновляем состояние чекбокса и цену
+                updateCheckboxState(input);
+            });
+        });
+
+        // Добавляем обработчик для всех чекбоксов доп. услуг
+        dopservices.forEach(service => {
+            service.addEventListener('change', updateRemainingAmount);
+        });
+    });
+</script>
+
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Считываем элементы
+        const remainingAmount = document.getElementById('remainingAmount');
+        const useBalance = document.getElementById('useBalance');
+        const usePoints = document.getElementById('usePoints');
+        const balanceCashElement = document.getElementById('balanceCash');
+        const balancePointsElement = document.getElementById('balancePoints');
+        let balanceCash = parseFloat(balanceCashElement.getAttribute('data-balance-cash'));
+        let balancePoints = parseFloat(balancePointsElement.getAttribute('data-balance-point'));
+
+        // Считываем все доп. услуги
+        const dopservices = document.querySelectorAll('.dopservice');
+
+        // Списания с баланса и баллов
+        let cashDeducted = 0;
+        let pointsDeducted = 0;
+
+        // Обновляем расчет оставшейся суммы
+        window.updateRemainingAmount = function () {
+            let remaining = parseFloat(remainingAmount.getAttribute('data-price'));
+
+            // Считываем стоимость выбранных доп. услуг
+            dopservices.forEach(service => {
+                if (service.checked) {
+                    remaining += parseFloat(service.getAttribute('data-dopservice-price'));
+                }
+            });
+
+            // Сбрасываем предыдущее списание
+            let newBalanceCash = balanceCash;
+            let newBalancePoints = balancePoints;
+
+            // Если выбран флажок для использования баланса
+            if (useBalance.checked) {
+                cashDeducted = Math.min(balanceCash, remaining); // Списываем не больше остатка
+                remaining -= cashDeducted;
+                newBalanceCash -= cashDeducted; // Обновляем баланс
+            } else {
+                cashDeducted = 0; // Если чекбокс снят, сбрасываем списание
+            }
+
+            // Если выбран флажок для использования баллов
+            if (usePoints.checked) {
+                pointsDeducted = Math.min(balancePoints, remaining); // Списываем не больше остатка
+                remaining -= pointsDeducted;
+                newBalancePoints -= pointsDeducted; // Обновляем баллы
+            } else {
+                pointsDeducted = 0; // Если чекбокс снят, сбрасываем списание
+            }
+
+            // Обновляем элементы на странице с новыми значениями
+            balanceCashElement.textContent = newBalanceCash.toFixed(2);
+            balancePointsElement.textContent = newBalancePoints.toFixed(2);
+
+            // Обновляем значение оставшейся суммы
+            remainingAmount.value = remaining.toFixed(2);
+        }
+
+        // Обработчики событий
+        useBalance.addEventListener('change', updateRemainingAmount);
+        usePoints.addEventListener('change', updateRemainingAmount);
+
+        // Добавляем обработчики для всех доп. услуг
+        dopservices.forEach(service => {
+            service.addEventListener('change', updateRemainingAmount);
+        });
+
+        // Инициализация при загрузке страницы
+        updateRemainingAmount();
+    });
+</script>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+    const submitButton = document.querySelector('.modal-footer .btn-primary');
+
+    submitButton.addEventListener('click', (e) => {
+        e.preventDefault();
+
+        // Извлекаем данные из модального окна
+        const bookingId = document.getElementById('booking-id').textContent.trim();
+        const useBalance = document.getElementById('useBalance').checked;
+        const usePoints = document.getElementById('usePoints').checked;
+        const remainingAmountInput = document.getElementById('remainingAmount');
+        const remainingAmount = parseFloat(remainingAmountInput.value) || 0;
+
+        // Получаем описание из textarea
+        const description = document.getElementById('dopservice-information').value.trim();
+
+        // Извлекаем выбранные дополнительные услуги
+        const selectedServices = [];
+        document.querySelectorAll('#listsetvice .form-check-input:checked').forEach(checkbox => {
+            selectedServices.push({
+                id: checkbox.getAttribute('data-dopservice-id'),
+                price: parseFloat(checkbox.getAttribute('data-dopservice-price'))
+            });
+        });
+
+        // Подготовка данных для отправки
+        const requestData = {
+            bookingId: bookingId,
+            useBalance: useBalance,
+            usePoints: usePoints,
+            remainingAmount: remainingAmount,
+            selectedServices: selectedServices,  // Добавляем выбранные услуги
+            description: description  // Добавляем описание
+        };
+
+        console.log("Отправляем данные для обновления бронирования:", requestData);
+
+        // AJAX-запрос для обновления бронирования
+        fetch('/update-booking/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(requestData)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Ошибка при отправке данных: ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    alert(data.message || "Оплата успешно проведена!");
+
+                    // Обновляем остаток и списания
+                    updateModalFields(data);
+                } else {
+                    alert(`Ошибка: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert(`Произошла ошибка: ${error.message}`);
+            });
+    });
+
+    // Функция для обновления полей модального окна
+    function updateModalFields(data) {
+        const amountBalanceUsedElement = document.getElementById('balanceCash');
+        const amountPointsUsedElement = document.getElementById('balancePoints');
+        const remainingAmountInput = document.getElementById('remainingAmount');
+
+        // Обновляем данные в модальном окне
+        if (amountBalanceUsedElement) {
+            const balanceCash = parseFloat(amountBalanceUsedElement.textContent);
+            const newBalance = balanceCash - data.amount_balance;
+            amountBalanceUsedElement.textContent = newBalance.toFixed(2);
+        } else {
+            console.error('Элемент с ID "balanceCash" не найден.');
+        }
+
+        if (amountPointsUsedElement) {
+            const points = parseFloat(amountPointsUsedElement.textContent);
+            const newPoints = points - data.amount_point;
+            amountPointsUsedElement.textContent = newPoints.toFixed(2);
+        } else {
+            console.error('Элемент с ID "balancePoints" не найден.');
+        }
+
+        if (remainingAmountInput) {
+            remainingAmountInput.value = data.remaining_amount.toFixed(2);
+        } else {
+            console.error('Элемент с ID "remainingAmount" не найден.');
+        }
+    }
+
+    // Функция для получения CSRF-токена
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+});
+
+
+
+</script>
+<script src="{% static 'site/website/js/search.js' %}"></script>
+<script src="{% static 'site/website/js/searched.js' %}"></script>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.querySelector('#add-review-form'); // Форма добавления отзыва
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            // Собираем данные из формы
+            const formData = new FormData(form);
+            const advertisementId = form.getAttribute('data-advertisement-id');
+            formData.append('advertisement_id', advertisementId);
+
+            // Отправляем данные через AJAX
+            fetch('/create-review/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value // CSRF токен
+                },
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        showNotification('Ошибка: ' + data.error, 'error');
+                    } else {
+                        showNotification('Отзыв успешно добавлен!', 'success');
+
+                        // Заменяем форму текстом "Вы оставили отзыв"
+                        form.innerHTML = '<p class="success-message">Вы оставили отзыв.</p>';
+
+                        // Обновляем список отзывов через jQuery
+                        $('#reviews-list').load(location.href + ' #reviews-list > *');
+                    }
+                })
+                .catch(error => console.error('Ошибка:', error));
+        });
+
+        // Функция для показа уведомления
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerText = message;
+
+            // Добавляем уведомление в тело документа
+            document.body.appendChild(notification);
+
+            // Удаляем уведомление через 3 секунды
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+    });
+
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Добавляем обработчик событий для кликов по ссылкам пагинации
+        document.querySelector('#reviews-list').addEventListener('click', function (e) {
+            // Проверяем, что клик произошёл по ссылке пагинации
+            if (e.target.tagName === 'A' && e.target.closest('.pagination')) {
+                e.preventDefault(); // Предотвращаем переход по ссылке
+
+                const url = e.target.getAttribute('href'); // Получаем URL из ссылки
+
+                // Загружаем новые данные с сервера
+                $('#reviews-list').load(url + ' #reviews-list > *', function () {
+                    console.log('Отзывы обновлены');
+                });
+            }
+        });
+    });
+
+</script>
+{% endblock footerbottom %}

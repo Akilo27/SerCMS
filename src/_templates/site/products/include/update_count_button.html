@@ -1,0 +1,96 @@
+{% load static generals_tag %}
+
+
+
+<div class="quantity product-quantity d-inline-flex display-flex" data-product="{{ selected.id }}" data-price=" {% if selected.variety %}
+                                         {% if valute != selected.product.valute %}
+                                         {% currency_conversion_for_products request selected.variety.price  selected.product.valute.id %}
+                                         {% else %}
+                                         {{ selected.variety.price  }}
+                                         {% endif %}
+                                     {% else %}
+                                         {% if valute != selected.product.valute %}
+                                         {% currency_conversion_for_products request selected.product.price selected.product.valute.id %}
+                                         {% else %}
+                                         {{ selected.product.price }}
+                                         {% endif %}
+                                     {% endif %}">
+
+    <!-- First Type Quantity Control -->
+       <div class="firsttype" {% if selected.product.typeofchoice == 1 or selected.product.typeofchoice == 3  %} style="display: block" {% else %}style="display: none" {% endif %}>
+        <button type="button" class="icon-btn sub qtyminus qty-btn" id="qtyminus-{{ selected.id }}-firsttype" data-type="minus" style="font-size: 25px;">
+            -
+        </button>
+        <input type="text" name="quantity" value="{{ selected.quantity }}" maxlength="{{ selected.product.quantity }}" class="qty-input qty" id="qty-input-{{ selected.id }}-firsttype">
+        <button type="button" class="icon-btn add qtyplus qty-btn" id="qtyplus-{{ selected.id }}-firsttype" data-type="plus" style="font-size: 25px;">
+            +
+        </button>
+    </div>
+
+    <!-- Second Type Quantity Control (Quantity in weight) -->
+    <div class="secondtype" {% if selected.product.typeofchoice == 2  %} style="display: block" {% else %}style="display: none"{% endif %}>
+        <button type="button" class="icon-btn sub qtyminus qty-btn" id="qtyminus-{{ selected.id }}-secondtype" data-type="minus" style="font-size: 25px;">
+            -
+        </button>
+        <input type="text" name="quantity" value="{{ selected.quantity|floatformat:2 }}" maxlength="{{ selected.product.quantity }}" class="qty-input qty" id="qty-input-{{ selected.id }}-secondtype">
+        <button type="button" class="icon-btn add qtyplus qty-btn" id="qtyplus-{{ selected.id }}-secondtype" data-type="plus" style="font-size: 25px;">
+            +
+        </button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        (function() {
+            const productId = "{{ selected.id }}";
+            const productWeight = parseFloat("{{ selected.product.weight }}");
+            const productMaxQuantity = parseInt("{{ selected.product.quantity }}");
+
+            // Логика для первой группы инпутов (firsttype)
+            const firstTypeQtyInput = document.getElementById('qty-input-' + productId + '-firsttype');
+            const firstTypePlusButton = document.getElementById('qtyplus-' + productId + '-firsttype');
+            const firstTypeMinusButton = document.getElementById('qtyminus-' + productId + '-firsttype');
+
+            firstTypePlusButton.addEventListener('click', function () {
+                let currentValue = parseInt(firstTypeQtyInput.value) || 1;
+                if (currentValue < productMaxQuantity) {
+                    currentValue += 1;
+                    firstTypeQtyInput.value = currentValue;
+                }
+            });
+
+            firstTypeMinusButton.addEventListener('click', function () {
+                let currentValue = parseInt(firstTypeQtyInput.value) || 1;
+                if (currentValue > 1) {
+                    currentValue -= 1;
+                    firstTypeQtyInput.value = currentValue;
+                }
+            });
+
+            // Логика для второй группы инпутов (secondtype)
+            const secondTypeQtyInput = document.getElementById('qty-input-' + productId + '-secondtype');
+            const secondTypePlusButton = document.getElementById('qtyplus-' + productId + '-secondtype');
+            const secondTypeMinusButton = document.getElementById('qtyminus-' + productId + '-secondtype');
+
+            // Устанавливаем начальное значение как количество умноженное на вес
+            let initialValue = parseFloat("{{ selected.quantity }}") * productWeight;
+            secondTypeQtyInput.value = initialValue.toFixed(2) + ' грамм'; // Показываем с "грамм"
+
+            secondTypePlusButton.addEventListener('click', function () {
+                let currentValue = parseFloat(secondTypeQtyInput.value) || 0;
+                currentValue += productWeight;  // Прибавляем вес товара
+                if (currentValue <= productMaxQuantity * productWeight) { // Ограничиваем максимальным количеством
+                    secondTypeQtyInput.value = currentValue.toFixed(2) + ' грамм'; // Обновляем с "грамм"
+                }
+            });
+
+            secondTypeMinusButton.addEventListener('click', function () {
+                let currentValue = parseFloat(secondTypeQtyInput.value) || 0;
+                currentValue -= productWeight;  // Уменьшаем на вес товара
+                if (currentValue >= productWeight) { // Минимум — это один вес товара
+                    secondTypeQtyInput.value = currentValue.toFixed(2) + ' грамм'; // Обновляем с "грамм"
+                }
+            });
+        })();
+    });
+</script>

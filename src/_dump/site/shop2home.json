@@ -1,0 +1,331 @@
+[
+  {
+    "page": "home",
+    "fields": {
+      "slide_1_image": {
+        "field": "",
+        "info": "/_media/jsontemplate/slide-3.jpg",
+        "type": "media"
+      },
+      "slide_1_title": {
+        "field": "Кроссовки для бега",
+        "info": [],
+        "type": "information"
+      },
+      "slide_1_description": {
+        "field": "Новое поступление",
+        "info": [],
+        "type": "information"
+      },
+      "slide_1_button": {
+        "field": "Каталог",
+        "info": [],
+        "type": "information"
+      },
+      "slide_1_button_link": {
+        "field": "#",
+        "info": [],
+        "type": "information"
+      },
+      "slide_2_image": {
+        "field": "Сертифицированая компания",
+        "info": "/_media/jsontemplate/slide-1.jpg",
+        "type": "media"
+      },
+      "slide_2_title": {
+        "field": "Образы",
+        "info": [],
+        "type": "information"
+      },
+      "slide_2_description": {
+        "field": "Просто выберете повод или стиль",
+        "info": [],
+        "type": "information"
+      },
+      "slide_2_button": {
+        "field": "Каталог",
+        "info": [],
+        "type": "information"
+      },
+      "slide_2_button_link": {
+        "field": "#",
+        "info": [],
+        "type": "information"
+      },
+      "slide_3_image": {
+        "field": "Сертифицированая компания",
+        "info": "/_media/jsontemplate/2.jpg",
+        "type": "media"
+      },
+      "slide_3_title": {
+        "field": "Аксессуары",
+        "info": [],
+        "type": "information"
+      },
+      "slide_3_description": {
+        "field": "<strong>Новинки</strong> 2025",
+        "info": [],
+        "type": "information"
+      },
+      "slide_3_button": {
+        "field": "Каталог",
+        "info": [],
+        "type": "information"
+      },
+      "slide_3_button_link": {
+        "field": "#",
+        "info": [],
+        "type": "information"
+      },
+      "banner_1_image": {
+        "field": "",
+        "info": "/_media/jsontemplate/1.jpg",
+        "type": "media"
+      },
+      "banner_1_title": {
+        "field": "Кеды Nike",
+        "info": [],
+        "type": "information"
+      },
+      "banner_1_description": {
+        "field": "<strong>Только</strong> оригинальная продукция",
+        "info": [],
+        "type": "information"
+      },
+      "banner_1_button": {
+        "field": "Открыть каталог",
+        "info": [],
+        "type": "information"
+      },
+      "banner_1_button_link": {
+        "field": "#",
+        "info": [],
+        "type": "information"
+      },
+      "banner_2_image": {
+        "field": "Сертифицированая компания",
+        "info": "/_media/jsontemplate/2-1-1.jpg",
+        "type": "media"
+      },
+      "banner_2_title": {
+        "field": "Часы для любых занятий",
+        "info": [],
+        "type": "information"
+      },
+      "banner_2_description": {
+        "field": "<strong>Премиальные</strong> материалы и высокое качество",
+        "info": [],
+        "type": "information"
+      },
+      "banner_2_button": {
+        "field": "Открыть каталог",
+        "info": [],
+        "type": "information"
+      },
+      "banner_2_button_link": {
+        "field": "#",
+        "info": [],
+        "type": "information"
+      },
+      "banner_3_image": {
+        "field": "Сертифицированая компания",
+        "info": "/_media/jsontemplate/2-4.jpg",
+        "type": "media"
+      },
+      "banner_3_title": {
+        "field": "Ремни из натуральной кожи",
+        "info": [],
+        "type": "information"
+      },
+      "banner_3_description": {
+        "field": "Универсальны для любого образа",
+        "info": [],
+        "type": "information"
+      },
+      "banner_3_button": {
+        "field": "Открыть каталог",
+        "info": [],
+        "type": "information"
+      },
+      "banner_3_button_link": {
+        "field": "#",
+        "info": [],
+        "type": "information"
+      },
+      "how_we_work_1_title": {
+        "field": "Бесплатная доставка и возврат товара",
+        "info": [],
+        "type": "information"
+      },
+      "how_we_work_1_description": {
+        "field": "Для всех заказов свыше 5000 рублей",
+        "info": [],
+        "type": "information"
+      },
+      "how_we_work_2_title": {
+        "field": "Безопастная оплата",
+        "info": [],
+        "type": "information"
+      },
+      "how_we_work_2_description": {
+        "field": "Мы гарантируем безопастную оплату",
+        "info": [],
+        "type": "information"
+      },
+      "how_we_work_3_title": {
+        "field": "Гарантия возврата денег",
+        "info": [],
+        "type": "information"
+      },
+      "how_we_work_3_description": {
+        "field": "Любой возврат в течение 30 дней",
+        "info": [],
+        "type": "information"
+      },
+      "how_we_work_4_title": {
+        "field": "Служба поддержки клиентов",
+        "info": [],
+        "type": "information"
+      },
+      "how_we_work_4_description": {
+        "field": "Позвоните или напишите нам по электронной почте в режиме 24/7",
+        "info": [],
+        "type": "information"
+      },
+      "hot_ones_title": {
+        "field": "Горячие Предложения Дня",
+        "info": [],
+        "type": "information"
+      },
+      "hot_ones": {
+        "field": "",
+        "info": [
+          "abcecaff-fc03-4bcc-b8a5-a88f47ac1baa",
+          "3e9665aa-e81f-499d-8638-df30ea6912f1"
+        ],
+        "type": "products"
+      },
+      "top_20_title": {
+        "field": "Топ-20 бестселлеров",
+        "info": [],
+        "type": "information"
+      },
+      "top_20": {
+        "field": "",
+        "info": [
+          "abcecaff-fc03-4bcc-b8a5-a88f47ac1baa",
+          "3e9665aa-e81f-499d-8638-df30ea6912f1"
+        ],
+        "type": "products"
+      },
+      "vendors_title": {
+        "field": "Лучшие поставщики",
+        "info": [],
+        "type": "information"
+      },
+      "vendors": {
+        "field": "",
+        "info": [
+          1
+        ],
+        "type": "vendors"
+      },
+      "bottom_banner_title": {
+        "field": "Рекомендуем посмотреть",
+        "info": [],
+        "type": "information"
+      },
+      "bottom_banner_1_image": {
+        "field": "",
+        "info": "/_media/jsontemplate/2.jpg",
+        "type": "media"
+      },
+      "bottom_banner_1_title": {
+        "field": "А вы готовы к пляжному сезону?",
+        "info": [],
+        "type": "information"
+      },
+      "bottom_banner_1_description": {
+        "field": "Успейте заказать со скидкой 30%",
+        "info": [],
+        "type": "information"
+      },
+      "bottom_banner_1_button": {
+        "field": "Открыть каталог",
+        "info": [],
+        "type": "information"
+      },
+      "bottom_banner_1_button_link": {
+        "field": "#",
+        "info": [],
+        "type": "information"
+      },
+      "bottom_banner_2_image": {
+        "field": "Сертифицированая компания",
+        "info": "/_media/jsontemplate/11.jpg",
+        "type": "media"
+      },
+      "bottom_banner_2_title": {
+        "field": "Для любителей активного отдыха",
+        "info": [],
+        "type": "information"
+      },
+      "bottom_banner_2_description": {
+        "field": "<strong>Коньки</strong> по выгодным ценам",
+        "info": [],
+        "type": "information"
+      },
+      "bottom_banner_2_button": {
+        "field": "Открыть каталог",
+        "info": [],
+        "type": "information"
+      },
+      "bottom_banner_2_button_link": {
+        "field": "#",
+        "info": [],
+        "type": "information"
+      },
+      "bottom_products": {
+        "field": "#",
+        "info": [
+          "abcecaff-fc03-4bcc-b8a5-a88f47ac1baa",
+          "3e9665aa-e81f-499d-8638-df30ea6912f1"
+        ],
+        "type": "products"
+      },
+      "selected_products_title": {
+        "field": "Избранные товары",
+        "info": [],
+        "type": "information"
+      },
+      "selected_products_link": {
+        "field": "#",
+        "info": [],
+        "type": "information"
+      },
+      "selected_products_link_text": {
+        "field": "Все товары",
+        "info": [],
+        "type": "information"
+      },
+      "selected_products_quickview": {
+        "field": "Быстрый просмотр",
+        "info": [],
+        "type": "information"
+      },
+      "selected_products_button": {
+        "field": "В корзину",
+        "info": [],
+        "type": "information"
+      },
+      "selected_products": {
+        "field": "",
+        "info": [
+          "abcecaff-fc03-4bcc-b8a5-a88f47ac1baa",
+          "3e9665aa-e81f-499d-8638-df30ea6912f1"
+        ],
+        "type": "products"
+      }
+    }
+  }
+]

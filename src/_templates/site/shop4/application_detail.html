@@ -1,0 +1,598 @@
+{% extends 'wolmart/base_profile.html' %}
+{% load static generals_tag %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+
+{% block content %}
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-body p-4">
+            <div class="account-details-form">
+                <table class="table">
+                    <tbody style="vertical-align:sub;">
+                    <tr>
+                        <td class="product-total-price">
+                            <h6 class="price">{% trans 'Тип' %} </h6>
+                        </td>
+                        <td class="product-info">
+                            <h6 class="name">
+                                <a previewlistener="true">
+                                    {{application.get_type_display}}
+                                </a>
+                            </h6>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="product-total-price">
+                            <h6 class="price">{% trans 'Информация о товаре' %}</h6>
+                        </td>
+                        <td class="product-info">
+                            <h6 class="name">
+                                <a previewlistener="true">
+                                    {{application.products.name}}
+                                </a>
+                            </h6>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="product-total-price">
+                            <h6 class="price">{% trans 'Дата' %}</h6>
+                        </td>
+                        <td class="product-info">
+                            <h6 class="name">
+                                <a previewlistener="true">
+                                    {{application.create}}
+                                </a>
+                            </h6>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="product-review-tabs-content">
+                <ul class="nav product-tab-nav" id="ReviewTab" role="tablist">
+                    <li role="presentation">
+                        <a class="active" id="information-tab" data-bs-toggle="pill" href="#information" role="tab"
+                           aria-controls="information" aria-selected="true">{% trans 'Переписка по товару' %}</a>
+                    </li>
+                </ul>
+                <div class="tab-content product-tab-content" id="ReviewTabContent">
+                    <div class="tab-pane fade show active" id="information" role="tabpanel"
+                         aria-labelledby="information-tab">
+                        <div class="product-information">
+                            <div class="information-content">
+
+                                <div class="reviews-content">
+                                    <!-- Review Form Start  -->
+                                    <form id="commentForm" method="post" enctype="multipart/form-data"
+                                          action="{% url 'shop:add_comment_aplication' application.id %}">
+                                        {% csrf_token %}
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="single-form">
+                                                    {{ form.content }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <div class="single-form">
+                                                    {{ form.files }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="single-form">
+                                                    <button type="submit" class="btn pull-right btn-hover-primary">
+                                                        {% trans 'Отправить' %}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+
+                                </div>
+                                <!-- Review Form End  -->
+                                <hr>
+                                <!-- Review Comment Start  -->
+                                <div class="reviews-comment" id="list-ticket">
+                                    {% for comments in ticket_comments %}
+                                    <!-- Single Comment Start  -->
+                                    <div class="single-reviews">
+                                        <div class="comment-author">
+                                            <img src="{% if comments.author.avatar %}{{comments.author.avatar.url}}{% endif %}"
+                                                 width="100" height="100" alt="author">
+                                        </div>
+                                        <div class="comment-content">
+                                            <div class="author-name-rating">
+                                                <h6 class="name">{{comments.author.username}}</h6>
+                                            </div>
+                                            <span class="date">{{comments.date}}</span>
+                                            <p>
+                                                {{comments.content}}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    {% if comments.applicationsmedia.all %}
+                                    <div class="col flex-column">
+                                        {% for media in comments.applicationsmedia.all %}
+                                        <a class="btn btn-primary btn-hover-dark" href="{{ media.file.url }}">
+                                            <i class="fa fa-file-o"></i>
+                                            {{ media.get_file_name }}
+                                        </a>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                    <!-- Single Comment End  -->
+                                    {% endfor %}
+                                    {% include 'wolmart/include/paginations.html' with items=ticket_comments %}
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    input#id_files {
+        padding-top: 10px;
+        background: #ffffff00;
+        border: 0;
+    }
+    .hidden{
+        display:none!important;
+    }
+</style>
+<style>
+    #reiting{
+        display: none;
+    }
+    .img-sm {
+        width: 46px;
+        height: 46px;
+    }
+
+    .panel {
+        box-shadow: 0 2px 0 rgba(0,0,0,0.075);
+        border-radius: 0;
+        border: 0;
+        margin-bottom: 15px;
+    }
+
+    .panel .panel-footer, .panel>:last-child {
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+
+    .panel .panel-heading, .panel>:first-child {
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+    }
+
+    .panel-body {
+        padding: 25px 20px;
+    }
+
+
+    .media-block .media-left {
+        display: block;
+        float: left;
+        padding: 10px;
+    }
+
+    .media-block .media-right {
+        float: right
+    }
+
+    .media-block .media-body {
+        display: block;
+        overflow: hidden;
+        width: auto
+    }
+
+    .middle .media-left,
+    .middle .media-right,
+    .middle .media-body {
+        vertical-align: middle
+    }
+
+    .thumbnail {
+        border-radius: 0;
+        border-color: #e9e9e9
+    }
+
+    .tag.tag-sm, .btn-group-sm>.tag {
+        padding: 5px 10px;
+    }
+
+    .tag:not(.label) {
+        background-color: #fff;
+        padding: 6px 12px;
+        border-radius: 2px;
+        border: 1px solid #cdd6e1;
+        font-size: 12px;
+        line-height: 1.42857;
+        vertical-align: middle;
+        -webkit-transition: all .15s;
+        transition: all .15s;
+    }
+    .text-muted, a.text-muted:hover, a.text-muted:focus {
+        color: #acacac;
+    }
+    .text-sm {
+        font-size: 0.9em;
+    }
+    .text-5x, .text-4x, .text-5x, .text-2x, .text-lg, .text-sm, .text-xs {
+        line-height: 1.25;
+    }
+
+    .btn-trans {
+        background-color: transparent;
+        border-color: transparent;
+        color: #929292;
+    }
+
+    .btn-icon {
+        padding-left: 9px;
+        padding-right: 9px;
+    }
+
+    .btn-sm, .btn-group-sm>.btn, .btn-icon.btn-sm {
+        padding: 5px 10px !important;
+    }
+
+    .mar-top {
+        margin-top: 15px;
+    }
+    form.add-to-cart-form {
+        display: flex;
+    }
+</style>
+<style>
+    .rating .fa.fa-star{
+        color: #ffbb00;
+        padding: 0px 3px;
+    }
+    .pd-wrap {
+        padding: 40px 0;
+        font-family: 'Poppins', sans-serif;
+    }
+    .heading-section {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .sub-heading {
+        font-family: 'Poppins', sans-serif;
+        font-size: 12px;
+        display: block;
+        font-weight: 600;
+        color: #2e9ca1;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+    .heading-section h2 {
+        font-size: 32px;
+        font-weight: 500;
+        padding-top: 10px;
+        padding-bottom: 15px;
+        font-family: 'Poppins', sans-serif;
+    }
+    .user-img {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        position: relative;
+        min-width: 80px;
+        background-size: 100%;
+    }
+    .carousel-testimonial .item {
+        padding: 30px 10px;
+    }
+    .quote {
+        position: absolute;
+        top: -23px;
+        color: #2e9da1;
+        font-size: 27px;
+    }
+    .name {
+        margin-bottom: 0;
+        line-height: 14px;
+        font-size: 17px;
+        font-weight: 500;
+    }
+    .position {
+        color: #adadad;
+        font-size: 14px;
+    }
+    .owl-nav button {
+        position: absolute;
+        top: 50%;
+        transform: translate(0, -50%);
+        outline: none;
+        height: 25px;
+    }
+    .owl-nav button svg {
+        width: 25px;
+        height: 25px;
+    }
+    .owl-nav button.owl-prev {
+        left: 25px;
+    }
+    .owl-nav button.owl-next {
+        right: 25px;
+    }
+    .owl-nav button span {
+        font-size: 45px;
+    }
+    .product-thumb .item img {
+        height: 100px;
+    }
+    .product-name {
+        font-size: 22px;
+        font-weight: 500;
+        line-height: 22px;
+        margin-bottom: 4px;
+    }
+    .product-price-discount {
+        font-size: 22px;
+        font-weight: 400;
+        padding: 10px 0;
+        clear: both;
+    }
+    .product-price-discount span.line-through {
+        text-decoration: line-through;
+        margin-left: 10px;
+        font-size: 14px;
+        vertical-align: middle;
+        color: #a5a5a5;
+    }
+    .display-flex {
+        display: flex;
+    }
+    .align-center {
+        align-items: center;
+    }
+    .product-info {
+        width: 100%;
+    }
+    .reviews-counter {
+        font-size: 13px;
+    }
+    .reviews-counter span {
+        vertical-align: -2px;
+    }
+    .rate {
+        float: left;
+        padding: 0 10px 0 0;
+    }
+    .rate:not(:checked) > input {
+        position:absolute;
+        top:-9999px;
+    }
+    .rate:not(:checked) > label {
+        float: right;
+        width: 15px;
+        overflow: hidden;
+        white-space: nowrap;
+        cursor: pointer;
+        font-size: 21px;
+        color:#ccc;
+        margin-bottom: 0;
+        line-height: 21px;
+    }
+    .rate:not(:checked) > label:before {
+        content: '\2605';
+    }
+    .rate > input:checked ~ label {
+        color: #ffc700;
+    }
+    .rate:not(:checked) > label:hover,
+    .rate:not(:checked) > label:hover ~ label {
+        color: #deb217;
+    }
+    .rate > input:checked + label:hover,
+    .rate > input:checked + label:hover ~ label,
+    .rate > input:checked ~ label:hover,
+    .rate > input:checked ~ label:hover ~ label,
+    .rate > label:hover ~ input:checked ~ label {
+        color: #c59b08;
+    }
+    .product-dtl p {
+        font-size: 14px;
+        line-height: 24px;
+        color: #7a7a7a;
+    }
+    .product-dtl .form-control {
+        font-size: 15px;
+    }
+    .product-dtl label {
+        line-height: 16px;
+        font-size: 15px;
+    }
+    .form-control:focus {
+        outline: none;
+        box-shadow: none;
+    }
+    .product-count {
+        margin-top: 15px;
+    }
+    .product-count .qtyminus,
+    .product-count .qtyplus {
+        width: 34px;
+        height: 34px;
+        background: #dc3545;
+        text-align: center;
+        font-size: 19px;
+        line-height: 36px;
+        color: #fff;
+        cursor: pointer;
+    }
+    .product-count .qtyminus {
+        border-radius: 3px 0 0 3px;
+    }
+    .product-count .qtyplus {
+        border-radius: 0 3px 3px 0;
+    }
+    .product-count .qty {
+        width: 60px;
+        text-align: center;
+    }
+    .round-black-btn {
+        border-radius: 4px;
+        background: #212529;
+        color: #fff;
+        padding: 7px 45px;
+        display: inline-block;
+        margin-top: 20px;
+        border: solid 2px #212529;
+        transition: all 0.5s ease-in-out 0s;
+    }
+    .round-black-btn:hover,
+    .round-black-btn:focus {
+        background: transparent;
+        color: #212529;
+        text-decoration: none;
+    }
+
+    .product-info-tabs {
+        margin-top: 25px;
+    }
+    .product-info-tabs .nav-tabs {
+        border-bottom: 2px solid #d8d8d8;
+    }
+    .product-info-tabs .nav-tabs .nav-item {
+        margin-bottom: 0;
+    }
+    .product-info-tabs .nav-tabs .nav-link {
+        border: none;
+        border-bottom: 2px solid transparent;
+        color: #323232;
+    }
+    .product-info-tabs .nav-tabs .nav-item .nav-link:hover {
+        border: none;
+    }
+    .product-info-tabs .nav-tabs .nav-item.show .nav-link,
+    .product-info-tabs .nav-tabs .nav-link.active,
+    .product-info-tabs .nav-tabs .nav-link.active:hover {
+        border: none;
+        border-bottom: 2px solid #d8d8d8;
+        font-weight: bold;
+    }
+    .product-info-tabs .tab-content .tab-pane {
+        padding: 30px 20px;
+        font-size: 15px;
+        line-height: 24px;
+        color: #7a7a7a;
+    }
+    .review-form .form-group {
+        clear: both;
+    }
+    .mb-20 {
+        margin-bottom: 20px;
+    }
+
+    .review-form .rate {
+        float: none;
+        display: inline-block;
+    }
+    .review-heading {
+        font-size: 24px;
+        font-weight: 600;
+        line-height: 24px;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        color: #000;
+    }
+    .review-form .form-control {
+        font-size: 14px;
+    }
+    .review-form input.form-control {
+        height: 40px;
+    }
+    .review-form textarea.form-control {
+        resize: none;
+    }
+    .review-form .round-black-btn {
+        text-transform: uppercase;
+        cursor: pointer;
+    }
+    .form-control{
+        height: 160px;
+    }
+    .single-form textarea{
+        display: block;
+    width: 100%;
+    padding: .375rem .75rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #212529;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    -moz-appearance: none;
+    appearance: none;
+    border-radius: .375rem;
+    margin: 0 0 15px 0;
+    }
+
+    .btn:hover{
+        background-color:#1f2226;
+        color: #fff;
+        transition: 0.3s;
+        -webkit-transition: 0.3s;
+        -moz-transition: 0.3s;
+        -ms-transition: 0.3s;
+        -o-transition: 0.3s;
+    }
+</style>
+<script>
+
+    function initialize() {
+        // Обновление радио-кнопок на основе значения поля ввода рейтинга
+        const ratingInput = document.getElementById('reiting');
+        const rateRadios = document.querySelectorAll('input[name="rate"]');
+
+        function updateRadioButtons() {
+            const ratingValue = ratingInput.value;
+            rateRadios.forEach(radio => {
+                radio.checked = radio.value === ratingValue;
+            });
+        }
+
+        ratingInput.addEventListener('input', updateRadioButtons);
+        updateRadioButtons();
+
+        // Удаление атрибутов cols и rows из элемента textarea
+        const messageTextarea = document.getElementById('message');
+        messageTextarea.removeAttribute('cols');
+        messageTextarea.removeAttribute('rows');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        initialize();
+
+        // Функция для добавления отложенного вызова функции initialize
+        function delayedInitialize() {
+            setTimeout(initialize, 1000);
+        }
+
+        // Добавляем обработчики событий для кнопок
+        const addButton = document.getElementById('reviews_submit_add');
+        const updateButton = document.getElementById('reviews_submit_update');
+
+        if (addButton) {
+            addButton.addEventListener('click', delayedInitialize);
+        }
+
+        if (updateButton) {
+            updateButton.addEventListener('click', delayedInitialize);
+        }
+    });
+</script>
+{% endblock content %}

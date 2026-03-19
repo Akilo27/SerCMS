@@ -1,0 +1,33 @@
+Установить все библиотеки
+pip install -r requirements.txt
+========================================
+Запустить сервер
+↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+python manage.py runserver
+=========================================
+Подготовить миграции
+↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+python manage.py makemigrations
+=========================================
+Провести миграции
+↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+python manage.py migrate
+=========================================
+Для создания приложения введите команду заменив
+ name_app на название вашего приложения (en)
+--------------------------↓↓↓↓↓↓↓↓
+python manage.py startapp name_app
+==========================================
+
+django-admin makemessages -l en -e html
+
+django-admin compilemessages
+
+
+python manage.py loaddata --database=default _dump/profile.json
+==========================================
+python manage.py migrate --database=default
+python manage.py migrate --database=development_db
+
+python manage.py dumpdata --database=default_db useraccount.profile > _dump/profile.json
+python manage.py dumpdata --database=development_db development > _dump/development.json

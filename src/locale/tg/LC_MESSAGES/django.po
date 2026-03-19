@@ -1,0 +1,4018 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-06-18 14:00+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+
+#: _project/settings/language.py:4
+msgid "Russian"
+msgstr "Русӣ"
+
+#: _project/settings/language.py:5
+msgid "English"
+msgstr "Англисӣ"
+
+#: _project/settings/language.py:6
+#, fuzzy
+#| msgid "Английский"
+msgid "Таджикский"
+msgstr "Тоҷик"
+
+#: _project/settings/language.py:7
+msgid "Турецкий"
+msgstr "Туркӣ"
+
+#: _project/settings/language.py:8
+#, fuzzy
+#| msgid "Английский"
+msgid "Казахский"
+msgstr "Щазан"
+
+#: _project/settings/language.py:9
+#, fuzzy
+#| msgid "Английский"
+msgid "Узбекский"
+msgstr "Ӯзбек"
+
+#: _templates/moderations/aboutform.html:39
+#: _templates/moderations/contactpageform.html:40
+#: _templates/moderations/homepagesetform.html:39
+#: _templates/moderations/seoform.html:71
+#: _templates/moderations/seosettings.html:57
+msgid "Мета-заголовок"
+msgstr "Метрӣ"
+
+#: _templates/moderations/aboutform.html:47
+#: _templates/moderations/advertisement_categorys_form.html:205
+#: _templates/moderations/advertisement_tags_form.html:187
+#: _templates/moderations/blogs_form.html:250
+#: _templates/moderations/blogs_form.html:308
+#: _templates/moderations/blogs_form.html:310
+#: _templates/moderations/categorys_form.html:220
+#: _templates/moderations/contactpageform.html:48
+#: _templates/moderations/gallery_form.html:385
+#: _templates/moderations/homepagesetform.html:47
+#: _templates/moderations/manufacturers_form.html:459
+#: _templates/moderations/pages_form.html:149
+#: _templates/moderations/price_form.html:177
+#: _templates/moderations/product_form.html:595
+#: _templates/moderations/seoform.html:79
+#: _templates/moderations/service_form.html:385
+#: _templates/moderations/sponsorship_form.html:221
+#: _templates/moderations/sponsorship_form.html:279
+#: _templates/moderations/sponsorship_form.html:281
+#: _templates/moderations/tags_form.html:195
+#: _templates/moderations/vacancys_form.html:250
+#: _templates/moderations/vacancys_form.html:252
+msgid "Мета-описание"
+msgstr "Метас-тавсиф"
+
+#: _templates/moderations/aboutform.html:55
+#: _templates/moderations/blogs_form.html:224
+#: _templates/moderations/contactpageform.html:56
+#: _templates/moderations/gallery_form.html:359
+#: _templates/moderations/homepagesetform.html:55
+#: _templates/moderations/manufacturers_form.html:433
+#: _templates/moderations/pages_form.html:123
+#: _templates/moderations/price_form.html:151
+#: _templates/moderations/product_form.html:570
+#: _templates/moderations/seoform.html:89
+#: _templates/moderations/service_form.html:359
+#: _templates/moderations/sponsorship_form.html:195
+msgid "Мета-заголовок ссылки"
+msgstr "Истиноди Meta"
+
+#: _templates/moderations/aboutform.html:63
+#: _templates/moderations/blogs_form.html:232
+#: _templates/moderations/contactpageform.html:64
+#: _templates/moderations/gallery_form.html:367
+#: _templates/moderations/homepagesetform.html:63
+#: _templates/moderations/manufacturers_form.html:441
+#: _templates/moderations/pages_form.html:131
+#: _templates/moderations/price_form.html:159
+#: _templates/moderations/product_form.html:578
+#: _templates/moderations/seoform.html:97
+#: _templates/moderations/service_form.html:367
+#: _templates/moderations/sponsorship_form.html:203
+msgid "Мета-описание ссылки"
+msgstr "Meta-Тавсифи истинод"
+
+#: _templates/moderations/aboutform.html:71
+#: _templates/moderations/blogs_form.html:194
+#: _templates/moderations/contactpageform.html:72
+#: _templates/moderations/gallery_form.html:329
+#: _templates/moderations/homepagesetform.html:71
+#: _templates/moderations/manufacturers_form.html:403
+#: _templates/moderations/pages_form.html:93
+#: _templates/moderations/product_form.html:540
+#: _templates/moderations/seoform.html:48
+#: _templates/moderations/service_form.html:329
+#: _templates/moderations/sponsorship_form.html:172
+msgid "Превью"
+msgstr "Посусӣ"
+
+#: _templates/moderations/aboutform.html:83
+#: _templates/moderations/advertisement_categorys_form.html:82
+#: _templates/moderations/advertisement_categorys_form.html:160
+#: _templates/moderations/advertisement_categorys_form.html:184
+#: _templates/moderations/advertisement_tags_form.html:82
+#: _templates/moderations/advertisement_tags_form.html:142
+#: _templates/moderations/advertisement_tags_form.html:166
+#: _templates/moderations/blogs_form.html:95
+#: _templates/moderations/blogs_form.html:203
+#: _templates/moderations/categorys_form.html:79
+#: _templates/moderations/categorys_form.html:161
+#: _templates/moderations/categorys_form.html:190
+#: _templates/moderations/contactpageform.html:84
+#: _templates/moderations/gallery_form.html:246
+#: _templates/moderations/gallery_form.html:338
+#: _templates/moderations/homepagesetform.html:83
+#: _templates/moderations/manufacturers_form.html:244
+#: _templates/moderations/manufacturers_form.html:272
+#: _templates/moderations/manufacturers_form.html:412
+#: _templates/moderations/pages_form.html:102
+#: _templates/moderations/product_form.html:549
+#: _templates/moderations/seoform.html:59
+#: _templates/moderations/service_form.html:246
+#: _templates/moderations/service_form.html:338
+#: _templates/moderations/settings_global.html:57
+#: _templates/moderations/settings_global.html:79
+#: _templates/moderations/settings_global.html:101
+#: _templates/moderations/settings_global.html:123
+#: _templates/moderations/settings_global.html:147
+#: _templates/moderations/settings_global.html:169
+#: _templates/moderations/settings_global.html:191
+#: _templates/moderations/settings_global.html:214
+#: _templates/moderations/sponsorship_form.html:98
+#: _templates/moderations/sponsorship_form.html:183
+#: _templates/moderations/tags_form.html:82
+#: _templates/moderations/tags_form.html:150
+#: _templates/moderations/tags_form.html:174
+#: _templates/moderations/vacancys_form.html:95
+msgid "Изображения нет"
+msgstr "Тасвирҳо нестанд"
+
+#: _templates/moderations/advertisement_categorys_form.html:55
+#: _templates/moderations/advertisement_tags_form.html:55
+#: _templates/moderations/blogs_settings.html:28
+#: _templates/moderations/categorys_form.html:55
+#: _templates/moderations/tags_form.html:55
+msgid "Список категорий"
+msgstr "Рӯйхати категорияҳо"
+
+#: _templates/moderations/advertisement_categorys_form.html:56
+#: _templates/moderations/advertisement_tags_form.html:56
+#: _templates/moderations/blogs_form.html:156
+#: _templates/moderations/blogs_settings.html:67
+#: _templates/moderations/categorys_form.html:56
+#: _templates/moderations/manufacturers_form.html:373
+#: _templates/moderations/product_list.html:53
+#: _templates/moderations/tags_form.html:56
+#: _templates/site/publication/advertisement_detail.html:100
+msgid "Категория"
+msgstr "Категория"
+
+#: _templates/moderations/advertisement_categorys_form.html:70
+#: _templates/moderations/advertisement_tags_form.html:70
+#: _templates/moderations/blogs_form.html:86
+#: _templates/moderations/blogs_form.html:322
+#: _templates/moderations/categorys_form.html:70
+#: _templates/moderations/gallery_form.html:237
+#: _templates/moderations/manufacturers_form.html:235
+#: _templates/moderations/service_form.html:237
+#: _templates/moderations/sponsorship_form.html:86
+#: _templates/moderations/sponsorship_form.html:293
+#: _templates/moderations/tags_form.html:70
+#: _templates/moderations/vacancys_form.html:86
+#: _templates/moderations/vacancys_form.html:264
+msgid "Обложка"
+msgstr "Пӯшидан"
+
+#: _templates/moderations/advertisement_categorys_form.html:94
+#: _templates/moderations/advertisement_tags_form.html:94
+#: _templates/moderations/advertisement_tags_settings.html:59
+#: _templates/moderations/categorys_form.html:100
+#: _templates/moderations/complaints.html:59
+#: _templates/moderations/faqs_list.html:62
+#: _templates/moderations/productcomments_form.html:38
+#: _templates/moderations/productcomments_list.html:61
+#: _templates/moderations/reviews.html:60
+#: _templates/moderations/sponsorship_settings.html:59
+#: _templates/moderations/statuspayment_list.html:41
+#: _templates/moderations/statuspayment_list.html:58
+#: _templates/moderations/tags_form.html:94
+#: _templates/moderations/tags_settings.html:59
+#: _templates/moderations/tickets.html:43
+#: _templates/moderations/tickets.html:62
+#: _templates/moderations/сomplaint_form.html:20
+#: _templates/site/publication/advertisements.html:49
+#: _templates/site/publication/dopadvertisement.html:45
+#: _templates/site/publication/reviews.html:37
+#: _templates/site/shop4/order_detail.html:38
+#: _templates/site/useraccount/complaint_list.html:40
+#: _templates/site/useraccount/tickets.html:46
+#: _templates/site/useraccount/tickets.html:67
+msgid "Статус"
+msgstr "Вазъият"
+
+#: _templates/moderations/advertisement_categorys_form.html:102
+#: _templates/moderations/advertisement_categorys_settings.html:39
+#: _templates/moderations/advertisement_categorys_settings.html:59
+#: _templates/moderations/advertisement_tags_form.html:102
+#: _templates/moderations/advertisement_tags_settings.html:39
+#: _templates/moderations/advertisement_tags_settings.html:58
+#: _templates/moderations/asset_edit.html:24
+#: _templates/moderations/asset_list.html:36
+#: _templates/moderations/asset_list.html:48
+#: _templates/moderations/blogs_form.html:124
+#: _templates/moderations/blogs_settings.html:48
+#: _templates/moderations/blogs_settings.html:66
+#: _templates/moderations/categorys_form.html:108
+#: _templates/moderations/categorys_settings.html:39
+#: _templates/moderations/categorys_settings.html:59
+#: _templates/moderations/documentation.html:36
+#: _templates/moderations/documentation.html:52
+#: _templates/moderations/documentation_create.html:35
+#: _templates/moderations/documentation_detail.html:35
+#: _templates/moderations/extended_site_list.html:37
+#: _templates/moderations/gallery_form.html:275
+#: _templates/moderations/gallery_settings.html:38
+#: _templates/moderations/gallery_settings.html:55
+#: _templates/moderations/knowelege.html:27
+#: _templates/moderations/language_list.html:95
+#: _templates/moderations/leads/lead_list.html:135
+#: _templates/moderations/manufacturers_form.html:309
+#: _templates/moderations/manufacturers_list.html:56
+#: _templates/moderations/orders.html:39
+#: _templates/moderations/pages_form.html:47
+#: _templates/moderations/pages_settings.html:38
+#: _templates/moderations/pages_settings.html:57
+#: _templates/moderations/price_form.html:90
+#: _templates/moderations/price_settings.html:38
+#: _templates/moderations/price_settings.html:55
+#: _templates/moderations/product_list.html:39
+#: _templates/moderations/service_form.html:275
+#: _templates/moderations/service_settings.html:38
+#: _templates/moderations/service_settings.html:55
+#: _templates/moderations/settings_global.html:227
+#: _templates/moderations/sponsorship_form.html:118
+#: _templates/moderations/sponsorship_settings.html:39
+#: _templates/moderations/sponsorship_settings.html:58
+#: _templates/moderations/storages_form.html:225
+#: _templates/moderations/storages_list.html:56
+#: _templates/moderations/tags_form.html:102
+#: _templates/moderations/tags_settings.html:39
+#: _templates/moderations/tags_settings.html:58
+#: _templates/moderations/vacances.html:39
+#: _templates/moderations/vacances.html:56
+#: _templates/moderations/vacancys_form.html:125
+#: _templates/moderations/valute_form.html:38
+#: _templates/moderations/valute_list.html:57
+#: _templates/moderations/variable_form.html:74
+#: _templates/moderations/variable_list.html:58
+#: _templates/site/publication/dopadvertisement.html:43
+#: _templates/site/shop2/cart.html:122 _templates/site/shop3/cart.html:122
+#: _templates/site/shop4/bookmarks.html:72 _templates/site/shop4/cart.html:122
+#: _templates/site/shop4/product_detail.html:263
+msgid "Название"
+msgstr "Ном"
+
+#: _templates/moderations/advertisement_categorys_form.html:111
+#: _templates/moderations/advertisement_tags_form.html:110
+#: _templates/moderations/blogs_form.html:132
+#: _templates/moderations/categorys_form.html:117
+#: _templates/moderations/gallery_form.html:283
+#: _templates/moderations/manufacturers_form.html:317
+#: _templates/moderations/pages_form.html:55
+#: _templates/moderations/pages_settings.html:39
+#: _templates/moderations/pages_settings.html:58
+#: _templates/moderations/price_form.html:98
+#: _templates/moderations/service_form.html:283
+#: _templates/moderations/tags_form.html:110
+#: _templates/moderations/vacancys_form.html:133
+#: _templates/moderations/variable_form.html:82
+msgid "Слаг"
+msgstr "Мутаассиб"
+
+#: _templates/moderations/advertisement_categorys_form.html:118
+#: _templates/moderations/categorys_form.html:124
+msgid "Родитель"
+msgstr "Волидон"
+
+#: _templates/moderations/advertisement_categorys_form.html:127
+#: _templates/moderations/blogs_form.html:164
+#: _templates/moderations/categorys_form.html:132
+#: _templates/moderations/faqs_form.html:47
+#: _templates/moderations/faqsproducts_form.html:64
+#: _templates/moderations/gallery_form.html:299
+#: _templates/moderations/manufacturers_form.html:381
+#: _templates/moderations/pages_form.html:63
+#: _templates/moderations/price_form.html:121
+#: _templates/moderations/service_form.html:299
+#: _templates/moderations/sponsorship_form.html:150
+#: _templates/moderations/tags_form.html:117
+#: _templates/moderations/vacancys_form.html:165
+#: _templates/moderations/variable_form.html:89
+msgid "Сайты"
+msgstr "Вебсайт"
+
+#: _templates/moderations/advertisement_categorys_form.html:138
+#: _templates/moderations/advertisement_tags_form.html:120
+#: _templates/moderations/applicationsproducts_form.html:50
+#: _templates/moderations/asset_edit.html:36
+#: _templates/moderations/blogs_form.html:183
+#: _templates/moderations/blogs_form.html:299
+#: _templates/moderations/categorys_form.html:143
+#: _templates/moderations/documentation.html:54
+#: _templates/moderations/documentation_create.html:51
+#: _templates/moderations/documentation_detail.html:51
+#: _templates/moderations/gallery_form.html:318
+#: _templates/moderations/manufacturers_form.html:392
+#: _templates/moderations/pages_form.html:82
+#: _templates/moderations/price_form.html:140
+#: _templates/moderations/service_form.html:318
+#: _templates/moderations/settings_global.html:235
+#: _templates/moderations/sponsorship_form.html:161
+#: _templates/moderations/sponsorship_form.html:270
+#: _templates/moderations/statuspayment_list.html:60
+#: _templates/moderations/storages_form.html:263
+#: _templates/moderations/tags_form.html:128
+#: _templates/moderations/vacancys_form.html:184
+#: _templates/moderations/vacancys_form.html:241
+#: _templates/moderations/сomplaint_form.html:36
+#: _templates/site/publication/advertisement_detail.html:84
+#: _templates/site/shop4/price.html:42
+#: _templates/site/shop4/product_detail.html:232
+#: _templates/site/shop4/vacancy_detail.html:62
+msgid "Описание"
+msgstr "Тасвирӣ"
+
+#: _templates/moderations/advertisement_categorys_form.html:148
+#: _templates/moderations/advertisement_tags_form.html:130
+#: _templates/moderations/blogs_form.html:330
+#: _templates/moderations/categorys_form.html:153
+#: _templates/moderations/sponsorship_form.html:301
+#: _templates/moderations/tags_form.html:138
+#: _templates/moderations/vacancys_form.html:272
+msgid "Картинка"
+msgstr "Расм"
+
+#: _templates/moderations/advertisement_categorys_form.html:172
+#: _templates/moderations/advertisement_tags_form.html:154
+#: _templates/moderations/blogs_form.html:326
+#: _templates/moderations/categorys_form.html:182
+#: _templates/moderations/sponsorship_form.html:297
+#: _templates/moderations/tags_form.html:162
+#: _templates/moderations/vacancys_form.html:268
+msgid "Иконка"
+msgstr "Нишона"
+
+#: _templates/moderations/advertisement_categorys_form.html:197
+#: _templates/moderations/advertisement_tags_form.html:179
+#: _templates/moderations/blogs_form.html:242
+#: _templates/moderations/blogs_form.html:304
+#: _templates/moderations/blogs_form.html:305
+#: _templates/moderations/categorys_form.html:212
+#: _templates/moderations/gallery_form.html:377
+#: _templates/moderations/manufacturers_form.html:451
+#: _templates/moderations/pages_form.html:141
+#: _templates/moderations/price_form.html:169
+#: _templates/moderations/product_form.html:587
+#: _templates/moderations/seosettings.html:38
+#: _templates/moderations/service_form.html:377
+#: _templates/moderations/sponsorship_form.html:213
+#: _templates/moderations/sponsorship_form.html:275
+#: _templates/moderations/sponsorship_form.html:276
+#: _templates/moderations/tags_form.html:187
+#: _templates/moderations/vacancys_form.html:246
+#: _templates/moderations/vacancys_form.html:247
+msgid "Заголовок"
+msgstr "Ном"
+
+#: _templates/moderations/advertisement_categorys_form.html:217
+#: _templates/moderations/advertisement_tags_form.html:199
+#: _templates/moderations/applicationsproducts_form.html:69
+#: _templates/moderations/asset_edit.html:71
+#: _templates/moderations/blogs_form.html:262
+#: _templates/moderations/blogs_form.html:335
+#: _templates/moderations/categorys_form.html:232
+#: _templates/moderations/faqs_form.html:61
+#: _templates/moderations/faqsproducts_form.html:78
+#: _templates/moderations/gallery_form.html:456
+#: _templates/moderations/iframe/cards_form.html:42
+#: _templates/moderations/manufacturers_form.html:471
+#: _templates/moderations/notifications_form.html:79
+#: _templates/moderations/pages_form.html:161
+#: _templates/moderations/price_form.html:189
+#: _templates/moderations/productcomments_form.html:70
+#: _templates/moderations/profile_edit_client.html:196
+#: _templates/moderations/profile_edit_client.html:282
+#: _templates/moderations/seoform.html:109
+#: _templates/moderations/service_form.html:453
+#: _templates/moderations/settings_global.html:569
+#: _templates/moderations/sponsorship_form.html:233
+#: _templates/moderations/sponsorship_form.html:306
+#: _templates/moderations/storages_form.html:315
+#: _templates/moderations/tags_form.html:207
+#: _templates/moderations/vacancys_form.html:208
+#: _templates/moderations/vacancys_form.html:277
+#: _templates/moderations/valute_form.html:73
+#: _templates/moderations/variable_form.html:116
+#: _templates/site/shop4/profile_edit.html:125
+#: _templates/site/useraccount/profile_edit.html:180
+#: _templates/site/useraccount/profile_edit.html:255
+#: _templates/site/useraccount/ticket_form.html:28
+msgid "Сохранить"
+msgstr "Пул захира кардан"
+
+#: _templates/moderations/advertisement_categorys_settings.html:19
+#: _templates/moderations/blogs_settings.html:49
+#: _templates/moderations/orders.html:40
+#: _templates/site/shop4/category.html:257
+#: _templates/site/shop4/include/category.html:42
+#: _templates/site/shop4/product_detail.html:212
+msgid "Категории"
+msgstr "Категорияҳо"
+
+#: _templates/moderations/advertisement_categorys_settings.html:35
+#: _templates/moderations/advertisement_tags_settings.html:35
+#: _templates/moderations/applicationsproducts_list.html:34
+#: _templates/moderations/asset_list.html:32
+#: _templates/moderations/blogs_settings.html:44
+#: _templates/moderations/categorys_settings.html:35
+#: _templates/moderations/collaborations.html:29
+#: _templates/moderations/complaints.html:30
+#: _templates/moderations/documentation.html:32
+#: _templates/moderations/extended_site_list.html:32
+#: _templates/moderations/faqs_list.html:34
+#: _templates/moderations/faqs_settings.html:34
+#: _templates/moderations/gallery_settings.html:34
+#: _templates/moderations/knowelege.html:23
+#: _templates/moderations/leads/lead_list.html:131
+#: _templates/moderations/manufacturers_list.html:34
+#: _templates/moderations/notifications_settings.html:32
+#: _templates/moderations/orders.html:35
+#: _templates/moderations/pages_settings.html:34
+#: _templates/moderations/price_settings.html:34
+#: _templates/moderations/product_list.html:35
+#: _templates/moderations/productcomments_list.html:34
+#: _templates/moderations/reviews.html:31
+#: _templates/moderations/seosettings.html:34
+#: _templates/moderations/service_settings.html:34
+#: _templates/moderations/sponsorship_settings.html:35
+#: _templates/moderations/statuspayment_list.html:36
+#: _templates/moderations/storages_list.html:34
+#: _templates/moderations/tags_settings.html:35
+#: _templates/moderations/tickets.html:36
+#: _templates/moderations/vacances.html:35
+#: _templates/moderations/valute_list.html:34
+#: _templates/moderations/variable_list.html:34
+#: _templates/moderations/withdraw.html:45
+#: _templates/site/useraccount/referrals_list.html:34
+#: _templates/site/useraccount/tickets.html:39
+#: _templates/site/useraccount/withdraw_payment.html:94
+#: _templates/site/useraccount/withdraw_point.html:34
+msgid "Поиск по"
+msgstr "Ҷустуҷӯ аз ҷониби"
+
+#: _templates/moderations/advertisement_categorys_settings.html:40
+#: _templates/moderations/advertisement_categorys_settings.html:60
+#: _templates/moderations/blogs_form.html:313
+#: _templates/moderations/categorys_settings.html:40
+#: _templates/moderations/categorys_settings.html:60
+#: _templates/moderations/sponsorship_form.html:284
+#: _templates/moderations/vacancys_form.html:255
+msgid "Родительская категория"
+msgstr "Категория категорияи волидайн"
+
+#: _templates/moderations/advertisement_categorys_settings.html:77
+#: _templates/moderations/categorys_settings.html:77
+msgid "Нет родительской категории"
+msgstr "Ягон категорияи волидӣ вуҷуд надорад"
+
+#: _templates/moderations/advertisement_categorys_settings.html:105
+#: _templates/moderations/advertisement_categorys_settings.html:123
+#: _templates/moderations/advertisement_tags_settings.html:102
+#: _templates/moderations/advertisement_tags_settings.html:120
+#: _templates/moderations/applicationsproducts_list.html:109
+#: _templates/moderations/applicationsproducts_list.html:128
+#: _templates/moderations/asset_list.html:86
+#: _templates/moderations/asset_list.html:99
+#: _templates/moderations/blogs_settings.html:110
+#: _templates/moderations/blogs_settings.html:133
+#: _templates/moderations/categorys_settings.html:105
+#: _templates/moderations/categorys_settings.html:123
+#: _templates/moderations/collaborations.html:104
+#: _templates/moderations/collaborations.html:123
+#: _templates/moderations/complaints.html:104
+#: _templates/moderations/complaints.html:134
+#: _templates/moderations/documentation.html:103
+#: _templates/moderations/documentation.html:113
+#: _templates/moderations/extended_site_list.html:136
+#: _templates/moderations/extended_site_list.html:164
+#: _templates/moderations/faqs_list.html:126
+#: _templates/moderations/faqs_list.html:145
+#: _templates/moderations/faqs_settings.html:106
+#: _templates/moderations/faqs_settings.html:125
+#: _templates/moderations/gallery_settings.html:98
+#: _templates/moderations/gallery_settings.html:113
+#: _templates/moderations/knowelege.html:89
+#: _templates/moderations/knowelege.html:99
+#: _templates/moderations/leads/lead_list.html:239
+#: _templates/moderations/leads/lead_list.html:249
+#: _templates/moderations/leads/task.html:103
+#: _templates/moderations/leads/task.html:113
+#: _templates/moderations/manufacturers_list.html:103
+#: _templates/moderations/manufacturers_list.html:122
+#: _templates/moderations/notifications_settings.html:92
+#: _templates/moderations/notifications_settings.html:119
+#: _templates/moderations/orders.html:162
+#: _templates/moderations/orders.html:185
+#: _templates/moderations/pages_settings.html:101
+#: _templates/moderations/pages_settings.html:123
+#: _templates/moderations/price_settings.html:99
+#: _templates/moderations/price_settings.html:114
+#: _templates/moderations/product_list.html:153
+#: _templates/moderations/product_list.html:232
+#: _templates/moderations/product_list.html:266
+#: _templates/moderations/productcomments_list.html:116
+#: _templates/moderations/productcomments_list.html:135
+#: _templates/moderations/reviews.html:108
+#: _templates/moderations/reviews.html:138
+#: _templates/moderations/seosettings.html:106
+#: _templates/moderations/seosettings.html:128
+#: _templates/moderations/service_settings.html:98
+#: _templates/moderations/service_settings.html:113
+#: _templates/moderations/sponsorship_settings.html:102
+#: _templates/moderations/sponsorship_settings.html:120
+#: _templates/moderations/statuspayment_list.html:109
+#: _templates/moderations/statuspayment_list.html:144
+#: _templates/moderations/storages_list.html:103
+#: _templates/moderations/storages_list.html:122
+#: _templates/moderations/tags_settings.html:102
+#: _templates/moderations/tags_settings.html:120
+#: _templates/moderations/tickets.html:111
+#: _templates/moderations/tickets.html:139
+#: _templates/moderations/vacances.html:102
+#: _templates/moderations/vacances.html:125
+#: _templates/moderations/vacances_aplication.html:60
+#: _templates/moderations/vacances_aplication.html:83
+#: _templates/moderations/valute_list.html:113
+#: _templates/moderations/valute_list.html:132
+#: _templates/moderations/variable_list.html:103
+#: _templates/moderations/variable_list.html:122
+#: _templates/moderations/withdraw.html:113
+#: _templates/moderations/withdraw.html:138
+#: _templates/site/publication/advertisements.html:102
+#: _templates/site/publication/advertisements.html:130
+#: _templates/site/publication/reviews.html:86
+#: _templates/site/publication/reviews.html:114
+#: _templates/site/shop4/base.html:656 _templates/site/shop4/catalog.html:189
+#: _templates/site/shop4/category.html:206
+#: _templates/site/shop4/manufacturers_details.html:173
+#: _templates/site/shop4/search.html:18 _templates/site/shop4/search.html:45
+#: _templates/site/shop4/search.html:56
+#: _templates/site/useraccount/bookmarks.html:104
+#: _templates/site/useraccount/bookmarks.html:132
+#: _templates/site/useraccount/complaint_list.html:83
+#: _templates/site/useraccount/complaint_list.html:111
+#: _templates/site/useraccount/referrals_list.html:85
+#: _templates/site/useraccount/referrals_list.html:107
+#: _templates/site/useraccount/tickets.html:110
+#: _templates/site/useraccount/tickets.html:138
+#: _templates/site/useraccount/withdraw_payment.html:144
+#: _templates/site/useraccount/withdraw_payment.html:166
+#: _templates/site/useraccount/withdraw_point.html:84
+#: _templates/site/useraccount/withdraw_point.html:106
+msgid "Поиск"
+msgstr "Кофтуков"
+
+#: _templates/moderations/advertisement_categorys_settings.html:110
+#: _templates/moderations/advertisement_tags_settings.html:107
+#: _templates/moderations/asset_list.html:91
+#: _templates/moderations/blogs_settings.html:120
+#: _templates/moderations/categorys_settings.html:110
+#: _templates/moderations/documentation.html:108
+#: _templates/moderations/gallery_settings.html:108
+#: _templates/moderations/knowelege.html:94
+#: _templates/moderations/leads/lead_list.html:244
+#: _templates/moderations/leads/task.html:108
+#: _templates/moderations/orders.html:172
+#: _templates/moderations/pages_settings.html:110
+#: _templates/moderations/price_settings.html:109
+#: _templates/moderations/product_list.html:158
+#: _templates/moderations/service_settings.html:108
+#: _templates/moderations/sponsorship_settings.html:107
+#: _templates/moderations/statuspayment_list.html:131
+#: _templates/moderations/tags_settings.html:107
+#: _templates/moderations/vacances.html:112
+#: _templates/moderations/vacances_aplication.html:70
+msgid "Введите название"
+msgstr "Номро ворид кунед"
+
+#: _templates/moderations/advertisement_categorys_settings.html:114
+#: _templates/moderations/advertisement_tags_settings.html:111
+#: _templates/moderations/blogs_settings.html:124
+#: _templates/moderations/categorys_settings.html:114
+#: _templates/moderations/orders.html:176
+#: _templates/moderations/product_list.html:221
+#: _templates/moderations/sponsorship_settings.html:111
+#: _templates/moderations/statuspayment_list.html:135
+#: _templates/moderations/tags_settings.html:111
+#: _templates/moderations/vacances.html:116
+#: _templates/moderations/vacances_aplication.html:74
+msgid "Выберите категорию"
+msgstr "Категорияро интихоб кунед"
+
+#: _templates/moderations/advertisement_categorys_settings.html:122
+#: _templates/moderations/advertisement_tags_settings.html:119
+#: _templates/moderations/applicationsproducts_list.html:127
+#: _templates/moderations/asset_list.html:98
+#: _templates/moderations/blogs_settings.html:132
+#: _templates/moderations/categorys_settings.html:122
+#: _templates/moderations/collaborations.html:122
+#: _templates/moderations/complaints.html:133
+#: _templates/moderations/documentation.html:112
+#: _templates/moderations/extended_site_list.html:163
+#: _templates/moderations/faqs_list.html:144
+#: _templates/moderations/faqs_settings.html:124
+#: _templates/moderations/gallery_settings.html:112
+#: _templates/moderations/knowelege.html:98
+#: _templates/moderations/leads/lead_list.html:248
+#: _templates/moderations/leads/task.html:112
+#: _templates/moderations/manufacturers_list.html:121
+#: _templates/moderations/notifications_settings.html:118
+#: _templates/moderations/orders.html:184
+#: _templates/moderations/pages_settings.html:122
+#: _templates/moderations/price_settings.html:113
+#: _templates/moderations/product_list.html:231
+#: _templates/moderations/productcomments_list.html:134
+#: _templates/moderations/reviews.html:137
+#: _templates/moderations/seosettings.html:127
+#: _templates/moderations/service_settings.html:112
+#: _templates/moderations/sponsorship_settings.html:119
+#: _templates/moderations/statuspayment_list.html:143
+#: _templates/moderations/storages_list.html:121
+#: _templates/moderations/tags_settings.html:119
+#: _templates/moderations/tickets.html:138
+#: _templates/moderations/vacances.html:124
+#: _templates/moderations/vacances_aplication.html:82
+#: _templates/moderations/valute_list.html:131
+#: _templates/moderations/variable_list.html:121
+#: _templates/moderations/withdraw.html:137
+#: _templates/site/publication/advertisements.html:129
+#: _templates/site/publication/reviews.html:113
+#: _templates/site/shop22/base/cart.html:7
+#: _templates/site/shop4/include/cart_product.html:61
+#: _templates/site/useraccount/bookmarks.html:131
+#: _templates/site/useraccount/complaint_list.html:110
+#: _templates/site/useraccount/referrals_list.html:106
+#: _templates/site/useraccount/tickets.html:137
+#: _templates/site/useraccount/withdraw_payment.html:165
+#: _templates/site/useraccount/withdraw_point.html:105
+msgid "Закрыть"
+msgstr "Наздик"
+
+#: _templates/moderations/advertisement_categorys_settings.html:139
+#: _templates/moderations/advertisement_tags_settings.html:136
+#: _templates/moderations/applicationsproducts_list.html:144
+#: _templates/moderations/asset_list.html:111
+#: _templates/moderations/blogs_settings.html:149
+#: _templates/moderations/categorys_settings.html:139
+#: _templates/moderations/documentation.html:129
+#: _templates/moderations/faqs_list.html:161
+#: _templates/moderations/faqs_settings.html:141
+#: _templates/moderations/gallery_settings.html:129
+#: _templates/moderations/knowelege.html:115
+#: _templates/moderations/leads/lead_list.html:265
+#: _templates/moderations/leads/task.html:129
+#: _templates/moderations/manufacturers_list.html:138
+#: _templates/moderations/orders.html:201
+#: _templates/moderations/pages_settings.html:147
+#: _templates/moderations/price_settings.html:130
+#: _templates/moderations/product_list.html:249
+#: _templates/moderations/productcomments_list.html:151
+#: _templates/moderations/service_settings.html:129
+#: _templates/moderations/sponsorship_settings.html:136
+#: _templates/moderations/statuspayment_list.html:201
+#: _templates/moderations/storages_list.html:138
+#: _templates/moderations/tags_settings.html:136
+#: _templates/moderations/vacances.html:141
+#: _templates/moderations/vacances_aplication.html:99
+#: _templates/moderations/valute_list.html:148
+#: _templates/moderations/variable_list.html:138
+#: _templates/site/shop4/vacancys.html:35
+msgid "Поиск по названию"
+msgstr "Ҷустуҷӯ аз рӯи ном"
+
+#: _templates/moderations/advertisement_categorys_settings.html:140
+#: _templates/moderations/blogs_settings.html:150
+#: _templates/moderations/categorys_settings.html:140
+#: _templates/moderations/orders.html:202
+#: _templates/moderations/product_list.html:263
+#: _templates/moderations/statuspayment_list.html:205
+#: _templates/moderations/vacances.html:142
+#: _templates/moderations/vacances_aplication.html:100
+msgid "Поиск по категории"
+msgstr "Ҷустуҷӯи категория"
+
+#: _templates/moderations/advertisement_categorys_settings.html:189
+#: _templates/moderations/advertisement_tags_settings.html:186
+#: _templates/moderations/applicationsproducts_list.html:202
+#: _templates/moderations/blogs_settings.html:207
+#: _templates/moderations/categorys_settings.html:189
+#: _templates/moderations/collaborations.html:209
+#: _templates/moderations/complaints.html:233
+#: _templates/moderations/documentation.html:171
+#: _templates/moderations/extended_site_list.html:236
+#: _templates/moderations/faqs_list.html:219
+#: _templates/moderations/faqs_settings.html:199
+#: _templates/moderations/gallery_settings.html:179
+#: _templates/moderations/manufacturers_list.html:196
+#: _templates/moderations/notifications_settings.html:206
+#: _templates/moderations/orders.html:259
+#: _templates/moderations/pages_settings.html:203
+#: _templates/moderations/price_settings.html:180
+#: _templates/moderations/product_list.html:343
+#: _templates/moderations/productcomments_list.html:209
+#: _templates/moderations/reviews.html:222
+#: _templates/moderations/seosettings.html:202
+#: _templates/moderations/service_settings.html:179
+#: _templates/moderations/sponsorship_settings.html:186
+#: _templates/moderations/statuspayment_list.html:280
+#: _templates/moderations/storages_list.html:196
+#: _templates/moderations/tags_settings.html:186
+#: _templates/moderations/tickets.html:213
+#: _templates/moderations/vacances.html:199
+#: _templates/moderations/vacances_aplication.html:157
+#: _templates/moderations/valute_list.html:206
+#: _templates/moderations/variable_list.html:196
+#: _templates/site/publication/advertisements.html:262
+#: _templates/site/publication/reviews.html:246
+#: _templates/site/shop2/tickets.html:84 _templates/site/shop3/tickets.html:84
+#: _templates/site/shop4/tickets.html:84 _templates/site/shop5/tickets.html:84
+#: _templates/site/shop6/tickets.html:84
+#: _templates/site/useraccount/complaint_list.html:243
+#: _templates/site/useraccount/tickets.html:212
+msgid "Выберите хотя бы один элемент для удаления."
+msgstr "Ҳадди аққал як унсурро барои тоза кардан интихоб кунед."
+
+#: _templates/moderations/advertisement_categorys_settings.html:193
+#: _templates/moderations/advertisement_tags_settings.html:190
+#: _templates/moderations/applicationsproducts_list.html:206
+#: _templates/moderations/blogs_settings.html:211
+#: _templates/moderations/categorys_settings.html:193
+#: _templates/moderations/collaborations.html:213
+#: _templates/moderations/complaints.html:237
+#: _templates/moderations/documentation.html:175
+#: _templates/moderations/extended_site_list.html:239
+#: _templates/moderations/faqs_list.html:223
+#: _templates/moderations/faqs_settings.html:203
+#: _templates/moderations/gallery_settings.html:183
+#: _templates/moderations/manufacturers_list.html:200
+#: _templates/moderations/notifications_settings.html:210
+#: _templates/moderations/orders.html:263
+#: _templates/moderations/pages_settings.html:207
+#: _templates/moderations/price_settings.html:184
+#: _templates/moderations/product_list.html:347
+#: _templates/moderations/productcomments_list.html:213
+#: _templates/moderations/reviews.html:226
+#: _templates/moderations/seosettings.html:206
+#: _templates/moderations/service_settings.html:183
+#: _templates/moderations/sponsorship_settings.html:190
+#: _templates/moderations/statuspayment_list.html:284
+#: _templates/moderations/storages_list.html:200
+#: _templates/moderations/tags_settings.html:190
+#: _templates/moderations/tickets.html:217
+#: _templates/moderations/vacances.html:203
+#: _templates/moderations/vacances_aplication.html:161
+#: _templates/moderations/valute_list.html:210
+#: _templates/moderations/variable_list.html:200
+#: _templates/site/publication/advertisements.html:266
+#: _templates/site/publication/reviews.html:250
+#: _templates/site/shop2/tickets.html:88 _templates/site/shop3/tickets.html:88
+#: _templates/site/shop4/tickets.html:88 _templates/site/shop5/tickets.html:88
+#: _templates/site/shop6/tickets.html:88
+#: _templates/site/useraccount/complaint_list.html:247
+#: _templates/site/useraccount/tickets.html:216
+msgid "Вы уверены, что хотите удалить выбранные элементы?"
+msgstr "Шумо мутмаин ҳастед, ки мехоҳед унсурҳои интихобшударо нест кунед?"
+
+#: _templates/moderations/advertisement_categorys_settings.html:210
+#: _templates/moderations/advertisement_categorys_settings.html:215
+#: _templates/moderations/advertisement_tags_settings.html:207
+#: _templates/moderations/advertisement_tags_settings.html:212
+#: _templates/moderations/applicationsproducts_list.html:223
+#: _templates/moderations/applicationsproducts_list.html:228
+#: _templates/moderations/blogs_settings.html:228
+#: _templates/moderations/blogs_settings.html:233
+#: _templates/moderations/categorys_settings.html:210
+#: _templates/moderations/categorys_settings.html:215
+#: _templates/moderations/collaborations.html:234
+#: _templates/moderations/complaints.html:254
+#: _templates/moderations/complaints.html:259
+#: _templates/moderations/documentation.html:192
+#: _templates/moderations/documentation.html:197
+#: _templates/moderations/extended_site_list.html:255
+#: _templates/moderations/extended_site_list.html:260
+#: _templates/moderations/faqs_list.html:240
+#: _templates/moderations/faqs_list.html:245
+#: _templates/moderations/faqs_settings.html:220
+#: _templates/moderations/faqs_settings.html:225
+#: _templates/moderations/gallery_settings.html:200
+#: _templates/moderations/gallery_settings.html:205
+#: _templates/moderations/manufacturers_list.html:217
+#: _templates/moderations/manufacturers_list.html:222
+#: _templates/moderations/notifications_settings.html:227
+#: _templates/moderations/notifications_settings.html:232
+#: _templates/moderations/orders.html:280
+#: _templates/moderations/orders.html:285
+#: _templates/moderations/pages_settings.html:224
+#: _templates/moderations/pages_settings.html:229
+#: _templates/moderations/price_settings.html:201
+#: _templates/moderations/price_settings.html:206
+#: _templates/moderations/product_list.html:364
+#: _templates/moderations/product_list.html:369
+#: _templates/moderations/productcomments_list.html:230
+#: _templates/moderations/productcomments_list.html:235
+#: _templates/moderations/reviews.html:243
+#: _templates/moderations/reviews.html:248
+#: _templates/moderations/seosettings.html:223
+#: _templates/moderations/seosettings.html:228
+#: _templates/moderations/service_settings.html:200
+#: _templates/moderations/service_settings.html:205
+#: _templates/moderations/sponsorship_settings.html:207
+#: _templates/moderations/sponsorship_settings.html:212
+#: _templates/moderations/statuspayment_list.html:301
+#: _templates/moderations/statuspayment_list.html:306
+#: _templates/moderations/storages_list.html:217
+#: _templates/moderations/storages_list.html:222
+#: _templates/moderations/tags_settings.html:207
+#: _templates/moderations/tags_settings.html:212
+#: _templates/moderations/tickets.html:234
+#: _templates/moderations/tickets.html:239
+#: _templates/moderations/vacances.html:220
+#: _templates/moderations/vacances.html:225
+#: _templates/moderations/vacances_aplication.html:178
+#: _templates/moderations/vacances_aplication.html:183
+#: _templates/moderations/valute_list.html:227
+#: _templates/moderations/valute_list.html:232
+#: _templates/moderations/variable_list.html:217
+#: _templates/moderations/variable_list.html:222
+#: _templates/site/publication/advertisements.html:283
+#: _templates/site/publication/advertisements.html:288
+#: _templates/site/publication/reviews.html:267
+#: _templates/site/publication/reviews.html:272
+#: _templates/site/shop2/tickets.html:105
+#: _templates/site/shop2/tickets.html:110
+#: _templates/site/shop3/tickets.html:105
+#: _templates/site/shop3/tickets.html:110
+#: _templates/site/shop4/tickets.html:105
+#: _templates/site/shop4/tickets.html:110
+#: _templates/site/shop5/tickets.html:105
+#: _templates/site/shop5/tickets.html:110
+#: _templates/site/shop6/tickets.html:105
+#: _templates/site/shop6/tickets.html:110
+#: _templates/site/useraccount/complaint_list.html:264
+#: _templates/site/useraccount/complaint_list.html:269
+#: _templates/site/useraccount/tickets.html:233
+#: _templates/site/useraccount/tickets.html:238
+msgid "Ошибка при удалении элементов."
+msgstr "Хатогӣ ҳангоми бартараф кардани унсурҳо."
+
+#: _templates/moderations/advertisement_categorys_settings.html:221
+#: _templates/moderations/advertisement_tags_settings.html:218
+#: _templates/moderations/applicationsproducts_list.html:234
+#: _templates/moderations/blogs_settings.html:239
+#: _templates/moderations/categorys_settings.html:221
+#: _templates/moderations/collaborations.html:240
+#: _templates/moderations/complaints.html:265
+#: _templates/moderations/documentation.html:203
+#: _templates/moderations/extended_site_list.html:265
+#: _templates/moderations/faqs_list.html:251
+#: _templates/moderations/faqs_settings.html:231
+#: _templates/moderations/gallery_settings.html:211
+#: _templates/moderations/manufacturers_list.html:228
+#: _templates/moderations/notifications_settings.html:238
+#: _templates/moderations/orders.html:291
+#: _templates/moderations/pages_settings.html:235
+#: _templates/moderations/price_settings.html:212
+#: _templates/moderations/product_list.html:375
+#: _templates/moderations/productcomments_list.html:241
+#: _templates/moderations/reviews.html:254
+#: _templates/moderations/seosettings.html:234
+#: _templates/moderations/service_settings.html:211
+#: _templates/moderations/sponsorship_settings.html:218
+#: _templates/moderations/statuspayment_list.html:312
+#: _templates/moderations/storages_list.html:228
+#: _templates/moderations/tags_settings.html:218
+#: _templates/moderations/tickets.html:245
+#: _templates/moderations/vacances.html:231
+#: _templates/moderations/vacances_aplication.html:189
+#: _templates/moderations/valute_list.html:238
+#: _templates/moderations/variable_list.html:228
+#: _templates/site/publication/advertisements.html:294
+#: _templates/site/publication/reviews.html:278
+#: _templates/site/shop2/tickets.html:116
+#: _templates/site/shop3/tickets.html:116
+#: _templates/site/shop4/tickets.html:116
+#: _templates/site/shop5/tickets.html:116
+#: _templates/site/shop6/tickets.html:116
+#: _templates/site/useraccount/complaint_list.html:275
+#: _templates/site/useraccount/tickets.html:244
+msgid "Вы уверены, что хотите удалить этот элемент?"
+msgstr "Шумо мутмаин ҳастед, ки мехоҳед ин унсурро хориҷ кунед?"
+
+#: _templates/moderations/advertisement_categorys_settings.html:238
+#: _templates/moderations/advertisement_categorys_settings.html:243
+#: _templates/moderations/advertisement_tags_settings.html:235
+#: _templates/moderations/advertisement_tags_settings.html:240
+#: _templates/moderations/applicationsproducts_list.html:249
+#: _templates/moderations/applicationsproducts_list.html:254
+#: _templates/moderations/blogs_settings.html:256
+#: _templates/moderations/blogs_settings.html:261
+#: _templates/moderations/categorys_settings.html:238
+#: _templates/moderations/categorys_settings.html:243
+#: _templates/moderations/collaborations.html:261
+#: _templates/moderations/complaints.html:282
+#: _templates/moderations/complaints.html:287
+#: _templates/moderations/documentation.html:220
+#: _templates/moderations/documentation.html:225
+#: _templates/moderations/extended_site_list.html:281
+#: _templates/moderations/extended_site_list.html:286
+#: _templates/moderations/faqs_list.html:266
+#: _templates/moderations/faqs_list.html:271
+#: _templates/moderations/faqs_settings.html:246
+#: _templates/moderations/faqs_settings.html:251
+#: _templates/moderations/gallery_settings.html:228
+#: _templates/moderations/gallery_settings.html:233
+#: _templates/moderations/manufacturers_list.html:243
+#: _templates/moderations/manufacturers_list.html:248
+#: _templates/moderations/notifications_settings.html:255
+#: _templates/moderations/notifications_settings.html:260
+#: _templates/moderations/orders.html:308
+#: _templates/moderations/orders.html:313
+#: _templates/moderations/pages_settings.html:252
+#: _templates/moderations/pages_settings.html:257
+#: _templates/moderations/price_settings.html:229
+#: _templates/moderations/price_settings.html:234
+#: _templates/moderations/product_list.html:392
+#: _templates/moderations/product_list.html:397
+#: _templates/moderations/productcomments_list.html:256
+#: _templates/moderations/productcomments_list.html:261
+#: _templates/moderations/reviews.html:271
+#: _templates/moderations/reviews.html:276
+#: _templates/moderations/seosettings.html:251
+#: _templates/moderations/seosettings.html:256
+#: _templates/moderations/service_settings.html:228
+#: _templates/moderations/service_settings.html:233
+#: _templates/moderations/sponsorship_settings.html:235
+#: _templates/moderations/sponsorship_settings.html:240
+#: _templates/moderations/statuspayment_list.html:329
+#: _templates/moderations/statuspayment_list.html:334
+#: _templates/moderations/storages_list.html:243
+#: _templates/moderations/storages_list.html:248
+#: _templates/moderations/tags_settings.html:235
+#: _templates/moderations/tags_settings.html:240
+#: _templates/moderations/tickets.html:262
+#: _templates/moderations/tickets.html:267
+#: _templates/moderations/vacances.html:248
+#: _templates/moderations/vacances.html:253
+#: _templates/moderations/vacances_aplication.html:206
+#: _templates/moderations/vacances_aplication.html:211
+#: _templates/moderations/valute_list.html:253
+#: _templates/moderations/valute_list.html:258
+#: _templates/moderations/variable_list.html:243
+#: _templates/moderations/variable_list.html:248
+#: _templates/site/publication/advertisements.html:311
+#: _templates/site/publication/advertisements.html:316
+#: _templates/site/publication/reviews.html:295
+#: _templates/site/publication/reviews.html:300
+#: _templates/site/shop2/tickets.html:133
+#: _templates/site/shop2/tickets.html:138
+#: _templates/site/shop3/tickets.html:133
+#: _templates/site/shop3/tickets.html:138
+#: _templates/site/shop4/tickets.html:133
+#: _templates/site/shop4/tickets.html:138
+#: _templates/site/shop5/tickets.html:133
+#: _templates/site/shop5/tickets.html:138
+#: _templates/site/shop6/tickets.html:133
+#: _templates/site/shop6/tickets.html:138
+#: _templates/site/useraccount/complaint_list.html:292
+#: _templates/site/useraccount/complaint_list.html:297
+#: _templates/site/useraccount/tickets.html:261
+#: _templates/site/useraccount/tickets.html:266
+msgid "Ошибка при удалении элемента."
+msgstr "Хатогӣ ҳангоми тоза кардани унсур."
+
+#: _templates/moderations/advertisement_tags_settings.html:19
+msgid "Метки объявлений"
+msgstr "Теги реклама"
+
+#: _templates/moderations/advertisement_tags_settings.html:60
+#: _templates/moderations/applicationsproducts_list.html:40
+#: _templates/moderations/applicationsproducts_list.html:118
+#: _templates/moderations/blogs_settings.html:50
+#: _templates/moderations/blogs_settings.html:115
+#: _templates/moderations/complaints.html:60
+#: _templates/moderations/extended_site_list.html:149
+#: _templates/moderations/faqs_list.html:40
+#: _templates/moderations/faqs_list.html:135
+#: _templates/moderations/faqs_settings.html:40
+#: _templates/moderations/faqs_settings.html:115
+#: _templates/moderations/gallery_settings.html:39
+#: _templates/moderations/gallery_settings.html:103
+#: _templates/moderations/leads/lead_list.html:136
+#: _templates/moderations/manufacturers_list.html:39
+#: _templates/moderations/manufacturers_list.html:112
+#: _templates/moderations/notifications_settings.html:38
+#: _templates/moderations/notifications_settings.html:108
+#: _templates/moderations/orders.html:41 _templates/moderations/orders.html:167
+#: _templates/moderations/price_settings.html:39
+#: _templates/moderations/price_settings.html:104
+#: _templates/moderations/productcomments_list.html:40
+#: _templates/moderations/productcomments_list.html:125
+#: _templates/moderations/reviews.html:59
+#: _templates/moderations/service_settings.html:39
+#: _templates/moderations/service_settings.html:103
+#: _templates/moderations/sponsorship_settings.html:60
+#: _templates/moderations/statuspayment_list.html:42
+#: _templates/moderations/statuspayment_list.html:62
+#: _templates/moderations/statuspayment_list.html:114
+#: _templates/moderations/storages_list.html:39
+#: _templates/moderations/storages_list.html:112
+#: _templates/moderations/tags_settings.html:60
+#: _templates/moderations/tickets.html:42
+#: _templates/moderations/tickets.html:61
+#: _templates/moderations/tickets.html:124
+#: _templates/moderations/vacances.html:40
+#: _templates/moderations/vacances.html:107
+#: _templates/moderations/vacances_aplication.html:32
+#: _templates/moderations/vacances_aplication.html:65
+#: _templates/moderations/valute_list.html:40
+#: _templates/moderations/valute_list.html:122
+#: _templates/moderations/variable_list.html:39
+#: _templates/moderations/variable_list.html:112
+#: _templates/moderations/withdraw.html:51
+#: _templates/moderations/withdraw.html:70
+#: _templates/moderations/withdraw.html:129
+#: _templates/site/publication/advertisements.html:44
+#: _templates/site/publication/advertisements.html:115
+#: _templates/site/publication/reviews.html:33
+#: _templates/site/publication/reviews.html:99
+#: _templates/site/shop4/application_detail.html:45
+#: _templates/site/shop4/manufacturer_applications.html:23
+#: _templates/site/shop4/manufacturer_order.html:29
+#: _templates/site/shop4/tickets.html:32
+#: _templates/site/useraccount/bookmarks.html:117
+#: _templates/site/useraccount/complaint_list.html:39
+#: _templates/site/useraccount/complaint_list.html:96
+#: _templates/site/useraccount/referrals_list.html:40
+#: _templates/site/useraccount/referrals_list.html:51
+#: _templates/site/useraccount/referrals_list.html:101
+#: _templates/site/useraccount/tickets.html:45
+#: _templates/site/useraccount/tickets.html:66
+#: _templates/site/useraccount/tickets.html:123
+#: _templates/site/useraccount/withdraw_payment.html:99
+#: _templates/site/useraccount/withdraw_payment.html:110
+#: _templates/site/useraccount/withdraw_payment.html:160
+#: _templates/site/useraccount/withdraw_point.html:39
+#: _templates/site/useraccount/withdraw_point.html:50
+#: _templates/site/useraccount/withdraw_point.html:100
+msgid "Дата"
+msgstr "Таърих"
+
+#: _templates/moderations/advertisement_tags_settings.html:137
+#: _templates/moderations/sponsorship_settings.html:137
+#: _templates/moderations/tags_settings.html:137
+msgid "Поиск по меткам"
+msgstr "Ҷустуҷӯ аз рӯи tags"
+
+#: _templates/moderations/applicationsproducts_form.html:17
+#: _templates/moderations/faqs_form.html:17
+#: _templates/moderations/faqsproducts_form.html:17
+#: _templates/moderations/productcomments_form.html:17
+#: _templates/moderations/valute_form.html:17
+#: _templates/site/shop1/base.html:894 _templates/site/shop22/base.html:588
+#: _templates/site/shop3/base.html:259 _templates/site/shop4/base.html:202
+msgid "ЧаВо"
+msgstr "ЧаВо"
+
+#: _templates/moderations/applicationsproducts_form.html:22
+#: _templates/moderations/faqs_form.html:22
+#: _templates/moderations/faqsproducts_form.html:22
+#: _templates/moderations/productcomments_form.html:22
+#: _templates/moderations/valute_form.html:22
+msgid "Faq"
+msgstr "Саволҳои зиёд такрормешуда"
+
+#: _templates/moderations/applicationsproducts_form.html:23
+#: _templates/moderations/applicationsproducts_list.html:39
+#: _templates/moderations/faqs_form.html:23
+#: _templates/moderations/faqs_form.html:38
+#: _templates/moderations/faqs_list.html:39
+#: _templates/moderations/faqs_list.html:58
+#: _templates/moderations/faqs_settings.html:39
+#: _templates/moderations/faqs_settings.html:57
+#: _templates/moderations/faqsproducts_form.html:23
+#: _templates/moderations/faqsproducts_form.html:50
+#: _templates/moderations/productcomments_form.html:23
+#: _templates/moderations/productcomments_list.html:39
+#: _templates/moderations/valute_form.html:23
+#: _templates/moderations/valute_list.html:39
+msgid "Вопрос"
+msgstr "Савол"
+
+#: _templates/moderations/applicationsproducts_form.html:38
+msgid "Образец Продукта"
+msgstr "Намуна"
+
+#: _templates/moderations/applicationsproducts_form.html:42
+#: _templates/moderations/manufacturers_form.html:325
+#: _templates/moderations/profile_edit.html:89
+#: _templates/moderations/profile_edit_client.html:93
+#: _templates/moderations/profile_edit_user.html:50
+#: _templates/moderations/vacances_aplication.html:28
+#: _templates/moderations/worker_edit.html:50
+#: _templates/site/useraccount/profile_edit.html:88
+#: _templates/site/useraccount/restore_access.html:28
+#: _templates/site/useraccount/restore_access.html:64
+msgid "Email"
+msgstr "Имейл"
+
+#: _templates/moderations/applicationsproducts_form.html:46
+#: _templates/moderations/manufacturers_form.html:333
+#: _templates/moderations/profile_edit.html:98
+#: _templates/moderations/profile_edit_client.html:108
+#: _templates/moderations/profile_edit_user.html:59
+#: _templates/moderations/vacances_aplication.html:29
+#: _templates/moderations/worker_edit.html:59
+#: _templates/site/shop4/base.html:251 _templates/site/shop4/base.html:479
+#: _templates/site/shop4/base_profile.html:145
+#: _templates/site/shop4/contacts.html:205
+#: _templates/site/shop4/include/form_applications.html:35
+#: _templates/site/shop4/include/form_applications.html:36
+#: _templates/site/shop4/include/form_applications_catalog.html:33
+#: _templates/site/shop4/include/form_applications_catalog.html:34
+#: _templates/site/shop4/profile_edit.html:82
+#: _templates/site/shop4/vacancy_detail.html:74
+#: _templates/site/shop6/base.html:264 _templates/site/shop6/base.html:573
+#: _templates/site/useraccount/profile_edit.html:103
+msgid "Телефон"
+msgstr "Телефон"
+
+#: _templates/moderations/applicationsproducts_form.html:55
+#: _templates/moderations/applicationsproducts_list.html:57
+#: _templates/moderations/faqs_list.html:57
+#: _templates/moderations/faqsproducts_form.html:46
+#: _templates/moderations/productcomments_form.html:46
+#: _templates/moderations/productcomments_list.html:57
+#: _templates/moderations/withdraw.html:53
+#: _templates/moderations/withdraw.html:67
+#: _templates/site/publication/reviews.html:34
+#: _templates/site/useraccount/complaint_list.html:37
+msgid "Пользователь"
+msgstr "Истифода"
+
+#: _templates/moderations/applicationsproducts_list.html:19
+msgid "Заявки"
+msgstr "Барномаҳо"
+
+#: _templates/moderations/applicationsproducts_list.html:38
+#: _templates/moderations/applicationsproducts_list.html:56
+#: _templates/moderations/complaints.html:34
+#: _templates/moderations/extended_site_list.html:36
+#: _templates/moderations/extended_site_list.html:55
+#: _templates/moderations/faqs_list.html:38
+#: _templates/moderations/faqs_list.html:56
+#: _templates/moderations/faqs_settings.html:38
+#: _templates/moderations/faqs_settings.html:56
+#: _templates/moderations/manufacturers_list.html:38
+#: _templates/moderations/manufacturers_list.html:55
+#: _templates/moderations/notifications_settings.html:36
+#: _templates/moderations/notifications_settings.html:55
+#: _templates/moderations/productcomments_list.html:38
+#: _templates/moderations/productcomments_list.html:56
+#: _templates/moderations/reviews.html:35
+#: _templates/moderations/seosettings.html:39
+#: _templates/moderations/seosettings.html:56
+#: _templates/moderations/storages_list.html:38
+#: _templates/moderations/storages_list.html:55
+#: _templates/moderations/tickets.html:40
+#: _templates/moderations/tickets.html:59
+#: _templates/moderations/valute_list.html:38
+#: _templates/moderations/valute_list.html:56
+#: _templates/moderations/variable_list.html:38
+#: _templates/moderations/variable_list.html:55
+#: _templates/moderations/withdraw.html:49
+#: _templates/moderations/withdraw.html:64
+#: _templates/site/publication/dopadvertisement.html:42
+#: _templates/site/useraccount/bookmarks.html:39
+#: _templates/site/useraccount/referrals_list.html:38
+#: _templates/site/useraccount/tickets.html:43
+#: _templates/site/useraccount/tickets.html:64
+#: _templates/site/useraccount/withdraw_payment.html:98
+#: _templates/site/useraccount/withdraw_payment.html:109
+#: _templates/site/useraccount/withdraw_point.html:38
+#: _templates/site/useraccount/withdraw_point.html:49
+msgid "ID"
+msgstr "Иди"
+
+#: _templates/moderations/applicationsproducts_list.html:58
+#: _templates/moderations/faqs_list.html:60
+#: _templates/moderations/faqsproducts_form.html:38
+#: _templates/moderations/productcomments_list.html:59
+#: _templates/moderations/сomplaint_form.html:44
+msgid "Продукт"
+msgstr "Маҳсул"
+
+#: _templates/moderations/applicationsproducts_list.html:59
+#: _templates/moderations/asset_list.html:50
+#: _templates/moderations/blogs_form.html:74
+#: _templates/moderations/blogs_settings.html:68
+#: _templates/moderations/faqs_list.html:61
+#: _templates/moderations/faqs_settings.html:58
+#: _templates/moderations/gallery_form.html:225
+#: _templates/moderations/gallery_settings.html:56
+#: _templates/moderations/manufacturers_form.html:223
+#: _templates/moderations/price_form.html:68
+#: _templates/moderations/price_settings.html:57
+#: _templates/moderations/productcomments_list.html:60
+#: _templates/moderations/service_form.html:225
+#: _templates/moderations/service_settings.html:56
+#: _templates/moderations/sponsorship_form.html:74
+#: _templates/moderations/vacancys_form.html:74
+msgid "Дата создания"
+msgstr "Санаи офариниш"
+
+#: _templates/moderations/applicationsproducts_list.html:89
+#: _templates/moderations/asset_list.html:68
+#: _templates/moderations/blogs_settings.html:89
+#: _templates/moderations/documentation.html:82
+#: _templates/moderations/faqs_list.html:105
+#: _templates/moderations/faqs_settings.html:85
+#: _templates/moderations/gallery_settings.html:77
+#: _templates/moderations/language_list.html:96
+#: _templates/moderations/language_list.html:106
+#: _templates/moderations/manufacturers_list.html:81
+#: _templates/moderations/price_settings.html:78
+#: _templates/moderations/productcomments_list.html:95
+#: _templates/moderations/service_settings.html:77
+#: _templates/moderations/storages_list.html:81
+#: _templates/moderations/vacances.html:81
+#: _templates/moderations/valute_list.html:92
+#: _templates/moderations/variable_list.html:81
+msgid "Редактировать"
+msgstr "Таҳрир кардан"
+
+#: _templates/moderations/applicationsproducts_list.html:114
+#: _templates/moderations/complaints.html:109
+#: _templates/moderations/extended_site_list.html:141
+#: _templates/moderations/faqs_list.html:131
+#: _templates/moderations/faqs_settings.html:111
+#: _templates/moderations/manufacturers_list.html:108
+#: _templates/moderations/notifications_settings.html:97
+#: _templates/moderations/productcomments_list.html:121
+#: _templates/moderations/reviews.html:113
+#: _templates/moderations/seosettings.html:111
+#: _templates/moderations/storages_list.html:108
+#: _templates/moderations/tickets.html:116
+#: _templates/moderations/valute_list.html:118
+#: _templates/moderations/variable_list.html:108
+#: _templates/moderations/withdraw.html:118
+#: _templates/site/publication/advertisements.html:107
+#: _templates/site/publication/reviews.html:91
+#: _templates/site/useraccount/bookmarks.html:109
+#: _templates/site/useraccount/complaint_list.html:88
+#: _templates/site/useraccount/referrals_list.html:90
+#: _templates/site/useraccount/tickets.html:115
+#: _templates/site/useraccount/withdraw_payment.html:149
+#: _templates/site/useraccount/withdraw_point.html:89
+msgid "Введите ID"
+msgstr "ID-ро ворид кунед"
+
+#: _templates/moderations/applicationsproducts_list.html:119
+#: _templates/moderations/blogs_settings.html:116
+#: _templates/moderations/extended_site_list.html:150
+#: _templates/moderations/faqs_list.html:136
+#: _templates/moderations/faqs_settings.html:116
+#: _templates/moderations/gallery_settings.html:104
+#: _templates/moderations/manufacturers_list.html:113
+#: _templates/moderations/notifications_settings.html:109
+#: _templates/moderations/orders.html:168
+#: _templates/moderations/price_settings.html:105
+#: _templates/moderations/productcomments_list.html:126
+#: _templates/moderations/service_settings.html:104
+#: _templates/moderations/statuspayment_list.html:115
+#: _templates/moderations/storages_list.html:113
+#: _templates/moderations/tickets.html:125
+#: _templates/moderations/vacances.html:108
+#: _templates/moderations/vacances_aplication.html:66
+#: _templates/moderations/valute_list.html:123
+#: _templates/moderations/variable_list.html:113
+#: _templates/moderations/withdraw.html:130
+#: _templates/site/publication/advertisements.html:116
+#: _templates/site/publication/reviews.html:100
+#: _templates/site/useraccount/bookmarks.html:118
+#: _templates/site/useraccount/complaint_list.html:97
+#: _templates/site/useraccount/referrals_list.html:102
+#: _templates/site/useraccount/tickets.html:124
+#: _templates/site/useraccount/withdraw_payment.html:161
+#: _templates/site/useraccount/withdraw_point.html:101
+msgid "Выберите дату"
+msgstr "Санаро интихоб кунед"
+
+#: _templates/moderations/applicationsproducts_list.html:123
+#: _templates/moderations/faqs_list.html:140
+#: _templates/moderations/faqs_settings.html:120
+#: _templates/moderations/manufacturers_list.html:117
+#: _templates/moderations/productcomments_list.html:130
+#: _templates/moderations/storages_list.html:117
+#: _templates/moderations/valute_list.html:127
+#: _templates/moderations/variable_list.html:117
+msgid "Введите вопрос"
+msgstr "Саволро ворид кунед"
+
+#: _templates/moderations/applicationsproducts_list.html:145
+#: _templates/moderations/blogs_settings.html:151
+#: _templates/moderations/complaints.html:145
+#: _templates/moderations/extended_site_list.html:175
+#: _templates/moderations/faqs_list.html:162
+#: _templates/moderations/faqs_settings.html:142
+#: _templates/moderations/gallery_settings.html:130
+#: _templates/moderations/manufacturers_list.html:139
+#: _templates/moderations/notifications_settings.html:137
+#: _templates/moderations/orders.html:203
+#: _templates/moderations/price_settings.html:131
+#: _templates/moderations/productcomments_list.html:152
+#: _templates/moderations/reviews.html:149
+#: _templates/moderations/service_settings.html:130
+#: _templates/moderations/statuspayment_list.html:189
+#: _templates/moderations/storages_list.html:139
+#: _templates/moderations/tickets.html:151
+#: _templates/moderations/vacances.html:143
+#: _templates/moderations/vacances_aplication.html:101
+#: _templates/moderations/valute_list.html:149
+#: _templates/moderations/variable_list.html:139
+#: _templates/moderations/withdraw.html:186
+#: _templates/site/publication/advertisements.html:200
+#: _templates/site/publication/reviews.html:184
+#: _templates/site/useraccount/complaint_list.html:181
+#: _templates/site/useraccount/referrals_list.html:268
+#: _templates/site/useraccount/tickets.html:150
+#: _templates/site/useraccount/withdraw_payment.html:327
+#: _templates/site/useraccount/withdraw_point.html:267
+msgid "Поиск по дате"
+msgstr "Ҷустуҷӯ аз рӯи сана"
+
+#: _templates/moderations/applicationsproducts_list.html:146
+#: _templates/moderations/complaints.html:142
+#: _templates/moderations/extended_site_list.html:172
+#: _templates/moderations/faqs_list.html:163
+#: _templates/moderations/faqs_settings.html:143
+#: _templates/moderations/manufacturers_list.html:140
+#: _templates/moderations/notifications_settings.html:135
+#: _templates/moderations/productcomments_list.html:153
+#: _templates/moderations/reviews.html:146
+#: _templates/moderations/seosettings.html:144
+#: _templates/moderations/storages_list.html:140
+#: _templates/moderations/tickets.html:148
+#: _templates/moderations/valute_list.html:150
+#: _templates/moderations/variable_list.html:140
+#: _templates/moderations/withdraw.html:184
+#: _templates/site/publication/advertisements.html:197
+#: _templates/site/publication/reviews.html:181
+#: _templates/site/useraccount/complaint_list.html:178
+#: _templates/site/useraccount/referrals_list.html:266
+#: _templates/site/useraccount/tickets.html:147
+#: _templates/site/useraccount/withdraw_payment.html:325
+#: _templates/site/useraccount/withdraw_point.html:265
+msgid "Поиск по ID"
+msgstr "Ҷустуҷӯ аз ҷониби ID"
+
+#: _templates/moderations/asset_edit.html:17
+msgid "Редактировать имущество"
+msgstr "Таҳрири амвол"
+
+#: _templates/moderations/asset_edit.html:30
+#: _templates/moderations/asset_list.html:37
+#: _templates/moderations/asset_list.html:49
+msgid "Инвентарный номер"
+msgstr "Рақами инвентаризатсия"
+
+#: _templates/moderations/asset_edit.html:42
+msgid "Дата покупки"
+msgstr "Санаи харид"
+
+#: _templates/moderations/asset_edit.html:48
+msgid "Окончание гарантии"
+msgstr "Охири кафолат"
+
+#: _templates/moderations/asset_edit.html:54
+msgid "Активно"
+msgstr "Фаъолона"
+
+#: _templates/moderations/asset_edit.html:60
+#: _templates/site/publication/advertisements.html:47
+#: _templates/site/useraccount/complaint_list.html:36
+msgid "Расположение"
+msgstr "Таъб"
+
+#: _templates/moderations/asset_edit.html:66
+msgid "Ответственный"
+msgstr "Ьавобгар"
+
+#: _templates/moderations/asset_edit.html:72
+msgid "Назад к списку"
+msgstr "Бозгашт ба рӯйхат"
+
+#: _templates/moderations/asset_edit.html:89
+msgid "История использования имущества"
+msgstr "Таърихи истифодаи амвол"
+
+#: _templates/moderations/asset_edit.html:110
+msgid "Запись о техническом обслуживании"
+msgstr "Сабти нигоҳдорӣ"
+
+#: _templates/moderations/asset_list.html:20
+msgid "Имущество"
+msgstr "Молу мулк"
+
+#: _templates/moderations/asset_list.html:51
+msgid "Активен"
+msgstr "Фаъол"
+
+#: _templates/moderations/asset_list.html:72
+msgid "Нет данных"
+msgstr "Маълумот нест"
+
+#: _templates/moderations/asset_list.html:94
+msgid "Введите инвентарный номер"
+msgstr "Рақами инвентаризатсияро ворид кунед"
+
+#: _templates/moderations/asset_list.html:114
+msgid "Поиск по инвентарному номеру"
+msgstr "Ҷустуҷӯи рақами инвентаризатсия"
+
+#: _templates/moderations/base.html:138
+#: _templates/site/useraccount/base.html:145
+msgid "Нет уведомлений"
+msgstr "Огоҳӣ нест"
+
+#: _templates/moderations/blogs_form.html:57
+#: _templates/moderations/blogs_settings.html:19
+#: _templates/moderations/gallery_form.html:208
+#: _templates/moderations/manufacturers_form.html:207
+#: _templates/moderations/price_form.html:51
+#: _templates/moderations/service_form.html:208
+#: _templates/moderations/sponsorship_form.html:57
+#: _templates/moderations/storages_form.html:207
+#: _templates/moderations/variable_form.html:57
+#: _templates/site/shop1/base.html:908 _templates/site/shop22/base.html:585
+#: _templates/site/shop4/base.html:319 _templates/site/shop4/base.html:511
+#: _templates/site/shop4/base.html:727 _templates/site/shop4/blogs.html:15
+#: _templates/site/shop6/base.html:239 _templates/site/shop6/base.html:434
+#: _templates/site/shop6/base.html:726
+msgid "Новости"
+msgstr "Ахбор"
+
+#: _templates/moderations/blogs_form.html:58
+#: _templates/moderations/gallery_form.html:209
+#: _templates/moderations/manufacturers_form.html:208
+#: _templates/moderations/price_form.html:52
+#: _templates/moderations/service_form.html:209
+#: _templates/moderations/sponsorship_form.html:58
+#: _templates/moderations/storages_form.html:208
+#: _templates/moderations/variable_form.html:58
+msgid "Новость"
+msgstr "Ахбор"
+
+#: _templates/moderations/blogs_form.html:80
+#: _templates/moderations/gallery_form.html:231
+#: _templates/moderations/manufacturers_form.html:229
+#: _templates/moderations/price_form.html:74
+#: _templates/moderations/service_form.html:231
+#: _templates/moderations/sponsorship_form.html:80
+#: _templates/moderations/vacancys_form.html:80
+msgid "Только что"
+msgstr "Ҳамин ҳоло"
+
+#: _templates/moderations/blogs_form.html:106
+#: _templates/moderations/blogs_form.html:214
+#: _templates/moderations/categorys_form.html:90
+#: _templates/moderations/categorys_form.html:172
+#: _templates/moderations/categorys_form.html:201
+#: _templates/moderations/gallery_form.html:257
+#: _templates/moderations/gallery_form.html:349
+#: _templates/moderations/manufacturers_form.html:255
+#: _templates/moderations/manufacturers_form.html:283
+#: _templates/moderations/manufacturers_form.html:423
+#: _templates/moderations/pages_form.html:113
+#: _templates/moderations/product_form.html:560
+#: _templates/moderations/service_form.html:257
+#: _templates/moderations/service_form.html:349
+#: _templates/moderations/vacancys_form.html:106
+#: _templates/site/shop4/catalog.html:196
+#: _templates/site/shop4/category.html:213
+#: _templates/site/shop4/manufacturers_details.html:180
+msgid "Очистить"
+msgstr "Тоза"
+
+#: _templates/moderations/blogs_form.html:114
+#: _templates/moderations/price_form.html:80
+#: _templates/moderations/service_form.html:265
+#: _templates/moderations/sponsorship_form.html:108
+msgid "Черновик"
+msgstr "Нащша"
+
+#: _templates/moderations/blogs_form.html:140
+#: _templates/moderations/gallery_form.html:291
+#: _templates/moderations/price_form.html:106
+#: _templates/moderations/service_form.html:291
+#: _templates/moderations/sponsorship_form.html:126
+msgid "Источник"
+msgstr "Сарчашма"
+
+#: _templates/moderations/blogs_form.html:148
+msgid "Метки"
+msgstr "Тегҳо"
+
+#: _templates/moderations/blogs_form.html:172
+#: _templates/moderations/complaints.html:58
+#: _templates/moderations/gallery_form.html:307
+#: _templates/moderations/price_form.html:129
+#: _templates/moderations/service_form.html:307
+#: _templates/moderations/sponsorship_form.html:141
+#: _templates/moderations/vacancys_form.html:173
+#: _templates/moderations/сomplaint_form.html:28
+#: _templates/site/shop4/include/reviews.html:10
+#: _templates/site/shop4/manufacturer_reviews.html:23
+#: _templates/site/shop4/order_detail.html:173
+#: _templates/site/shop4/order_detail.html:215
+msgid "Автор"
+msgstr "Муаллиф"
+
+#: _templates/moderations/blogs_form.html:265
+#: _templates/moderations/blogs_settings.html:23
+#: _templates/moderations/sponsorship_form.html:236
+msgid "Добавить категорию"
+msgstr "Андозаро илова кунед"
+
+#: _templates/moderations/blogs_form.html:281
+#: _templates/moderations/sponsorship_form.html:252
+#: _templates/moderations/vacancys_form.html:223
+msgid "Создание категории"
+msgstr "Эҷоди категория"
+
+#: _templates/moderations/blogs_form.html:289
+#: _templates/moderations/blogs_form.html:291
+#: _templates/moderations/sponsorship_form.html:260
+#: _templates/moderations/sponsorship_form.html:262
+#: _templates/moderations/vacancys_form.html:231
+#: _templates/moderations/vacancys_form.html:233
+msgid "Название категории"
+msgstr "Номи категория"
+
+#: _templates/moderations/blogs_form.html:294
+#: _templates/moderations/product_list.html:40
+#: _templates/moderations/sponsorship_form.html:265
+#: _templates/moderations/vacancys_form.html:236
+msgid "Slug"
+msgstr "Slug"
+
+#: _templates/moderations/blogs_form.html:296
+#: _templates/moderations/sponsorship_form.html:267
+#: _templates/moderations/vacancys_form.html:238
+msgid "Slug категории"
+msgstr "Категория Slug"
+
+#: _templates/moderations/blogs_form.html:301
+#: _templates/moderations/sponsorship_form.html:272
+#: _templates/moderations/vacancys_form.html:243
+msgid "Описание категории"
+msgstr "Тавсифи категория"
+
+#: _templates/moderations/blogs_form.html:315
+#: _templates/moderations/product_list.html:196
+#: _templates/moderations/product_list.html:204
+#: _templates/moderations/sponsorship_form.html:286
+#: _templates/moderations/vacancys_form.html:257
+msgid "Нет"
+msgstr "Нест"
+
+#: _templates/moderations/blogs_settings.html:92
+#: _templates/moderations/documentation.html:85
+#: _templates/moderations/documentation_create.html:82
+#: _templates/moderations/documentation_detail.html:87
+#: _templates/moderations/documentation_detail.html:147
+#: _templates/moderations/faqs_list.html:108
+#: _templates/moderations/faqs_settings.html:88
+#: _templates/moderations/gallery_settings.html:80
+#: _templates/moderations/language_list.html:97
+#: _templates/moderations/language_list.html:113
+#: _templates/moderations/manufacturers_list.html:84
+#: _templates/moderations/price_settings.html:81
+#: _templates/moderations/productcomments_list.html:98
+#: _templates/moderations/service_settings.html:80
+#: _templates/moderations/storages_list.html:84
+#: _templates/moderations/vacances.html:84
+#: _templates/moderations/valute_list.html:95
+#: _templates/moderations/variable_list.html:84
+#: _templates/site/publication/advertisements.html:84
+#: _templates/site/shop4/tickets.html:34
+#: _templates/site/useraccount/tickets.html:92
+msgid "Удалить"
+msgstr "Нест"
+
+#: _templates/moderations/categorys_settings.html:19
+msgid "Категории новостей"
+msgstr "Категорияҳои ахбор"
+
+#: _templates/moderations/client_list.html:19
+msgid "Поиск по имени клиента"
+msgstr "Ҷустуҷӯи мизоҷ"
+
+#: _templates/moderations/client_list.html:29
+#: _templates/moderations/user_list.html:42
+#: _templates/moderations/worker_list.html:29
+msgid "Поиск по ФИО"
+msgstr "Ҷустуҷӯ аз рӯи ном"
+
+#: _templates/moderations/client_list.html:38
+#: _templates/moderations/iframe/cards_form.html:42
+#: _templates/moderations/language_list.html:78
+#: _templates/moderations/schedule_calendar.html:23
+#: _templates/moderations/worker_list.html:38
+msgid "Добавить"
+msgstr "Илова кардан"
+
+#: _templates/moderations/collaborations.html:19
+#: _templates/site/shop4/contacts.html:208
+#: _templates/site/shop4/ticket_create.html:29
+msgid "Обращение"
+msgstr "Шикоят кардан"
+
+#: _templates/moderations/collaborations.html:33
+#: _templates/moderations/collaborations.html:56
+#: _templates/site/shop4/contacts.html:199
+#: _templates/site/shop4/include/form_applications.html:32
+#: _templates/site/shop4/include/form_applications_catalog.html:30
+msgid "Электронная почта"
+msgstr "Почтаи электронӣ"
+
+#: _templates/moderations/collaborations.html:34
+#: _templates/moderations/collaborations.html:55
+#: _templates/moderations/profile_edit.html:109
+#: _templates/moderations/profile_edit_client.html:125
+#: _templates/moderations/profile_edit_user.html:70
+#: _templates/moderations/worker_edit.html:70
+#: _templates/site/useraccount/profile_edit.html:120
+#: _templates/site/useraccount/referrals_list.html:50
+#: _templates/site/useraccount/referrals_list.html:52
+msgid "Имя"
+msgstr "Ном"
+
+#: _templates/moderations/collaborations.html:35
+#: _templates/moderations/collaborations.html:58
+msgid "Номер телефона"
+msgstr "Рақами мобилӣ"
+
+#: _templates/moderations/collaborations.html:36
+#: _templates/moderations/collaborations.html:59
+#: _templates/moderations/notifications_form.html:67
+#: _templates/moderations/vacances_aplication.html:30
+msgid "Сообщение"
+msgstr "Хабар"
+
+#: _templates/moderations/collaborations.html:57
+msgid "Обьект сотрудничества"
+msgstr "Объекти ҳамкорӣ"
+
+#: _templates/moderations/collaborations.html:109
+msgid "Введите эл.почту"
+msgstr "Ба почтаи электронӣ ворид кунед"
+
+#: _templates/moderations/collaborations.html:112
+#: _templates/site/shop4/checkout.html:50
+msgid "Введите имя"
+msgstr "Номро ворид кунед"
+
+#: _templates/moderations/collaborations.html:115
+msgid "Введите номер телефона"
+msgstr "Рақами телефонро ворид кунед"
+
+#: _templates/moderations/collaborations.html:118
+#: _templates/moderations/complaints.html:126
+#: _templates/moderations/reviews.html:130
+msgid "Введите комментарий"
+msgstr "Шарҳро ворид кунед"
+
+#: _templates/moderations/collaborations.html:132
+msgid "Поиск по электронной почте"
+msgstr "Ҷустуҷӯ аз ҷониби E -Mail"
+
+#: _templates/moderations/collaborations.html:133
+#: _templates/moderations/worker_list.html:19
+msgid "Поиск по имени"
+msgstr "Ҷустуҷӯ аз рӯи ном"
+
+#: _templates/moderations/collaborations.html:134
+msgid "Поиск по номеру телефона"
+msgstr "Ҷустуҷӯ аз ҷониби рақами телефон"
+
+#: _templates/moderations/collaborations.html:135
+#: _templates/moderations/complaints.html:146
+#: _templates/moderations/reviews.html:150
+msgid "Поиск по комментарию"
+msgstr "Ҷустуҷӯ аз рӯи эзоҳ"
+
+#: _templates/moderations/collaborations.html:229
+msgid "Ошибка при удалении элементов: "
+msgstr "Хатогӣ ҳангоми бартараф кардани унсурҳо:"
+
+#: _templates/moderations/collaborations.html:256
+msgid "Ошибка при удалении элемента: "
+msgstr "Хатогӣ ҳангоми тоза кардани унсур:"
+
+#: _templates/moderations/complaints.html:19
+msgid "Жалобы"
+msgstr "Шикоятҳо"
+
+#: _templates/moderations/complaints.html:35
+#: _templates/moderations/reviews.html:36
+msgid "Автору"
+msgstr "Муаллиф"
+
+#: _templates/moderations/complaints.html:36
+#: _templates/moderations/reviews.html:37
+msgid "Дате"
+msgstr "Таърих"
+
+#: _templates/moderations/complaints.html:37
+#: _templates/moderations/reviews.html:38
+msgid "Статусу"
+msgstr "Вазъият"
+
+#: _templates/moderations/complaints.html:38
+#: _templates/moderations/reviews.html:39
+msgid "Комментарию"
+msgstr "Шарҳ"
+
+#: _templates/moderations/complaints.html:57
+#: _templates/moderations/сomplaint_form.html:52
+msgid "Объект"
+msgstr "Мущобилат кардан"
+
+#: _templates/moderations/complaints.html:112
+#: _templates/moderations/reviews.html:116
+msgid "Введите автора"
+msgstr "Ба муаллиф ворид кунед"
+
+#: _templates/moderations/complaints.html:119
+#: _templates/moderations/extended_site_list.html:155
+#: _templates/moderations/reviews.html:123
+#: _templates/moderations/statuspayment_list.html:123
+#: _templates/moderations/tickets.html:130
+#: _templates/site/publication/advertisements.html:121
+#: _templates/site/publication/reviews.html:105
+#: _templates/site/useraccount/bookmarks.html:123
+#: _templates/site/useraccount/complaint_list.html:102
+#: _templates/site/useraccount/tickets.html:129
+msgid "Выберите статус"
+msgstr "Вазъро интихоб кунед"
+
+#: _templates/moderations/complaints.html:129
+#: _templates/moderations/reviews.html:133
+msgid "Введите оценку"
+msgstr "Арзёбӣ ворид кунед"
+
+#: _templates/moderations/complaints.html:143
+#: _templates/moderations/extended_site_list.html:173
+#: _templates/moderations/notifications_settings.html:136
+#: _templates/moderations/pages_settings.html:146
+#: _templates/moderations/product_list.html:251
+#: _templates/moderations/reviews.html:147
+#: _templates/moderations/seosettings.html:145
+#: _templates/moderations/tickets.html:149
+#: _templates/moderations/withdraw.html:185
+#: _templates/site/publication/advertisements.html:198
+#: _templates/site/publication/reviews.html:182
+#: _templates/site/useraccount/complaint_list.html:179
+#: _templates/site/useraccount/referrals_list.html:267
+#: _templates/site/useraccount/tickets.html:148
+#: _templates/site/useraccount/withdraw_payment.html:326
+#: _templates/site/useraccount/withdraw_point.html:266
+msgid "Поиск по типу"
+msgstr "Ҷустуҷӯ барои намуд"
+
+#: _templates/moderations/complaints.html:144
+#: _templates/moderations/extended_site_list.html:174
+#: _templates/moderations/reviews.html:148
+#: _templates/moderations/seosettings.html:146
+#: _templates/moderations/tickets.html:150
+#: _templates/site/publication/advertisements.html:199
+#: _templates/site/publication/reviews.html:183
+#: _templates/site/useraccount/complaint_list.html:180
+#: _templates/site/useraccount/tickets.html:149
+msgid "Поиск по заголовку"
+msgstr "Ҷустуҷӯи сарлавҳа"
+
+#: _templates/moderations/complaints.html:147
+#: _templates/moderations/reviews.html:151
+msgid "Поиск по оценке"
+msgstr "Ҷустуҷӯи арзёбӣ"
+
+#: _templates/moderations/documentation.html:17
+#: _templates/moderations/documentation_create.html:21
+#: _templates/moderations/documentation_detail.html:21
+msgid "Документация"
+msgstr "Ҳуҷҷатгузорӣ"
+
+#: _templates/moderations/documentation.html:53
+#: _templates/moderations/documentation_create.html:42
+#: _templates/moderations/documentation_detail.html:42
+#: _templates/moderations/notifications_settings.html:37
+#: _templates/moderations/notifications_settings.html:57
+#: _templates/moderations/pages_settings.html:40
+#: _templates/moderations/pages_settings.html:56
+#: _templates/moderations/product_list.html:41
+#: _templates/moderations/seosettings.html:40
+#: _templates/moderations/valute_list.html:59
+#: _templates/moderations/withdraw.html:50
+#: _templates/moderations/withdraw.html:71
+#: _templates/site/publication/advertisement_detail.html:104
+#: _templates/site/shop4/application_detail.html:19
+#: _templates/site/useraccount/referrals_list.html:39
+#: _templates/site/useraccount/withdraw_payment.html:111
+#: _templates/site/useraccount/withdraw_point.html:51
+msgid "Тип"
+msgstr "Чоп"
+
+#: _templates/moderations/documentation_create.html:59
+#: _templates/moderations/gallery_form.html:394
+#: _templates/moderations/product_form.html:607
+#: _templates/moderations/product_variable_form.html:415
+#: _templates/moderations/service_form.html:394
+#: _templates/moderations/settings_global.html:40
+#: _templates/site/useraccount/ticket_form.html:50
+msgid "Файлы"
+msgstr "Файлҳо"
+
+#: _templates/moderations/documentation_create.html:66
+#: _templates/moderations/documentation_detail.html:58
+msgid "Сохранить документацию"
+msgstr "Ҳуҷҷатҳоро захира кунед"
+
+#: _templates/moderations/documentation_detail.html:63
+msgid "Загрузка файлов"
+msgstr "Файлҳоро зеркашӣ кунед"
+
+#: _templates/moderations/documentation_detail.html:67
+msgid "Выберите файлы"
+msgstr "Интихоб кунед Файлҳо"
+
+#: _templates/moderations/documentation_detail.html:71
+msgid "Загрузить файлы"
+msgstr "Файлҳоро зеркашӣ кунед"
+
+#: _templates/moderations/extended_site_list.html:17
+msgid "Домены"
+msgstr "Доменҳо"
+
+#: _templates/moderations/extended_site_list.html:38
+#: _templates/moderations/extended_site_list.html:56
+msgid "Домен"
+msgstr "Думан"
+
+#: _templates/moderations/extended_site_list.html:39
+#: _templates/moderations/extended_site_list.html:58
+msgid "Шаблон"
+msgstr "Намуна"
+
+#: _templates/moderations/extended_site_list.html:57
+msgid "Название сайта"
+msgstr "Номи сайт"
+
+#: _templates/moderations/extended_site_list.html:145
+#: _templates/moderations/tickets.html:120
+#: _templates/site/publication/advertisements.html:111
+#: _templates/site/publication/reviews.html:95
+#: _templates/site/useraccount/bookmarks.html:113
+#: _templates/site/useraccount/complaint_list.html:92
+#: _templates/site/useraccount/tickets.html:119
+msgid "Введите тему"
+msgstr "Мавзӯъро ворид кунед"
+
+#: _templates/moderations/faqs_form.html:42
+#: _templates/moderations/faqs_list.html:59
+#: _templates/moderations/faqsproducts_form.html:54
+msgid "Ответ"
+msgstr "Ьавоб"
+
+#: _templates/moderations/faqs_list.html:19
+#: _templates/moderations/faqs_settings.html:19
+#: _templates/site/shop4/faqs.html:21
+msgid "Часто задаваемые вопросы"
+msgstr "Саволҳои зуд-зуд додашуда"
+
+#: _templates/moderations/faqsproducts_form.html:59
+#: _templates/moderations/productcomments_form.html:59
+msgid "Опубликован"
+msgstr "Нашр шудааст"
+
+#: _templates/moderations/gallery_form.html:265
+#: _templates/moderations/pages_form.html:39
+msgid "Опубликовать"
+msgstr "Нашр кардан"
+
+#: _templates/moderations/gallery_settings.html:19
+#: _templates/site/shop1/base.html:915 _templates/site/shop4/base.html:515
+#: _templates/site/shop4/gallery.html:15 _templates/site/shop6/base.html:438
+msgid "Галерея"
+msgstr "Галерея"
+
+#: _templates/moderations/iframe/cards_form.html:23
+msgid "Номер карты"
+msgstr "Шумораӣ карта"
+
+#: _templates/moderations/iframe/cards_form.html:31
+msgid "Статус карты"
+msgstr "Ҳолати корт"
+
+#: _templates/moderations/iframe/withdraw_form.html:23
+#: _templates/moderations/statuspayment_list.html:40
+#: _templates/moderations/statuspayment_list.html:59
+#: _templates/moderations/withdraw.html:72 _templates/site/shop2/cart.html:188
+#: _templates/site/shop3/cart.html:188 _templates/site/shop4/cart.html:188
+#: _templates/site/shop4/order.html:48
+#: _templates/site/useraccount/bookmarks.html:43
+#: _templates/site/useraccount/complaint_list.html:38
+#: _templates/site/useraccount/withdraw_payment.html:112
+#: _templates/site/useraccount/withdraw_point.html:52
+msgid "Сумма"
+msgstr "Ҳосили ьамъ"
+
+#: _templates/moderations/iframe/withdraw_form.html:35
+#: _templates/moderations/tickets_messages.html:48
+#: _templates/site/shop4/application_detail.html:90
+#: _templates/site/shop4/contacts.html:210
+#: _templates/site/shop4/include/cooperation.html:33
+#: _templates/site/shop4/include/form_applications.html:45
+#: _templates/site/shop4/include/form_applications_catalog.html:43
+#: _templates/site/shop4/include/partnership.html:15
+#: _templates/site/shop4/order_detail.html:113
+#: _templates/site/shop4/ticket_create.html:37
+#: _templates/site/shop4/tickets_messages.html:96
+#: _templates/site/shop4/vacancy_detail.html:77
+#: _templates/site/useraccount/restore_access.html:42
+#: _templates/site/useraccount/restore_access.html:68
+#: _templates/site/useraccount/tickets_messages.html:48
+msgid "Отправить"
+msgstr "Фиристодан"
+
+#: _templates/moderations/knowelege.html:14
+msgid "База знаний"
+msgstr "Пойгоҳи дониш"
+
+#: _templates/moderations/knowelege.html:53
+msgid "Посмотреть"
+msgstr "Нигоҳ"
+
+#: _templates/moderations/knowelege.html:54
+msgid "Скачать"
+msgstr "Download"
+
+#: _templates/moderations/knowelege.html:63
+msgid "Прошлая"
+msgstr "Гузашта"
+
+#: _templates/moderations/knowelege.html:68
+msgid "Следующая"
+msgstr "Баъдан"
+
+#: _templates/moderations/language_list.html:72
+msgid "Добавить язык"
+msgstr "Забонро илова кунед"
+
+#: _templates/moderations/language_list.html:76
+msgid "Код (например, 'fr')"
+msgstr "Рамз (масалан 'fr')"
+
+#: _templates/moderations/language_list.html:77
+msgid "Название (например, 'Français')"
+msgstr "Ном (масалан, 'Français')"
+
+#: _templates/moderations/language_list.html:89
+msgid "Список языков"
+msgstr "Рӯйхати забонҳо"
+
+#: _templates/moderations/language_list.html:94
+#: _templates/moderations/valute_form.html:42
+msgid "Код"
+msgstr "Рамз"
+
+#: _templates/moderations/language_list.html:119
+msgid "Языки не найдены."
+msgstr "Забонҳо ёфт нашудаанд."
+
+#: _templates/moderations/leads/lead_list.html:116
+msgid "Лиды"
+msgstr "Лида"
+
+#: _templates/moderations/leads/lead_list.html:149
+#: _templates/site/shop1/base.html:880 _templates/site/shop4/base.html:501
+#: _templates/site/shop4/manufacturer_applications.html:20
+#: _templates/site/shop4/manufacturer_order.html:26
+#: _templates/site/shop4/tickets.html:29 _templates/site/shop6/base.html:424
+msgid "Информация"
+msgstr "Ахбор"
+
+#: _templates/moderations/leads/lead_list.html:152
+msgid "Бюджет"
+msgstr "Буьет"
+
+#: _templates/moderations/leads/lead_list.html:153
+msgid "Документы"
+msgstr "Ҳуҷҷатҳо"
+
+#: _templates/moderations/leads/lead_list.html:154
+msgid "Заказчик"
+msgstr "Фармоишгар"
+
+#: _templates/moderations/leads/lead_list.html:155
+msgid "Сотрудники"
+msgstr "Кормандон"
+
+#: _templates/moderations/leads/lead_list.html:156
+msgid "Процентов"
+msgstr "Фоиз"
+
+#: _templates/moderations/leads/lead_list.html:157
+msgid "Задачи"
+msgstr "Вазифаҳо"
+
+#: _templates/moderations/login.html:21 _templates/moderations/login.html:22
+#: _templates/moderations/login.html:39
+msgid "Авторизация в системе"
+msgstr "Авторизатсия дар система"
+
+#: _templates/moderations/login.html:28
+#: _templates/moderations/profile_edit.html:80
+#: _templates/moderations/profile_edit_client.html:78
+#: _templates/moderations/profile_edit_user.html:41
+#: _templates/moderations/worker_edit.html:41
+#: _templates/site/shop4/profile_edit.html:64
+#: _templates/site/shop4/register.html:29
+#: _templates/site/shop4/register.html:30
+#: _templates/site/useraccount/profile_edit.html:73
+msgid "Логин"
+msgstr "Даромадан"
+
+#: _templates/moderations/login.html:29
+msgid "Введите логин"
+msgstr "Вурудро ворид кунед"
+
+#: _templates/moderations/login.html:32 _templates/site/shop2/login.html:67
+#: _templates/site/shop3/login.html:47 _templates/site/shop4/login.html:47
+#: _templates/site/shop4/register.html:55
+#: _templates/site/shop4/register.html:56 _templates/site/shop5/login.html:67
+#: _templates/site/shop6/login.html:67 _templates/site/stroitel1/login.html:60
+#: _templates/site/useraccount/login.html:45
+msgid "Пароль"
+msgstr "Номи махфӣ"
+
+#: _templates/moderations/login.html:33 _templates/site/shop2/login.html:68
+#: _templates/site/shop3/login.html:48 _templates/site/shop4/login.html:48
+#: _templates/site/shop5/login.html:68 _templates/site/shop6/login.html:68
+#: _templates/site/stroitel1/login.html:61
+#: _templates/site/useraccount/login.html:46
+msgid "Введите пароль"
+msgstr "Паролро ворид кунед"
+
+#: _templates/moderations/login.html:36 _templates/site/shop2/base.html:266
+#: _templates/site/shop2/login.html:86 _templates/site/shop22/base.html:101
+#: _templates/site/shop3/base.html:318 _templates/site/shop3/login.html:66
+#: _templates/site/shop4/base.html:207 _templates/site/shop4/login.html:66
+#: _templates/site/shop4/restore_access.html:28
+#: _templates/site/shop4/restore_access_user.html:36
+#: _templates/site/shop5/base.html:212 _templates/site/shop5/login.html:86
+#: _templates/site/shop6/login.html:86 _templates/site/stroitel1/login.html:70
+#: _templates/site/useraccount/login.html:64
+#: _templates/site/useraccount/restore_access.html:39
+msgid "Войти"
+msgstr "Даромадан"
+
+#: _templates/moderations/login.html:40
+msgid "Нет аккаунта"
+msgstr "Ҳисоб нест"
+
+#: _templates/moderations/login.html:41
+msgid "Забыли пароль"
+msgstr "Паролро фаромӯш кардед"
+
+#: _templates/moderations/manufacturers_form.html:263
+msgid "Изображения"
+msgstr "Тасвирҳо"
+
+#: _templates/moderations/manufacturers_form.html:293
+msgid "Владелец"
+msgstr "Соҳибмол"
+
+#: _templates/moderations/manufacturers_form.html:301
+#: _templates/moderations/notifications_settings.html:39
+msgid "Пользователи"
+msgstr "Истифодабарандагон"
+
+#: _templates/moderations/manufacturers_form.html:341
+msgid "Название компании"
+msgstr "Номи ширкат"
+
+#: _templates/moderations/manufacturers_form.html:349
+#: _templates/moderations/manufacturers_form.html:357
+msgid "ИНН организации или ИП"
+msgstr "Ташкилоти SNIN ё IP"
+
+#: _templates/moderations/manufacturers_form.html:365
+#: _templates/moderations/manufacturers_list.html:57
+#: _templates/moderations/storages_form.html:250
+#: _templates/moderations/storages_list.html:57
+#: _templates/site/shop4/checkout.html:157
+msgid "Адрес"
+msgstr "Суроца"
+
+#: _templates/moderations/manufacturers_list.html:19
+msgid "Магазины"
+msgstr "Мағозаҳо"
+
+#: _templates/moderations/manufacturers_list.html:58
+#: _templates/moderations/storages_form.html:293
+#: _templates/moderations/storages_list.html:58
+msgid "Контактный номер"
+msgstr "Рақами тамос"
+
+#: _templates/moderations/notification_list.html:15
+#: _templates/moderations/notification_list.html:23
+#: _templates/moderations/notifications_settings.html:17
+msgid "Уведомления"
+msgstr "Огоҳиҳо"
+
+#: _templates/moderations/notification_list.html:19
+#: _templates/site/shop22/base.html:579 _templates/site/shop4/about.html:27
+#: _templates/site/shop4/base.html:310 _templates/site/shop4/base.html:510
+#: _templates/site/shop4/base.html:713
+#: _templates/site/shop4/blog_detail.html:23
+#: _templates/site/shop4/cooperation_detail.html:240
+#: _templates/site/shop4/manufacturers_details.html:156
+#: _templates/site/shop6/base.html:230 _templates/site/shop6/base.html:433
+#: _templates/site/shop6/base.html:622 _templates/site/shop6/base.html:712
+#: _templates/site/useraccount/restore_access.html:18
+msgid "Главная"
+msgstr "Хона"
+
+#: _templates/moderations/notification_list.html:44
+#: _templates/site/useraccount/notification_list.html:47
+msgid "Уведомлений нет"
+msgstr "Огоҳӣ нест"
+
+#: _templates/moderations/notifications_form.html:17
+msgid "Создание уведомления"
+msgstr "Эҷоди огоҳӣ"
+
+#: _templates/moderations/notifications_form.html:22
+msgid "Список уведомлений"
+msgstr "Рӯйхати огоҳиҳоро"
+
+#: _templates/moderations/notifications_form.html:23
+msgid "Новое уведомление"
+msgstr "Хабарномаи нав"
+
+#: _templates/moderations/notifications_form.html:37
+#: _templates/site/publication/advertisement_detail.html:96
+msgid "ID объекта"
+msgstr "ID объект"
+
+#: _templates/moderations/notifications_form.html:46
+msgid "Тип уведомления"
+msgstr "Навъи огоҳӣ"
+
+#: _templates/moderations/notifications_form.html:56
+msgid "Получатель уведомления"
+msgstr "Гирандаи огоҳнома"
+
+#: _templates/moderations/notifications_settings.html:56
+msgid "Время отправки"
+msgstr "Ирсоли вақт"
+
+#: _templates/moderations/notifications_settings.html:101
+#: _templates/moderations/pages_settings.html:114
+#: _templates/moderations/seosettings.html:119
+#: _templates/moderations/withdraw.html:122
+#: _templates/site/useraccount/referrals_list.html:94
+#: _templates/site/useraccount/withdraw_payment.html:153
+#: _templates/site/useraccount/withdraw_point.html:93
+msgid "Выберите тип"
+msgstr "Навъи интихоб кунед"
+
+#: _templates/moderations/notifications_settings.html:138
+#: _templates/moderations/withdraw.html:187
+msgid "Поиск по пользователю"
+msgstr "Ҷустуҷӯ аз ҷониби корбар"
+
+#: _templates/moderations/order_form.html:17
+#: _templates/moderations/orders.html:19 _templates/site/shop6/base.html:464
+msgid "Покупки"
+msgstr "Харид"
+
+#: _templates/moderations/pages_form.html:22
+#: _templates/moderations/pages_settings.html:19
+msgid "Страницы"
+msgstr "Саҳифаҳое"
+
+#: _templates/moderations/pages_form.html:23
+msgid "Страница"
+msgstr "Саҳифа"
+
+#: _templates/moderations/pages_form.html:71
+#: _templates/moderations/seoform.html:36
+#: _templates/moderations/seosettings.html:58
+msgid "Тип страницы"
+msgstr "Саҳифаи навъи"
+
+#: _templates/moderations/pages_settings.html:106
+msgid "Введите слаг"
+msgstr "Slats ворид кунед"
+
+#: _templates/moderations/pages_settings.html:145
+msgid "Поиск по слагу"
+msgstr "Ҷустуҷӯ аз рӯи портер"
+
+#: _templates/moderations/price_form.html:114
+#: _templates/moderations/price_settings.html:56
+#: _templates/moderations/product_list.html:47
+#: _templates/site/publication/advertisements.html:48
+#: _templates/site/shop2/cart.html:124 _templates/site/shop3/cart.html:124
+#: _templates/site/shop4/bookmarks.html:73 _templates/site/shop4/cart.html:124
+#: _templates/site/shop4/checkout.html:177 _templates/site/shop4/price.html:45
+msgid "Цена"
+msgstr "Баҳо"
+
+#: _templates/moderations/price_settings.html:19
+#: _templates/moderations/service_settings.html:19
+#: _templates/site/shop1/base.html:922 _templates/site/shop4/base.html:517
+#: _templates/site/shop4/service.html:15 _templates/site/shop6/base.html:440
+msgid "Услуги"
+msgstr "Хизматрасонӣ"
+
+#: _templates/moderations/product_list.html:19
+msgid "Товары"
+msgstr "Молҳо"
+
+#: _templates/moderations/product_list.html:42
+msgid "Тип выбора"
+msgstr "Намуди интихоб"
+
+#: _templates/moderations/product_list.html:43
+#: _templates/site/shop2/cart.html:125 _templates/site/shop3/cart.html:125
+#: _templates/site/shop4/cart.html:125
+msgid "Количество"
+msgstr "Миқдор"
+
+#: _templates/moderations/product_list.html:44
+#: _templates/site/shop4/catalog.html:323 _templates/site/shop4/home.html:520
+#: _templates/site/shop4/home.html:626
+#: _templates/site/shop4/manufacturers_details.html:307
+msgid "Рейтинг"
+msgstr "Рейтинг"
+
+#: _templates/moderations/product_list.html:45
+msgid "Количество отзывов"
+msgstr "Шумораи баррасиҳо"
+
+#: _templates/moderations/product_list.html:46
+msgid "Сумма отзывов"
+msgstr "Миқдори баррасиҳо"
+
+#: _templates/moderations/product_list.html:48
+#: _templates/moderations/product_list.html:258
+msgid "В заказе"
+msgstr "Бо тартиби"
+
+#: _templates/moderations/product_list.html:49
+#: _templates/moderations/product_list.html:259
+#: _templates/site/shop4/bookmarks.html:116
+msgid "В наличии"
+msgstr "Дар фурӯш"
+
+#: _templates/moderations/product_list.html:50
+#: _templates/site/shop4/product_detail.html:220
+msgid "Производитель"
+msgstr "Истеъсолкунанда"
+
+#: _templates/moderations/product_list.html:51
+#: _templates/moderations/valute_list.html:19
+#: _templates/site/shop4/include/valute.html:11
+msgid "Валюта"
+msgstr "Асъор"
+
+#: _templates/moderations/product_list.html:52
+msgid "Сайт"
+msgstr "Вебсайт"
+
+#: _templates/moderations/product_list.html:161
+msgid "Введите slug"
+msgstr "Slug ворид кунед"
+
+#: _templates/moderations/product_list.html:165
+msgid "Введите тип"
+msgstr "Навъро ворид кунед"
+
+#: _templates/moderations/product_list.html:169
+msgid "Введите тип выбора"
+msgstr "Навъи интихобро ворид кунед"
+
+#: _templates/moderations/product_list.html:173
+msgid "Введите количество"
+msgstr "Миқдорро ворид кунед"
+
+#: _templates/moderations/product_list.html:177
+msgid "Введите рейтинг"
+msgstr "Рейтингро ворид кунед"
+
+#: _templates/moderations/product_list.html:181
+msgid "Введите количество отзывов"
+msgstr "Шумораи баррасиҳо дохил кунед"
+
+#: _templates/moderations/product_list.html:185
+msgid "Введите сумму отзывов"
+msgstr "Маблағи баррасиро ворид кунед"
+
+#: _templates/moderations/product_list.html:189
+msgid "Введите цену"
+msgstr "Нархро ворид кунед"
+
+#: _templates/moderations/product_list.html:194
+#: _templates/moderations/product_list.html:202
+msgid "Выберите"
+msgstr "Интихоб кардан"
+
+#: _templates/moderations/product_list.html:195
+#: _templates/moderations/product_list.html:203
+msgid "Да"
+msgstr ""
+
+#: _templates/moderations/product_list.html:209
+msgid "Введите производителя"
+msgstr "Истеҳсолкунандаро ворид кунед"
+
+#: _templates/moderations/product_list.html:213
+msgid "Введите валюту"
+msgstr "Асъорро ворид кунед"
+
+#: _templates/moderations/product_list.html:217
+msgid "Введите сайт"
+msgstr "Сайтро ворид кунед"
+
+#: _templates/moderations/product_list.html:250
+msgid "Поиск по slug"
+msgstr "Ҷустуҷӯ аз рӯи slug"
+
+#: _templates/moderations/product_list.html:252
+msgid "Поиск по типу выбора"
+msgstr "Ҷустуҷӯи намуди интихоб"
+
+#: _templates/moderations/product_list.html:253
+msgid "Поиск по количеству"
+msgstr "Ҷустуҷӯ аз рӯи миқдор"
+
+#: _templates/moderations/product_list.html:254
+msgid "Поиск по рейтингу"
+msgstr "Ҷустуҷӯи рейтинг"
+
+#: _templates/moderations/product_list.html:255
+msgid "Поиск по количеству отзывов"
+msgstr "Ҷустуҷӯи шумораи баррасиҳо"
+
+#: _templates/moderations/product_list.html:256
+msgid "Поиск по сумме отзывов"
+msgstr "Ҷустуҷӯи миқдори баррасиҳо"
+
+#: _templates/moderations/product_list.html:257
+msgid "Поиск по цене"
+msgstr "Ҷустуҷӯи нарх"
+
+#: _templates/moderations/product_list.html:260
+msgid "Поиск по производителю"
+msgstr "Ҷустуҷӯ аз ҷониби истеҳсолкунанда"
+
+#: _templates/moderations/product_list.html:261
+msgid "Поиск по валюте"
+msgstr "Ҷустуҷӯи асъор"
+
+#: _templates/moderations/product_list.html:262
+msgid "Поиск по сайту"
+msgstr "Ҷустуҷӯ дар сайт"
+
+#: _templates/moderations/productcomments_form.html:50
+#: _templates/moderations/productcomments_list.html:58
+#: _templates/moderations/reviews.html:57
+#: _templates/site/shop4/include/form_applications.html:40
+#: _templates/site/shop4/include/form_applications.html:41
+#: _templates/site/shop4/include/form_applications_catalog.html:38
+#: _templates/site/shop4/include/form_applications_catalog.html:39
+msgid "Комментарий"
+msgstr "Шарҳ"
+
+#: _templates/moderations/productcomments_form.html:54
+#: _templates/moderations/reviews.html:56
+#: _templates/site/shop4/manufacturer_reviews.html:36
+msgid "Товар"
+msgstr "Маҳсул"
+
+#: _templates/moderations/productcomments_list.html:19
+msgid "Комментарии товаров"
+msgstr "Шарҳҳои мол"
+
+#: _templates/moderations/profile_edit.html:65
+#: _templates/moderations/profile_edit_client.html:63
+#: _templates/moderations/profile_edit_user.html:26
+#: _templates/moderations/worker_edit.html:26
+#: _templates/site/useraccount/profile_edit.html:58
+msgid "Сохранить информацию об пользователи"
+msgstr "Маълумотро дар бораи корбарон захира кунед"
+
+#: _templates/moderations/profile_edit.html:71
+#: _templates/moderations/profile_edit_client.html:69
+#: _templates/moderations/profile_edit_user.html:32
+#: _templates/moderations/worker_edit.html:32
+#: _templates/site/shop4/profile_edit.html:56
+#: _templates/site/useraccount/profile_edit.html:64
+msgid "Аватарка"
+msgstr "Аватар"
+
+#: _templates/moderations/profile_edit.html:105
+#: _templates/moderations/profile_edit_client.html:121
+#: _templates/moderations/profile_edit_user.html:66
+#: _templates/moderations/worker_edit.html:66
+#: _templates/site/shop4/profile_edit.html:92
+#: _templates/site/useraccount/profile_edit.html:116
+msgid "Публичная информация"
+msgstr "Маълумоти оммавӣ"
+
+#: _templates/moderations/profile_edit.html:118
+#: _templates/moderations/profile_edit_client.html:134
+#: _templates/moderations/profile_edit_user.html:79
+#: _templates/moderations/worker_edit.html:79
+#: _templates/site/useraccount/profile_edit.html:129
+#: _templates/site/useraccount/referrals_list.html:53
+msgid "Фамилия"
+msgstr "Ном"
+
+#: _templates/moderations/profile_edit.html:127
+#: _templates/moderations/profile_edit_client.html:143
+#: _templates/moderations/profile_edit_user.html:88
+#: _templates/moderations/worker_edit.html:88
+#: _templates/site/useraccount/profile_edit.html:138
+msgid "Отчество"
+msgstr "Ном"
+
+#: _templates/moderations/profile_edit.html:136
+#: _templates/moderations/profile_edit_client.html:152
+#: _templates/moderations/profile_edit_user.html:97
+#: _templates/moderations/storages_form.html:233
+#: _templates/moderations/worker_edit.html:97
+#: _templates/site/shop4/checkout.html:86
+#: _templates/site/shop4/profile_edit.html:96
+#: _templates/site/useraccount/profile_edit.html:147
+msgid "Город"
+msgstr "Шаҳр"
+
+#: _templates/moderations/profile_edit.html:145
+#: _templates/moderations/profile_edit_client.html:161
+#: _templates/moderations/profile_edit_user.html:106
+#: _templates/moderations/worker_edit.html:106
+#: _templates/site/shop4/profile_edit.html:105
+#: _templates/site/useraccount/profile_edit.html:156
+msgid "Дата рождения"
+msgstr "Санаи таваллуд"
+
+#: _templates/moderations/profile_edit.html:154
+#: _templates/moderations/profile_edit_client.html:170
+#: _templates/moderations/profile_edit_user.html:115
+#: _templates/moderations/worker_edit.html:115
+#: _templates/site/shop4/profile_edit.html:115
+#: _templates/site/useraccount/profile_edit.html:165
+msgid "Пол"
+msgstr "Фарш"
+
+#: _templates/moderations/profile_edit.html:169
+#: _templates/site/useraccount/profile_edit.html:349
+msgid "Изменить пароль"
+msgstr "Ивази калидвожа"
+
+#: _templates/moderations/profile_edit.html:176
+#: _templates/site/useraccount/profile_edit.html:356
+msgid "Старый пароль"
+msgstr "Калидвожаи куҳна"
+
+#: _templates/moderations/profile_edit.html:185
+#: _templates/site/useraccount/profile_edit.html:365
+msgid "Новый пароль"
+msgstr "Калидвожаи Нав"
+
+#: _templates/moderations/profile_edit.html:194
+#: _templates/site/useraccount/profile_edit.html:374
+msgid "Подтверждение нового пароля"
+msgstr "Тасдиқи гузарвожаи нав"
+
+#: _templates/moderations/profile_edit.html:211
+msgid "Сохранить паспортные данные пользователя"
+msgstr "Маълумоти шиносномаи корбарро захира кунед"
+
+#: _templates/moderations/profile_edit.html:217
+#: _templates/moderations/profile_edit_client.html:202
+#: _templates/site/useraccount/profile_edit.html:186
+msgid "Кем выдан"
+msgstr "Ки дода шуд"
+
+#: _templates/moderations/profile_edit.html:226
+#: _templates/moderations/profile_edit_client.html:211
+#: _templates/site/useraccount/profile_edit.html:195
+msgid "Дата выдачи"
+msgstr "Оғози эътибор"
+
+#: _templates/moderations/profile_edit.html:235
+msgid "Код подрозделения"
+msgstr "Рамзи воҳид"
+
+#: _templates/moderations/profile_edit.html:244
+#: _templates/moderations/profile_edit_client.html:220
+#: _templates/site/useraccount/profile_edit.html:204
+msgid "Серия и номер"
+msgstr "Силсила ва рақам"
+
+#: _templates/moderations/profile_edit.html:254
+#: _templates/moderations/profile_edit_client.html:238
+#: _templates/site/useraccount/profile_edit.html:222
+msgid "Место рождения"
+msgstr "Ҷои таввалуд"
+
+#: _templates/moderations/profile_edit.html:263
+#: _templates/moderations/profile_edit_client.html:229
+#: _templates/site/useraccount/profile_edit.html:213
+msgid "Прописка"
+msgstr "Щайд"
+
+#: _templates/moderations/profile_edit.html:272
+#: _templates/moderations/profile_edit_client.html:247
+#: _templates/site/useraccount/profile_edit.html:231
+msgid "Лицевая часть"
+msgstr "Қисми пеши"
+
+#: _templates/moderations/profile_edit.html:281
+#: _templates/moderations/profile_edit_client.html:256
+#: _templates/site/useraccount/profile_edit.html:240
+msgid "Место прописки"
+msgstr "Ҷои истиқомат"
+
+#: _templates/moderations/profile_edit_client.html:288
+#: _templates/site/useraccount/profile_edit.html:261
+msgid "Название организации"
+msgstr "Номи ташкилот"
+
+#: _templates/moderations/profile_edit_client.html:297
+#: _templates/site/useraccount/profile_edit.html:270
+msgid "Руководитель"
+msgstr "Роҳбар"
+
+#: _templates/moderations/profile_edit_client.html:306
+#: _templates/site/useraccount/profile_edit.html:279
+msgid "Юридический адрес"
+msgstr "Сурати ҳуқуқӣ"
+
+#: _templates/moderations/profile_edit_client.html:315
+#: _templates/site/useraccount/profile_edit.html:288
+msgid "Налоговый орган"
+msgstr "Мақомоти андоз"
+
+#: _templates/moderations/profile_edit_client.html:324
+#: _templates/site/useraccount/profile_edit.html:297
+msgid "ОГРН"
+msgstr "Цогр"
+
+#: _templates/moderations/profile_edit_client.html:333
+#: _templates/site/useraccount/profile_edit.html:306
+msgid "ИНН"
+msgstr "Тунука"
+
+#: _templates/moderations/profile_edit_client.html:342
+#: _templates/site/useraccount/profile_edit.html:315
+msgid "КПП"
+msgstr "Қуттича"
+
+#: _templates/moderations/profile_edit_client.html:351
+#: _templates/site/useraccount/profile_edit.html:324
+msgid "Дата регистрации"
+msgstr "Санаи бақайдгирӣ"
+
+#: _templates/moderations/profile_edit_client.html:360
+#: _templates/site/useraccount/profile_edit.html:333
+msgid "Основной вид деятельности"
+msgstr "Фаъолияти асосӣ"
+
+#: _templates/moderations/reviews.html:19
+#: _templates/site/publication/advertisements.html:81
+#: _templates/site/publication/reviews.html:19
+#: _templates/site/shop4/include/profile_menu.html:34
+#: _templates/site/shop4/product_detail.html:241
+msgid "Отзывы"
+msgstr "Шарҳҳо"
+
+#: _templates/moderations/reviews.html:40
+msgid "Оценке"
+msgstr "Баҳо"
+
+#: _templates/moderations/reviews.html:58
+#: _templates/site/publication/reviews.html:36
+#: _templates/site/shop4/include/form_reviews.html:11
+#: _templates/site/shop4/include/reviews.html:12
+#: _templates/site/shop4/manufacturer_reviews.html:49
+#: _templates/site/shop4/order_detail.html:179
+#: _templates/site/shop4/order_detail.html:221
+msgid "Оценка"
+msgstr "Баҳо"
+
+#: _templates/moderations/schedule_calendar.html:28
+msgid "Ближайшие даты"
+msgstr "Санаҳои наздиктарин"
+
+#: _templates/moderations/schedule_calendar.html:34
+msgid "Нет предстоящих событий"
+msgstr "Воқеаҳои оянда вуҷуд надоранд"
+
+#: _templates/moderations/seoform.html:17
+#: _templates/moderations/seoform.html:23
+msgid "Настройка SEO"
+msgstr "SEO танзимоти SEO"
+
+#: _templates/moderations/seoform.html:22
+msgid "Список SEO"
+msgstr "Рӯйхати SEO"
+
+#: _templates/moderations/seosettings.html:19
+msgid "SEO"
+msgstr "Со"
+
+#: _templates/moderations/seosettings.html:115
+msgid "Введите заголовок"
+msgstr "Сарлавҳа ворид кунед"
+
+#: _templates/moderations/settings_global.html:45
+msgid "Лого"
+msgstr "Лого"
+
+#: _templates/moderations/settings_global.html:67
+msgid "Доп Лого без иконки"
+msgstr "Лоғар бидуни нишонаҳо"
+
+#: _templates/moderations/settings_global.html:89
+msgid "Доп Лого маленький"
+msgstr "Логотип хурд аст"
+
+#: _templates/moderations/settings_global.html:111
+msgid "Фавикон"
+msgstr "Фотикон"
+
+#: _templates/moderations/settings_global.html:135
+msgid "Лого белый"
+msgstr "Лого сафед аст"
+
+#: _templates/moderations/settings_global.html:157
+msgid "Доп Лого белый без иконки"
+msgstr "Лого аз сафед бе нишона"
+
+#: _templates/moderations/settings_global.html:179
+msgid "Доп Лого белый маленький"
+msgstr "Dop логотипи сафед"
+
+#: _templates/moderations/settings_global.html:202
+msgid "Метод оплаты"
+msgstr "Тариқи пардохт"
+
+#: _templates/moderations/settings_global.html:224
+msgid "Общее"
+msgstr "Генерал"
+
+#: _templates/moderations/settings_global.html:243
+msgid "Яндекс Метрика"
+msgstr "Yandex метр"
+
+#: _templates/moderations/settings_global.html:251
+msgid "Google Аналитика"
+msgstr "Google Analytics"
+
+#: _templates/moderations/settings_global.html:259
+msgid "Копирайт"
+msgstr "Копиракӣ"
+
+#: _templates/moderations/settings_global.html:270
+msgid "Заголовок сообщения"
+msgstr "Мавзӯи почта"
+
+#: _templates/moderations/settings_global.html:278
+msgid "Подвал сообщения"
+msgstr "Таҳлили паёмҳо"
+
+#: _templates/moderations/settings_global.html:288
+msgid "Email Site HOST"
+msgstr "Ҳуҷраи почтаи электронӣ"
+
+#: _templates/moderations/settings_global.html:298
+msgid "Email Site HOST Default"
+msgstr "Почтаи электронии сайт"
+
+#: _templates/moderations/settings_global.html:308
+msgid "Email Site PORT"
+msgstr "Паёми почтаи электронӣ"
+
+#: _templates/moderations/settings_global.html:320
+msgid "Email Site User"
+msgstr "Корбари почтаи электронӣ"
+
+#: _templates/moderations/settings_global.html:330
+msgid "Email Site Password"
+msgstr "Рамзи почтаи электронӣ"
+
+#: _templates/moderations/settings_global.html:340
+msgid "Use TLS"
+msgstr "TLS-ро истифода баред"
+
+#: _templates/moderations/settings_global.html:350
+msgid "Use SSL"
+msgstr "SSL-ро истифода баред"
+
+#: _templates/moderations/sponsorship_form.html:133
+msgid "Связанные новости"
+msgstr "Навигариҳои марбут"
+
+#: _templates/moderations/sponsorship_settings.html:19
+msgid "Объекты благотворительности"
+msgstr "Объекти хайрия"
+
+#: _templates/moderations/statuspayment_list.html:20
+msgid "Платежи"
+msgstr "Пардохтҳо"
+
+#: _templates/moderations/statuspayment_list.html:55
+msgid "№"
+msgstr "№"
+
+#: _templates/moderations/statuspayment_list.html:61
+msgid "Относится"
+msgstr "Дахл дорад"
+
+#: _templates/moderations/statuspayment_list.html:118
+msgid "Введите сумму"
+msgstr "Маблағро ворид кунед"
+
+#: _templates/moderations/statuspayment_list.html:193
+msgid "Поиск по статусу"
+msgstr "Ҷустуҷӯ аз рӯи ҳолат"
+
+#: _templates/moderations/statuspayment_list.html:197
+msgid "Поиск по сумме"
+msgstr "Ҷустуҷӯи маблағ"
+
+#: _templates/moderations/storages_form.html:240
+msgid "Почтовый индекс"
+msgstr "Рамзи почта"
+
+#: _templates/moderations/storages_form.html:277
+msgid "Контактная почта"
+msgstr "Тамос бо почта"
+
+#: _templates/moderations/storages_form.html:285
+msgid "Контактный Имя"
+msgstr "Номи тамос"
+
+#: _templates/moderations/storages_form.html:301
+msgid "Комментарий склада для доставки"
+msgstr "Шарҳ барои расонидан"
+
+#: _templates/moderations/storages_list.html:19
+msgid "Склады"
+msgstr "Таркиб"
+
+#: _templates/moderations/tags_settings.html:19
+msgid "Меток новостей"
+msgstr "Тегҳои ахбор"
+
+#: _templates/moderations/tickets.html:19
+#: _templates/site/shop4/include/profile_menu.html:46
+#: _templates/site/useraccount/tickets.html:19
+msgid "Поддержка"
+msgstr "Ёрӣ расондан"
+
+#: _templates/moderations/tickets.html:23
+msgid "Под моим руководством"
+msgstr "Дар зери роҳбарияти ман"
+
+#: _templates/moderations/tickets.html:41
+#: _templates/moderations/tickets.html:60
+#: _templates/site/shop4/ticket_create.html:23
+#: _templates/site/useraccount/ticket_form.html:41
+#: _templates/site/useraccount/tickets.html:44
+#: _templates/site/useraccount/tickets.html:65
+msgid "Тема"
+msgstr "Мавзӯъ"
+
+#: _templates/moderations/tickets_messages.html:23
+#: _templates/site/useraccount/tickets_messages.html:23
+msgid "Тикет"
+msgstr "Билет"
+
+#: _templates/moderations/vacances.html:19
+#: _templates/moderations/vacances_aplication.html:19
+#: _templates/moderations/vacancys_form.html:57
+#: _templates/site/shop1/base.html:473 _templates/site/shop2/base.html:260
+#: _templates/site/shop22/base.html:95 _templates/site/shop3/base.html:258
+#: _templates/site/shop4/base.html:200 _templates/site/shop4/vacancys.html:22
+#: _templates/site/shop5/base.html:206 _templates/site/shop6/base.html:198
+msgid "Вакансии"
+msgstr "Ҷойҳои холӣ"
+
+#: _templates/moderations/vacances.html:57
+#: _templates/moderations/vacancys_form.html:141
+#: _templates/site/shop4/vacancy_detail.html:48
+#: _templates/site/shop4/vacancys.html:43
+msgid "График работы"
+msgstr "Ҷадвали корӣ"
+
+#: _templates/moderations/vacances.html:58
+#: _templates/moderations/vacancys_form.html:149
+msgid "Заработная плата"
+msgstr "Музди меҳнат"
+
+#: _templates/moderations/vacances.html:59
+#: _templates/moderations/vacancys_form.html:114
+msgid "Активность вакансии"
+msgstr "Фаъолияти холӣ"
+
+#: _templates/moderations/vacances_aplication.html:26
+#: _templates/moderations/vacancys_form.html:58
+msgid "Вакансия"
+msgstr "Вазифа"
+
+#: _templates/moderations/vacances_aplication.html:27
+#: _templates/site/shop4/vacancy_detail.html:72
+msgid "ФИО"
+msgstr "Номи пурра"
+
+#: _templates/moderations/vacances_aplication.html:31
+msgid "Резюме"
+msgstr "Хулоса"
+
+#: _templates/moderations/vacancys_form.html:157
+msgid "Местоположение"
+msgstr "Макон"
+
+#: _templates/moderations/vacancys_form.html:195
+#: _templates/site/shop4/vacancy_detail.html:65
+msgid "Требования к кандидату"
+msgstr "Талабот нисбати номзад"
+
+#: _templates/moderations/valute_form.html:46
+msgid "Код иконки"
+msgstr "Рамзи ICON"
+
+#: _templates/moderations/valute_form.html:50
+msgid "Изображение"
+msgstr "Тасвири"
+
+#: _templates/moderations/valute_form.html:54
+msgid "По умолчанию"
+msgstr "бо нобаёнӣ"
+
+#: _templates/moderations/valute_form.html:58
+#: _templates/moderations/valute_list.html:60
+msgid "Соотношение"
+msgstr "Таносуб"
+
+#: _templates/moderations/valute_form.html:62
+#: _templates/moderations/valute_list.html:61
+msgid "Наценка"
+msgstr "Маржа"
+
+#: _templates/moderations/valute_list.html:58
+msgid "Ключ"
+msgstr "Калид"
+
+#: _templates/moderations/variable_form.html:100
+#: _templates/moderations/variable_form.html:108
+#: _templates/moderations/variable_list.html:56
+#: _templates/moderations/variable_list.html:57
+msgid "Тип фильтра"
+msgstr "Навъи филтр"
+
+#: _templates/moderations/variable_list.html:19
+msgid "Вариации"
+msgstr "Таъцирдиҳӣ"
+
+#: _templates/moderations/withdraw.html:19
+msgid "Выплаты"
+msgstr "Пардохтҳо"
+
+#: _templates/moderations/withdraw.html:148
+msgid "Новая выплата"
+msgstr "Пардохти нав"
+
+#: _templates/moderations/withdraw.html:163
+msgid "Банковская карта"
+msgstr "Корти бонкӣ"
+
+#: _templates/moderations/сomplaint_form.html:60
+msgid "Чат (если есть)"
+msgstr "Чат (агар бошад)"
+
+#: _templates/site/publication/advertisement_detail.html:93
+msgid "Подробная информация"
+msgstr "Маълумоти муфассал"
+
+#: _templates/site/publication/advertisement_detail.html:108
+#: _templates/site/publication/dopadvertisement.html:44
+#: _templates/site/shop4/order_detail.html:30
+msgid "Стоимость"
+msgstr "Баҳо"
+
+#: _templates/site/publication/advertisement_detail.html:112
+msgid "Комнат"
+msgstr "Утоқҳо"
+
+#: _templates/site/publication/advertisement_detail.html:116
+msgid "Ванных комнат"
+msgstr "Ҳаммом"
+
+#: _templates/site/publication/advertisement_detail.html:120
+msgid "Спален"
+msgstr "Ьои хоб"
+
+#: _templates/site/publication/advertisement_detail.html:124
+msgid "Гаражей"
+msgstr "Гаражҳо"
+
+#: _templates/site/publication/advertisement_detail.html:128
+msgid "Дата публикации"
+msgstr "Санаи нашрияҳо"
+
+#: _templates/site/publication/advertisement_detail.html:132
+msgid "Время заезда"
+msgstr "Вақти расидан"
+
+#: _templates/site/publication/advertisement_detail.html:136
+msgid "Время выезда"
+msgstr "Вақти парвоз"
+
+#: _templates/site/publication/advertisement_detail.html:141
+msgid "Дополнительная информация"
+msgstr "Маълумоти Иловагӣ"
+
+#: _templates/site/publication/advertisements.html:20
+msgid "Объявления"
+msgstr "Реклама"
+
+#: _templates/site/publication/advertisements.html:30
+msgid "Дополнительные услуги"
+msgstr "Хизматрасониҳои иловагӣ"
+
+#: _templates/site/publication/advertisements.html:43
+#: _templates/site/publication/reviews.html:32
+#: _templates/site/useraccount/complaint_list.html:34
+msgid "Фото и название недвижимости"
+msgstr "Аксҳо ва номи амволи ғайриманқул"
+
+#: _templates/site/publication/advertisements.html:45
+msgid "Типы"
+msgstr "Намудҳо"
+
+#: _templates/site/publication/advertisements.html:46
+#: _templates/site/useraccount/complaint_list.html:35
+msgid "Размер"
+msgstr "Андоза"
+
+#: _templates/site/publication/advertisements.html:78
+#: _templates/site/publication/dopadvertisement.html:61
+msgid "Изменить"
+msgstr "Иваз"
+
+#: _templates/site/publication/advertisements.html:79
+msgid "Брони"
+msgstr "Зиреҳ"
+
+#: _templates/site/publication/advertisements.html:80
+msgid "Продвинуть"
+msgstr "Пеш рафтан"
+
+#: _templates/site/publication/dopadvertisement.html:19
+msgid "Дополнительные услуги для объявления"
+msgstr "Хизматрасониҳои иловагӣ барои эълон"
+
+#: _templates/site/publication/dopadvertisement.html:26
+msgid "К объявлениям"
+msgstr "Ба реклама"
+
+#: _templates/site/publication/reviews.html:35
+#: _templates/site/shop4/include/form_reviews.html:28
+#: _templates/site/shop4/order_detail.html:196
+#: _templates/site/shop4/order_detail.html:238
+msgid "Отзыв"
+msgstr "Назар"
+
+#: _templates/site/shop1/base.html:455 _templates/site/shop2/base.html:261
+#: _templates/site/shop22/base.html:96 _templates/site/shop4/base.html:201
+#: _templates/site/shop5/base.html:207 _templates/site/shop6/base.html:199
+msgid "Компания"
+msgstr "Ширкат"
+
+#: _templates/site/shop1/base.html:461 _templates/site/shop4/base.html:535
+#: _templates/site/shop4/cooperation_detail.html:241
+#: _templates/site/shop6/base.html:495 _templates/site/stroitel1/base.html:299
+msgid "Сотрудничество"
+msgstr "Ҳамкорӣ"
+
+#: _templates/site/shop1/base.html:467 _templates/site/shop2/base.html:262
+#: _templates/site/shop22/base.html:97 _templates/site/shop3/base.html:260
+#: _templates/site/shop4/base.html:203 _templates/site/shop4/base.html:322
+#: _templates/site/shop4/base.html:433 _templates/site/shop4/base.html:514
+#: _templates/site/shop4/base.html:730 _templates/site/shop4/contacts.html:217
+#: _templates/site/shop5/base.html:208 _templates/site/shop6/base.html:200
+#: _templates/site/shop6/base.html:242 _templates/site/shop6/base.html:437
+#: _templates/site/shop6/base.html:544 _templates/site/shop6/base.html:729
+msgid "Контакты"
+msgstr "Тамос"
+
+#: _templates/site/shop1/base.html:842 _templates/site/shop1/base.html:969
+#: _templates/site/shop4/base.html:562 _templates/site/shop6/base.html:523
+#: _templates/site/stroitel1/base.html:312
+msgid "Пользовательское соглашение"
+msgstr "Созишномаи корбар"
+
+#: _templates/site/shop1/base.html:849 _templates/site/shop1/base.html:976
+#: _templates/site/shop4/base.html:565 _templates/site/shop6/base.html:526
+#: _templates/site/stroitel1/base.html:319
+msgid "Политика конфедециальности"
+msgstr "Сиёсати Корбурди Маълумоти Шахсӣ"
+
+#: _templates/site/shop1/base.html:856 _templates/site/shop1/base.html:983
+#: _templates/site/shop4/base.html:568 _templates/site/shop6/base.html:529
+#: _templates/site/stroitel1/base.html:326
+msgid "Политика Cookie - Файлов"
+msgstr "Сиёсати куки - Файлҳо"
+
+#: _templates/site/shop1/base.html:863 _templates/site/shop1/base.html:990
+#: _templates/site/shop4/base.html:571 _templates/site/shop6/base.html:532
+#: _templates/site/stroitel1/base.html:333
+msgid "Согласия на обработку персональных данных"
+msgstr "Розигӣ ба коркарди шахсӣ"
+
+#: _templates/site/shop1/base.html:901 _templates/site/shop4/base.html:516
+#: _templates/site/shop4/sponsorship.html:15
+#: _templates/site/shop6/base.html:439
+msgid "Благотворительность"
+msgstr "Эҳсонкорӣ"
+
+#: _templates/site/shop1/base.html:929 _templates/site/shop4/base.html:518
+#: _templates/site/shop4/price.html:15 _templates/site/shop6/base.html:441
+msgid "Прайс"
+msgstr "Баҳо"
+
+#: _templates/site/shop1/base.html:936 _templates/site/shop22/base.html:582
+#: _templates/site/shop4/base.html:695
+#: _templates/site/shop4/include/category.html:77
+#: _templates/site/shop4/include/category_list_mobile.html:5
+msgid "Каталог"
+msgstr "Каталог"
+
+#: _templates/site/shop1/base.html:953
+msgid "Полезная информация"
+msgstr "Маълумоти муфид"
+
+#: _templates/site/shop1/base.html:1011
+msgid "Соц.сети"
+msgstr "Шабакаҳои иҷтимоӣ"
+
+#: _templates/site/shop1/base/autorize.html:73
+msgid "Аккаунта пока нет?"
+msgstr "Ҳанӯз ҳисоб вуҷуд надорад?"
+
+#: _templates/site/shop1/base/autorize.html:75
+msgid "Создать учетную запись"
+msgstr "Ҳисоб кушоед"
+
+#: _templates/site/shop2/base.html:269 _templates/site/shop2/login.html:90
+#: _templates/site/shop22/base.html:104 _templates/site/shop3/base.html:320
+#: _templates/site/shop4/base.html:210 _templates/site/shop4/register.html:80
+#: _templates/site/shop4/restore_access.html:31
+#: _templates/site/shop4/restore_access_user.html:39
+#: _templates/site/shop5/base.html:215 _templates/site/shop5/login.html:90
+#: _templates/site/shop6/base.html:207 _templates/site/shop6/login.html:90
+#: _templates/site/stroitel1/login.html:80
+#: _templates/site/useraccount/login.html:68
+#: _templates/site/useraccount/restore_access.html:46
+#: _templates/site/useraccount/signup.html:108
+msgid "Зарегистрироваться"
+msgstr "Рӯйхат"
+
+#: _templates/site/shop2/base.html:273 _templates/site/shop22/base.html:108
+#: _templates/site/shop4/base.html:214
+#: _templates/site/shop4/include/profile_menu.html:51
+#: _templates/site/shop4/profile_edit.html:49
+#: _templates/site/shop5/base.html:219 _templates/site/shop6/base.html:211
+msgid "Мой профиль"
+msgstr "Профили ман"
+
+#: _templates/site/shop2/base.html:388 _templates/site/shop22/base.html:595
+#: _templates/site/shop5/base.html:333
+msgid "Доставка:"
+msgstr "Расонидани:"
+
+#: _templates/site/shop2/base.html:388 _templates/site/shop22/base.html:595
+#: _templates/site/shop5/base.html:333 _templates/site/shop6/base.html:328
+msgid "Выберите способ получения"
+msgstr "Усули қабулро интихоб кунед"
+
+#: _templates/site/shop2/base.html:389 _templates/site/shop22/base.html:596
+#: _templates/site/shop4/base.html:328 _templates/site/shop5/base.html:334
+#: _templates/site/shop6/base.html:329
+msgid "Акции"
+msgstr "Саҳҳомӣ"
+
+#: _templates/site/shop2/cart.html:126 _templates/site/shop3/cart.html:126
+#: _templates/site/shop4/cart.html:126
+#: _templates/site/shop4/include/cart_product.html:89
+msgid "Итого"
+msgstr "Ьамъбастӣ"
+
+#: _templates/site/shop2/cart.html:174 _templates/site/shop3/cart.html:174
+#: _templates/site/shop4/base.html:316 _templates/site/shop4/base.html:512
+#: _templates/site/shop4/base.html:716 _templates/site/shop4/cart.html:174
+#: _templates/site/shop6/base.html:236 _templates/site/shop6/base.html:435
+#: _templates/site/shop6/base.html:715
+msgid "Магазин"
+msgstr "Мацоза"
+
+#: _templates/site/shop2/cart.html:181 _templates/site/shop3/cart.html:181
+#: _templates/site/shop4/cart.html:181
+msgid "Детали корзины"
+msgstr "Тафсилоти сабад"
+
+#: _templates/site/shop2/cart.html:183 _templates/site/shop3/cart.html:183
+#: _templates/site/shop4/cart.html:183
+msgid "Кол-во товаров"
+msgstr "Шумораи молҳо"
+
+#: _templates/site/shop2/cart.html:195 _templates/site/shop3/cart.html:195
+#: _templates/site/shop4/cart.html:195 _templates/site/shop4/order.html:99
+msgid "Оплатить"
+msgstr "Ҳащ"
+
+#: _templates/site/shop2/cart.html:206 _templates/site/shop3/cart.html:206
+#: _templates/site/shop4/cart.html:206
+#: _templates/site/shop4/include/cart_product.html:76
+#: _templates/site/shop4/include/cart_product.html:93
+msgid "Корзина пуста"
+msgstr "Сабабе холӣ аст"
+
+#: _templates/site/shop2/login.html:58 _templates/site/shop3/login.html:38
+#: _templates/site/shop4/login.html:38 _templates/site/shop5/login.html:58
+#: _templates/site/shop6/login.html:58 _templates/site/stroitel1/login.html:51
+#: _templates/site/useraccount/login.html:36
+msgid "Логин или Email"
+msgstr "Вуруд ё почтаи электронӣ"
+
+#: _templates/site/shop2/login.html:59 _templates/site/shop3/login.html:39
+#: _templates/site/shop4/login.html:39 _templates/site/shop5/login.html:59
+#: _templates/site/shop6/login.html:59 _templates/site/stroitel1/login.html:52
+#: _templates/site/useraccount/login.html:37
+msgid "Введите логин или email"
+msgstr "Воридшавӣ ё почтаи электронӣ ворид кунед"
+
+#: _templates/site/shop2/login.html:82 _templates/site/shop3/login.html:62
+#: _templates/site/shop4/login.html:62
+#: _templates/site/shop4/restore_access.html:24
+#: _templates/site/shop5/login.html:82 _templates/site/shop6/login.html:82
+#: _templates/site/stroitel1/login.html:76
+#: _templates/site/useraccount/login.html:60
+#: _templates/site/useraccount/signup.html:99
+msgid "Сбросить пароль"
+msgstr "Паролро партоед"
+
+#: _templates/site/shop22/base.html:153
+msgid "Избранное"
+msgstr "Мунтахаб"
+
+#: _templates/site/shop22/base.html:161 _templates/site/shop4/base.html:286
+#: _templates/site/shop4/base.html:724
+#: _templates/site/shop4/base_profile.html:179
+#: _templates/site/shop4/include/cart_product.html:60
+#: _templates/site/shop4/include/cart_product.html:97
+#: _templates/site/shop6/base.html:299 _templates/site/shop6/base.html:459
+#: _templates/site/shop6/base.html:643 _templates/site/shop6/base.html:723
+msgid "Корзина"
+msgstr "Сабад"
+
+#: _templates/site/shop22/base/cart.html:6
+msgid "Товары в корзине"
+msgstr "Мол дар сабад"
+
+#: _templates/site/shop3/base.html:329
+msgid "в профиль"
+msgstr "Дар профил"
+
+#: _templates/site/shop4/about.html:18 _templates/site/shop4/about.html:28
+#: _templates/site/shop4/base.html:525 _templates/site/shop6/base.html:485
+msgid "О нас"
+msgstr "Дар бораи мо"
+
+#: _templates/site/shop4/application_detail.html:32
+msgid "Информация о товаре"
+msgstr "Маълумот дар бораи маҳсулот"
+
+#: _templates/site/shop4/application_detail.html:62
+#: _templates/site/shop4/order_detail.html:81
+msgid "Переписка по товару"
+msgstr "Мукотиба барои мол"
+
+#: _templates/site/shop4/base.html:231 _templates/site/shop6/base.html:322
+msgid "Введи поисковую фразу..."
+msgstr "Ибораи ҷустуҷӯро ворид кунед ..."
+
+#: _templates/site/shop4/base.html:275 _templates/site/shop4/base.html:720
+#: _templates/site/shop4/base_profile.html:157
+#: _templates/site/shop4/include/profile_menu.html:14
+#: _templates/site/shop6/base.html:288 _templates/site/shop6/base.html:461
+#: _templates/site/shop6/base.html:719
+msgid "Закладки"
+msgstr "Замимаҳо"
+
+#: _templates/site/shop4/base.html:313 _templates/site/shop4/base.html:733
+#: _templates/site/shop6/base.html:233 _templates/site/shop6/base.html:732
+msgid "О компании"
+msgstr "Дар бораи ширкат"
+
+#: _templates/site/shop4/base.html:389
+#: _templates/site/shop4/base_profile.html:104
+#: _templates/site/shop6/base.html:391
+msgid "Товар добавлен в корзину!"
+msgstr "Мол ба сабад илова карда мешавад!"
+
+#: _templates/site/shop4/base.html:462 _templates/site/shop6/base.html:560
+msgid "Наш адрес"
+msgstr "Суроғаи мо"
+
+#: _templates/site/shop4/base.html:513 _templates/site/shop6/base.html:436
+msgid "О проекте"
+msgstr "Дар бораи лоиҳа"
+
+#: _templates/site/shop4/base.html:532 _templates/site/shop6/base.html:492
+#: _templates/site/stroitel1/base.html:292
+msgid "Партнерство"
+msgstr "Шарик"
+
+#: _templates/site/shop4/base.html:538 _templates/site/shop4/checkout.html:77
+#: _templates/site/shop4/checkout.html:164 _templates/site/shop6/base.html:328
+#: _templates/site/shop6/base.html:498
+msgid "Доставка"
+msgstr "Молсупорӣ"
+
+#: _templates/site/shop4/base.html:541
+#: _templates/site/shop4/include/cart_product.html:100
+#: _templates/site/shop6/base.html:501
+msgid "Оплата"
+msgstr "Пул"
+
+#: _templates/site/shop4/base.html:544 _templates/site/shop6/base.html:504
+msgid "Возврат"
+msgstr "Баргаштан"
+
+#: _templates/site/shop4/base.html:556 _templates/site/shop6/base.html:517
+msgid "Политики"
+msgstr "Сиёсатмадорон"
+
+#: _templates/site/shop4/base.html:584
+msgid "Подпишитесь на нас"
+msgstr "Обуна ба мо"
+
+#: _templates/site/shop4/base.html:585
+msgid ""
+"Подпишитесь на рассылку, чтобы получать информацию о специальных "
+"предложениях."
+msgstr ""
+
+#: _templates/site/shop4/base.html:604
+msgid "Мы используем безопасную оплату для."
+msgstr "Мо пардохти бехатариро истифода мебарем."
+
+#: _templates/site/shop4/base.html:624
+msgid "ГЛАВНАЯ"
+msgstr "Хона"
+
+#: _templates/site/shop4/base.html:628 _templates/site/shop6/base.html:626
+#: _templates/site/shop6/base.html:694
+msgid "КАТАЛОГ"
+msgstr "Каталог"
+
+#: _templates/site/shop4/base.html:633 _templates/site/shop6/base.html:456
+#: _templates/site/shop6/base.html:631
+msgid "ПРОФИЛЬ"
+msgstr "Профил"
+
+#: _templates/site/shop4/base.html:639 _templates/site/shop6/base.html:204
+#: _templates/site/shop6/base.html:637
+msgid "ВОЙТИ"
+msgstr "Даромадан"
+
+#: _templates/site/shop4/base.html:645
+msgid "КОРЗИНА"
+msgstr "Сабад"
+
+#: _templates/site/shop4/base.html:653 _templates/site/shop6/base.html:651
+msgid "ПОИСК"
+msgstr "Кофтуков"
+
+#: _templates/site/shop4/base.html:683
+#: _templates/site/shop4/base_profile.html:135
+msgid "Введи поисковую фразу"
+msgstr "Ибораи ҷустуҷӯро ворид кунед"
+
+#: _templates/site/shop4/base.html:692 _templates/site/shop6/base.html:691
+msgid "Меню"
+msgstr "Меню"
+
+#: _templates/site/shop4/base.html:704
+#: _templates/site/shop4/base_profile.html:165
+#: _templates/site/shop6/base.html:703
+msgid "Мой аккаунт"
+msgstr "Ҳисоби ман"
+
+#: _templates/site/shop4/base.html:707
+#: _templates/site/shop4/base_profile.html:170
+#: _templates/site/shop4/login.html:19 _templates/site/shop4/register.html:20
+#: _templates/site/shop6/base.html:706
+msgid "Вход"
+msgstr "Даромадгоҳ"
+
+#: _templates/site/shop4/base.html:709 _templates/site/shop4/login.html:22
+#: _templates/site/shop4/register.html:23
+msgid "Регистрация"
+msgstr "Щайд"
+
+#: _templates/site/shop4/blogs.html:48
+#: _templates/site/shop4/cooperation.html:254
+#: _templates/site/shop4/service.html:49
+#: _templates/site/shop4/sponsorship.html:49
+#: _templates/site/shop4/tickets.html:43 _templates/site/shop4/vacancys.html:55
+msgid "Подробнее"
+msgstr "Бештар"
+
+#: _templates/site/shop4/blogs.html:67
+msgid "Рубрика"
+msgstr "Сарлавҳа"
+
+#: _templates/site/shop4/blogs.html:78
+msgid "Фильтр"
+msgstr "Полоидан"
+
+#: _templates/site/shop4/blogs.html:79 _templates/site/shop4/catalog.html:383
+#: _templates/site/shop4/category.html:366
+#: _templates/site/shop4/manufacturers_details.html:367
+msgid "По алфавиту"
+msgstr "Дар алифбо"
+
+#: _templates/site/shop4/blogs.html:80 _templates/site/shop4/catalog.html:384
+#: _templates/site/shop4/category.html:367
+#: _templates/site/shop4/manufacturers_details.html:368
+msgid "Новое"
+msgstr "Нав"
+
+#: _templates/site/shop4/blogs.html:81 _templates/site/shop4/catalog.html:385
+#: _templates/site/shop4/category.html:368
+#: _templates/site/shop4/manufacturers_details.html:369
+msgid "Старое"
+msgstr "Кӯҳна"
+
+#: _templates/site/shop4/bookmarks.html:74
+msgid "Наличие"
+msgstr "Дастрас"
+
+#: _templates/site/shop4/catalog.html:195
+#: _templates/site/shop4/category.html:212
+#: _templates/site/shop4/manufacturers_details.html:179
+msgid "Искать"
+msgstr "Кофтуков"
+
+#: _templates/site/shop4/catalog.html:200
+#: _templates/site/shop4/category.html:218
+#: _templates/site/shop4/manufacturers_details.html:185
+msgid "Сортировать по цене"
+msgstr "Аз рӯи нарх"
+
+#: _templates/site/shop4/catalog.html:239
+msgid "Все категории"
+msgstr "Ҳамаи категорияҳо"
+
+#: _templates/site/shop4/catalog.html:354
+#: _templates/site/shop4/category.html:337
+#: _templates/site/shop4/manufacturers_details.html:338
+msgid "Без фильтров"
+msgstr "Бе филмҳо"
+
+#: _templates/site/shop4/catalog.html:382
+#: _templates/site/shop4/category.html:365
+#: _templates/site/shop4/manufacturers_details.html:366
+msgid "Сортировать"
+msgstr "Ба навъҳо ьудо кардан"
+
+#: _templates/site/shop4/checkout.html:45
+msgid "Данные получателя"
+msgstr "Маълумоти гиранда"
+
+#: _templates/site/shop4/checkout.html:55
+msgid "Введите фамилию"
+msgstr "Номи охирини худро ворид кунед"
+
+#: _templates/site/shop4/checkout.html:60
+msgid "Введите телефон"
+msgstr "Телефонро ворид кунед"
+
+#: _templates/site/shop4/checkout.html:65
+msgid "Введите email"
+msgstr "Email-ро ворид кунед"
+
+#: _templates/site/shop4/checkout.html:91
+msgid "Улица/Дом"
+msgstr "Кӯча / хона"
+
+#: _templates/site/shop4/checkout.html:96
+msgid "Подьезд"
+msgstr "рондан"
+
+#: _templates/site/shop4/checkout.html:101
+msgid "Этаж"
+msgstr "Фарш"
+
+#: _templates/site/shop4/checkout.html:106
+msgid "Квартира"
+msgstr "Квартира"
+
+#: _templates/site/shop4/checkout.html:111
+msgid "Комментарий курьеру"
+msgstr "Шарҳҳо ба хаткашон"
+
+#: _templates/site/shop4/checkout.html:124
+msgid "Яндекс Доставка"
+msgstr "Расонидани Yandex"
+
+#: _templates/site/shop4/checkout.html:126
+msgid "Почта России"
+msgstr "Почтахона"
+
+#: _templates/site/shop4/checkout.html:136
+msgid "Рассчитать стоимость Доставки по Городу"
+msgstr "Арзиши расонидани хароҷотро дар шаҳр ҳисоб кунед"
+
+#: _templates/site/shop4/checkout.html:140
+msgid "Рассчитать стоимость"
+msgstr "Арзишро ҳисоб кунед"
+
+#: _templates/site/shop4/checkout.html:156
+msgid "Контактное Имя"
+msgstr "Номи тамос"
+
+#: _templates/site/shop4/checkout.html:158
+msgid "Контактный Телефон"
+msgstr "Тамос бо телефони тамос"
+
+#: _templates/site/shop4/checkout.html:163
+msgid "Покупка"
+msgstr "Харидан"
+
+#: _templates/site/shop4/checkout.html:172
+msgid "Кол"
+msgstr "Даст"
+
+#: _templates/site/shop4/checkout.html:183
+msgid "Общая сумма"
+msgstr "Ҳамагӣ"
+
+#: _templates/site/shop4/checkout.html:198
+msgid "Платежные системы"
+msgstr "Системаҳои пардохт"
+
+#: _templates/site/shop4/checkout.html:199
+msgid "Вы можете выбрать любой из доступных платежных терминалов"
+msgstr "Шумо метавонед ҳама гуна терминалҳои мавҷударо интихоб кунед"
+
+#: _templates/site/shop4/checkout.html:226
+msgid "Нет доступных способов оплаты"
+msgstr "Усулҳои дастраси дастрас нестанд"
+
+#: _templates/site/shop4/checkout.html:233
+msgid "Оформить заказ"
+msgstr "Фармоиш диҳед"
+
+#: _templates/site/shop4/contacts.html:192
+msgid "Форма обратной связи"
+msgstr "Шакли тавсиянома"
+
+#: _templates/site/shop4/contacts.html:196
+msgid "Ваше Имя"
+msgstr "Номи шумо"
+
+#: _templates/site/shop4/contacts.html:202
+msgid "Предмет"
+msgstr "Нущта"
+
+#: _templates/site/shop4/contacts.html:218
+msgid "Телефон, адрес, email, форма обратной связи и пр"
+msgstr "Телефон, суроға, почтаи электронӣ, шакли фикру мулоҳиза ва ғайра."
+
+#: _templates/site/shop4/contacts.html:225
+msgid "Контактная информация"
+msgstr "Маълумот барои тамос"
+
+#: _templates/site/shop4/contacts.html:245
+msgid "Нет информации о адресах"
+msgstr "Маълумот дар бораи суроғаҳо"
+
+#: _templates/site/shop4/contacts.html:260
+msgid "Нет информации о телефонах"
+msgstr "Маълумот дар бораи телефонҳо"
+
+#: _templates/site/shop4/contacts.html:275
+msgid "Нет информации о эл.почте"
+msgstr "Маълумот дар бораи барқ ​​нест"
+
+#: _templates/site/shop4/contacts.html:288
+msgid "Нет рабочих дняй"
+msgstr "Рӯзи корӣ вуҷуд надорад"
+
+#: _templates/site/shop4/contacts.html:295
+msgid "Нет выходных"
+msgstr "Рӯзи истироҳат нест"
+
+#: _templates/site/shop4/cooperation.html:231
+#: _templates/site/shop4/cooperation_detail.html:229
+#: _templates/site/shop4/page_detail.html:136
+msgid "Оставить заявку"
+msgstr "Ариза гузоред"
+
+#: _templates/site/shop4/home.html:391
+#: _templates/site/shop4/include/cart_button_catalog.html:20
+#: _templates/site/shop4/product_detail.html:112
+msgid "В корзину"
+msgstr "Дар сабад"
+
+#: _templates/site/shop4/home.html:513
+#, fuzzy
+#| msgid "Товаров"
+msgid "товаров"
+msgstr "молҳо"
+
+#: _templates/site/shop4/home.html:543
+#, fuzzy
+#| msgid "Нет отзывов."
+msgid "Нет товаров"
+msgstr "Ягон мол"
+
+#: _templates/site/shop4/include/cart_product.html:103
+msgid "К покупкам"
+msgstr "Харид кардан"
+
+#: _templates/site/shop4/include/category.html:70
+msgid "На категорию"
+msgstr "Ба категория"
+
+#: _templates/site/shop4/include/category.html:71
+msgid "с меткой"
+msgstr "Tagged"
+
+#: _templates/site/shop4/include/category.html:73
+msgid "Скидка"
+msgstr "Камкунии тахфиф"
+
+#: _templates/site/shop4/include/faqs.html:21
+#: _templates/site/shop4/manufacturer_faqs.html:37
+msgid "Администрация"
+msgstr "Маъмурият"
+
+#: _templates/site/shop4/include/form_applications.html:8
+msgid "Вы оставили заявку"
+msgstr "Шумо дархостро тарк кардед"
+
+#: _templates/site/shop4/include/form_faqs.html:7
+msgid "У вас есть вопросы?"
+msgstr "Шумо саволҳо доред?"
+
+#: _templates/site/shop4/include/form_faqs.html:9
+msgid "Написать"
+msgstr "Навиштан"
+
+#: _templates/site/shop4/include/form_faqs.html:13
+msgid "Задать вопрос могут только авторизованные пользователи"
+msgstr "Танҳо корбарони ваколатдор метавонанд савол диҳанд"
+
+#: _templates/site/shop4/include/form_reviews.html:29
+#: _templates/site/shop4/order_detail.html:197
+msgid "Ваш отзыв"
+msgstr "Баррасии шумо"
+
+#: _templates/site/shop4/include/form_reviews.html:33
+#: _templates/site/shop4/order_detail.html:165
+#: _templates/site/shop4/order_detail.html:202
+#: _templates/site/shop4/order_detail.html:244
+msgid "Оставить отзыв"
+msgstr "Назари худро гузоред"
+
+#: _templates/site/shop4/include/manufacturers.html:3
+msgid "Лучшие продавцы"
+msgstr "Беҳтарин фурӯшандагон"
+
+#: _templates/site/shop4/include/profile_menu.html:9
+msgid "Мои Покупки"
+msgstr "Хариди ман"
+
+#: _templates/site/shop4/include/profile_menu.html:22
+#: _templates/site/shop6/base.html:468
+msgid "Продажи"
+msgstr "Фурӯш"
+
+#: _templates/site/shop4/include/profile_menu.html:28
+#, fuzzy
+#| msgid "Мой магазин"
+msgid "Мои магазин"
+msgstr "Мағозаи ман"
+
+#: _templates/site/shop4/include/profile_menu.html:40
+#: _templates/site/shop4/product_detail.html:245
+msgid "Вопросы"
+msgstr "Саволҳо"
+
+#: _templates/site/shop4/include/profile_menu.html:55
+msgid "Выйти"
+msgstr "Баромадан"
+
+#: _templates/site/shop4/include/reviews.html:29
+msgid "Нет отзывов."
+msgstr "Баррасиҳо нест."
+
+#: _templates/site/shop4/include/subscriptions.html:8
+#: _templates/site/shop6/base.html:406
+msgid "Подписаться"
+msgstr "Обуна шавед"
+
+#: _templates/site/shop4/order.html:54
+#, fuzzy
+#| msgid "Подробнее"
+msgid "Подробнее о покупке"
+msgstr "Бештар дар бораи харид"
+
+#: _templates/site/shop4/order.html:69
+msgid "Детали заказа"
+msgstr "Тафсилоти фармоиш"
+
+#: _templates/site/shop4/order.html:75
+msgid "Товаров"
+msgstr "Молҳо"
+
+#: _templates/site/shop4/order.html:79
+msgid "Статус оплаты"
+msgstr "Ҳолати пардохт"
+
+#: _templates/site/shop4/order.html:83
+msgid "Статус Доставки"
+msgstr "Ҳолати интиқол"
+
+#: _templates/site/shop4/order.html:87
+msgid "Адрес доставки"
+msgstr "Суроғаи расонидан"
+
+#: _templates/site/shop4/order.html:91
+msgid "ИТОГО"
+msgstr "Ьамъбастӣ"
+
+#: _templates/site/shop4/order.html:101
+msgid "Оплачено"
+msgstr "Пардохтшуда"
+
+#: _templates/site/shop4/order_detail.html:25
+msgid "Информация покупки"
+msgstr "Харидҳои иттилоотӣ"
+
+#: _templates/site/shop4/order_detail.html:30
+msgid "Дата заказа"
+msgstr "Санаи фармоиш"
+
+#: _templates/site/shop4/order_detail.html:51
+msgid "Название товара"
+msgstr "Номи маҳсулот"
+
+#: _templates/site/shop4/order_detail.html:63
+msgid "Продавец"
+msgstr "Фурӯшанда"
+
+#: _templates/site/shop4/order_detail.html:85
+msgid "Отзыв о товаре"
+msgstr "Шарҳи маҳсулот"
+
+#: _templates/site/shop4/order_detail.html:207
+msgid "Обновить отзыв"
+msgstr "Шарҳро навсозӣ кунед"
+
+#: _templates/site/shop4/price.html:39
+msgid "Название услуги"
+msgstr "Номи хидматрасонӣ"
+
+#: _templates/site/shop4/product_detail.html:160
+msgid "Вариации товара"
+msgstr "Вариантҳои мол"
+
+#: _templates/site/shop4/product_detail.html:215
+msgid "На складе"
+msgstr "Дар анбор"
+
+#: _templates/site/shop4/product_detail.html:237
+msgid "Характеристики"
+msgstr "Тавсифи хусусиятҳо"
+
+#: _templates/site/shop4/product_detail.html:264
+msgid "Значение"
+msgstr "Маъно"
+
+#: _templates/site/shop4/register.html:68
+#: _templates/site/shop4/register.html:69
+msgid "Повторите паролm"
+msgstr "Рамзро такрор кунед"
+
+#: _templates/site/shop4/restore_access.html:16
+msgid "Востановить доступ к учетной записи"
+msgstr "Барқарор кардани дастрасӣ ба суратҳисоб"
+
+#: _templates/site/shop4/restore_access.html:30
+#: _templates/site/shop4/restore_access_user.html:38
+msgid "У вас нет аккаунта?"
+msgstr "Шумо ҳисобе надоред?"
+
+#: _templates/site/shop4/restore_access_user.html:21
+msgid "Сменить пароль для своей учетной записи"
+msgstr "Рамзро барои ҳисоби худ иваз кунед"
+
+#: _templates/site/shop4/restore_access_user.html:32
+msgid "Сменить"
+msgstr "Иваз"
+
+#: _templates/site/shop4/search.html:33
+msgid "Результаты по запросу"
+msgstr "Ба дархост оварда мерасонад"
+
+#: _templates/site/shop4/search.html:36 _templates/site/shop4/search.html:117
+msgid "Введите запрос для поиска"
+msgstr "Ҷустуҷӯро ҷустуҷӯ кунед"
+
+#: _templates/site/shop4/search.html:49
+msgid "Все"
+msgstr "Ҳама"
+
+#: _templates/site/shop4/search.html:107
+msgid "Ничего не найдено"
+msgstr "Чизе ёфт нашуд"
+
+#: _templates/site/shop4/tickets.html:21
+msgid "Новое обращение в поддержку"
+msgstr "Шикояти нав барои дастгирӣ"
+
+#: _templates/site/shop4/upload.csv.html:111
+msgid "Загрузить"
+msgstr "Download"
+
+#: _templates/site/shop4/vacancy_detail.html:49
+msgid "Зарплата"
+msgstr "Маош"
+
+#: _templates/site/shop4/vacancy_detail.html:56
+msgid "Локация"
+msgstr "Макон"
+
+#: _templates/site/shop4/vacancy_detail.html:57
+msgid "Опубликовано"
+msgstr "Ofbukovano"
+
+#: _templates/site/shop4/vacancy_detail.html:69
+msgid "Откликнуться на вакансию"
+msgstr "Вокуниш ба ҷои холӣ"
+
+#: _templates/site/shop4/vacancy_detail.html:75
+msgid "Сообщение (необязательно)"
+msgstr "Паём (ихтиёрӣ)"
+
+#: _templates/site/shop4/vacancys.html:38
+msgid "ЗП от"
+msgstr "Майдони"
+
+#: _templates/site/shop4/vacancys.html:39
+msgid "ЗП до"
+msgstr "Np пеш"
+
+#: _templates/site/shop4/vacancys.html:44
+msgid "Полный рабочий день"
+msgstr "Вақти пурра"
+
+#: _templates/site/shop4/vacancys.html:45
+msgid "Неполный рабочий день"
+msgstr "Нимавақт"
+
+#: _templates/site/shop4/vacancys.html:46
+msgid "Удаленная работа"
+msgstr "Кори дурдаст"
+
+#: _templates/site/shop4/vacancys.html:47
+msgid "Сменный график"
+msgstr "Ҷадвали хурд"
+
+#: _templates/site/shop4/vacancys.html:50
+msgid "Применить фильтр"
+msgstr "Филтрро татбиқ кунед"
+
+#: _templates/site/shop4/vacancys.html:55
+#, fuzzy
+#| msgid "Загрузить"
+msgid "Загрузка..."
+msgstr "Боркунӣ ..."
+
+#: _templates/site/shop4/vacancys.html:56
+#, fuzzy
+#| msgid "Нет отзывов."
+msgid "Нет результатов"
+msgstr "Натиҷа вуҷуд надорад"
+
+#: _templates/site/shop6/base.html:449
+msgid "Пользователю"
+msgstr "Истифода"
+
+#: _templates/site/shop6/base.html:472
+msgid "Мой магазин"
+msgstr "Мағозаи ман"
+
+#: _templates/site/shop6/base.html:604
+msgid "Мы используем безопасную оплату для"
+msgstr "Мо пардохти бехатарро истифода мебарем"
+
+#: _templates/site/shop6/base.html:682
+msgid "Введи поискоовую фразу..."
+msgstr "Ибораи ҷустуҷӯро ворид кунед ..."
+
+#: _templates/site/useraccount/bookmarks.html:25
+msgid "Аренды"
+msgstr "Иьора"
+
+#: _templates/site/useraccount/bookmarks.html:40
+msgid "Объявление"
+msgstr "Эълон"
+
+#: _templates/site/useraccount/bookmarks.html:41
+msgid "Заезд"
+msgstr "Толор"
+
+#: _templates/site/useraccount/bookmarks.html:42
+msgid "Выезд"
+msgstr "Рафтан"
+
+#: _templates/site/useraccount/bookmarks.html:60
+msgid "Чек"
+msgstr "Саньидан"
+
+#: _templates/site/useraccount/bookmarks.html:82
+msgid "Возрат"
+msgstr "Сурб"
+
+#: _templates/site/useraccount/complaint_list.html:20
+msgid "Претензии"
+msgstr "Даъво"
+
+#: _templates/site/useraccount/password_reset_complete.html:18
+#: _templates/site/useraccount/password_reset_complete.html:19
+#: _templates/site/useraccount/password_reset_complete.html:29
+msgid "Пароль успешно сброшен"
+msgstr "Парол бомуваффақият партофта мешавад"
+
+#: _templates/site/useraccount/password_reset_complete.html:30
+msgid "Ваш пароль был успешно изменен. Вы можете"
+msgstr "Рамзи шумо бомуваффақият тағир ёфтааст.Ту метавонӣ"
+
+#: _templates/site/useraccount/password_reset_complete.html:30
+msgid "войти"
+msgstr "Даромадан"
+
+#: _templates/site/useraccount/password_reset_complete.html:30
+msgid "с новым паролем"
+msgstr "Бо пароли нав"
+
+#: _templates/site/useraccount/password_reset_done.html:17
+#: _templates/site/useraccount/password_reset_done.html:18
+#: _templates/site/useraccount/password_reset_done.html:27
+msgid "Письмо для сброса пароля отправлено"
+msgstr "Рамз ба мактуби фиристодашуда"
+
+#: _templates/site/useraccount/password_reset_done.html:28
+msgid "Ожидайте его на вашей электронной почте"
+msgstr "Инро аз ҷониби почтаи электронии шумо интизор шавед"
+
+#: _templates/site/useraccount/referrals_list.html:18
+#: _templates/site/useraccount/withdraw_point.html:18
+msgid "Реферальный код"
+msgstr "Кодекси муроҷиат"
+
+#: _templates/site/useraccount/referrals_list.html:23
+msgid "Партнерка"
+msgstr "Шарик"
+
+#: _templates/site/useraccount/referrals_list.html:28
+#: _templates/site/useraccount/withdraw_point.html:28
+msgid "Баллов"
+msgstr "Нуқтаҳо"
+
+#: _templates/site/useraccount/referrals_list.html:117
+#: _templates/site/useraccount/withdraw_payment.html:176
+#: _templates/site/useraccount/withdraw_point.html:116
+msgid "Пополнение средств"
+msgstr "Пуркунии маблағ"
+
+#: _templates/site/useraccount/restore_access.html:17
+#: _templates/site/useraccount/restore_access.html:18
+#: _templates/site/useraccount/restore_access.html:60
+msgid "Сброс пароля"
+msgstr "Рамз"
+
+#: _templates/site/useraccount/restore_access.html:29
+#: _templates/site/useraccount/restore_access.html:65
+msgid "Введите ваш"
+msgstr "Ба худ ворид шавед"
+
+#: _templates/site/useraccount/restore_access.html:35
+msgid "Хотите авторизоваться?"
+msgstr "Мехоҳед ворид шавед?"
+
+#: _templates/site/useraccount/restore_access.html:44
+msgid "Нет аккаунта?"
+msgstr "Ҳисоб?"
+
+#: _templates/site/useraccount/ticket_form.html:21
+msgid "Новый вопрос"
+msgstr "Саволи нав"
+
+#: _templates/site/useraccount/ticket_form.html:45
+msgid "Комментариий"
+msgstr "Шарҳ"
+
+#: _templates/site/useraccount/tickets.html:89
+msgid "Переписка"
+msgstr "Ахборот"
+
+#: _templates/site/useraccount/withdraw_payment.html:20
+msgid "Карта"
+msgstr "Харита"
+
+#: _templates/site/useraccount/withdraw_payment.html:45
+msgid "Нет карты"
+msgstr "Нест корт"
+
+#: _templates/site/useraccount/withdraw_payment.html:75
+msgid "Замороженный баланс"
+msgstr "Тавозуни яхкардашуда"
+
+#: _templates/site/useraccount/withdraw_payment.html:80
+msgid "Сумма на балансе"
+msgstr "Маблағ дар тавозун"
+
+#: _templates/site/useraccount/withdraw_point.html:23
+msgid "Рефералы"
+msgstr "Мавҳум"
+
+#~ msgid "Русский"
+#~ msgstr "Russian"
+
+#~ msgid "Корзина-пуста"
+#~ msgstr "Cart-emty"

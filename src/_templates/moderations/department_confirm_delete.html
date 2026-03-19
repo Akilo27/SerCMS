@@ -1,0 +1,22 @@
+<!-- departments/department_confirm_delete.html -->
+{% extends 'moderations/base.html' %}
+{% load i18n %}
+{% load static %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+{% endblock head %}
+
+{% block content %}
+<h1>{% trans "Удалить отдел" %}</h1>
+<p>{% trans "Вы уверены, что хотите удалить" %} "{{ object }}"?</p>
+<form method="post">
+  {% csrf_token %}
+  <button type="submit">{% trans "Удалить" %}</button>
+  <a href="{% url 'kpi:department_list' %}">{% trans "Отмена" %}</a>
+</form>
+{% endblock %}

@@ -1,0 +1,127 @@
+{% extends 'moderations/base.html' %}
+{% load i18n %}
+{% load static  %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<style>
+    div#id_types > div {
+        display: inline-block;
+    }
+</style>
+{% endblock head %}
+{% block content %}
+<form method="post" novalidate>
+    {% csrf_token %}
+    <!--
+        form: Django Form,
+        содержащая поля: name, types, users
+    -->
+    {{ form.non_field_errors }}
+
+    <div class="mb-3">
+        <label for="{{ form.name.id_for_label }}" class="form-label">
+            {% trans "Name" %}
+        </label>
+        {{ form.name }}
+        {% if form.name.errors %}
+        <div class="text-danger">
+            {{ form.name.errors }}
+        </div>
+        {% endif %}
+    </div>
+    <style>
+    #id_types {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+    }
+
+    #id_types > div {
+        background: #f9f9f9;
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+    }
+
+    #id_types > div > label:first-child {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: #333;
+    }
+
+    #id_types div label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 6px;
+        font-size: 14px;
+    }
+
+    #id_types input[type="checkbox"] {
+        transform: scale(1.1);
+    }
+
+    @media (max-width: 992px) {
+        #id_types {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 576px) {
+        #id_types {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+    <div class="mb-3">
+        <label for="{{ form.types.id_for_label }}" class="form-label">
+            {% trans "Access Type(s)" %}
+        </label>
+        {{ form.types }}
+        {% if form.types.errors %}
+        <div class="text-danger">
+            {{ form.types.errors }}
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="mb-3">
+        <label for="{{ form.users.id_for_label }}" class="form-label">
+            {% trans "Users" %}
+        </label>
+        {{ form.users }}
+        {% if form.users.errors %}
+        <div class="text-danger">
+            {{ form.users.errors }}
+        </div>
+        {% endif %}
+    </div>
+
+    <!--
+      Если вам нужно, чтобы пользователь выбирал компанию (если их несколько),
+      вы можете сделать здесь отдельное поле (или скрытое поле),
+      но в примере мы company не даём выбирать напрямую.
+    -->
+
+    <!-- Общие ошибки формы (если заданы через add_error(None, "...")) -->
+    {% if form.non_field_errors %}
+    <div class="text-danger">
+        {{ form.non_field_errors }}
+    </div>
+    {% endif %}
+
+    <button type="submit" class="btn btn-primary">
+        {% trans "Save" %}
+    </button>
+    <a href="{% url 'useraccount:groups_list' %}" class="btn btn-secondary">
+        {% trans "Cancel" %}
+    </a>
+</form>
+
+{% endblock content %}

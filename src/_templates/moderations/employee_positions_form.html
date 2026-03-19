@@ -1,0 +1,215 @@
+{% extends 'moderations/base.html' %}
+{% load static i18n shop_tags %}
+
+{% block head %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+    .select2-container--default .select2-selection--multiple .select2-selection__choice {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+    }
+    .add-new-item {
+        margin-top: 5px;
+        cursor: pointer;
+        color: #0d6efd;
+    }
+    .modal-form {
+        padding: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+<div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">{% trans 'Название должности' %}</label>
+                            {{ form.Name|add_class:"form-control" }}
+                            {{ form.Name.errors }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">{% trans 'Оклад' %}</label>
+                            {{ form.Salary|add_class:"form-control" }}
+                            {{ form.Salary.errors }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">{% trans 'Описание' %}</label>
+                    {{ form.Description|add_class:"form-control" }}
+                    {{ form.Description.errors }}
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">{% trans 'Смена' %}</label>
+                            {{ form.Change|add_class:"form-select select2-single" }}
+                            {{ form.Change.errors }}
+                        </div>
+                    </div>
+                </div>
+                <!-- Основные поля формы -->
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">{% trans 'Бонусы' %}</label>
+                            {{ form.Bonuses|add_class:"form-select select2-multiple" }}
+                            <small class="add-new-item" data-type="bonus">+ Добавить бонус</small>
+                            {{ form.Bonuses.errors }}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">{% trans 'Премии' %}</label>
+                            {{ form.Prizes|add_class:"form-select select2-multiple" }}
+                            <small class="add-new-item" data-type="prize">+ Добавить премию</small>
+                            {{ form.Prizes.errors }}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">{% trans 'Штрафы' %}</label>
+                            {{ form.Penalties|add_class:"form-select select2-multiple" }}
+                            <small class="add-new-item" data-type="penalty">+ Добавить штраф</small>
+                            {{ form.Penalties.errors }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Кнопка сохранения -->
+                <div class="d-flex justify-content-end mt-4">
+                    <button type="submit" class="btn btn-primary">{% trans 'Сохранить' %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для создания новых элементов -->
+<div class="modal fade" id="createItemModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">{% trans "Добавить новый элемент" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body modal-form">
+                <form id="itemForm">
+                    <div class="mb-3">
+                        <label class="form-label">{% trans "Название" %}</label>
+                        <input type="text" class="form-control" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{% trans "Сумма" %}</label>
+                        <input type="number" step="0.01" class="form-control" name="amount" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{% trans "Причина" %}</label>
+                        <textarea class="form-control" name="reason" rows="3"></textarea>
+                    </div>
+                    <input type="hidden" name="type" id="itemType">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Отмена" %}</button>
+                <button type="button" class="btn btn-primary" id="saveItem">{% trans "Сохранить" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    // Инициализация Select2
+    $('.select2-multiple').select2({
+        placeholder: "Выберите варианты",
+        width: '100%',
+        language: 'ru',
+        closeOnSelect: false
+    });
+
+    // Обработчик клика по "Добавить"
+    $('.add-new-item').click(function() {
+        const type = $(this).data('type');
+        $('#itemType').val(type);
+        $('#modalTitle').text('Добавить новый ' + getTypeName(type));
+        $('#createItemModal').modal('show');
+    });
+
+    // Сохранение нового элемента
+    $('#saveItem').click(function() {
+        const type = $('#itemType').val();
+        const formData = $('#itemForm').serialize();
+        let url;
+        let selectId;
+
+        // Определяем URL и ID select в зависимости от типа
+        switch(type) {
+            case 'bonus':
+                url = "{% url 'kpi:create_bonus_ajax' %}";
+                selectId = 'id_Bonuses';
+                break;
+            case 'prize':
+                url = "{% url 'kpi:create_prize_ajax' %}";
+                selectId = 'id_Prizes';
+                break;
+            case 'penalty':
+                url = "{% url 'kpi:create_penalty_ajax' %}";
+                selectId = 'id_Penalties';
+                break;
+            default:
+                alert('Неизвестный тип элемента');
+                return;
+        }
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: formData,
+            success: function(response) {
+                if(response.success) {
+                    const $select = $('#' + selectId);
+
+                    // Создаем новый option
+                    const newOption = new Option(response.text, response.id, true, true);
+                    $select.append(newOption).trigger('change');
+
+                    // Закрываем модальное окно и очищаем форму
+                    $('#createItemModal').modal('hide');
+                    $('#itemForm')[0].reset();
+                } else {
+                    alert('Ошибка: ' + response.error);
+                }
+            },
+            error: function(xhr) {
+                alert('Произошла ошибка при сохранении');
+            }
+        });
+    });
+
+    // Вспомогательные функции
+    function getTypeName(type) {
+        const names = {
+            'bonus': 'бонус',
+            'prize': 'премию',
+            'penalty': 'штраф'
+        };
+        return names[type] || 'элемент';
+    }
+});
+</script>
+{% endblock %}

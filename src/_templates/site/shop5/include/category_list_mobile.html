@@ -1,0 +1,32 @@
+{% load shop_tags %}
+{% get_categories_without_parent as categories_without_parent %}
+<li class="menu-item-has-children" style="position: static;">
+    <span class="mobile-menu-expand"></span>
+    <a href="#">Каталог</a>
+    <ul class="mega-sub-menu">
+        {% for category in categories_without_parent %}
+        <li class="menu-item-has-children">
+            <span class="mobile-menu-expand"></span>
+            <a href="{#% url 'categories_detail' category.slug %#}" class="menu-title">{{ category.name }}</a>
+            <ul class="menu-item" >
+                {% for child in category.children.all %}
+                <li>
+                    <a href="{#% url 'categories_detail' child.slug %#}" previewlistener="true">
+                        {{child.name}}
+                    </a>
+                    <ul class="menu-item" >
+                        {% for grandchild in child.children.all %}
+                        <li>
+                            <a href="{#% url 'categories_detail' grandchild.slug %#}" previewlistener="true">
+                                {{grandchild.name}}
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </li>
+                {% endfor %}
+            </ul>
+        </li>
+        {% endfor %}
+    </ul>
+</li>

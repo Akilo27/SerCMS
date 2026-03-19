@@ -1,0 +1,316 @@
+{% extends 'site/shop4/base.html' %}
+{% load static generals_tag i18n %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+{% block content %}
+<main class="main">
+    <div class="page-content mb-8 mt-5">
+        <div class="container">
+            <div class="tab-vertical row gutter-lg">
+                {% include 'site/shop4/include/profile_menu.html' %}
+                <div class="tab-content" id="nav-tabContent">
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-body p-4">
+            <div class="account-details-form">
+                <table class="table">
+                    <tbody style="vertical-align:sub;">
+                    <tr>
+                        <td class="product-total-price">
+                            <h6 class="price">{% trans 'Информация покупки' %} </h6>
+                        </td>
+                        <td class="product-info">
+                            <h6 class="name">
+                                <a previewlistener="true">
+                                    {% trans 'Стоимость' %}: {{product.amount}} &nbsp; {% trans 'Дата заказа' %}: {{product.update}},
+                                </a>
+                            </h6>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="product-total-price">
+                            <h6 class="price">{% trans 'Статус' %}</h6>
+                        </td>
+                        <td class="product-info">
+                            <h6 class="name">
+                                <a previewlistener="true">
+                                    {{product.get_status_display}}
+                                </a>
+                            </h6>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="product-total-price">
+                            <h6 class="price">{% trans 'Название товара' %}</h6>
+                        </td>
+                        <td class="product-info">
+                            <h6 class="name">
+                                <a href="{% url 'shop:products' product.product.slug %}" previewlistener="true">
+                                    {{product.product.name}}
+                                </a>
+                            </h6>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="product-total-price">
+                            <h6 class="price">{% trans 'Продавец' %}</h6>
+                        </td>
+                        <td class="product-info">
+                            <h6 class="name">
+                                <a href="{% url 'shop:manufacturers' product.product.manufacturers.slug %}"
+                                   previewlistener="true">
+                                    {{product.product.manufacturers.name}}
+                                </a>
+                            </h6>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="product-review-tabs-content">
+                <ul class="nav product-tab-nav" id="ReviewTab" role="tablist">
+                    <li role="presentation">
+                        <a class="active" id="information-tab" data-bs-toggle="pill" href="#information" role="tab"
+                           aria-controls="information" aria-selected="true">{% trans 'Переписка по товару' %}</a>
+                    </li>
+                    <li role="presentation">
+                        <a id="reviews-tab" data-bs-toggle="pill" href="#reviews" role="tab" aria-controls="reviews"
+                           aria-selected="false">{% trans 'Отзыв о товаре' %}</a>
+                    </li>
+                </ul>
+                <div class="tab-content product-tab-content" id="ReviewTabContent">
+                    <div class="tab-pane fade show active" id="information" role="tabpanel"
+                         aria-labelledby="information-tab">
+                        <div class="product-information">
+                            <div class="information-content">
+
+                                <div class="reviews-content">
+                                    <!-- Review Form Start  -->
+                                    <form id="commentForm" method="post" enctype="multipart/form-data"
+                                          action="{% url 'shop:add_comment_product' product.id %}">
+                                        {% csrf_token %}
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="single-form">
+                                                    {{ form.content }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <div class="single-form">
+                                                    {{ form.files }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="single-form">
+                                                    <button type="submit" class="btn pull-right btn-hover-primary">
+                                                        {% trans 'Отправить' %}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+
+                                </div>
+                                <!-- Review Form End  -->
+                                <hr>
+                                <!-- Review Comment Start  -->
+                                <div class="reviews-comment" id="list-ticket">
+                                    {% for comments in ticket_comments %}
+                                    <!-- Single Comment Start  -->
+                                    <div class="single-reviews">
+                                        <div class="comment-author">
+                                            <img src="{% if comments.author.avatar %}{{comments.author.avatar.url}}{% endif %}"
+                                                 width="100" height="100" alt="author">
+                                        </div>
+                                        <div class="comment-content">
+                                            <div class="author-name-rating">
+                                                <h6 class="name">{{comments.author.username}}</h6>
+                                            </div>
+                                            <span class="date">{{comments.date}}</span>
+                                            <p>
+                                                {{comments.content}}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    {% if comments.commentmedia.all %}
+                                    <div class="col flex-column">
+                                        {% for media in comments.commentmedia.all %}
+                                        <a class="btn btn-primary btn-hover-dark" href="{{ media.file.url }}">
+                                            <i class="fa fa-file-o"></i>
+                                            {{ media.get_file_name }}
+                                        </a>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                    <!-- Single Comment End  -->
+                                    {% endfor %}
+                                    {% include 'site/shop4/include/paginations.html' with items=ticket_comments %}
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="reviews" role="tabpanel" aria-labelledby="reviews-tab">
+                        <div id="reviews-list">
+                            <!-- Форма для добавления или обновления отзыва -->
+
+                            {% if show_reviews_form %}
+                            <h3>{% trans 'Оставить отзыв' %}</h3>
+                            <form id="review-form" class="review-form" method="post"
+                                  action="{% url 'shop:submit_review' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="product" value="{{ product.product.id }}">
+                                <input type="hidden" name="author" value="{{ user.id }}">
+
+                                <div class="form-group hidden">
+                                    <label for="author">{% trans 'Автор' %}</label>
+                                    <input type="text" id="author" name="author" class="form-control"
+                                           value="{{ user.username }}" disabled>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>{% trans 'Оценка' %}</label>
+                                    <div class="reviews-counter">
+                                        <div class="rate">
+                                            <input type="radio" id="star5" name="rate" value="5"/>
+                                            <label for="star5" title="text">5 stars</label>
+                                            <input type="radio" id="star4" name="rate" value="4"/>
+                                            <label for="star4" title="text">4 stars</label>
+                                            <input type="radio" id="star3" name="rate" value="3"/>
+                                            <label for="star3" title="text">3 stars</label>
+                                            <input type="radio" id="star2" name="rate" value="2"/>
+                                            <label for="star2" title="text">2 stars</label>
+                                            <input type="radio" id="star1" name="rate" value="1"/>
+                                            <label for="star1" title="text">1 star</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>{% trans 'Отзыв' %}</label>
+                                    <textarea name="text" class="form-control" placeholder="{% trans 'Ваш отзыв' %}"></textarea>
+                                </div>
+                                <input type="hidden" name="starvalue" id="reiting">
+                                <br>
+                                <button type="submit" class="btn btn-sm btn-primary pull-right"
+                                        id="reviews_submit_update">{% trans 'Оставить отзыв' %}
+                                </button>
+                            </form>
+
+                            {% elif show_reviews_form_update %}
+                            <h3>{% trans 'Обновить отзыв' %}</h3>
+                            <form id="review-form" class="review-form" method="post"
+                                  action="{% url 'shop:submit_review' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="product" value="{{ product.product.id }}">
+                                <input type="hidden" name="author" value="{{ user.id }}">
+
+                                <div class="form-group hidden">
+                                    <label for="author">{% trans 'Автор' %}</label>
+                                    <input type="text" id="author" name="author" class="form-control"
+                                           value="{{ user.username }}" disabled>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>{% trans 'Оценка' %}</label>
+                                    <div class="reviews-counter">
+                                        <div class="rate">
+                                            <input type="radio" id="star5" name="rate" value="5"/>
+                                            <label for="star5" title="text">5 stars</label>
+                                            <input type="radio" id="star4" name="rate" value="4"/>
+                                            <label for="star4" title="text">4 stars</label>
+                                            <input type="radio" id="star3" name="rate" value="3"/>
+                                            <label for="star3" title="text">3 stars</label>
+                                            <input type="radio" id="star2" name="rate" value="2"/>
+                                            <label for="star2" title="text">2 stars</label>
+                                            <input type="radio" id="star1" name="rate" value="1"/>
+                                            <label for="star1" title="text">1 star</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>{% trans 'Отзыв' %}</label>
+                                    {{ reviews_form.text }}
+                                </div>
+                                {{ reviews_form.starvalue }}
+                                <br>
+                                <button type="submit" class="btn btn-primary pull-right" id="reviews_submit_add">
+                                    {% trans 'Оставить отзыв' %}
+                                </button>
+                            </form>
+
+                            {% endif %}
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Product Details tab Section Start -->
+
+
+        </div>
+    </div>
+</div>
+
+<!-- Product Details tab Section End -->
+
+
+<script>
+
+function initialize() {
+    // Обновление радио-кнопок на основе значения поля ввода рейтинга
+    const ratingInput = document.getElementById('reiting');
+    const rateRadios = document.querySelectorAll('input[name="rate"]');
+
+    function updateRadioButtons() {
+        const ratingValue = ratingInput.value;
+        rateRadios.forEach(radio => {
+            radio.checked = radio.value === ratingValue;
+        });
+    }
+
+    ratingInput.addEventListener('input', updateRadioButtons);
+    updateRadioButtons();
+
+    // Удаление атрибутов cols и rows из элемента textarea
+    const messageTextarea = document.getElementById('message');
+    messageTextarea.removeAttribute('cols');
+    messageTextarea.removeAttribute('rows');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    initialize();
+
+    // Функция для добавления отложенного вызова функции initialize
+    function delayedInitialize() {
+        setTimeout(initialize, 1000);
+    }
+
+    // Добавляем обработчики событий для кнопок
+    const addButton = document.getElementById('reviews_submit_add');
+    const updateButton = document.getElementById('reviews_submit_update');
+
+    if (addButton) {
+        addButton.addEventListener('click', delayedInitialize);
+    }
+
+    if (updateButton) {
+        updateButton.addEventListener('click', delayedInitialize);
+    }
+});
+</script>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock content %}

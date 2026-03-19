@@ -1,0 +1,133 @@
+{% extends 'site/useraccount/base.html' %}
+{% load i18n %}
+{% load static  %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+
+{% block content %}
+
+<!-- ========== Page Title Start ========== -->
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="mb-0 fw-semibold">Чек</h4>
+            <ol class="breadcrumb mb-0">
+                {% if user.type == 1 %}
+                <li class="breadcrumb-item"><a href="{% url 'useraccount:bookmarks' %}">Аренды</a></li>
+                {% endif %}
+                <li class="breadcrumb-item active">Чек</li>
+            </ol>
+        </div>
+    </div>
+</div>
+<!-- ========== Page Title End ========== -->
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <!-- Logo & title -->
+                <div class="clearfix">
+                    <div class="float-sm-end">
+                        <div class="auth-logo">
+                            <img class="logo-dark me-1"  src="{% if settings.logo %}{{settings.logo.url}}{% else %}{% static 'site/moderations/assets/images/logo-light.png' %}{% endif %}" alt="logo-dark" height="24"/>
+                            <img class="logo-light me-1"  src="{% if settings.logo_white %}{{settings.logo_white.url}}{% else %}{% static 'site/moderations/assets/images/logo-light.png' %}{% endif %}" alt="logo-dark" height="24"/>
+                        </div>
+                        <address class="mt-3">
+                            {{booking.advertisement.address}}  <br>
+                            <abbr title="Phone"></abbr> {{booking.advertisement.phone}}
+                        </address>
+                    </div>
+                    <div class="float-sm-start">
+                        <h5 class="card-title mb-2">#{{booking.id}}</h5>
+                        <p> {{booking.create|date:"d/m/Y"}}</p>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <h6 class="fw-normal text-muted">Дынные пользователя</h6>
+                        <h6 class="fs-16"> {{booking.user_lastname}}</h6>
+                        <h6 class="fs-16"> {{booking.user_firstname}}</h6>
+                        <address>
+                            {{booking.user_email}}<br>
+                            <abbr title="Phone"></abbr> {{booking.user_phone}}
+                        </address>
+                    </div> <!-- end col -->
+                </div>
+                <!-- end row -->
+                {% if booking.description %}
+                <div class="row">
+                    <div class="col-12">
+                        <div class="table-responsive table-borderless text-nowrap mt-3 table-centered">
+                            <table class="table mb-0">
+                                <thead class="bg-light bg-opacity-50">
+                                <tr>
+                                    <th class="border-0 py-2">Услуга</th>
+                                    <th class="border-0 py-2">Количество</th>
+                                    <th class="border-0 py-2">Цена</th>
+                                    <th class="text-end border-0 py-2">Стоимость</th>
+                                </tr>
+                                </thead> <!-- end thead -->
+                                <tbody>
+                                {% for item in dop_services %}
+                                <tr>
+                                    <td>{{ item.service.name }}</td>
+                                    <td>{{ item.count }}</td>
+                                    <td>{{ item.service.price }}</td>
+                                    <td class="text-end">{{ item.amount }}</td>
+                                </tr>
+                                {% endfor %}
+
+                                </tbody> <!-- end tbody -->
+                            </table> <!-- end table -->
+                        </div> <!-- end table responsive -->
+                    </div> <!-- end col -->
+                </div> <!-- end row -->
+                {% endif %}
+                <div class="row mt-3">
+                    <div class="col-sm-7">
+                        <div class="clearfix pt-xl-3 pt-0">
+                            <h6 class="text-muted">Информация:</h6>
+
+                            <small class="text-muted">
+                                {{booking.advertisement.booking_info}}
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-sm-5">
+                        <div class="float-end">
+                            <p><span class="fw-medium">Списано с баланса: </span>
+                                <span class="float-end">{{booking.amount_balance}}</span>
+                            </p>
+                            <p><span class="fw-medium">Списано баллами ({{booking.amount_point}})</span>
+
+                            </p>
+                            <h3>{{booking.amount}}</h3>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div> <!-- end col -->
+                </div> <!-- end row -->
+
+                <div class="mt-5 mb-1">
+                    <div class="text-center d-print-none">
+                        <a href="javascript:window.print()" class="btn btn-danger width-md">Распечатать</a>
+                    </div>
+                </div>
+
+            </div> <!-- end card body -->
+        </div> <!-- end card -->
+    </div> <!-- end col -->
+</div> <!-- end row -->
+
+{% endblock content %}
+
+{% block footertop %}
+{% endblock footertop %}
+{% block footerbottom %}
+
+{% endblock footerbottom %}

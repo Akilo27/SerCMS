@@ -1,0 +1,16 @@
+<!-- Форма -->
+<div class="panel">
+    {% if user.is_authenticated %}
+    <div class="panel-body row" id="faqs-form" data-product="{{product.id}}">
+        <div class="col-12 form-group">
+            <textarea class="form-control" rows="2" placeholder="У вас есть вопросы?"></textarea>
+        </div>
+        <div class="col-12 form-group">
+            <button class="th-btn" onclick="submitQuestion()" type="submit"><i class="fa fa-pencil fa-fw"></i> Написать</button>
+        </div>
+
+    </div>
+    {% else %}
+    Задать вопрос могут только авторизованные пользователи
+    {% endif %}
+</div>

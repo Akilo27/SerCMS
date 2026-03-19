@@ -1,0 +1,106 @@
+{% load i18n %}
+<div class="-mx-5 ">
+    <table class="table">
+        <thead >
+        <tr class="border-bottom-primary">
+            <th scope="col">
+                Аватар и ФИО
+            </th>
+            <th scope="col">
+                Почта
+            </th>
+            <th scope="col">
+                Телефон
+            </th>
+            <th scope="col">
+                Город
+            </th>
+            <th scope="col">
+                Действия
+            </th>
+        </tr>
+        </thead>
+        <tbody class="list " id="employeeList">
+        {% for user in users %}
+        <tr class="{% if user.blocked %}red-overlay{% elif user.deleted %}gray-overlay{% else %} {% endif %}">
+            <td>
+                <div class="d-flex align-items-center gap-2">
+                    <div>
+                        <img src="{% if user.avatar %}{{ user.avatar.url }}{% endif %}" alt="" class="avatar-sm rounded-circle">
+                    </div>
+                    <div>
+                        <a href="agents-list.html#!" class="text-dark fw-medium fs-15">                {% if user.first_name and user.last_name and  user.middle_name %} {{ user.last_name }} {{ user.first_name }} {{ user.middle_name }} {% else %}{{ user.username }}{% endif %}
+                        </a>
+                    </div>
+                </div>
+
+            </td>
+
+            <td class="ModerationGroupsEmail">
+                {% if user.email %}{{ user.email }}{% endif %}
+            </td>
+            <td class="ModerationGroupsPhone">
+                {% if user.phone %}{{ user.phone }}{% endif %}
+            </td>
+            <td class="ModerationGroupsCountry">
+                {% if user.city %}{{ user.city }}{% endif %}
+            </td>
+            <td class="ModerationGroupsAction">
+                <div class="flex gap-3">
+                    <div class="d-flex">
+                        {% if user.blocked %}
+                        <div  class="delete">
+                            <form method="post" action="{% url 'moderation:unblock_user' pk=user.id %}" class="w-full">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-light btn-sm">
+                                    <!-- Уменьшил отступ слева до ml-1 -->
+                                    <iconify-icon icon="solar:user-check-bold" class="align-middle fs-18"></iconify-icon>
+                                </button>
+                            </form>
+                        </div>
+                        {% elif user.deleted %}
+                        <form style="padding: 1px;" method="post" action="{% url 'moderation:restore_user' pk=user.id %}" class="w-full">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-soft-primary btn-sm">
+                                <!-- Уменьшил отступ слева до ml-1 -->
+                                <iconify-icon icon="solar:refresh-circle-broken" class="align-middle fs-18"></iconify-icon>
+                            </button>
+                        </form>
+                        <form style="padding: 1px;" method="post" action="{% url 'moderation:worker_delete' pk=user.id %}" class="w-full">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-soft-danger btn-sm">
+                                <!-- Уменьшил отступ слева до ml-1 -->
+                                <iconify-icon icon="solar:trash-bin-minimalistic-2-broken" class="align-middle fs-18"></iconify-icon>
+                            </button>
+                        </form>
+                        {% else %}
+                        <a href="{% url 'moderation:edit_profiles' user.id %}"
+                           data-modal-target="addEmployeeModal"
+                           class="btn btn-soft-primary btn-sm">
+                            <iconify-icon icon="solar:pen-2-broken" class="align-middle fs-18"></iconify-icon>
+                        </a>
+
+                        <form method="post"
+                              action="{% url 'moderation:delete_user' user.id %}">
+                            {% csrf_token %}
+                            <button type="submit" data-modal-target="deleteModal"  class="btn btn-soft-danger btn-sm">
+                                <iconify-icon icon="solar:trash-bin-minimalistic-2-broken" class="align-middle fs-18"></iconify-icon>
+                            </button>
+                        </form>
+                        <form method="post"
+                              action="{% url 'moderation:block_user' pk=user.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-light btn-sm">
+                                <iconify-icon icon="solar:user-block-bold" class="align-middle fs-18"></iconify-icon>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>

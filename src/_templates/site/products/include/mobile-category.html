@@ -1,0 +1,14 @@
+{% load static shop_tags generals_tag %}
+{% get_categories_without_parent request.get_host as categories %}
+<ul class="mobile-menu-category row d-lg-none">
+    {% for category in categories %}
+    <li class="col-6" style="display: grid;justify-content: center; padding:20px; ">
+
+        <a href="{{category.get_absolute_url}}" style="display: grid;justify-content: center;justify-items: center; line-height: normal;text-align: center;font-size: 48px;">
+            {% if category.icon %}
+            <img style="height:300px;" src="{{category.icon.url}}" alt="Frutin">{% endif %}
+            {{category.name}}
+        </a>
+    </li>
+    {% endfor %}
+</ul>

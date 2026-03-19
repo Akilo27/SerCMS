@@ -1,0 +1,221 @@
+{% extends 'site/trendsup/base.html' %}
+{% load static generals_tag i18n shop_tags %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<style>
+    .alert.alert-info {
+    color: #fff;
+    background-color: #dcb996 !important;
+}
+
+button.btn.btn-primary.mobile-button {
+    width: 50%;
+    height: 50px;
+}
+.product-media .product-action-horizontal {
+  position: absolute;
+  top: 10px;      /* отступ сверху */
+  right: 10px;    /* отступ справа */
+  z-index: 2;     /* чтобы было поверх картинки */
+  width: auto !important;  /* убрать принудительное 100% */
+  height: auto !important; /* убрать фиксированные 45px */
+  display: flex !important;
+  justify-content: flex-end;
+}
+.pro-qty {
+  display: flex !important;
+  align-items: stretch !important;
+  width: max-content !important;
+}
+
+.pro-qty input.quantity {
+  width: 60px !important;
+  text-align: center !important;
+  border-radius: 4px 0 0 4px !important;
+}
+
+/* оборачиваем кнопки в колонку */
+.pro-qty .qtyplus,
+.pro-qty .qtyminus {
+  width: 30px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 0px solid #ccc !important;
+  background: #f8f9fa00 !important;
+}
+
+/* чтобы кнопки шли вертикально */
+.pro-qty {
+  gap: 0 !important;
+}
+
+.pro-qty .qtyplus {
+  border-radius: 0 4px 0 0 !important;
+  border-bottom: none !important;
+  height: 45%;
+  top: 6px;
+}
+
+.pro-qty .qtyminus {
+  border-radius: 0 0 4px 0 !important;
+      height: 45%;
+    position: absolute;
+    right: 0;
+    bottom: 6px;
+}
+</style>
+{% endblock head %}
+{% block content %}
+<main class="main">
+    <div class="page-content mb-8 mt-5">
+        <div class="container">
+            <div class="tab-vertical row gutter-lg">
+                <div class="col-xxl-3 col-lg-3">
+                    <aside class="sidebar-area">
+
+                        <div class="widget widget_categories widget-profile">
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <div class="profile-avatar">
+                                    {# порядок проверок: Profile.avatar -> user.avatar -> user.image -> дефолт #}
+                                    {% if user.profile.avatar %}
+                                    <img src="{{ user.profile.avatar.url }}" alt="{{ user.get_full_name|default:user.username }}">
+                                    {% elif user.avatar %}
+                                    <img src="{{ user.avatar.url }}" alt="{{ user.get_full_name|default:user.username }}">
+                                    {% elif user.image %}
+                                    <img src="{{ user.image.url }}" alt="{{ user.get_full_name|default:user.username }}">
+                                    {% else %}
+                                    <img src="{% static 'img/default-avatar.png' %}" alt="avatar">
+                                    {% endif %}
+                                </div>
+
+                                <div class="profile-meta">
+                                    {% if user.last_name or user.first_name %}
+                                    <h6 class="mb-0">{{ user.last_name }} {{ user.first_name }}</h6>
+                                    {% elif user.get_full_name %}
+                                    <h6 class="mb-0">{{ user.get_full_name }}</h6>
+                                    {% else %}
+                                    <h6 class="mb-0">{{ user.username }}</h6>
+                                    {% endif %}
+                                    <div class="text-muted">@{{ user.username }}</div>
+                                </div>
+                            </div>
+                            {% include 'site/trendsup/include/profile_menu.html' %}
+                        </div>
+                    </aside>
+                </div>
+                <div class="col-xxl-9 col-lg-9">
+                    <div class="tab-content" id="nav-tabContent">
+                        <div class="row row-cols-2 row-cols-sm-2 row-cols-md-3 g-3 bookmark-list">
+
+                            {% for product in recommended_products %}
+                            <div class="col">
+                                <div class="product-wrap h-100">
+                                    <div class="product text-center h-100 d-flex flex-column">
+                                        <figure class="product-media position-relative">
+                                            <a href="/catalog/{{ product.slug }}">
+                                                {% if product.image %}
+                                                <img src="{{ product.image.url }}" alt="Product"
+                                                     class="img-fluid w-100"
+                                                     style="height:300px; object-fit:cover;">
+                                                {% else %}
+                                                <img src="/_media/default/product-nophoto.png" alt="Product"
+                                                     class="img-fluid w-100"
+                                                     style="height:300px; object-fit:cover;">
+                                                {% endif %}
+                                            </a>
+
+                                            {% if user.is_authenticated and not user.type == 2 %}
+                                            <div class="product-action-horizontal d-flex justify-content-around align-items-center position-absolute top-0 end-0 m-2"
+                                                 style="width:100px; height:45px;">
+                                                {% include 'site/trendsup/include/bookmark-button.html' %}
+                                            </div>
+                                            {% endif %}
+                                        </figure>
+
+                                        <div class="product-details mt-2">
+                                            <div class="product-cat">
+                                                <a href="shop-banner-sidebar.html">{{ category.name }}</a>
+                                            </div>
+
+                                            <h3 class="product-name h6">
+                                                <a href="{% url 'shop:products' product.slug %}" class="text-reset text-decoration-none">
+                                                    {{ product.name }}
+                                                </a>
+                                            </h3>
+
+                                            <div>
+                                                <div class="product-price fw-semibold">
+                                                    {% if valute != product.valute %}
+                                                    {% if product.type == 1 %}
+                                                    <span class="new-price">{% currency_conversion_for_products request product.price product.valute.id %} {{valute.icon_code}}</span>
+                                                    {% else %}
+                                                    <span class="new-price">{% currency_conversion_for_products request product.productsvariable_set.all.first.price product.valute.id %} {{valute.icon_code}}</span>
+                                                    {% endif %}
+                                                    {% else %}
+                                                    {% if product.type == 1 %}
+                                                    <span class="new-price">{{ product.price }} {{valute.icon_code}}</span>
+                                                    {% else %}
+                                                    <span class="new-price">{{ product.productsvariable_set.all.first.price }} {{valute.icon_code}}</span>
+                                                    {% endif %}
+                                                    {% endif %}
+                                                </div>
+
+                                                <div class="product-meta mt-2">
+                                                    {% if not user.type == 2 %}
+                                                    {% if product.quantity == 0 and product.order %}
+                                                    {% include 'site/trendsup/include/form_applications.html' %}
+                                                    {% else %}
+                                                    {% include 'site/trendsup/include/cart_button_catalog.html' %}
+                                                    {% endif %}
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="alert alert-info">{% trans "Для вас пока нет рекомендации" %}.</div>
+                            {% endfor %}
+                        </div>
+
+                        {% if recommended_products.paginator.num_pages > 1 %}
+                        <nav class="mt-3">
+                            <ul class="pagination">
+                                {% if recommended_products.has_previous %}
+                                <li class="page-item"><a class="page-link" href="?page={{ recommended_products.previous_page_number }}">{% trans "Назад" %}</a></li>
+                                {% else %}<li class="page-item disabled"><span class="page-link">{% trans "Назад" %}</span></li>{% endif %}
+
+                                {% for pnum in recommended_products.paginator.page_range %}
+                                {% if pnum == recommended_products.number %}
+                                <li class="page-item active"><span class="page-link">{{ pnum }}</span></li>
+                                {% elif pnum >= recommended_products.number|add:-2 and pnum <= recommended_products.number|add:2 %}
+                                <li class="page-item"><a class="page-link" href="?page={{ pnum }}">{{ pnum }}</a></li>
+                                {% endif %}
+                                {% endfor %}
+
+                                {% if recommended_products.has_next %}
+                                <li class="page-item"><a class="page-link" href="?page={{ recommended_products.next_page_number }}">{% trans "Вперёд" %}</a></li>
+                                {% else %}<li class="page-item disabled"><span class="page-link">{% trans "Вперёд" %}</span></li>{% endif %}
+                            </ul>
+                        </nav>
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock content %}
+
+{% block footertop %}
+
+{% endblock footertop %}

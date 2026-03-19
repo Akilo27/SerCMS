@@ -1,0 +1,81 @@
+<form method="post" action="{% url 'shop:add_to_cart' %}" data-product-id="{{ product.id }}" class="add-to-cart-form">
+    {% csrf_token %}
+    <div class="row">
+        <div class="" style="margin-top: 5px;">
+            <div class="product-quantity qty-wrap product-about" data-product="{{ product.id }}" style="{% if product.typeofchoice == 1 or product.typeofchoice == 3 %}display:block{% else %}display:none{% endif %}">
+                <div class="quantity">
+                    <input type="number" disabled class="qty-input" name="quantity" value="1" id="quantityvalue-{{ product.id }}" data-product="{{ product.id }}" maxlength="{{ product.quantity }}" min="1" max="{{ product.quantity }}" >
+                    <button class="quantity-plus qty-btn" type="button" ><i class="far fa-chevron-up"></i></button>
+                    <button class="quantity-minus qty-btn" type="button"><i class="far fa-chevron-down"></i></button>
+                </div>
+            </div>
+
+            <div class="product-quantity qty-wrap product-about" data-product="{{ product.id }}" style="{% if product.typeofchoice == 2  %}display:block{% else %}display:none{% endif %}">
+                <div class="quantity quantitypalks">
+                    <input type="text" class="qty-input" disabled id="qty-input-{{ product.id }}" style="width: 200px" name="quantity" value="{{ product.weight }} /гр." data-product="{{ product.id }}" maxlength="{{ product.quantity }}" min="1" max="{{ product.quantity }}">
+                    <button class="quantity-plus qty-btn" id="quantity-plus-{{ product.id }}" type="button"><i class="far fa-chevron-up"></i></button>
+                    <button class="quantity-minus qty-btn" id="quantity-minus-{{ product.id }}" type="button"><i class="far fa-chevron-down"></i></button>
+                </div>
+            </div>
+
+           <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const attributeValue = parseFloat("{{ product.weight }}");
+                    const attributeValueItog = attributeValue - 1;
+
+                    // Логика для первой группы инпутов (typeofchoice == 1)
+                    const quantityValueInput = document.getElementById('quantityvalue-{{ product.id }}');
+                    const plusButton = document.getElementById('quantity-plus-{{ product.id }}');
+                    const minusButton = document.getElementById('quantity-minus-{{ product.id }}');
+
+                    const minQuantityValue = parseInt(quantityValueInput.min);
+                    const maxQuantityValue = parseInt(quantityValueInput.max);
+
+                    plusButton.addEventListener('click', function () {
+                        let currentValue = parseInt(quantityValueInput.value) || 1;
+                        if (currentValue < maxQuantityValue) {
+                            currentValue += 1;
+                            quantityValueInput.value = currentValue;
+                        }
+                    });
+
+                    minusButton.addEventListener('click', function () {
+                        let currentValue = parseInt(quantityValueInput.value) || 1;
+                        if (currentValue > minQuantityValue) {
+                            currentValue -= 1;
+                            quantityValueInput.value = currentValue;
+                        }
+                    });
+
+                    // Логика для второй группы инпутов (typeofchoice == 2)
+                    const qtyInputPalks = document.getElementById('qty-input-{{ product.id }}');
+                    const plusPalksButton = document.getElementById('quantity-plus-{{ product.id }}');
+                    const minusPalksButton = document.getElementById('quantity-minus-{{ product.id }}');
+
+                    const minValue = parseFloat(qtyInputPalks.min) * attributeValue;
+                    const maxValue = parseFloat(qtyInputPalks.max) * attributeValue;
+
+                    plusPalksButton.addEventListener('click', function () {
+                        let currentValue = parseFloat(qtyInputPalks.value) || 0;
+                        currentValue += attributeValueItog;
+                        qtyInputPalks.value = Math.min(currentValue, maxValue) + ' /гр.'; // Добавляем "грамм" после значения
+                    });
+
+                    minusPalksButton.addEventListener('click', function () {
+                        let currentValue = parseFloat(qtyInputPalks.value) || 0;
+                        currentValue -= attributeValueItog;
+                        qtyInputPalks.value = Math.max(currentValue, minValue) + ' /гр.'; // Добавляем "грамм" после значения
+                    });
+                });
+            </script>
+
+            <input type="hidden" name="variation_slug" value="{{ product.productsvariable_set.all.first.slug }}">
+        </div>
+
+        <div class="" style="display: flex; align-items: center; justify-content: center; margin-top: 5px;">
+            <button type="submit" class="th-btn" style="min-width: auto; font-size: 12px; font-weight: 400; padding: 20px 20px; height: 56px; width: 200px;margin-left:15px">
+                В корзину
+            </button>
+        </div>
+    </div>
+</form>

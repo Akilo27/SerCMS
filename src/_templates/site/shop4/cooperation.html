@@ -1,0 +1,356 @@
+{% extends 'wolmart/base.html' %}
+{% load static generals_tag %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+{% endblock head %}
+
+
+{% block content %}
+<style>
+.modal {
+    --bs-modal-zindex: 1055;
+    --bs-modal-width: 500px;
+    --bs-modal-padding: 1rem;
+    --bs-modal-margin: 0.5rem;
+    --bs-modal-color: ;
+    --bs-modal-bg: #fff;
+    --bs-modal-border-color: var(--bs-border-color-translucent);
+    --bs-modal-border-width: 1px;
+    --bs-modal-border-radius: 0.5rem;
+    --bs-modal-box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    --bs-modal-inner-border-radius: calc(0.5rem - 1px);
+    --bs-modal-header-padding-x: 1rem;
+    --bs-modal-header-padding-y: 1rem;
+    --bs-modal-header-padding: 1rem 1rem;
+    --bs-modal-header-border-color: var(--bs-border-color);
+    --bs-modal-header-border-width: 1px;
+    --bs-modal-title-line-height: 1.5;
+    --bs-modal-footer-gap: 0.5rem;
+    --bs-modal-footer-bg: ;
+    --bs-modal-footer-border-color: var(--bs-border-color);
+    --bs-modal-footer-border-width: 1px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: var(--bs-modal-zindex);
+    display: none;
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    outline: 0
+}
+
+.modal-dialog {
+    position: relative;
+    width: auto;
+    margin: var(--bs-modal-margin);
+    pointer-events: none
+}
+
+.modal.fade .modal-dialog {
+    transition: transform .3s ease-out;
+    transform: translate(0,-50px)
+}
+
+@media (prefers-reduced-motion:reduce) {
+    .modal.fade .modal-dialog {
+        transition: none
+    }
+}
+
+.modal.show .modal-dialog {
+    transform: none
+}
+
+.modal.modal-static .modal-dialog {
+    transform: scale(1.02)
+}
+
+.modal-dialog-scrollable {
+    height: calc(100% - var(--bs-modal-margin) * 2)
+}
+
+.modal-dialog-scrollable .modal-content {
+    max-height: 100%;
+    overflow: hidden
+}
+
+.modal-dialog-scrollable .modal-body {
+    overflow-y: auto
+}
+
+.modal-dialog-centered {
+    display: flex;
+    align-items: center;
+    min-height: calc(100% - var(--bs-modal-margin) * 2)
+}
+
+.modal-content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    color: var(--bs-modal-color);
+    pointer-events: auto;
+    background-color: var(--bs-modal-bg);
+    background-clip: padding-box;
+    border: var(--bs-modal-border-width) solid var(--bs-modal-border-color);
+    border-radius: var(--bs-modal-border-radius);
+    outline: 0
+}
+
+.modal-backdrop {
+    --bs-backdrop-zindex: 1050;
+    --bs-backdrop-bg: #000;
+    --bs-backdrop-opacity: 0.5;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: var(--bs-backdrop-zindex);
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--bs-backdrop-bg)
+}
+
+.modal-backdrop.fade {
+    opacity: 0
+}
+
+.modal-backdrop.show {
+    opacity: var(--bs-backdrop-opacity)
+}
+
+.modal-header {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--bs-modal-header-padding);
+    border-bottom: var(--bs-modal-header-border-width) solid var(--bs-modal-header-border-color);
+    border-top-left-radius: var(--bs-modal-inner-border-radius);
+    border-top-right-radius: var(--bs-modal-inner-border-radius)
+}
+
+.modal-header .btn-close {
+    padding: calc(var(--bs-modal-header-padding-y) * .5) calc(var(--bs-modal-header-padding-x) * .5);
+    margin: calc(-.5 * var(--bs-modal-header-padding-y)) calc(-.5 * var(--bs-modal-header-padding-x)) calc(-.5 * var(--bs-modal-header-padding-y)) auto
+}
+
+.modal-title {
+    margin-bottom: 0;
+    line-height: var(--bs-modal-title-line-height)
+}
+
+.modal-body {
+    position: relative;
+    flex: 1 1 auto;
+    padding: var(--bs-modal-padding)
+}
+
+.modal-footer {
+    display: flex;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    padding: calc(var(--bs-modal-padding) - var(--bs-modal-footer-gap) * .5);
+    background-color: var(--bs-modal-footer-bg);
+    border-top: var(--bs-modal-footer-border-width) solid var(--bs-modal-footer-border-color);
+    border-bottom-right-radius: var(--bs-modal-inner-border-radius);
+    border-bottom-left-radius: var(--bs-modal-inner-border-radius)
+}
+
+.modal-footer>* {
+    margin: calc(var(--bs-modal-footer-gap) * .5)
+}
+
+@media (min-width: 576px) {
+    .modal {
+        --bs-modal-margin:1.75rem;
+        --bs-modal-box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15)
+    }
+
+    .modal-dialog {
+        max-width: var(--bs-modal-width);
+        margin-right: auto;
+        margin-left: auto
+    }
+
+    .modal-sm {
+        --bs-modal-width: 300px
+    }
+}
+
+@media (min-width: 992px) {
+    .modal-lg,.modal-xl {
+        --bs-modal-width:800px
+    }
+}
+
+@media (min-width: 1200px) {
+    .modal-xl {
+        --bs-modal-width:1140px
+    }
+}
+[type=button]:not(:disabled), [type=reset]:not(:disabled), [type=submit]:not(:disabled), button:not(:disabled) {
+    cursor: pointer;
+}
+.btn-close {
+    box-sizing: content-box;
+    width: 1em;
+    height: 1em;
+    padding: .25em .25em;
+    color: #000;
+    background: transparent url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3e%3cpath d='M.293.293a1 1 0 0 1 1.414 0L8 6.586 14.293.293a1 1 0 1 1 1.414 1.414L9.414 8l6.293 6.293a1 1 0 0 1-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 0 1-1.414-1.414L6.586 8 .293 1.707a1 1 0 0 1 0-1.414z'/%3e%3c/svg%3e") center/1em auto no-repeat;
+    border: 0;
+    border-radius: .375rem;
+    opacity: .5;
+}
+[type=button], [type=reset], [type=submit], button {
+    -webkit-appearance: button;
+}
+button, select {
+    text-transform: none;
+}
+button, input, optgroup, select, textarea {
+    margin: 0;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+}
+</style>
+
+<a class="btn-application" data-bs-toggle="modal" data-bs-target="#quickView" href="#">{% trans 'Оставить заявку' %}</a>
+
+<section class="section section-padding" style="padding-top: 100px;">
+      <div class="container">
+        <div class="row justify-content-between flex-xl-row-reverse">
+          <div class="col-xl-12">
+            <div class="row">
+              {% for cooperation in cooperations %}
+              <div class="col-md-6 col-lg-4 col-xl-6">
+                <!--== Start Blog Item ==-->
+                <div class="post-item">
+                  <div class="thumb">
+                    <a href="{% url 'webmain:cooperation' cooperation.slug %}"  previewlistener="true">
+                      <img src="{% if cooperation.image %}{{ cooperation.image.url }}{% endif %}" width="350" height="250" alt="Image-HasTech">
+                    </a>
+                  </div>
+                  <div class="content">
+                    <h4 class="title"><a href="{% url 'webmain:cooperation' cooperation.slug %}">{{ cooperation.name }}</a></h4>
+                      <a style="color: #333;" href="{% url 'webmain:cooperation' cooperation.slug %}">
+                      <div>
+                          {{ cooperation.description|safe|slice:":255" }}
+                      </div>
+                          </a>
+                    <a class="btn-theme btn-sm" href="{% url 'webmain:cooperation' cooperation.slug %}">{% trans 'Подробнее' %}</a>
+                  </div>
+                </div>
+
+                <!--== End Blog Item ==-->
+              </div>
+              {% endfor %}
+
+            </div>
+          </div>
+            <div class="col-xl-12">
+                <div class="pagination-items pagination-items-style1">
+                    {% include 'wolmart/include/paginations_cooperative.html' %}
+                </div>
+            </div>
+        </div>
+
+      </div>
+
+</section>
+<div class="modal fade " id="quickView" style="display: none; padding-left: 0px;" aria-modal="true" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-body">
+                {% if cooperation %}
+                {% include 'wolmart/include/partnership.html' %}
+                {% else %}
+                {% include 'wolmart/include/cooperation.html' %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+
+    .btn-application{
+        position: fixed!important;
+        top: 220px!important;
+        right:  -76px!important;
+        transform: rotate(270deg);
+        z-index: 999;
+        border: none;
+        background-color: #336699;
+        text-transform: uppercase;
+        font-family: "Nunito Sans", sans-serif;
+        font-weight: 600;
+        padding: 20px 40px;
+        line-height: 1;
+        color: #fff;
+        font-size: 13px;
+        border-radius: 10px;
+
+    }
+    .btn-application:hover{
+        border: none;
+        background-color: #1f2226;
+        text-transform: uppercase;
+        font-family: "Nunito Sans", sans-serif;
+        font-weight: 600;
+        padding: 20px 40px;
+        line-height: 1;
+        color: #fff;
+        font-size: 13px;
+    }
+    .btn-application:focus{
+        border: none;
+        background-color: #1f2226;
+        text-transform: uppercase;
+        font-family: "Nunito Sans", sans-serif;
+        font-weight: 600;
+        padding: 20px 40px;
+        line-height: 1;
+        color: #fff;
+        font-size: 13px;
+    }
+    .btn-application:focus-visible{
+        border: none;
+        background-color: #1f2226;
+        text-transform: uppercase;
+        font-family: "Nunito Sans", sans-serif;
+        font-weight: 600;
+        padding: 20px 40px;
+        line-height: 1;
+        color: #fff;
+        font-size: 13px;
+    }
+    .btn-application:active{
+        border: none;
+        background-color: #1f2226;
+        text-transform: uppercase;
+        font-family: "Nunito Sans", sans-serif;
+        font-weight: 600;
+        padding: 20px 40px;
+        line-height: 1;
+        color: #fff;
+        font-size: 13px;
+    }
+
+</style>
+<!--=== jQuery Bootstrap Min Js ===-->
+<script src="{% static 'site/tumie/js/bootstrap.min.js' %}"></script>
+{% endblock content %}

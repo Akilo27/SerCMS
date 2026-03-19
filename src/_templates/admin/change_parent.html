@@ -1,0 +1,17 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block content %}
+  <h1>{% trans "Массовое изменение родителя" %}</h1>
+  <p>{% trans "Выбрано" %} {{ objects.count }} {% trans "категорий" %}:</p>
+  <ul>
+    {% for obj in objects %}
+      <li>{{ obj.name }}</li>
+    {% endfor %}
+  </ul>
+
+  <form method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="default">{% trans "Изменить" %}</button>
+  </form>
+{% endblock %}

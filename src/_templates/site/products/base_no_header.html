@@ -1,0 +1,149 @@
+{% load static generals_tag %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>{% with request|get_settings as settings %}{% if settings.name %}{{ settings.name }}{% endif %}{% endwith %} - {% block title %}{% endblock title %}</title>
+    <meta content="{% block description %}{% endblock description %}" name="description">
+    <meta property="og:title" content="{% block propertytitle %} {% endblock propertytitle %}">
+    <meta property="og:description" content="{% block propertydescription %}{% endblock propertydescription %}">
+    <meta property="og:image" content="{% block propertyimage %}{% endblock propertyimage %}">
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="{% with request|get_settings as settings %}{% if settings.favicon %}{{ settings.favicon.url }}{% endif %}{% endwith %}" />
+    <!-- Analitic link -->
+    {% with request|get_settings as settings %}{% if settings.yandex_metrica %}{{ settings.yandex_metrica|safe }}{% endif %}{% endwith %}
+    {% with request|get_settings as settings %}{% if settings.google_analitic %}{{ settings.google_analitic|safe }}{% endif %}{% endwith %}
+    <!-- Main Style CSS -->
+    <link rel="stylesheet" href="{% static 'site/frutin/css/app.min.css' %}">
+    <link rel="stylesheet" href="{% static 'site/frutin/css/fontawesome.min.css' %}">
+    <link rel="stylesheet" href="{% static 'site/frutin/css/style.css' %}">
+    {% block head %}{% endblock head %}
+</head>
+<div class="th-menu-wrapper">
+    <div class="th-menu-area text-center">
+        <button class="th-menu-toggle">
+            <i class="fal fa-times"></i>
+        </button>
+        <div class="mobile-logo">
+            <a href="{% url 'webmain:home' %}">
+                <img src="{% with request|get_settings as settings %}{% if settings.logo %}{{ settings.logo.url }}{% endif %}{% endwith %}" alt="Frutin">
+            </a>
+        </div>
+        <div class="th-mobile-menu">
+            <ul>
+                <li><a href="{% url 'webmain:home' %}">Главная</a></li>
+                <li><a href="{% url 'webmain:blogs' %}">Новости</a></li>
+                <li class="menu-item-has-children th-item-has-children th-active">
+                    <a href="{% url 'shop:catalogs' %}" previewlistener="true">
+                        Магазин
+                        <span class="th-mean-expand"></span>
+                    </a>
+                    <ul class="sub-menu th-submenu th-open" style="">
+                        <!---Категории mobile--->
+                        <li>
+                            <a href="home-organic-farm.html" previewlistener="true">Категория</a>
+                        </li>
+
+                    </ul>
+                </li>
+                <li><a href="{% url 'webmain:about' %}">О проекте</a></li>
+                <li><a href="{% url 'webmain:contact' %}">Контакты</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+<header class="th-header header-layout3">
+
+    <div class="sticky-wrapper">
+        <div class="menu-area">
+            <div class="container">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-3 d-none d-xl-block">
+                        {% include 'products/include/category.html' %}
+                    </div>
+                    <div class="col-auto">
+                        <nav class="main-menu menu-style1 d-none d-lg-inline-block">
+                           <ul>
+                                <li style="margin-right: 40px"><a href="{% url 'shop:catalogs' %}">Магазин</a></li>
+                                <li style="margin-right: 40px"><a href="{% url 'webmain:blogs' %}">Топ продаж</a></li>
+                                <li style="margin-right: 40px"><a href="{% url 'webmain:delivery_payment' %}">Доставка и Оплата</a></li>
+                                <li style="margin-right: 40px"><a href="{% url 'webmain:about' %}">О компании</a></li>
+                                <li style="margin-right: 40px"><a href="{% url 'webmain:contact' %}">Контакты</a></li>
+                            </ul>
+                        </nav>
+                        <button type="button" class="th-menu-toggle d-block d-lg-none">
+                            <i class="far fa-bars"></i>
+                        </button>
+                    </div>
+                    <div class="col-auto">
+                        <div class="call-btn">
+                            <div class="box-icon">
+                                <i class="far fa-headphones"></i>
+                            </div>
+                            <div class="media-body">
+                                <p class="box-subtitle">Поддержка с 9 до 9</p>
+                                <h3 class="box-title">
+                                    <a href="tel:+{% with request|get_contact as settings %}{% if settings.phone %}{{ settings.phone }}{% endif %}{%endwith%}">
+                                        {% with request|get_contact as settings %}{% if settings.phone %}{{ settings.phone }}{% endif %}{%endwith%}
+                                    </a>
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+{% if messages %}
+<div style="display:none;  width: 500px;
+        text-align: center;
+        position: fixed;
+        top: 200px;
+        padding: 10px 20px;
+        background-color: #5cb85c;
+        color: #fff;
+        border-radius: 5px;
+        z-index: 1000;
+        left: 50%;
+        transform: translateX(-50%);
+        opacity:0; transition: opacity 0.5s ease;" id="message-box">
+    {% for message in messages %}
+    {{ message }}
+    {% endfor %}
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("Страница загружена, скрипт начал работу");  // Проверка в консоли
+        var messageBox = document.getElementById("message-box");
+        if (messageBox) {
+            messageBox.style.display = "block";
+            setTimeout(function() {
+                messageBox.style.opacity = "1";
+            }, 500);
+
+            // Скрываем через 5 секунд
+            setTimeout(function() {
+                messageBox.style.opacity = "0";
+                setTimeout(function() {
+                    messageBox.style.display = "none";
+                }, 500);  // Даем время для завершения анимации
+            }, 5000);  // Время показа сообщения
+        }
+    });
+</script>
+{% endif %}
+{% block content %}{% endblock content %}
+<div class="scroll-top">
+    <svg class="progress-circle svg-content" width="100%" height="100%" viewBox="-1 -1 102 102">
+        <path d="M50,1 a49,49 0 0,1 0,98 a49,49 0 0,1 0,-98"
+              style="transition: stroke-dashoffset 10ms linear 0s; stroke-dasharray: 307.919, 307.919; stroke-dashoffset: 307.919;"></path>
+    </svg>
+</div>
+{% block footer %}{% endblock footer %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="{% static 'site/script.js' %}"></script>
+
+<!-- Main Standart JS -->

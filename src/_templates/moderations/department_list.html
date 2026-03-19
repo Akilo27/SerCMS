@@ -1,0 +1,129 @@
+{% extends 'moderations/base.html' %}
+{% load i18n %}
+{% load static %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+{% endblock head %}
+
+{% block content %}
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            <div class="col-12">
+                <div class="page-title-box">
+                    <h4 class="mb-0 fw-semibold">{% trans 'Отделы' %}</h4>
+                    <ol class="breadcrumb mb-0">
+                        <div class="toolbar" role="toolbar">
+                            <div class="btn-group mb-1">
+                                <a href="{% url 'kpi:employee_positions_list' %}" class="btn btn-primary px-3">
+                                    {% trans 'Должности' %}
+                                </a>
+                            </div>
+                            <div class="btn-group mb-1">
+                                <a href="{% url 'kpi:department_create' %}" class="btn btn-primary px-3">
+                                    <iconify-icon icon="solar:add-square-broken"></iconify-icon>
+                                    {% trans 'Добавить' %}
+                                </a>
+                            </div>
+                            <div class="btn-group mb-1">
+                                <button type="button" class="btn btn-primary light px-3" id="deleteButton" onclick="deleteSelected()">
+                                    <iconify-icon icon="solar:trash-bin-minimalistic-broken"></iconify-icon>
+                                </button>
+                            </div>
+                            <div class="btn-group mb-1">
+                                <button type="button" class="btn btn-primary light dropdown-toggle v" data-bs-toggle="dropdown">
+                                    {% trans 'Поиск по' %}
+                                    <span class="caret m-l-5"></span>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item" href="javascript:void(0);" onclick="openSearch('id')">{% trans 'ID' %}</a>
+                                    <a class="dropdown-item" href="javascript:void(0);" onclick="openSearch('name')">{% trans 'Названию' %}</a>
+                                    <a class="dropdown-item" href="javascript:void(0);" onclick="openSearch('guide')">{% trans 'Руководителю' %}</a>
+                                </div>
+                            </div>
+                        </div>
+                    </ol>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div>
+                <table class="table table-responsive-md ck-table">
+                    <thead style="text-align: center;">
+                    <tr>
+                        <th class="align-middle">
+                            <div class="form-check custom-checkbox">
+                                <input type="checkbox" class="form-check-input" id="checkAll">
+                                <label class="form-check-label" for="checkAll"></label>
+                            </div>
+                        </th>
+                        <th><strong>{% trans "ID" %}</strong></th>
+                        <th><strong>{% trans "Название" %}</strong></th>
+                        <th><strong>{% trans "Руководитель" %}</strong></th>
+                        <th><strong>{% trans "Сотрудников" %}</strong></th>
+                        <th><strong>{% trans "Дата создания" %}</strong></th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody style="text-align: center;">
+                    {% for department in departments %}
+                    <tr>
+                        <td class="py-2">
+                            <div class="form-check custom-checkbox checkbox-success">
+                                <input type="checkbox" name="department_ids" value="{{ department.CustomerID }}" class="form-check-input" id="checkbox_{{ department.CustomerID }}">
+                                <label class="form-check-label" for="checkbox_{{ department.CustomerID }}"></label>
+                            </div>
+                        </td>
+                        <td>{{ department.CustomerID }}</td>
+                        <td>{{ department.Name }}</td>
+                        <td>{% if department.Guide %}{{ department.Guide.get_full_name }}{% else %}-{% endif %}</td>
+                        <td>{{ department.Staff.count }}</td>
+                        <td>{{ department.created_at|date:"d.m.Y H:i" }}</td>
+                        <td class="py-2 text-right">
+                            <div class="dropdown text-sans-serif">
+                                <button class="btn btn-primary tp-btn-light sharp" type="button" id="order-dropdown-{{ department.CustomerID }}" data-bs-toggle="dropdown" data-boundary="viewport" aria-haspopup="true" aria-expanded="false">
+                                    <span><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="18px" height="18px" viewBox="0 0 24 24" version="1.1"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><rect x="0" y="0" width="24" height="24"></rect><circle fill="#000000" cx="5" cy="12" r="2"></circle><circle fill="#000000" cx="12" cy="12" r="2"></circle><circle fill="#000000" cx="19" cy="12" r="2"></circle></g></svg></span>
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-end border py-0" aria-labelledby="order-dropdown-{{ department.CustomerID }}" style="">
+                                    <div class="py-2">
+                                        <a class="dropdown-item" href="{% url 'kpi:department_update' department.CustomerID %}">Редактировать</a>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item text-danger" href="{% url 'kpi:department_delete' department.CustomerID %}">Удалить</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% include 'moderations/include/paginations.html' with items=department_list %}
+        </div>
+    </div>
+</div>
+
+<script>
+function deleteSelected() {
+    const selectedIds = [];
+    document.querySelectorAll('input[name="department_ids"]:checked').forEach(checkbox => {
+        selectedIds.push(checkbox.value);
+    });
+
+    if (selectedIds.length === 0) {
+        alert('{% trans "Выберите хотя бы один отдел для удаления" %}');
+        return;
+    }
+
+    if (confirm('{% trans "Вы уверены, что хотите удалить выбранные отделы?" %}')) {
+        // Здесь код для отправки запроса на удаление
+        console.log('Отправка на удаление:', selectedIds);
+    }
+}
+</script>
+{% endblock content %}

@@ -1,0 +1,88 @@
+services:
+  cd-redis:
+    image: redis:latest
+    container_name: cd-redis
+    restart: always
+    # Порт наружу не публикуем — внутри сети доступен по cd-redis:6379
+    volumes:
+      - cd-redis-data:/data
+    env_file:
+      - .env
+    networks:
+      - cd-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  cd-db:
+    image: postgres:14-alpine
+    container_name: cd-db
+    command: ["postgres", "-c", "max_connections=1000"]
+    restart: always
+    env_file:
+      - .env
+    environment:
+      PGDATA: /var/lib/postgresql/data   # <-- исправлено
+    volumes:
+      - cd-db-data:/var/lib/postgresql/data
+      # - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    # Порт наружу не публикуем — внутри сети доступен по cd-db:5432
+    networks:
+      - cd-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\""]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  cd-app:
+    build:
+      context: .
+      dockerfile: _config/app/Dockerfile
+    container_name: cd-app
+    command: bash run.sh
+    env_file:
+      - .env
+    environment:
+      WAIT_HOSTS: cd-db:5432,cd-redis:6379
+    volumes:
+      - ./src:/app/marketplace
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+    tty: true
+    restart: on-failure
+    depends_on:
+      - cd-db
+      - cd-redis
+    networks:
+      - cd-net
+
+  cd-celery:
+    build:
+      context: .
+      dockerfile: _config/app/Dockerfile
+    container_name: cd-celery
+    command: celery --app _project worker --beat -l info --concurrency=1
+    env_file:
+      - .env
+    environment:
+      WAIT_HOSTS: cd-db:5432,cd-redis:6379
+    volumes:
+      - ./src:/app/marketplace
+    restart: always
+    depends_on:
+      - cd-db
+      - cd-redis
+    networks:
+      - cd-net
+
+volumes:
+  cd-db-data:
+  cd-redis-data:
+
+networks:
+  cd-net:
+    driver: bridge

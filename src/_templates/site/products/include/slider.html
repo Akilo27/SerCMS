@@ -1,0 +1,31 @@
+<div class="th-hero-wrapper hero-3" id="hero">
+  <div class="container">
+    <div class="row justify-content-end">
+      <div class="col-xl-12">
+        <div class="swiper th-slider" id="heroSlider3" data-slider-options='{"effect":"fade"}'>
+          <div class="swiper-wrapper">
+            {% for slide in sliders %}
+            <div class="swiper-slide">
+              <div class="hero-inner" style="object-fit: cover;
+    height: 500px;
+    max-height: 500px;" data-bg-src="{% if slide.slide_image %}{{slide.slide_image.url}}{% endif %}">
+                <div class="hero-style3">
+                  <h1 class="hero-title2" >
+                    <span class="title1" data-ani="slideinup" style="    color: white;" data-ani-delay="0.0s">{{slide.slide_title|safe}}</span>
+                  </h1>
+                  <p class="hero-text" data-ani="slideinup" style="    color: white;" data-ani-delay="0.5s">{{slide.slide_description|safe}}</p>
+                  {% if slide.slide_button_link_one %}
+                  <a href="{{slide.slide_button_link_one}}" class="th-btn style4" data-ani="slideinup"
+                     data-ani-delay="0.6s" >{{slide.slide_button_title_one}}</a>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          <div class="slider-pagination"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

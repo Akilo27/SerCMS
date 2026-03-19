@@ -1,0 +1,167 @@
+{% extends 'products/base.html' %}
+{% load static generals_tag shop_tags %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+{% block content %}
+
+<section class="space-top space-extra-bottom">
+    <div class="container">
+        <div class="th-sort-bar">
+            <div class="row justify-content-between align-items-center">
+                <div class="col-md">
+                    <p class="woocommerce-result-count">Показано {{ page_obj.start_index }}–{{ page_obj.end_index }} из {{ paginator.count }} элементов</p>
+                </div>
+                <div class="col-md-auto">
+
+                    <select  id="filterSelect" class="orderby" aria-label="Фильтр">
+                        <option value="all" {% if not request.GET.filter %}selected{% endif %} >Все</option>
+                        <option value="blogs" {% if request.GET.filter == 'blogs' %}selected{% endif %}>Новости</option>
+                        <option value="products" {% if request.GET.filter == 'products' %}selected{% endif %}>Продукты</option>
+                        <option value="manufacturers" {% if request.GET.filter == 'manufacturers' %}selected{% endif %}>Производители</option>
+                    </select>
+                    <script> document.getElementById("filterSelect").addEventListener("change", function () {
+                        var selectedOption = this.value;
+
+                        if (selectedOption) {
+                            var currentUrl = new URL(window.location.href);  // Get the current URL
+                            currentUrl.searchParams.set("filter", selectedOption);  // Set or update `filter`
+                            window.location.href = currentUrl.toString();  // Navigate to the updated URL
+                        }
+                    });</script>
+
+                </div>
+            </div>
+        </div>
+        <div class="row gy-40">
+            {% for result in results %}
+            <div class="col-xl-3 col-lg-4 col-sm-6">
+                <div class="th-product product-grid">
+                    <div class="product-img"><img style="height:200px;object-fit: cover;" src="{% if result.image %}{{ result.image.url }}{% else %}{% static 'site/image.jpg' %}{% endif %}" alt="Product Image">
+                        <div class="actions">
+                            {% if result.price %}
+                            {% include 'products/include/bookmark_btn.html' with product=result %}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="product-content">
+                        {% if not user.type == 2 %}
+                        {% if result.quantity == 0 and result.order %}
+                        {% include 'products/include/form_applications.html' %}
+                        {% else %}
+                        {% include 'products/include/cart_button.html' with product=result %}
+                        {% endif %}
+                        {% endif %}
+                        <h3 class="product-title"  style="padding-top: 10px;" >
+                            <a href="{{ result.get_absolute_url }}" style="    max-width: 100%;
+    text-decoration: none;
+    color: inherit;
+    white-space: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.5;
+    height: 3em;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    display: -webkit-box;">{{ result.name }}</a>
+                        </h3>
+                        {% if result.price %}
+                        {% if valute != result.valute %}
+                        {% if result.type == 1 %}
+                        <span class="price" style="color: #017D03; font-weight: 600; font-size: 20px;">
+                                    {% currency_conversion_for_products request result.price result.valute.id %}
+                                    {{valute.icon_code}}
+                                     {% if result.typeofchoice == 2%} /
+                                        {{product.weight}}гр
+                                        {% elif  result.typeofchoice == 3 or result.typeofchoice == 1 %}
+                                        за уп.{% endif %}
+                                </span>
+                        {% else %}
+                        <span class="price" style="color: #017D03; font-weight: 600; font-size: 20px;">
+                                    {% currency_conversion_for_products request result.productsvariable_set.all.first.price result.valute.id %}
+                                    {{valute.icon_code}}
+                                    {% if result.typeofchoice == 2%} /
+                                        {{result.weight}}гр
+                                        {% elif  result.typeofchoice == 3  or result.typeofchoice == 1 %}
+                                        за уп.{% endif %}
+                                </span>
+                        {% endif %}
+                        {% else %}
+                        {% if result.type == 1 %}
+                        <span class="price" style="color: #017D03; font-weight: 600; font-size: 20px;">
+                            {{ result.price }} {{valute.icon_code}}
+                            {% if result.typeofchoice == 2%} /
+                            {{result.weight}}гр
+                            {% elif  result.typeofchoice == 3  %} за уп.{% endif %}
+                        </span>
+                        {% else %}
+                        <span class="price" style="color: #017D03; font-weight: 600; font-size: 20px;">
+                            {{ result.productsvariable_set.all.first.price }} {{valute.icon_code}}
+                            {% if result.typeofchoice == 2%} /
+                            {{result.weight}}гр
+                            {% elif  result.typeofchoice == 3 or result.typeofchoice == 1  %} за уп.
+                            {% endif %}
+                        </span>
+                        {% endif %}
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="th-pagination text-center">
+    <ul >
+        {% if paginator.num_pages >= 1 %}
+        {% if page_obj.has_previous %}
+        <li>
+            <a href="?page=1&q={{request.GET.q}}" >
+                <i class="far fa-arrow-left"></i>
+            </a>
+        </li>
+        {% endif %}
+        {% for i in paginator.page_range %}
+        {% if page_obj.number == i %}
+        <li >
+            <a class="active" href="#">{{ i }}</a>
+        </li>
+        {% elif i > page_obj.number|add:'-2' and i < page_obj.number|add:'3' %}
+        <li >
+            <a  href="?page={{ i }}&q={{request.GET.q}}">{{ i }}</a>
+        </li>
+        {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <li>
+            <a  href="?page={{ paginator.num_pages }}&q={{request.GET.q}}" aria-label="Next">
+                <i class="far fa-arrow-right"></i>
+            </a>
+        </li>
+        {% endif %}
+        {% endif %}
+    </ul>
+</div>
+
+    </div>
+</section>
+<style>
+    .form-check-input.hidden {
+        display: none;
+    }
+
+    /* Стили для звезд */
+    .fa-star {
+        color: #ddd; /* Неактивная звезда */
+        margin-right: 2px;
+    }
+
+    /* Когда чекбокс отмечен, звезды становятся желтыми */
+    input[type="checkbox"]:checked ~ .fa-star {
+        color: #ffcc00; /* Желтый цвет активной звезды */
+    }
+</style>
+{% endblock content %}
+{% block footer %}{% endblock footer %}

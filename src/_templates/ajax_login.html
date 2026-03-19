@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajax Login</title>
+    <script>
+        async function sendLoginRequest(event) {
+            event.preventDefault(); // Предотвращаем стандартное поведение формы
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch(window.location.href, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password,
+                    }),
+                });
+
+                const data = await response.json();
+                if (response.status === 200) {
+                    console.log('Login successful!');
+                    console.log('Redirecting to:', data.redirect_url);
+                    alert('Login successful! Redirecting...');
+                    window.location.href = data.redirect_url;
+                } else {
+                    console.error('Login failed:', data.error);
+                    alert(data.error);
+                }
+            } catch (error) {
+                console.error('Error sending login request:', error);
+                alert('An error occurred. Please try again later.');
+            }
+        }
+    </script>
+</head>
+<body>
+<h1>Ajax Login</h1>
+<form id="login-form" onsubmit="sendLoginRequest(event)">
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username" required><br><br>
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" required><br><br>
+    <button type="submit">Login</button>
+</form>
+</body>
+</html>

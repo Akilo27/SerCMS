@@ -1,0 +1,122 @@
+{% load static generals_tag i18n %}
+
+<style>
+    /* Делаем значение в инпуте контрастным и читаемым */
+.product-qty-form .input-group.pro-qty .form-control.quantity{
+  text-align: center;                         /* по центру */
+  font-size: 1.125rem;                        /* крупнее */
+  font-weight: 600;
+  color: var(--bs-body-color, #212529) !important;
+  -webkit-text-fill-color: var(--bs-body-color, #212529); /* Safari */
+  background-color: #fff !important;          /* явный светлый фон */
+  line-height: 1.2;
+  padding: .375rem .5rem;                      /* чтобы цифра не прилипала к краям */
+  box-sizing: border-box;
+  min-width: 4.5rem;                           /* не сжимать до нуля */
+  border-top-right-radius: 0;                  /* как у тебя было */
+  border-bottom-right-radius: 0;
+}
+
+button.qtyplus.inc.qty-btn, button.qtyminus.dec.qty-btn {
+    background: #ffffff00;
+    border: 0px;
+    border-radius: 10px 10px 10px 10px;
+    color: #7c573c;
+}
+
+
+  /* Если хотите убрать зазор между кнопками и получить общий столбик без щели:
+     замените column-gap на 0 выше или раскомментируйте это:
+  */
+
+
+</style>
+
+<div class="product-form container">
+    <form method="post" action="{% url 'shop:add_to_cart' %}" data-product-id="{{ product.id }}" class="add-to-cart-form">
+        {% csrf_token %}
+
+        <div class="row">
+            <div class="col-xl-5">
+                <div class="product-qty-form product-quantity qty-wrap"  data-product="{{ product.id }}">
+                    <div class="input-group pro-qty">
+                        <input name="quantity" class="quantity form-control" id="quantityvalue-{{ product.id }}" value="1" data-product="{{ product.id }}" maxlength="{{ product.quantity }}" min="1" max="{{ product.quantity }}" type="number">
+                        <button type="button" class="qtyplus inc qty-btn quantity-plus w-icon-plus qty" ><i class="far fa-chevron-up"></i></button>
+                        <button type="button" class="qtyminus dec qty-btn quantity-minus w-icon-minus qty"><i class="far fa-chevron-down"></i></button>
+                    </div>
+                </div>
+                <input type="hidden" name="variation_slug" value="{{ product.productsvariable_set.all.first.slug }}">
+            </div>
+                <button class="btn btn-primary mobile-button" type="submit">
+                    <span>{% trans "В корзину" %}</span>
+                </button>
+            </div>
+
+    </form>
+</div>
+<script>
+(function () {
+  // Безопасный парсер чисел
+  const asNum = (v, fb = null) => {
+    const n = parseFloat(v);
+    return Number.isFinite(n) ? n : fb;
+  };
+  const clamp = (x, lo, hi) => {
+    if (lo != null && x < lo) x = lo;
+    if (hi != null && x > hi) x = hi;
+    return x;
+  };
+
+  // Перехватываем клики ДО других обработчиков (capture = true)
+  document.addEventListener('click', function (e) {
+    const btn = e.target.closest('.pro-qty .qty-btn');
+    if (!btn) return;
+
+    // Останавливаем чужие обработчики, чтобы не было +2
+    e.preventDefault();
+    e.stopPropagation();
+    if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+
+    const group = btn.closest('.pro-qty');
+    const input = group && group.querySelector('input.quantity');
+    if (!input) return;
+
+    const step = asNum(input.step, 1);
+    const min  = input.min === '' ? null : asNum(input.min, null);
+    const max  = input.max === '' ? null : asNum(input.max, null);
+    const cur  = asNum(input.value, min ?? 0);
+
+    const dir = btn.classList.contains('qtyplus') ? 1 : -1;
+    let next = cur + dir * step;
+
+    // Если шаг целый — округлим до целого
+    if (Number.isInteger(step)) next = Math.round(next);
+
+    next = clamp(next, min, max);
+
+    if (next !== cur) {
+      input.value = next;
+      // Сообщим остальному коду (обновление цены/итога и т.п.)
+      input.dispatchEvent(new Event('input',  { bubbles: true }));
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+  }, true); // <-- ВАЖНО: capture = true
+
+  // Нормализуем ручной ввод при потере фокуса
+  document.addEventListener('blur', function (e) {
+    const input = e.target;
+    if (!input.matches('input.quantity')) return;
+
+    const step = asNum(input.step, 1);
+    const min  = input.min === '' ? null : asNum(input.min, null);
+    const max  = input.max === '' ? null : asNum(input.max, null);
+    let val    = asNum(input.value, min ?? 0);
+
+    if (Number.isInteger(step)) val = Math.round(val);
+    val = clamp(val, min, max);
+
+    input.value = val;
+  }, true);
+})();
+</script>
+

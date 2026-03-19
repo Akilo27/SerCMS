@@ -1,0 +1,329 @@
+{% extends 'moderations/base.html' %}
+{% load i18n %}
+{% load static  %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<style>
+    /* Стили для попапа */
+    #tag-search {
+        width: 100%;
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        margin-bottom: 10px;
+    }
+
+    #search-results {
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    #search-results div {
+        padding: 8px;
+        cursor: pointer;
+    }
+
+    #search-results div:hover {
+        background-color: #eee;
+    }
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/hint/show-hint.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/hint/show-hint.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/hint/javascript-hint.min.js"></script>
+<link rel="stylesheet" type="text/css" href="lightbox_stylesheet.css">
+{% endblock head %}
+
+{% block content %}
+<div class="row page-titles mx-0">
+    <div class="col-sm-6 p-md-0">
+        <div class="welcome-text">
+            <h4>{{ tags.name }}</h4>
+        </div>
+    </div>
+    <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'moderation:tags_settings' %}">{% trans "Список категорий" %}</a></li>
+            <li class="breadcrumb-item active">{% trans "Категория" %}</li>
+        </ol>
+    </div>
+</div>
+<div class="card">
+    <div class="card-body" >
+
+        <form method="post" class="requisites-info" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-xl-6 ">
+                        <div class="row">
+                            <div class="mb-3">
+                                <h6 class="mb-2">{% trans "Обложка" %}</h6>
+                            </div>
+                            {% if tags.cover %}
+                            <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                                {% if tags.cover %}
+                                <img src="{{tags.cover.url}}" alt=""
+                                     style="max-height: 300px">
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                                <div style="height:300px; border: 0.0625rem solid #EEEEEE; border-radius:0.5rem;width:80%;background: #fff;align-content: center;text-align: center;">
+                                    <h1 style="transform: rotate(20deg); color: #ababab">{% trans "Изображения нет" %}</h1>
+                                </div>
+                            </div>
+                            {% endif %}
+                            <div class="mb-3 single-form">
+                                {{ form.cover }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-6 ">
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <h6 class="mb-2" style="width: max-content">{% trans "Статус" %}</h6>
+                            </div>
+                            <div class="mb-3">
+                                {{ form.publishet }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <h6 class="mb-2" style="width: max-content">{% trans "Название" %}</h6>
+                            </div>
+                            <div class="mb-3">
+                                {{ form.name }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <h6 class="mb-2" style="width: max-content">{% trans "Слаг" %}</h6>
+                            </div>
+                            <div class="mb-3">
+                                {{ form.slug }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-12 mt-4 mb-4">
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <h6 class="mb-2">{% trans "Описание" %}</h6>
+                            </div>
+                            <div class="mb-3">
+                                {{ form.description|safe }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-6 ">
+                        <div class="row">
+                            <div class="mb-3">
+                                <h6 class="mb-2">{% trans "Картинка" %}</h6>
+                            </div>
+                            {% if tags.image %}
+                            <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                                {% if tags.image %}
+                                <img src="{{tags.image.url}}" alt=""
+                                     style="max-height: 300px">
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                                <div style="height:300px; border: 0.0625rem solid #EEEEEE; border-radius:0.5rem;width:80%;background: #fff;align-content: center;text-align: center;">
+                                    <h1 style="transform: rotate(20deg); color: #ababab">{% trans "Изображения нет" %}</h1>
+                                </div>
+                            </div>
+                            {% endif %}
+                            <div class="mb-3 single-form">
+                                {{ form.image }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-6 ">
+                        <div class="row">
+                            <div class="mb-3">
+                                <h6 class="mb-2">{% trans "Иконка" %}</h6>
+                            </div>
+                            {% if tags.icon %}
+                            <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                                {% if tags.icon %}
+                                <img src="{{tags.icon.url}}" alt=""
+                                     style="max-height: 300px">
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                                <div style="height:300px; border: 0.0625rem solid #EEEEEE; border-radius:0.5rem;width:80%;background: #fff;align-content: center;text-align: center;">
+                                    <h1 style="transform: rotate(20deg); color: #ababab">{% trans "Изображения нет" %}</h1>
+                                </div>
+                            </div>
+                            {% endif %}
+                            <div class="mb-3 single-form">
+                                {{ form.icon }}
+                            </div>
+                        </div>
+                    </div>
+                    <hr class="mb-4 mt-4">
+                    <div class="col-xl-12">
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <h6 class="mb-2" style="width: max-content">{% trans "Заголовок" %}</h6>
+                            </div>
+                            <div class="mb-3">
+                                {{ form.title }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <h6 class="mb-2">{% trans "Мета-описание" %}</h6>
+                            </div>
+                            <div class="mb-3">
+                                {{ form.metadescription }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12 form-btn">
+                            <button type="submit"
+                                    class="btn btn-success"
+                                    style=" margin-top: 10px; width: 150px">
+                                {% trans "Сохранить" %}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+    </div><!--end card-->
+</div><!--end col-->
+<style>
+    textarea {
+        --tw-border-opacity: 1;
+        border-color: rgb(226 232 240 / var(--tw-border-opacity));
+        display: block;
+        width: 100%;
+        border-radius: .375rem;
+        border-width: 1px;
+        padding: .5rem 1rem;
+        font-size: .875rem;
+        font-weight: inherit;
+        line-height: inherit;
+        color: inherit;
+        margin: 0;
+        font-family: inherit;
+        resize: none;
+        height: 120px;
+    }
+    textarea:focus{
+        --tw-border-opacity: 1!important;
+        border-color: rgb(59 130 246 / var(--tw-border-opacity))!important;
+    }
+    .form-control[type="file"]:not(:disabled):not([readonly]) {
+        --tw-border-opacity: 1;
+        border-color: rgb(226 232 240 / var(--tw-border-opacity));
+        width: fit-content;
+        display: block;
+        border-radius: .375rem;
+        border-width: 1px;
+        font-size: .875rem;
+        height: auto!important;
+        padding: 5px 0px 5px 10px;
+    }
+    .django-ckeditor-widget {
+        width: 100%;
+    }
+    .cke_editor_id_description {
+        display: block !important;
+        background: #fff;
+        border: 0.0625rem solid #EEEEEE;
+        padding: 0.3125rem 1.25rem;
+        color: #6e6e6e;
+        border-radius: 0.5rem;
+        width: auto!important;
+    }
+    .choices__list--dropdown, .choices__list[aria-expanded] {
+        position: relative;
+        max-height: 120px;
+        overflow: auto;
+    }
+</style>
+<script>
+    function transliterate(text) {
+        const translitDict = {
+            'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd',
+            'е': 'e', 'ё': 'e', 'ж': 'zh', 'з': 'z', 'и': 'i',
+            'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n',
+            'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't',
+            'у': 'u', 'ф': 'f', 'х': 'kh', 'ц': 'ts', 'ч': 'ch',
+            'ш': 'sh', 'щ': 'shch', 'ъ': '', 'ы': 'y', 'ь': '',
+            'э': 'e', 'ю': 'yu', 'я': 'ya', ' ': '-', 'ç': 'c',
+            'ƣ': 'q', 'ī': 'i', 'ş': 's', 'ū': 'u', 'ƶ': 'z'
+        };
+
+        return text.split('').map(char => {
+            const lowerChar = char.toLowerCase(); // Приводим к нижнему регистру
+            return translitDict[lowerChar] || char; // Используем транслитерацию
+        }).join('');
+    }
+
+    function generateSlug() {
+        const nameInput = document.querySelector('input[name="name"]');
+        const slugInput = document.querySelector('input[name="slug"]');
+
+        // Преобразование текста в slug
+        const slug = transliterate(nameInput.value) // Транслитерация
+            .trim() // Убираем пробелы по краям
+            .replace(/-+/g, '-') // Убираем лишние дефисы
+            .replace(/^-|-$/g, '') // Убираем дефисы в начале и в конце
+            .replace(/[^a-z0-9-]/g, ''); // Убираем все символы, кроме букв, цифр и дефисов
+
+        slugInput.value = slug;
+        console.log(slugInput.value);
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const nameInput = document.querySelector('input[name="name"]');
+        nameInput.addEventListener('input', generateSlug);
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const choicesElement = document.querySelector('.choices select');
+        const choices = new Choices(choicesElement, {
+            searchEnabled: true,
+            placeholder: true,
+            placeholderValue: 'Выберите родителя',
+            noResultsText: 'Нет результатов',
+            noChoicesText: 'Нет доступных вариантов',
+            removeItemButton: true,
+        });
+
+        choicesElement.addEventListener('change', function() {
+            console.log('Selected tags:', Array.from(this.selectedOptions).map(option => option.value));
+
+            // Убираем placeholder, если выбрана хотя бы одна категория
+            if (this.selectedOptions.length > 0) {
+                choices.placeholderValue = ''; // Устанавливаем пустое значение для placeholder
+            } else {
+                choices.placeholderValue = 'Выберите родителя'; // Возвращаем исходное значение
+            }
+            choices.setValue(this.value); // Обновляем значение в Choices
+        });
+    });
+</script>
+<script>
+    $('select[name="tag"]').on('change', function() {
+        console.log('Изменение выбора произошло');// Отладочный вывод
+    });
+</script>
+{% endblock content %}

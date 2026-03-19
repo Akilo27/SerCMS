@@ -1,0 +1,51 @@
+<div id="createChatForm" style="background: #fff; padding: 10px;">
+    <form id="sendMessageForm">
+        <!-- Скрытые поля для content_type и object_id -->
+        <input type="hidden" name="content_type" value="{{ content_type }}">
+        <input type="hidden" name="object_id" value="{{ object_id }}">
+        <input type="hidden" id="owner" name="owner" value="{{ advertisements.author.id }}">
+        <!-- Поле для ввода названия чата -->
+        <input type="hidden" name="name" value="{{ object_id }}">
+        <!-- Поле для ввода сообщения -->
+        <textarea name="message_content" rows="2" placeholder="{% trans 'Введите сообщение' %}..." required style="width: 100%;    height: 60px;"></textarea>
+        <!-- Кнопка для отправки сообщения -->
+        <button type="submit" class="btn reservation btn-radius theme-btn full-width mrg-top-10" style="width: 100%;">{% trans "Отправить" %}</button>
+    </form>
+</div>
+<script>
+    $(document).ready(function() {
+    $('#sendMessageForm').submit(function(e) {
+        e.preventDefault();  // Предотвращаем стандартную отправку формы
+        // Получаем данные из формы
+        var formData = {
+            'content_type': $('input[name="content_type"]').val(),
+            'object_id': $('input[name="object_id"]').val(),
+            'owner': $('input[name="owner"]').val(),
+            'name': $('input[name="name"]').val(),
+            'message_content': $('textarea[name="message_content"]').val(),
+            'csrfmiddlewaretoken': '{{ csrf_token }}'  // CSRF токен
+        };
+        // Выводим данные для отладки в консоль
+        console.log(formData);
+        // Отправляем данные на сервер через Ajax
+        $.ajax({
+            url: '/chat/create/',
+            method: 'POST',
+            data: formData,
+            success: function(response) {
+                if (response.status === 'success') {
+                    // Обновляем содержимое div с id="chats" с помощью load
+                    $('#chats').load(location.href + ' #chats> *');
+                    $('#createChatForm').hide();  // Скрываем форму после создания чата
+                    $('#writeMessageLink').css('display', 'block');  // Показываем ссылку на переписку
+                } else {
+                    alert('Ошибка: ' + response.error);  // Если есть ошибка на сервере
+                }
+            },
+            error: function(xhr, status, error) {
+                alert("{% trans 'Ошибка при отправке сообщения' %}: " + error);
+            }
+        });
+    });
+});
+</script>

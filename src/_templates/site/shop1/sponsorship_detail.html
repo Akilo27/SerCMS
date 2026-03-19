@@ -1,0 +1,56 @@
+{% extends 'site/shop1/base.html' %}
+{% load static %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+{% block content %}
+<div id="wrapper" class="inner-pages ui-elements hd-white">
+
+    <section class="headings">
+        <div class="text-heading text-center">
+            <div class="container">
+                <h1>Благотворительность</h1>
+                <h2><a href="{% url 'webmain:home' %}">Главная </a> &nbsp;/&nbsp; <a href="{% url 'webmain:sponsorships' %}">Благотворительность </a> &nbsp;/&nbsp; {{sponsorship.name}}</h2>
+            </div>
+        </div>
+    </section>
+    <!-- END SECTION HEADINGS -->
+
+    <!-- START SECTION BLOG -->
+    <section class="blog blog-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-9 col-md-12 col-xs-12">
+                    <div class="row">
+                        {{ sponsorship.description|safe }}
+                    </div>
+                </div>
+                <aside class="col-lg-3 col-md-12">
+                    <div class="widget">
+                        <div class="recent-post pt-5">
+                            <h5 class="font-weight-bold mb-4">Связаные новости</h5>
+                            {% for blog in sponsorship.blogs.all %}
+                            <div class="recent-main">
+                                <div class="recent-img">
+                                    <a href="{% url 'webmain:blog' blog.slug %}">
+                                        <img src="{% if blog.image %}{{ blog.image.url }}{%endif%}" alt="">
+                                    </a>
+                                </div>
+                                <div class="info-img">
+                                    <a href="{% url 'webmain:blog' blog.slug %}"><h6>{{blog.name}}</h6></a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </section>
+</div>
+<!-- END SECTION BLOG -->
+{% endblock content %}
+{% block footer %}{% endblock footer %}

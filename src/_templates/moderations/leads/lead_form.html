@@ -1,0 +1,840 @@
+{% extends 'moderations/base.html' %}
+{% load static %}
+    {% load i18n %}
+
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }}{% endif %}{% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+
+{% block head %}
+<style>
+    #id_image {
+    display:none;
+    }
+    .save-form {
+    right: 0;
+    position: fixed;
+    z-index: 2;
+    margin: 10px 20px 0px 0px;
+}
+
+    .flow-containers {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .step {
+      position: relative;
+      background: #00a99d;
+      color: white;
+      padding: 8px 26px;
+      border-radius: 5px;
+      font-weight: bold;
+          margin-right: 20px;
+    }
+
+    .step::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      right: -16px;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-top: 19px solid transparent;
+      border-bottom: 19px solid transparent;
+      border-left: 19px solid #00a99d;
+    }
+
+    .step:last-child::after {
+      display: none;
+    }
+    ul#payments-list {
+    list-style-type: none;
+}
+
+</style>
+{% endblock head %}
+
+{% block content %}
+
+<div class="card">
+    <div class="card-header">
+        {% include 'moderations/leads/top-menu.html' %}
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-xl-3 col-lg-4">
+                <div class="card">
+                    <div class="card-body">
+                        {% if lead.client %}
+                        <div class="d-flex align-items-center my-3 gap-3">
+                            <img src="{% if lead.client.avatar %}{{lead.client.avatar.url}}{% endif %}" alt="" class="rounded-circle avatar-xl img-thumbnail">
+                            <div>
+                                <h3 class="fw-semibold mb-1">{{lead.client.first_name}}</h3>
+                                <a href="customers-details.html#!" class="link-primary fw-medium fs-14">{{lead.client.last_name}}</a>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mt-3">
+                            <div>
+                                <a href="customers-details.html#!" class="btn btn-primary"><i class="ri-chat-1-fill"></i> {% trans "Чат" %}</a>
+                                <a href="customers-details.html#!" class="btn btn-outline-primary"><i class="ri-phone-fill"></i> {% trans "Позвонить" %}</a>
+                            </div>
+                            <div class="d-flex gap-1">
+                                <a href="" class="btn btn-dark avatar-sm d-flex align-items-center justify-content-center fs-20">
+                                    <i class="ri-edit-fill"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div id="search-client" style="display:none;">
+                            <input type="text" id="phone-search" placeholder="{% trans 'Введите номер телефона' %}" class="form-control mb-2">
+                            <div id="client-result"></div>
+                            <button type="button" id="add-client-btn" class="btn btn-success mt-2" style="display: none;">
+                                {% trans "Добавить клиента" %}
+                            </button>
+                        </div>
+                        {% else %}
+                        {% trans "Клиент не выбран" %}
+                        <input type="text" id="phone-search" placeholder="{% trans 'Введите номер телефона' %}" class="form-control mb-2">
+                        <div id="client-result"></div>
+                        <button type="button" id="add-client-btn" class="btn btn-success mt-2" style="display: none;">
+                            {% trans "Добавить клиента" %}
+                        </button>
+
+                        {% endif %}
+                    </div>
+                </div>
+                <!-- end card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h1 class="card-title">{% trans "Финансовые движение по проекту" %}</h1>
+                    </div>
+                    <h4  style="margin: 10px">{% trans "Сумма платежей" %}: <span id="total-amount">0</span></h4>
+                    <ul id="payments-list">
+                        {% for payment in lead.payment.all %}
+                        <li data-amount="{{ payment.amount }}">
+                            <strong>{% if payment.status == "replenishment"  %} + {% else %} - {% endif %}{{ payment.amount }}</strong><br>
+                            <span class="description-container">
+                <span class="description-short">
+                    {{ payment.description|truncatechars:50 }}
+                </span>
+                <span class="description-full" style="display: none;">
+                    {{ payment.description }}
+                </span>
+                <a href="#" class="toggle-description">{% trans "Показать" %}</a>
+            </span>
+
+                            <div class="created-at">{{ payment.created_at|date:"d.m.Y H:i" }}</div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+
+
+
+                    <div class="card-body">
+                        <div class=" justify-content-between align-content-center">
+                            <div class="d-flex align-items-center gap-3" style="margin: 10px">
+                                <div class="avatar flex-shrink-0">
+                                                      <span class="avatar-title bg-danger-subtle text-danger fw-bold rounded">
+                                                       <i class="ri-arrow-up-line fs-20"></i>
+                                                      </span>
+                                </div>
+                                <div>
+                                    <h4 class="text-dark fw-semibold mb-1">{{lead.paid_out}}</h4>
+                                    <p class="mb-0 text-muted">{% trans "Выплачено" %}</p>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="avatar flex-shrink-0" style="margin: 10px">
+                                                       <span class="avatar-title bg-success-subtle text-success fw-bold rounded">
+                                                            <i class="ri-arrow-down-line fs-20"></i>
+                                                       </span>
+                                </div>
+                                <div>
+                                    <h4 class="text-dark fw-semibold mb-1">{{lead.swim_out}}</h4>
+                                    <p class="mb-0 text-muted">{% trans "К выплате" %}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <form id="create-payment-form" data-lead-id="{{ lead.id }}">
+                            <div class="d-flex" style="margin: 10px">
+                                <input type="number" id="payment-amount" placeholder="{% trans 'Сумма платежа' %}">
+
+                                <select id="payment-status">
+                                    <option value="replenishment">+</option>
+                                    <option value="payout">-</option>
+                                </select>
+                            </div>
+                            <textarea style="margin: 10px" id="payment-description" placeholder="{% trans 'Описание платежа' %}"></textarea>
+<br>
+                            <button class="btn btn-primary " style="margin: 10px" type="submit">{% trans "Создать платеж" %}</button>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-9 col-lg-4">
+                <div class="card">
+                    <div class="card-body">
+                        <form method="post" enctype="multipart/form-data" class="form-lid">
+                            <div class="form-list">
+                                {% csrf_token %}
+                                {{ form.users }}
+                                <div class="row">
+                                    <div class="col-md-3 mb-3">
+                                        <div class="form-group">
+                                            {{ form.amount.label_tag }}
+                                            {{ form.amount }}
+                                        </div>
+                                        <div class="form-group">
+                                            {% if form.instance.image %}
+                                            <img id="preview-image" src="{{ form.instance.image.url }}" alt="Изображение" style="max-width: 100%; height: auto; cursor: pointer;">
+                                            {% else %}
+                                            <img id="preview-image" src="{% static 'site/moderations/assets/images/trophy.png' %}" alt="Нет изображения" style="max-width: 100%; height: auto; cursor: pointer;">
+                                            {% endif %}
+                                            {{ form.image }}
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-9 mb-3">
+                                        <div class="form-group" style="margin-bottom: 20px;">
+                                            {{ form.name.label_tag }}
+                                            {{ form.name }}
+                                        </div>
+                                        <div class="form-group">
+                                            {{ form.description.label_tag }}
+                                            {{ form.description }}
+                                        </div>
+
+                                        {{ form.client }}
+                                    </div>
+                                </div>
+                            </div>
+                                                        <button style="z-index: 1000000;position: absolute; buttom: 70px,right: 70px" type="submit" class="btn btn-primary save-form" id="safe-form">{% trans "Сохранить" %}</button>
+
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block footerbottom %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const paymentForm = document.getElementById('create-payment-form');
+
+        function recalculateTotalAmount() {
+            let total = 0;
+            document.querySelectorAll('#payments-list li').forEach(li => {
+                const amount = parseFloat(li.dataset.amount);
+                const isPayout = li.dataset.status === 'payout';
+
+                if (!isNaN(amount)) {
+                    total += isPayout ? -amount : amount;
+                }
+            });
+            document.getElementById('total-amount').textContent = total.toFixed(2);
+        }
+
+        // обработка переключения описания
+        function addToggleEvents(li) {
+            li.querySelectorAll('.toggle-description').forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const short = li.querySelector('.description-short');
+                    const full = li.querySelector('.description-full');
+                    const isShortVisible = short.style.display !== 'none';
+                    short.style.display = isShortVisible ? 'none' : 'inline';
+                    full.style.display = isShortVisible ? 'inline' : 'none';
+                });
+            });
+        }
+
+        // Повесить события на уже существующие элементы
+        document.querySelectorAll('#payments-list li').forEach(addToggleEvents);
+
+        // пересчет при загрузке
+        recalculateTotalAmount();
+
+        paymentForm?.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const leadId = this.dataset.leadId;
+            const amount = document.getElementById('payment-amount').value || '0';
+            const description = document.getElementById('payment-description').value;
+            const status = document.getElementById('payment-status').value;
+
+            fetch("{% url 'crm:ajax_create_payment' %}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    lead_id: leadId,
+                    amount: amount,
+                    description: description,
+                    status: status
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert("{% trans 'Ошибка' %}: " + data.error);
+                } else {
+                    const list = document.getElementById('payments-list');
+                    const li = document.createElement('li');
+                    const sign = data.status === 'payout' ? '-' : '+';
+
+                    li.setAttribute('data-amount', data.amount);
+                    li.setAttribute('data-status', data.status);
+
+                    li.innerHTML = `
+                        <strong>${sign} ${data.amount}</strong><br>
+                        <span class="description-short" style="display: inline;">
+                            ${data.description.length > 50 ? data.description.slice(0, 50) + '...' : data.description}
+                            <a href="#" class="toggle-description">{% trans "Показать" %}</a>
+                        </span>
+                        <span class="description-full" style="display: none;">
+                            ${data.description}<br>
+                            <a href="#" class="toggle-description">{% trans "Скрыть" %}</a>
+                        </span>
+                        <div class="created-at">${data.created_at}</div>
+                    `;
+
+                    list.appendChild(li);
+                    addToggleEvents(li);
+                    recalculateTotalAmount();
+                    paymentForm.reset();
+                }
+            })
+            .catch(error => console.error('Ошибка:', error));
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const paymentsList = document.getElementById('payments-list');
+
+        if (paymentsList) {
+            paymentsList.addEventListener('click', function (e) {
+                if (e.target.classList.contains('toggle-description')) {
+                    e.preventDefault();
+
+                    const container = e.target.closest('.description-container');
+                    const shortText = container.querySelector('.description-short');
+                    const fullText = container.querySelector('.description-full');
+
+                    const isShortVisible = getComputedStyle(shortText).display !== 'none';
+
+                    if (isShortVisible) {
+                        shortText.style.display = 'none';
+                        fullText.style.display = 'inline';
+                        e.target.textContent = '{% trans "Скрыть" %}';
+                    } else {
+                        shortText.style.display = 'inline';
+                        fullText.style.display = 'none';
+                        e.target.textContent = '{% trans "Показать" %}';
+                    }
+                }
+            });
+        }
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const forms = document.querySelectorAll(".create-note-form");
+
+        forms.forEach(function(noteForm) {
+            noteForm.addEventListener("submit", function (e) {
+                e.preventDefault();
+
+                const csrftoken = noteForm.querySelector('[name=csrfmiddlewaretoken]').value;
+                const formData = new FormData(noteForm);
+                const url = noteForm.getAttribute("action");
+
+                fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        "X-CSRFToken": csrftoken
+                    },
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("{% trans 'Заметка добавлена' %}. ID: " + data.note_id);
+                        noteForm.reset();
+                    } else {
+                        alert("{% trans 'Ошибка' %}: " + data.error);
+                    }
+                })
+                .catch(error => {
+                    alert("{% trans 'Ошибка при отправке запроса' %}");
+                    console.error(error);
+                });
+            });
+        });
+    });
+</script>
+
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.body.addEventListener("submit", function (e) {
+            const form = e.target.closest(".ajax-note-form");
+            if (!form) return;
+
+            e.preventDefault(); // 🔴 Остановить переход
+
+            console.log("📤 Форма отправлена через JS");
+
+            const formData = new FormData(form);
+
+            fetch(form.action, {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("✅ Ответ сервера:", data);
+
+                if (data.success) {
+                    form.reset();  // Очистка формы
+                    // Можешь тут обновить блок заметок, если нужно
+                } else {
+                    alert("Ошибка: " + (data.error || "Неизвестная"));
+                }
+            })
+            .catch(err => {
+                console.error("❌ Ошибка при сохранении:", err);
+            });
+        });
+    });
+</script>
+
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const formWrapper = document.getElementById("tasks-form");
+        const form = document.getElementById("create-task-form");
+        const createBtn = document.getElementById("create-task-btn");
+        const tasksList = document.getElementById("tasks-list");
+
+        let isSubmitting = false;
+        let currentPage = 1;
+        const leadId = "{{ lead.id }}";
+
+        // Скрыть/показать форму
+        createBtn.addEventListener("click", function () {
+            formWrapper.style.display = formWrapper.style.display === "none" ? "block" : "none";
+        });
+
+        // Отправка формы через fetch
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+            if (isSubmitting) return;
+
+            isSubmitting = true;
+            const formData = new FormData(form);
+
+            fetch("/ru/crm/tasks/create/", {
+                method: "POST",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                isSubmitting = false;
+                if (data.success) {
+                    form.reset();
+                    formWrapper.style.display = "none";
+                    tasksList.innerHTML = "";
+                    loadDeals(1);
+                } else {
+                    alert("Ошибка: " + data.error);
+                }
+            })
+            .catch(error => {
+                isSubmitting = false;
+                alert("Ошибка запроса");
+                console.error(error);
+            });
+        });
+
+        // Загрузка задач
+        function loadDeals(page) {
+            fetch(`/ru/crm/leads/${leadId}/tasks/?page=${page}`, {
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.html) {
+                    tasksList.insertAdjacentHTML('beforeend', data.html);
+                    const loadMoreBtn = document.getElementById("load-more-btn");
+
+                    if (data.has_next) {
+                        if (!loadMoreBtn) {
+                            const btn = document.createElement("button");
+                            btn.id = "load-more-btn";
+                            btn.className = "btn btn-primary mt-3";
+                            btn.textContent = "{% trans 'Загрузить ещё' %}";
+                            btn.addEventListener("click", function () {
+                                currentPage++;
+                                loadDeals(currentPage);
+                            });
+                            tasksList.appendChild(btn);
+                        }
+                    } else {
+                        if (loadMoreBtn) loadMoreBtn.remove();
+                    }
+                }
+            })
+            .catch(() => {
+                tasksList.innerHTML = "<p>{% trans 'Ошибка при загрузке задач' %}.</p>";
+            });
+        }
+
+        window.loadDeals = loadDeals;
+        loadDeals(currentPage);
+    });
+</script>
+
+
+
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const tasksList = document.getElementById("tasks-list");
+        if (!tasksList) return;
+
+        tasksList.addEventListener("click", function (event) {
+            const button = event.target.closest(".show-notes-btn");
+            if (!button) return;
+
+            const card = button.closest("[data-item-task]");
+            if (!card) return;
+
+            const taskId = card.getAttribute("data-item-task");
+            const outerCol = card.closest(".col-xl-4, .col-xl-12");  // находим .col-xl-4 или col-xl-12
+            const notesContainer = card.querySelector(".notes-container");
+            const isOpen = !notesContainer.classList.contains("d-none");
+
+            if (isOpen) {
+                // Скрываем заметки и возвращаем ширину
+                notesContainer.classList.add("d-none");
+                outerCol.classList.remove("col-xl-12");
+                outerCol.classList.add("col-xl-4");
+                return;
+            }
+
+            // Показываем заметки
+            notesContainer.classList.remove("d-none");
+            outerCol.classList.remove("col-xl-4");
+            outerCol.classList.add("col-xl-12");
+
+            // Загрузим заметки через fetch
+            fetch(`/ru/crm/load-task-notes/${taskId}/`, {
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error("Ошибка загрузки");
+                return response.json();
+            })
+            .then(data => {
+                notesContainer.innerHTML = data.html;
+            })
+            .catch(error => {
+                console.error("Ошибка загрузки:", error);
+                notesContainer.innerHTML = `<div class="text-danger">Ошибка загрузки заметок</div>`;
+            });
+        });
+    });
+
+
+</script>
+
+
+
+
+
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+const leadId = "{{ lead.id }}";
+let currentPage = 1;
+
+function loadDeals(page) {
+fetch(`/ru/crm/leads/${leadId}/tasks/?page=${page}`, {
+headers: {
+    'X-Requested-With': 'XMLHttpRequest'
+}
+})
+.then(response => response.json())
+.then(data => {
+if (data.html) {
+    // Добавляем новые сделки в конец списка
+    document.getElementById("tasks-list").insertAdjacentHTML('beforeend', data.html);
+
+    // Если есть следующая страница, показываем кнопку "Загрузить ещё"
+    if (data.has_next) {
+        // Проверяем, существует ли кнопка "Загрузить еще"
+        let loadMoreBtn = document.getElementById("load-more-btn");
+        if (!loadMoreBtn) {
+            // Если кнопки нет, создаем и добавляем
+            loadMoreBtn = document.createElement('button');
+            loadMoreBtn.id = "load-more-btn";
+            loadMoreBtn.classList.add('btn', 'btn-primary', 'mt-3');
+            loadMoreBtn.textContent = '{% trans "Загрузить ещё" %}';
+            loadMoreBtn.addEventListener('click', function() {
+                currentPage++;
+                loadDeals(currentPage); // Запрашиваем следующую страницу
+            });
+
+            // Добавляем кнопку после списка сделок
+            document.getElementById("tasks-list").appendChild(loadMoreBtn);
+        }
+    } else {
+        // Если следующей страницы нет, скрываем кнопку
+        let loadMoreBtn = document.getElementById("load-more-btn");
+        if (loadMoreBtn) {
+            loadMoreBtn.style.display = "none";
+        }
+    }
+} else {
+    document.getElementById("tasks-list").innerHTML = "<p>{% trans 'Не удалось загрузить сделки' %}.</p>";
+}
+})
+.catch(() => {
+document.getElementById("tasks-list").innerHTML = "<p>{% trans 'Ошибка при загрузке сделок' %}.</p>";
+});
+}
+
+// Загружаем первые 10 сделок
+loadDeals(currentPage);
+});
+
+
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const triggerBtn = document.getElementById("upload-trigger");
+        const fileInput = document.getElementById("file-input");
+        const progressWrapper = document.querySelector(".progress");
+        const progressBar = document.getElementById("upload-progress");
+
+        triggerBtn.addEventListener("click", function (e) {
+            e.preventDefault();
+            fileInput.click();  // сразу открываем выбор файла
+        });
+
+        fileInput.addEventListener("change", function () {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            const leadId = triggerBtn.dataset.lideid;
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('lead_id', leadId);
+            formData.append('title', file.name); // название файла как title
+
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "{% url 'crm:upload_lead_document' %}", true);
+            xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+
+            xhr.upload.addEventListener("progress", function (e) {
+                if (e.lengthComputable) {
+                    const percent = Math.round((e.loaded / e.total) * 100);
+                    progressWrapper.style.display = "block";
+                    progressBar.style.width = percent + "%";
+                    progressBar.textContent = percent + "%";
+                }
+            });
+
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    progressBar.style.width = "0%";
+                    progressBar.textContent = "0%";
+                    progressWrapper.style.display = "none";
+                    fileInput.value = "";
+
+                    // Обновление #documents через jQuery
+                    $('#documents').load(location.href + ' #documents > *');
+
+                } else {
+                    alert("Ошибка загрузки файла");
+                }
+            };
+
+            xhr.onerror = function () {
+                alert("Ошибка соединения");
+            };
+
+            xhr.send(formData);
+        });
+    });
+</script>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const leadId = "{{ lead.id }}";  // Получаем lead.id из шаблона Django
+
+        const searchInput = document.getElementById("phone-search");
+        const resultDiv = document.getElementById("client-result");
+        const clientField = document.getElementById("id_client");
+        const addClientBtn = document.getElementById("add-client-btn");
+        let foundClient = null;
+
+        searchInput.addEventListener("input", function () {
+            const phone = this.value.trim();
+            if (!phone) {
+                resultDiv.innerHTML = '';
+                addClientBtn.style.display = 'none';
+                return;
+            }
+
+            // ✅ Здесь используется правильный leadId
+            fetch(`/ru/crm/lead/${leadId}/edit/?phone=${encodeURIComponent(phone)}`, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    resultDiv.innerHTML = `<div class="text-danger">${data.error}</div>`;
+                    clientField.value = '';
+                    addClientBtn.style.display = 'none';
+                    foundClient = null;
+                } else {
+                    foundClient = data;
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            {% trans "Найден клиент" %}: <strong>${data.full_name}</strong> (${data.phone})
+                        </div>
+                    `;
+                    addClientBtn.style.display = 'inline-block';
+                }
+            })
+            .catch(error => {
+                resultDiv.innerHTML = `<div class="text-danger">{% trans "Произошла ошибка" %}: ${error.message}</div>`;
+                addClientBtn.style.display = 'none';
+            });
+        });
+
+        addClientBtn.addEventListener("click", function () {
+            if (foundClient) {
+                clientField.value = foundClient.id;
+                resultDiv.innerHTML += `<div class="text-info mt-2">{% trans "Клиент добавлен в заявку" %}</div>`;
+                document.getElementById("safe-form").click();  // триггерим отправку формы
+            }
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const toggleBtn = document.querySelector(".btn.btn-dark.avatar-sm");
+        const searchClientDiv = document.getElementById("search-client");
+
+        toggleBtn.addEventListener("click", function (e) {
+            e.preventDefault(); // предотвратить переход по ссылке
+            searchClientDiv.style.display = searchClientDiv.style.display === "none" ? "block" : "none";
+        });
+    });
+</script>
+<script>
+    const percentValue = {{ lead.procent|default:0 }};
+const options = {
+    chart: {
+        height: 350,
+        type: 'radialBar',
+    },
+    series: [percentValue], // <-- передаём сюда число от 0 до 100
+    plotOptions: {
+        radialBar: {
+            hollow: {
+                size: '70%',
+            },
+            dataLabels: {
+                name: {
+                    show: false,
+                },
+                value: {
+                    formatter: function (val) {
+                        return val + "%";
+                    },
+                    fontSize: '22px',
+                    color: '#000',
+                    show: true,
+                }
+            }
+        }
+    },
+    labels: ['Progress'],
+};
+
+const chart = new ApexCharts(document.querySelector("#gradient-chart"), options);
+chart.render();
+
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const form = document.querySelector(".form-lid");
+        if (form) {
+            const inputs = form.querySelectorAll("input, select, textarea");
+            inputs.forEach(function(input) {
+                input.classList.add("form-control");
+            });
+
+            const imageInput = form.querySelector('input[type="file"]');
+            const preview = document.getElementById('preview-image');
+
+            if (preview && imageInput) {
+                preview.addEventListener('click', () => {
+                    imageInput.click();
+                });
+
+                imageInput.addEventListener('change', (event) => {
+                    const file = event.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            preview.src = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+        }
+    });
+</script>
+<script src="{% static 'site/moderations/assets/js/pages/customer-detail.js' %}"></script>
+<script src="{% static 'site/moderations/assets/js/components/apexchart-radialbar.js' %}"></script>
+
+{% endblock footerbottom %}

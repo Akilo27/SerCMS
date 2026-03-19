@@ -1,0 +1,481 @@
+{% extends 'products/base.html' %}
+{% load static generals_tag %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+{% block content %}
+<style>
+    .product-big-img {
+        height: 380px;
+        background-color: #ffffff00!important;
+        text-align: center;
+        overflow: hidden;
+        border-radius: 20px;
+        place-items: center;
+    }
+    .summary-content .quantitypalks:after, .product-about .quantitypalks:after {
+        content: '';
+        height: 100%;
+        width: 1px;
+        background-color: var(--th-border-color);
+        position: absolute;
+        top: 0;
+        left: 155px;
+    }
+    .slider-container {
+        position: relative;
+        width: 380px; /* Укажите ширину слайдера */
+        height: 380px; /* Укажите высоту слайдера */
+        overflow: hidden;
+    }
+
+    .slider-wrapper {
+        display: flex;
+        transition: transform 0.5s ease;
+        width: 100%;
+    }
+
+    .slider-images {
+        display: flex;
+        width: 100%;
+    }
+
+    .slide {
+        min-width: 100%;
+        height: auto;
+    }
+
+    button.prev-slide, button.next-slide {
+        position: absolute;
+        bottom: 0;
+        transform: translateY(-50%);
+        background-color: rgba(0, 0, 0, 0.5);
+        color: white;
+        border: none;
+        padding: 10px;
+        cursor: pointer;
+    }
+
+    button.prev-slide {
+        left: 10px;
+    }
+
+    button.next-slide {
+        right: 10px;
+    }
+
+</style>
+<section class="product-details space-top space-extra-bottom">
+    <div class="container">
+        <div class="row gx-60">
+            <div class="col-lg-6">
+
+                <div class="product-big-img">
+                    <div class="slider-container">
+                        <div class="slider-wrapper">
+                            <div class="slider-images">
+                                <img src="{% if product.image %}{{ product.image.url }}{% else %}{% static 'site/image.jpg' %}{% endif %}" alt="Product Image" class="slide">
+                                {% if product.productsgallery_set.all %}
+                                {% for gallery in product.productsgallery_set.all %}
+                                <img src="{{ gallery.image.url }}" alt="Product Gallery Image" class="slide">
+                                {% endfor %}
+                                {% endif %}
+                            </div>
+                        </div>
+                        <!-- Кнопки пролистывания -->
+                        <button class="prev-slide nav-link th-btn">←</button>
+                        <button class="next-slide nav-link th-btn">→</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 align-self-center">
+                <div class="product-about">
+                    <p class="price">
+                        {% if product_variable.price %}
+                        {% if valute != product.valute %}
+                        {% if product.type == 1 %}
+                        <span class="sale-price" style=" color: #017D03;
+            font-weight: 600;
+            font-size: 34px;">{% currency_conversion_for_products request product_variable.price product.valute.id %} {{valute.icon_code}}</span>
+                        {% else %}
+                        <span class="sale-price" style=" color: #017D03;
+            font-weight: 600;
+            font-size: 34px;">{% currency_conversion_for_products request product_variable.price product.valute.id  %} {{valute.icon_code}}</span>
+                        {% endif %}
+                        {% else %}
+                        {% if product.type == 1 %}
+                        <span class="sale-price" style=" color: #017D03;
+            font-weight: 600;
+            font-size: 34px;">{{ product.price }} {{valute.icon_code}}</span>
+                        {% else %}
+                        <span class="sale-price" style=" color: #017D03;
+            font-weight: 600;
+            font-size: 34px;">{{ product_variable.price }} {{valute.icon_code}}</span>
+                        {% endif %}
+                        {% endif %}
+                        {% else %}
+                        {% if valute != product.valute %}
+                        {% if product.type == 1 %}
+                        <span class="sale-price" style=" color: #017D03;
+            font-weight: 600;
+            font-size: 34px;">{% currency_conversion_for_products request product.price product.valute.id %} {{valute.icon_code}}</span>
+                        {% else %}
+                        <span class="sale-price" style=" color: #017D03;
+            font-weight: 600;
+            font-size: 34px;">{% currency_conversion_for_products request product.productsvariable_set.all.first.price product.valute.id  %} {{valute.icon_code}}</span>
+                        {% endif %}
+                        {% else %}
+                        {% if product.type == 1 %}
+                        <span class="sale-price" style=" color: #017D03;
+            font-weight: 600;
+            font-size: 34px;">{{ product.price }} {{valute.icon_code}}</span>
+                        {% else %}
+                        <span class="sale-price" style=" color: #017D03;
+            font-weight: 600;
+            font-size: 34px;">{{ product.productsvariable_set.all.first.price }} {{valute.icon_code}}</span>
+                        {% endif %}
+                        {% endif %}
+                        {% endif %}
+                    </p>
+                    <h2 class="product-title" style="font-size: 30px;">{{product.name}}</h2>
+                    <div class="product-rating">
+                        {% if product.review_all_sum != 0 %}
+                        <div class="star-rating" role="img" aria-label="Rated 5.00 out of 5"><span
+                                style="width: {% if product.review_rating >= 5 %}100%{%elif product.review_rating >= 4 %}80% {%elif product.review_rating >= 3 %}60%{%elif product.review_rating >= 2 %}40%{%elif product.review_rating >= 1 %}20%{%else%}0%{%endif%}">Оценок <strong
+                                class="rating">5.00</strong> out of 5 based on <span class="rating">1</span> customer rating</span>
+                        </div>
+                        <a href="" class="woocommerce-review-link">(<span
+                                class="count">{{product.review_count}}  </span>
+                            Отзывов)</a>
+                        {% else %}
+                        <a href="" class="woocommerce-review-link">(<span class="count">Нет оценок</span>)
+                        </a>
+                        {% endif %}
+                    </div>
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            const variablesData = {
+                            {
+                                all_variables_for_product | safe
+                            }
+                        }
+                            ;
+                            const selfslug = '{{selfslug}}';
+
+                            function findMatchingProductSlug(selectedValues) {
+                                const productMatches = {};
+
+                                // Проходим по всем записям variablesData и собираем соответствия по каждому ProductsVariable_slug
+                                for (const variable of variablesData) {
+                                    if (selectedValues[variable.Attribute_variable_slug] === variable.Attribute_slug) {
+                                        if (!productMatches[variable.ProductsVariable_slug]) {
+                                            productMatches[variable.ProductsVariable_slug] = 0;
+                                        }
+                                        productMatches[variable.ProductsVariable_slug]++;
+                                    }
+                                }
+
+                                console.log('Product Matches:', productMatches); // Debugging
+
+                                // Находим продукт, у которого количество совпадений равно количеству выбранных значений
+                                const selectedCount = Object.keys(selectedValues).length;
+                                for (const [productSlug, matchCount] of Object.entries(productMatches)) {
+                                    if (matchCount === selectedCount) {
+                                        return productSlug;
+                                    }
+                                }
+
+                                return null;
+                            }
+
+                            function getSelectedValues() {
+                                const selectedValues = {};
+
+                                document.querySelectorAll('input[type="radio"]:checked').forEach(function (radio) {
+                                    selectedValues[radio.dataset.variableSlug] = radio.dataset.attributeSlug;
+                                });
+
+                                document.querySelectorAll('select.select2').forEach(function (select) {
+                                    const attributeSlug = select.options[select.selectedIndex].dataset.attributeSlug;
+                                    selectedValues[select.dataset.variableSlug] = attributeSlug;
+                                });
+
+                                console.log('Collected Selected Values:', selectedValues); // Debugging
+                                return selectedValues;
+                            }
+
+                            function handleChange() {
+                                const selectedValues = getSelectedValues();
+                                const productSlug = findMatchingProductSlug(selectedValues);
+                                if (productSlug) {
+                                    console.log('Redirecting to:', `/catalog/${selfslug}/${productSlug}`); // Debugging
+                                    window.location.href = `/catalog/${selfslug}/${productSlug}`;
+                                } else {
+                                    console.log('No matching product slug found'); // Debugging
+                                }
+                            }
+
+                            // Обработчик для типа 1 (радио-кнопки)
+                            document.querySelectorAll('input[type="radio"]').forEach(function (radio) {
+                                radio.addEventListener('change', handleChange);
+                            });
+
+                            // Обработчик для типа 2 (селекты)
+                            document.querySelectorAll('select.select2').forEach(function (select) {
+                                select.addEventListener('change', handleChange);
+                            });
+                        });
+                    </script>
+                    <p class="text">{{product.fragment|safe}}</p>
+                    {% for variable, attributes in attributes_by_variable.items %}
+                    {% if variable.type == 1 %}
+                    <div class="product-color">
+                        <span class="label" id="{{ variable.slug }}">{{ variable.name }}:</span>
+                        <ul>
+                            {% for attribute in attributes %}
+                            <li>
+                                <input type="radio" {% if attribute.slug in selected_attributes%} checked {% endif %}
+                                       name="{{ variable.slug }}" id="attribute_{{ attribute.id }}"
+                                       value="{{ attribute.id }}" data-variable-slug="{{ variable.slug }}"
+                                       data-attribute-slug="{{ attribute.slug }}">
+                                <label for="attribute_{{ attribute.id }}">
+                    <span style="border-color: #6c757d !important;
+                    {% if attribute.image %}
+                    background: url('{{ attribute.image.url }}');
+                    {% else %}
+                    {{ attribute.content }}
+                    {% endif %}
+                    "></span>
+                                </label>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% else %}
+                    <div class="single-select2">
+                        <div class="form-select2">
+                            <span class="label">{{ variable.name }} *</span>
+                            <select class="select2" id="attribute_{{ variable.slug }}" name="{{ variable.slug }}"
+                                    data-variable-slug="{{ variable.slug }}">
+                                {% for attribute in attributes %}
+                                <option value="{{ attribute.id }}" {% if attribute.slug in selected_attributes%}
+                                        selected {% endif %} data-attribute-slug="{{ attribute.slug }}">
+                                    {{ attribute.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            const variablesData = {
+                            {
+                                all_variables_for_product | safe
+                            }
+                        }
+                            ;
+                            const selfslug = '{{selfslug}}';
+
+                            function findMatchingProductSlug(selectedValues) {
+                                const productMatches = {};
+
+                                // Проходим по всем записям variablesData и собираем соответствия по каждому ProductsVariable_slug
+                                for (const variable of variablesData) {
+                                    if (selectedValues[variable.Attribute_variable_slug] === variable.Attribute_slug) {
+                                        if (!productMatches[variable.ProductsVariable_slug]) {
+                                            productMatches[variable.ProductsVariable_slug] = 0;
+                                        }
+                                        productMatches[variable.ProductsVariable_slug]++;
+                                    }
+                                }
+
+                                console.log('Product Matches:', productMatches); // Debugging
+
+                                // Находим продукт, у которого количество совпадений равно количеству выбранных значений
+                                const selectedCount = Object.keys(selectedValues).length;
+                                for (const [productSlug, matchCount] of Object.entries(productMatches)) {
+                                    if (matchCount === selectedCount) {
+                                        return productSlug;
+                                    }
+                                }
+
+                                return null;
+                            }
+
+                            function getSelectedValues() {
+                                const selectedValues = {};
+
+                                document.querySelectorAll('input[type="radio"]:checked').forEach(function (radio) {
+                                    selectedValues[radio.dataset.variableSlug] = radio.dataset.attributeSlug;
+                                });
+
+                                document.querySelectorAll('select.select2').forEach(function (select) {
+                                    const attributeSlug = select.options[select.selectedIndex].dataset.attributeSlug;
+                                    selectedValues[select.dataset.variableSlug] = attributeSlug;
+                                });
+
+                                console.log('Collected Selected Values:', selectedValues); // Debugging
+                                return selectedValues;
+                            }
+
+                            function handleChange() {
+                                const selectedValues = getSelectedValues();
+                                const productSlug = findMatchingProductSlug(selectedValues);
+                                if (productSlug) {
+                                    console.log('Redirecting to:', `/catalog/${selfslug}/${productSlug}`); // Debugging
+                                    window.location.href = `/catalog/${selfslug}/${productSlug}`;
+                                } else {
+                                    console.log('No matching product slug found'); // Debugging
+                                }
+                            }
+
+                            // Обработчик для типа 1 (радио-кнопки)
+                            document.querySelectorAll('input[type="radio"]').forEach(function (radio) {
+                                radio.addEventListener('change', handleChange);
+                            });
+
+                            // Обработчик для типа 2 (селекты)
+                            document.querySelectorAll('select.select2').forEach(function (select) {
+                                select.addEventListener('change', handleChange);
+                            });
+                        });
+                    </script>
+                    <div class="mt-2 link-inherit"><p><strong class="text-title me-3">Статус:</strong>
+                        {% if product.quantity == 0 %}
+                        <span class="stock in-stock"><i
+                                class="far fa-check-square me-2 ms-1"></i>Товар закончился</span></p>
+                        {% else %}
+                        <span class="stock in-stock"><i class="far fa-check-square me-2 ms-1"></i>На складе {{product.quantity}}</span></p>
+                        {% endif %}
+                    </div>
+                    <div class="actions">
+                        {% if not user.type == 2 %}
+                        {% if product.quantity == 0 and product.order %}
+                        {% include 'products/include/form_applications.html' %}
+                        {% else %}
+                        {% include 'products/include/cart_btn.html' %}
+                        {% endif %}
+                        {% include 'products/include/bookmark_button.html' %}
+                        {% endif %}
+                    </div>
+                    <div class="product_meta">
+                        <span class="posted_in">Категории:
+                            {% for category in product.category.all %}
+                            <a href="{{category.get_absolute_url}}">{{category.name}}</a>
+                            {% endfor %}
+                        </span>
+                        <span class="posted_in">Производитель:
+                          <a href="{% url 'shop:manufacturers' product.manufacturers.slug %}">
+                            <span class="value">{{product.manufacturers}}</span>
+                          </a>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <ul class="nav product-tab-style1" id="productTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <a class="nav-link th-btn active" id="description-tab"
+                   data-bs-toggle="tab" href="#description"
+                   role="tab" aria-controls="description" aria-selected="true">
+                    Описание
+                </a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link th-btn" id="information-tab"
+                   data-bs-toggle="tab" href="#information" role="tab"
+                   aria-controls="information" aria-selected="false">
+                    Характеристики
+                </a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link th-btn" id="reviews-tab"
+                   data-bs-toggle="tab" href="#reviews" role="tab"
+                   aria-controls="reviews" aria-selected="false">
+                    Отзывы
+                </a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link th-btn" id="faqs-tab"
+                   data-bs-toggle="tab" href="#faq" role="tab"
+                   aria-controls="faq" aria-selected="false">
+                    Вопросы
+                </a>
+            </li>
+        </ul>
+        <div class="tab-content" id="productTabContent">
+            <div class="tab-pane fade show active" id="description" role="tabpanel" aria-labelledby="description-tab">
+                <p>
+                    {{product.description|safe}}
+                </p>
+            </div>
+            <div class="tab-pane fade" id="information" role="tabpanel" aria-labelledby="information-tab">
+                <div class="team-info">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Название</th>
+                            <th scope="col">Значение</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for atribute in product.atribute.all%}
+                        <tr>
+                            <th scope="row">{{ forloop.counter }}</th>
+                            <td>{{atribute.variable.name }}</td>
+                            <td>{{atribute.name }}</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="reviews" role="tabpanel" aria-labelledby="reviews-tab">
+                <div class="woocommerce-Reviews" id="reviews-list">
+                    {% include 'products/include/form_reviews.html' %}
+                    {% include 'products/include/reviews.html' %}
+                </div>
+            </div>
+            <div class="tab-pane fade" id="faq" role="tabpanel" aria-labelledby="faqs-tab">
+                {% include 'products/include/form_faqs.html' %}
+                {% include 'products/include/faqs.html' %}
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function showSlide(index) {
+            const sliderWrapper = document.querySelector('.slider-wrapper');
+            if (index >= totalSlides) {
+                currentSlide = 0;
+            } else if (index < 0) {
+                currentSlide = totalSlides - 1;
+            } else {
+                currentSlide = index;
+            }
+            sliderWrapper.style.transform = `translateX(-${currentSlide * 100}%)`;
+        }
+
+        document.querySelector('.next-slide').addEventListener('click', function() {
+            showSlide(currentSlide + 1);
+        });
+
+        document.querySelector('.prev-slide').addEventListener('click', function() {
+            showSlide(currentSlide - 1);
+        });
+    });
+</script>
+
+{% endblock content %}

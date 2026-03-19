@@ -1,0 +1,2189 @@
+{% extends 'moderations/base.html' %}
+{% load i18n moder_tags %}
+{% load static  %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<style>
+    textarea#id_fragment {
+    width: 100%;
+}
+</style>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<style>
+    /* Стили для попапа */
+
+#search-results {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+#search-results div {
+    padding: 8px;
+    cursor: pointer;
+}
+
+.delete-file {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Центрируем иконку */
+.delete-file .iconify-icon {
+  margin: auto;
+  vertical-align: middle;
+}
+
+#search-results div:hover {
+    background-color: #eee;
+}
+.preview-image {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.preview-image:hover {
+    transform: scale(1.03);
+}
+
+.delete-file {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.card:hover .delete-file {
+    opacity: 1;
+}
+</style>
+<style>
+    .custom-alert {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+
+.custom-alert-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 350px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    animation: alertFadeIn 0.3s;
+}
+
+@keyframes alertFadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.custom-alert-buttons {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+    gap: 10px;
+}
+    textarea {
+        --tw-border-opacity: 1;
+        border-color: rgb(226 232 240 / var(--tw-border-opacity));
+        display: block;
+        width: 100%;
+        border-radius: .375rem;
+        border-width: 1px;
+        padding: .5rem 1rem;
+        font-size: .875rem;
+        font-weight: inherit;
+        line-height: inherit;
+        color: inherit;
+        margin: 0;
+        font-family: inherit;
+        resize: none;
+        height: 120px;
+    }
+    textarea:focus{
+        --tw-border-opacity: 1!important;
+        border-color: rgb(59 130 246 / var(--tw-border-opacity))!important;
+    }
+    .form-control[type="file"]:not(:disabled):not([readonly]) {
+        --tw-border-opacity: 1;
+        border-color: rgb(226 232 240 / var(--tw-border-opacity));
+        width: fit-content;
+        display: block;
+        border-radius: .375rem;
+        border-width: 1px;
+        font-size: .875rem;
+        height: auto!important;
+        padding: 5px 0px 5px 10px;
+    }
+    .django-ckeditor-widget {
+        width: 100%;
+    }
+    .cke_editor_id_description {
+        display: block !important;
+        background: #fff;
+        border: 0.0625rem solid #EEEEEE;
+        padding: 0.3125rem 1.25rem;
+        color: #6e6e6e;
+        border-radius: 0.5rem;
+        width: auto!important;
+    }
+    .choices__list--dropdown, .choices__list[aria-expanded] {
+        position: relative;
+        max-height: 120px;
+        overflow: auto;
+    }
+    .modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1040;
+        display: none;
+    }
+    .modal-backdrop.show {
+        display: block;
+    }
+#selected-files-preview .col-md-3 {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Стили для карточек превью */
+.preview-image {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.preview-image:hover {
+    transform: scale(1.03);
+}
+
+/* Кнопка удаления */
+.delete-file {
+    transition: all 0.2s;
+}
+
+.delete-file:hover {
+    background-color: #dc3545 !important;
+    color: white !important;
+}
+#file-upload-area {
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+#file-upload-area:hover {
+    background-color: #f0f0f0;
+    border-color: #999;
+}
+#file-upload-area i {
+    font-size: 48px;
+}
+
+
+.sortable-ghost {
+    opacity: 0.5;
+    background: #c8ebfb !important;
+}
+
+.sortable-chosen {
+    background: #f8f9fa !important;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.sortable-drag {
+    opacity: 1 !important;
+    transform: rotate(5deg);
+}
+
+.media-item {
+    cursor: move;
+    transition: transform 0.2s;
+}
+
+.media-item:hover {
+    transform: translateY(-2px);
+}
+
+/* Индикатор перетаскивания */
+.media-item:active {
+    cursor: grabbing;
+}
+
+/* Стили для древовидной структуры категорий */
+.category-tree {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 15px;
+    background: #fff;
+}
+
+.category-item {
+    margin-bottom: 5px;
+}
+
+.category-toggle {
+    background: none;
+    border: none;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    margin-right: 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
+    border-radius: 4px;
+}
+
+.category-toggle:hover {
+    background-color: #f8f9fa;
+}
+
+.category-toggle.expanded {
+    transform: rotate(90deg);
+}
+
+.category-toggle i {
+    font-size: 12px;
+    color: #6c757d;
+}
+
+.category-label {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-left: -5px;
+}
+
+.category-label:hover {
+    background-color: #f8f9fa;
+}
+
+.category-label input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+.category-children {
+    margin-left: 30px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+}
+
+.category-children.expanded {
+    max-height: 1000px;
+    opacity: 1;
+}
+
+.category-children .category-item {
+    margin-bottom: 4px;
+}
+
+/* Стили для выбранных категорий */
+.category-label.selected {
+    background-color: #e3f2fd;
+    border-left: 3px solid #2196f3;
+}
+
+/* Иконки для разных уровней вложенности */
+.category-level-0 > .category-label { padding-left: 12px; }
+.category-level-1 > .category-label { padding-left: 24px; }
+.category-level-2 > .category-label { padding-left: 36px; }
+.category-level-3 > .category-label { padding-left: 48px; }
+.category-level-4 > .category-label { padding-left: 60px; }
+
+/* Стили для поиска */
+.category-search {
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.category-search input {
+    padding-left: 40px;
+    border-radius: 20px;
+}
+
+.category-search i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+}
+
+/* Счетчик выбранных категорий */
+.category-counter {
+    background-color: #007bff;
+    color: white;
+    border-radius: 12px;
+    padding: 2px 8px;
+    font-size: 12px;
+    margin-left: 8px;
+}
+
+.tags-management {
+    margin-top: 20px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px;
+    background: #f8f9fa;
+}
+
+.tags-list {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+}
+
+.tag-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    margin-bottom: 5px;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+}
+
+.tag-name {
+    flex-grow: 1;
+}
+
+.tag-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.tag-blocked {
+    opacity: 0.6;
+    background-color: #f8d7da;
+    text-decoration: line-through;
+}
+
+.tag-edit-input {
+    width: 100%;
+    padding: 4px 8px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+}
+
+.add-tag-form {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.tag-status-badge {
+    font-size: 0.75rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 8px;
+}
+
+.status-active {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+
+.status-blocked {
+    background-color: #f8d7da;
+    color: #842029;
+}
+
+
+    .expenses-management {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    background: #f8f9fa;
+    margin-top: 20px;
+}
+
+.expenses-management .card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.expenses-management .table {
+    margin-bottom: 0;
+}
+
+.expenses-management .table th {
+    border-top: none;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.expenses-management .table td {
+    vertical-align: middle;
+}
+
+.expenses-management .form-control-sm {
+    height: calc(1.5em + 0.5rem + 2px);
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.expenses-management .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.selected-expenses tr {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Стили для кнопок */
+.remove-expense {
+    transition: all 0.2s ease;
+}
+
+.remove-expense:hover {
+    transform: scale(1.1);
+    background-color: #dc3545 !important;
+}
+
+#add-expense-btn {
+    transition: all 0.2s ease;
+}
+
+#add-expense-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+}
+
+
+.category-children {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+}
+
+.category-children.expanded {
+    max-height: 1000px; /* или auto, если нужно */
+    opacity: 1;
+}
+
+
+
+.toggle-children {
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-right: 5px;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.toggle-children::after {
+  content: '▶'; /* стрелка вправо */
+  display: inline-block;
+  transition: transform 0.2s;
+}
+
+.category-item.expanded > .category-label > .toggle-children::after {
+  transform: rotate(90deg); /* стрелка вниз */
+}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/hint/show-hint.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/hint/show-hint.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/hint/javascript-hint.min.js"></script>
+<link rel="stylesheet" type="text/css" href="lightbox_stylesheet.css">
+
+{% endblock head %}
+{% block content %}
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            <div class="card-header">
+                <ul class="nav nav-pills nav-justified p-1 align-items-center">
+                    <li class="nav-item">
+                        <a href="#homePillJustified" data-bs-toggle="tab" aria-expanded="true" class="nav-link active">
+                            <span class="d-block d-sm-none"><i class="bx bx-home"></i></span>
+                            <span class="d-none d-sm-block">Товар</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#PasspardTabsJustified" data-bs-toggle="tab" aria-expanded="false" class="nav-link">
+                            <span class="d-block d-sm-none"><i class="ri-mail-line"></i></span>
+                            <span class="d-none d-sm-block">Галерея</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#StaticTabsJustified" data-bs-toggle="tab" aria-expanded="false" class="nav-link">
+                            <span class="d-block d-sm-none"><i class="ri-mail-line"></i></span>
+                            <span class="d-none d-sm-block">История цен</span>
+                        </a>
+                    </li>
+
+                    <!-- Кнопка "Сохранить" справа -->
+                    <li class="nav-item ms-auto"  id="saveTabTrigger">
+                        <a href="#saveTab" class="btn btn-success px-3 py-1">
+                            <i class="ri-save-line me-1"></i>
+                            <span class="d-none d-sm-inline">Сохранить</span>
+                        </a>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+        <div class="card-body">
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}{{ form.media }}
+                <div class="tabbed-content button-tabs">
+                    {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <strong>Ошибки при сохранении:</strong>
+                        <ul>
+                            {% for field, errors in form.errors.items %}
+                            <li><strong>{{ field }}:</strong> {{ errors|join:", " }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <div class="tab-content pt-2 text-muted">
+                        <div class="tab-pane show active" id="homePillJustified">
+
+
+                            <div class="row">
+                                <h4>Основная информация</h4>
+                                <div class="col-9">
+                                    <div class="row">
+                                        <div class="col-2">
+                                            <label for="{{ form.type.id_for_label }}">{{ form.type.label }}</label><br>
+                                            {{ form.type }}
+                                            {% if form.type.help_text %}
+                                            <small>{{ form.type.help_text }}</small>
+                                            {% endif %}
+                                            {% for error in form.type.errors %}
+                                            <p style="color:red;">{{ error }}</p>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="col-2">
+                                            <label for="{{ form.typeofchoice.id_for_label }}">{{ form.typeofchoice.label }}</label><br>
+                                            {{ form.typeofchoice }}
+                                            {% if form.typeofchoice.help_text %}
+                                            <small>{{ form.typeofchoice.help_text }}</small>
+                                            {% endif %}
+                                            {% for error in form.typeofchoice.errors %}
+                                            <p style="color:red;">{{ error }}</p>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="col-2">
+                                            <label for="{{ form.price.id_for_label }}">{{ form.price.label }}</label><br>
+                                            {{ form.price }}
+                                            {% if form.price.help_text %}
+                                            <small>{{ form.price.help_text }}</small>
+                                            {% endif %}
+                                            {% for error in form.price.errors %}
+                                            <p style="color:red;">{{ error }}</p>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="col-2">
+                                            <label for="{{ form.price.id_for_label }}">{{ form.price_oldprice_old.label }}</label><br>
+                                            {{ form.price_seller }}
+                                            {% if form.price_seller.help_text %}
+                                            <small>{{ form.price_seller.help_text }}</small>
+                                            {% endif %}
+                                            {% for error in form.price_seller.errors %}
+                                            <p style="color:red;">{{ error }}</p>
+                                            {% endfor %}
+                                        </div>
+
+                                        <div class="col-2">
+                                            <label for="{{ form.price.id_for_label }}">{{ form.price_oldprice_old.label }}</label><br>
+                                            {{ form.price_old }}
+                                            {% if form.price_old.help_text %}
+                                            <small>{{ form.price_old.help_text }}</small>
+                                            {% endif %}
+                                            {% for error in form.price_old.errors %}
+                                            <p style="color:red;">{{ error }}</p>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="col-2">
+                                            <label for="{{ form.costprice.id_for_label }}">{{ form.costprice.label }}</label><br>
+                                            {{ form.costprice }}
+                                            {% if form.costprice.help_text %}
+                                            <small>{{ form.costprice.help_text }}</small>
+                                            {% endif %}
+                                            {% for error in form.costprice.errors %}
+                                            <p style="color:red;">{{ error }}</p>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="col-2">
+                                            <div>
+                                                <label for="{{ form.valute.id_for_label }}">{{ form.valute.label }}</label><br>
+                                                {{ form.valute }}
+                                                {% if form.valute.help_text %}
+                                                <small>{{ form.valute.help_text }}</small>
+                                                {% endif %}
+                                                {% for error in form.valute.errors %}
+                                                <p style="color:red;">{{ error }}</p>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <!-- Навигация по вкладкам -->
+                                            <ul class="nav nav-tabs" id="langTabs" role="tablist">
+                                                {% for lang_code in languages %}
+                                                {% with lang=language_field_map|get_item:lang_code %}
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link {% if forloop.first %}active{% endif %}" id="tab-{{ lang_code }}" data-bs-toggle="tab" data-bs-target="#content-{{ lang_code }}" type="button" role="tab">
+                                                        {{ lang.lang_name }} ({{ lang_code }})
+                                                    </button>
+                                                </li>
+                                                {% endwith %}
+                                                {% endfor %}
+                                            </ul>
+
+                                            <!-- Контейнеры вкладок -->
+                                            <div class="tab-content mt-3" id="langTabsContent">
+                                                {% for lang_code in languages %}
+                                                {% with lang=language_field_map|get_item:lang_code %}
+                                                {% with field=grouped_fields.name|get_item:lang_code %}
+                                                {% if field %}
+                                                <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" id="content-{{ lang_code }}" role="tabpanel">
+                                                    <div class="mb-3">
+                                                        <label for="id_name_{{ lang_code }}">Название ({{ lang.lang_name }})</label>
+                                                        {{ field }}
+                                                    </div>
+                                                </div>
+                                                {% endif %}
+                                                {% endwith %}
+                                                {% endwith %}
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label for="{{ form.slug.id_for_label }}">{{ form.slug.label }}</label><br>
+                                            {{ form.slug }}
+                                            {% if form.slug.help_text %}
+                                            <small>{{ form.slug.help_text }}</small>
+                                            {% endif %}
+                                            {% for error in form.slug.errors %}
+                                            <p style="color:red;">{{ error }}</p>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <!-- Навигация по вкладкам -->
+                                        <ul class="nav nav-tabs" id="langTabs-fragment" role="tablist">
+                                            {% for lang_code in languages %}
+                                            {% with lang=language_field_map|get_item:lang_code %}
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link {% if forloop.first %}active{% endif %}"
+                                                        id="tab-fragment-{{ lang_code }}"
+                                                        data-bs-toggle="tab"
+                                                        data-bs-target="#content-fragment-{{ lang_code }}"
+                                                        type="button"
+                                                        role="tab">
+                                                    {{ lang.lang_name }} ({{ lang_code }})
+                                                </button>
+                                            </li>
+                                            {% endwith %}
+                                            {% endfor %}
+                                        </ul>
+
+                                        <!-- Контейнеры вкладок -->
+                                        <div class="tab-content mt-3" id="langTabsContent-fragment">
+                                            {% for lang_code in languages %}
+                                            {% with lang=language_field_map|get_item:lang_code %}
+                                            {% with field=grouped_fields.fragment|get_item:lang_code %}
+                                            {% if field %}
+                                            <div class="tab-pane fade {% if forloop.first %}show active{% endif %}"
+                                                 id="content-fragment-{{ lang_code }}"
+                                                 role="tabpanel">
+                                                <div class="mb-3">
+                                                    <label for="id_fragment_{{ lang_code }}">
+                                                        {% trans "Краткое описание" %} ({{ lang.lang_name }})
+                                                    </label>
+                                                    {{ field }}
+                                                </div>
+                                            </div>
+                                            {% endif %}
+                                            {% endwith %}
+                                            {% endwith %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <!-- Навигация по вкладкам -->
+                                        <ul class="nav nav-tabs" id="langTabs-fragment" role="tablist">
+                                            {% for lang_code in languages %}
+                                            {% with lang=language_field_map|get_item:lang_code %}
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link {% if forloop.first %}active{% endif %}"
+                                                        id="tab-fragment-{{ lang_code }}"
+                                                        data-bs-toggle="tab"
+                                                        data-bs-target="#content-fragment-{{ lang_code }}"
+                                                        type="button"
+                                                        role="tab">
+                                                    {{ lang.lang_name }} ({{ lang_code }})
+                                                </button>
+                                            </li>
+                                            {% endwith %}
+                                            {% endfor %}
+                                        </ul>
+
+                                        <!-- Контейнеры вкладок -->
+                                        <div class="tab-content mt-3" id="langTabsContent-description">
+                                            {% for lang_code in languages %}
+                                            {% with lang=language_field_map|get_item:lang_code %}
+                                            {% with field=grouped_fields.description|get_item:lang_code %}
+                                            {% if field %}
+                                            <div class="tab-pane fade {% if forloop.first %}show active{% endif %}"
+                                                 id="content-description-{{ lang_code }}"
+                                                 role="tabpanel">
+                                                <div class="mb-3">
+                                                    <label for="id_description_{{ lang_code }}">
+                                                        Описание ({{ lang.lang_name }})
+                                                    </label>
+                                                    {{ field }}
+                                                </div>
+                                            </div>
+                                            {% endif %}
+                                            {% endwith %}
+                                            {% endwith %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="col-3">
+                                    <div>
+                                        <label for="{{ form.image.id_for_label }}">{{ form.image.label }}</label><br>
+                                        {{ form.image }}
+                                        {% if form.image.help_text %}
+                                        <small>{{ form.image.help_text }}</small>
+                                        {% endif %}
+                                        {% for error in form.image.errors %}
+                                        <p style="color:red;">{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                    <div>
+<!--                                    <div class="category-item category-level-{{ level }}" data-category-id="{{ category.id }}">-->
+<!--                                        <div class="d-flex align-items-center">-->
+<!--                                        <div style="display: none;">-->
+<!--                                            <label for="{{ form.category.id_for_label }}">{{ form.category.label }}</label><br>-->
+<!--                                            {{ form.category }}-->
+<!--                                            {% if form.category.help_text %}-->
+<!--                                            <small>{{ form.category.help_text }}</small>-->
+<!--                                            {% endif %}-->
+<!--                                            {% for error in form.category.errors %}-->
+<!--                                            <p style="color:red;">{{ error }}</p>-->
+<!--                                            {% endfor %}-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+                                        <ul class="category-tree">
+                                            <h4>{% trans "выбор категории" %}</h4>
+                                            {% for item in category_tree %}
+                                                {% include 'moderations/include/category_item.html' with item=item %}
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <label for="{{ form.manufacturers.id_for_label }}">{{ form.manufacturers.label }}</label><br>
+                                        {{ form.manufacturers }}
+                                        {% if form.manufacturers.help_text %}
+                                        <small>{{ form.manufacturers.help_text }}</small>
+                                        {% endif %}
+                                        {% for error in form.manufacturers.errors %}
+                                        <p style="color:red;">{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                      <div style="display: none;" >
+                                      <label for="{{ form.tags.id_for_label }}">{{ form.tags.label }}</label><br>
+                                      {{ form.tags }}
+                                      <small class="text-muted">{% trans "Начните вводить название тега или создайте новый" %}</small>
+                                      </div>
+                                    <div class="tags-management">
+                                        <h6>{% trans "Управление тегами" %}</h6>
+
+                                        <div class="tags-list" id="tags-list">
+                                            {% for tag in all_tags %}
+                                            <div class="tag-item {% if tag.blocked %}tag-blocked{% endif %}" data-tag-id="{{ tag.id }}">
+                                                <div class="tag-name">
+                                                    <span>{{ tag.name }}</span>
+                                                    <span class="tag-status-badge {% if tag.blocked %}status-blocked{% else %}status-active{% endif %}">
+                                                        {% if tag.blocked %}{% trans "заблокирован" %}{% else %}{% trans "активен" %}{% endif %}
+                                                    </span>
+                                                </div>
+                                                <div class="tag-actions">
+                                                    <button type="button" class="btn btn-sm btn-outline-primary edit-tag"
+                                                            data-tag-id="{{ tag.id }}" data-tag-name="{{ tag.name }}">
+                                                        <i class="ri-edit-line"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm {% if tag.blocked %}btn-success{% else %}btn-warning{% endif %} toggle-tag"
+                                                            data-tag-id="{{ tag.id }}" data-tag-blocked="{{ tag.blocked|yesno:"true,false" }}">
+                                                        <i class="{% if tag.blocked %}ri-check-line{% else %}ri-close-line{% endif %}"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+
+                                        <div class="add-tag-form">
+                                            <input type="text" id="new-tag-name" class="form-control" placeholder="Новый тег">
+                                            <button type="button" id="add-tag-btn" class="btn btn-primary">
+                                                <i class="ri-add-line"></i> {% trans "Добавить" %}
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="expenses-management mb-3">
+                                        <h6>{% trans "Управление расходниками" %}</h6>
+
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <!-- Форма добавления нового расходника -->
+                                                <div class="row g-3 mb-4">
+                                                    <div class="col-md-6">
+                                                        <label class="form-label">{% trans "Выберите расходник" %}:</label>
+                                                        <select id="expense-select" class="form-control">
+                                                            <option value="">-- {% trans "Выберите расходник" %} --</option>
+                                                            {% for expense in all_expenses %}
+                                                                <option value="{{ expense.id }}" data-name="{{ expense.name }}">{{ expense.name }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="form-label">{% trans "Количество" %}:</label>
+                                                        <input type="number" id="expense-quantity" class="form-control" min="1" value="1">
+                                                    </div>
+                                                    <button type="button" id="add-expense-btn" class="btn btn-primary w-100">
+                                                        <i class="ri-add-line me-1"></i> {% trans "Добавить" %}
+                                                    </button>
+                                                </div>
+
+                                                <!-- Список выбранных расходников -->
+                                                <div class="selected-expenses">
+                                                    <h6 class="mb-3">{% trans "Выбранные расходники" %}:</h6>
+                                                    <div id="selected-expenses-list" class="table-responsive">
+                                                        <table class="table table-bordered table-hover">
+                                                            <thead class="table-light">
+                                                                <tr>
+                                                                    <th>{% trans "Название" %}</th>
+                                                                    <th width="120">{% trans "Количество" %}</th>
+                                                                    <th width="80">{% trans "Действия" %}</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {% for expense in product_expenses %}
+                                                                <tr data-expense-id="{{ expense.productexpenseposition.id }}">
+                                                                    <td>{{ expense.productexpenseposition.name }}</td>
+                                                                    <td>
+                                                                        <input type="number"
+                                                                               name="expense_quantity_{{ expense.productexpenseposition.id }}"
+                                                                               value="{{ expense.count }}"
+                                                                               class="form-control form-control-sm expense-quantity"
+                                                                               min="1">
+                                                                    </td>
+                                                                    <td class="text-center">
+                                                                        <button type="button" class="btn btn-sm btn-danger remove-expense">
+                                                                            <i class="ri-delete-bin-line"></i>
+                                                                        </button>
+                                                                    </td>
+                                                                </tr>
+                                                                {% endfor %}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Скрытые поля для сохранения данных -->
+                                                <div id="expenses-data-container" class="d-none">
+                                                    {% for expense in product_expenses %}
+                                                    <input type="hidden" name="expenses" value="{{ expense.productexpenseposition.id }}">
+                                                    <input type="hidden" name="expense_quantity_{{ expense.productexpenseposition.id }}" value="{{ expense.count }}">
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label for="{{ form.expenses.id_for_label }}">{{ form.expenses.label }}</label><br>
+                                        {{ form.expenses }}
+                                        {% if form.expenses.help_text %}
+                                        <small>{{ form.expenses.help_text }}</small>
+                                        {% endif %}
+                                        {% for error in form.expenses.errors %}
+                                        <p style="color:red;">{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                    <div>
+                                        <label for="{{ form.stocks.id_for_label }}">{{ form.stocks.label }}</label><br>
+                                        {{ form.stocks }}
+                                        {% if form.stocks.help_text %}
+                                        <small>{{ form.stocks.help_text }}</small>
+                                        {% endif %}
+                                        {% for error in form.stocks.errors %}
+                                        <p style="color:red;">{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                    <div>
+                                        <label for="{{ form.order.id_for_label }}">{{ form.order.label }}</label><br>
+                                        {{ form.order }}
+                                        {% if form.order.help_text %}
+                                        <small>{{ form.order.help_text }}</small>
+                                        {% endif %}
+                                        {% for error in form.order.errors %}
+                                        <p style="color:red;">{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                    <div>
+                                        <label for="{{ form.review.id_for_label }}">{{ form.review.label }}</label><br>
+                                        {{ form.review }}
+                                        {% if form.review.help_text %}
+                                        <small>{{ form.review.help_text }}</small>
+                                        {% endif %}
+                                        {% for error in form.review.errors %}
+                                        <p style="color:red;">{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                    <div>
+                                        <label for="{{ form.faqs.id_for_label }}">{{ form.faqs.label }}</label><br>
+                                        {{ form.faqs }}
+                                        {% if form.faqs.help_text %}
+                                        <small>{{ form.faqs.help_text }}</small>
+                                        {% endif %}
+                                        {% for error in form.faqs.errors %}
+                                        <p style="color:red;">{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                    <div>
+                                        <label for="{{ form.comment.id_for_label }}">{{ form.comment.label }}</label><br>
+                                        {{ form.comment }}
+                                        {% if form.comment.help_text %}
+                                        <small>{{ form.comment.help_text }}</small>
+                                        {% endif %}
+                                        {% for error in form.comment.errors %}
+                                        <p style="color:red;">{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <label for="{{ form.brand.id_for_label }}">{{ form.brand.label }}</label><br>
+                                    {{ form.brand }}
+                                 </div>
+                                <h4>{% trans "Вариация" %}</h4>
+                                {{ variable_formset.management_form }}
+                                <div id="formset-container">
+                                    {% for form in variable_formset %}
+                                    <div class="formset-form border p-2 mb-2">
+                                        {{ form.id }}
+                                        {{ form.as_p }}
+
+                                    </div>
+                                    {% endfor %}
+                                </div>
+
+                                <button type="button" class="btn btn-secondary" id="add-form">{% trans "Добавить ещё" %}</button>
+
+                                <!-- скрытая пустая форма-шаблон -->
+                                <div id="empty-form-template" class="d-none">
+                                    {{ empty_form.as_p|safe }}
+                                </div>
+
+                            </div>
+
+                        </div>
+                        <div class="tab-pane" id="PasspardTabsJustified">
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <h6 class="mb-2">{% trans "Файлы" %}</h6>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="custom-file-upload" id="file-upload-area">
+                                        <i class="bx bx-cloud-upload fs-48 text-primary"></i>
+                                        <h3 class="mt-2">{% trans "Drop your images here, or" %} <span class="text-primary" style="cursor:pointer;">{% trans "click to browse" %}</span></h3>
+                                        <p class="text-muted fs-13">1600 x 1200 (4:3) {% trans "recommended. PNG, JPG and GIF files are allowed" %}</p>
+                                        <input type="file" id="file-input" multiple accept="image/*" style="display:none;">
+                                    </div>
+                                    <!-- Контейнер для предпросмотра выбранных файлов -->
+                                    <div class="row g-3" id="selected-files-preview"></div>
+
+                                    <!-- Секция с существующими файлами -->
+                                    {% if existing_files %}
+                                    <div class="row g-3 mt-3" id="existing-files-container">
+                                        {% for media in existing_files %}
+                                        <div class="col-md-3 position-relative media-item"
+                                             data-media-id="{{ media.id }}"
+                                             data-position="{{ media.position }}">
+                                            <div class="card shadow-sm">
+                                                {% if media.image.name|lower|slice:"-4:" in ".jpg,.jpeg,.png,.gif,.webp" %}
+                                                <img src="{{ media.image.url }}" class="card-img-top preview-image"
+                                                     style="height: 150px; object-fit: cover"
+                                                     alt="{{ media.file.name }}">
+                                                {% else %}
+                                                <div class="text-center py-4">
+                                                    <i class="fas fa-file fa-3x text-muted"></i>
+                                                </div>
+                                                {% endif %}
+
+                                                <div class="card-body">
+                                                    <small class="d-block text-truncate mb-2">
+                                                        {{ media.file.name|slice:"32:" }}
+                                                    </small>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <small class="text-muted">Поз: {{ media.position }}</small>
+                                                        <div>
+                                                            <a href="{{ media.file.url }}"
+                                                               target="_blank"
+                                                               class="btn btn-sm btn-outline-primary">
+                                                                <span class="iconify me-1" data-icon="mdi:download"></span>
+                                                                Посмотреть
+                                                            </a>
+                                                            <button type="button"
+                                                                    class="btn btn-sm btn-outline-danger delete-file d-flex align-items-center justify-content-center"
+                                                                    data-file-id="{{ media.id }}">
+                                                                <iconify-icon icon="mdi:trash-outline"
+                                                                              class="m-auto"></iconify-icon>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Скрытое поле для удаляемых файлов -->
+                            <input type="hidden" name="delete_files" id="delete_files" value="">
+                        </div>
+                        <button  class="d-none" type="submit" id="saveTab">{% trans "Сохранить" %}</button>
+            </form>
+
+            <div class="tab-pane" id="StaticTabsJustified">
+                <h3>{% trans "Цены продукта" %}</h3>
+
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>{% trans "Тип цены" %}</th>
+                        <th>{% trans "Цена" %}</th>
+                        <th>{% trans "Оптовая цена" %}</th>
+                        <th>{% trans "Скидка" %} (%)</th>
+                        <th>{% trans "Дата изменения" %}</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td><strong>{% trans "старые цены" %}</strong></td>
+                        <td colspan="4"></td>
+                    </tr>
+                    {% for price in productsprice %}
+                    <tr>
+                        <td></td>
+                        <td>{{ price.price }}</td>
+                        <td>{{ price.wholesale_price }}</td>
+                        <td>{{ price.discount }}</td>
+                        <td>{{ price.create|date:"d.m.Y H:i" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5">{% trans "Нет данных" %}</td></tr>
+                    {% endfor %}
+
+                    <tr>
+                        <td><strong>{% trans "Старые закупочные цены" %}</strong></td>
+                        <td colspan="4"></td>
+                    </tr>
+                    {% for cost in costprice %}
+                    <tr>
+                        <td></td>
+                        <td>{{ cost.price }}</td>
+                        <td>{{ cost.wholesale_price }}</td>
+                        <td>{{ cost.discount }}</td>
+                        <td>{{ cost.create|date:"d.m.Y H:i" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5">{% trans "Нет данных" %}</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+
+
+</div>
+<!-- Кастомный алерт -->
+<div id="custom-alert" class="custom-alert">
+    <div class="custom-alert-content">
+        <h5>{% trans "Подтверждение удаления" %}</h5>
+        <p>{% trans "Вы уверены, что хотите удалить этот файл" %}?</p>
+        <div class="custom-alert-buttons">
+            <button id="alert-cancel" class="btn btn-secondary">{% trans "Отмена" %}</button>
+            <button id="alert-confirm" class="btn btn-danger">{% trans "Удалить" %}</button>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block footerbottom %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('form').forEach(form => {
+            form.querySelectorAll('input, select, textarea').forEach(field => {
+                if (field.type === 'checkbox' || field.type === 'radio') {
+                    field.classList.add('form-check-input');
+                } else {
+                    field.classList.add('form-control');
+                }
+            });
+        });
+    });
+</script>
+<script src="{% static 'site/website/js/ui-lement.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const trigger = document.getElementById('saveTabTrigger');
+        const realSubmit = document.getElementById('saveTab');
+
+        if (trigger && realSubmit) {
+            trigger.addEventListener('click', function (e) {
+                e.preventDefault(); // Отключаем переход по ссылке
+                realSubmit.click(); // Симулируем клик по кнопке submit
+            });
+        }
+    });
+</script>
+<script>
+$(document).ready(function () {
+  $(document).on('change', 'select[id$="-variable"]', function () {
+    const $variableSelect = $(this);
+    const variableId = $variableSelect.val();
+    const variableIdAttr = $variableSelect.attr('id');
+
+    // Разбираем: id_form-1-variable → формируем form-1
+    const regex = /^id_(form-\d+)-variable$/;
+    const match = variableIdAttr.match(regex);
+
+    if (!match) {
+      console.error("[JS] Невозможно определить форму из id:", variableIdAttr);
+      return;
+    }
+
+    const formPrefix = match[1]; // form-1, form-0 и т.д.
+    const $attributeSelect = $('#id_' + formPrefix + '-attribute');
+
+    console.log(`[JS] Выбрана вариация: variable_id=${variableId}`);
+    console.log(`[JS] Обнаружена форма: ${formPrefix}`);
+    console.log(`[JS] Селект атрибутов: #id_${formPrefix}-attribute`);
+
+    $attributeSelect.empty();
+
+    if (!variableId) {
+      $attributeSelect.append($('<option>').text('Выберите вариацию'));
+      return;
+    }
+
+    $.ajax({
+      url: "{% url 'moderation:load_atributes' %}",
+      data: {
+        'variable_id': variableId
+      },
+      dataType: 'json',
+      success: function (data) {
+        console.log(`[JS] Получено ${data.length} атрибутов:`, data);
+
+        if (!data.length) {
+          $attributeSelect.append($('<option>').text('Нет атрибутов'));
+        } else {
+          data.forEach(attr => {
+            $attributeSelect.append(
+              $('<option></option>')
+                .attr('value', attr.id)
+                .text(attr.name)
+            );
+          });
+        }
+      },
+      error: function (xhr) {
+        console.error('[JS] Ошибка при загрузке атрибутов', xhr);
+        alert('Ошибка при загрузке атрибутов');
+      }
+    });
+  });
+});
+</script>
+
+
+
+
+
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const addFormBtn = document.getElementById("add-form");
+      const formsetContainer = document.getElementById("formset-container");
+      const emptyFormTemplate = document.getElementById("empty-form-template").innerHTML;
+      const totalForms = document.querySelector("#id_form-TOTAL_FORMS");
+
+      addFormBtn.addEventListener("click", function () {
+        const currentFormCount = parseInt(totalForms.value);
+        const newFormHtml = emptyFormTemplate.replace(/__prefix__/g, currentFormCount);
+        const wrapper = document.createElement('div');
+        wrapper.classList.add('formset-form', 'border', 'p-2', 'mb-2');
+        wrapper.innerHTML = newFormHtml;
+        formsetContainer.appendChild(wrapper);
+        totalForms.value = currentFormCount + 1;
+      });
+    });
+</script>
+<!--ДОП. ФАЙЛЫ-->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Элементы кастомного алерта
+        const customAlert = document.getElementById('custom-alert');
+        const alertConfirm = document.getElementById('alert-confirm');
+        const alertCancel = document.getElementById('alert-cancel');
+
+        let currentFileToDelete = null;
+        let currentDeleteCallback = null;
+
+        // Показ кастомного алерта
+        function showCustomAlert(callback) {
+            currentDeleteCallback = callback;
+            customAlert.style.display = 'flex';
+        }
+
+        // Скрытие кастомного алерта
+        function hideCustomAlert() {
+            customAlert.style.display = 'none';
+            currentFileToDelete = null;
+            currentDeleteCallback = null;
+        }
+
+        // Обработчики кнопок алерта
+        alertConfirm.addEventListener('click', function() {
+            if (currentDeleteCallback) {
+                currentDeleteCallback();
+            }
+            hideCustomAlert();
+        });
+
+        alertCancel.addEventListener('click', hideCustomAlert);
+
+        // Обработка удаления существующих файлов
+        const deleteButtons = document.querySelectorAll('.delete-file');
+        const deleteFilesInput = document.getElementById('delete_files');
+        let deletedFiles = [];
+
+        function setupDeleteButton(button, deleteCallback) {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                currentFileToDelete = this;
+                showCustomAlert(deleteCallback);
+            });
+        }
+
+        // Для существующих файлов из БД
+        deleteButtons.forEach(button => {
+            setupDeleteButton(button, function() {
+                const fileId = button.dataset.fileId;
+                deletedFiles.push(fileId);
+                deleteFilesInput.value = deletedFiles.join(',');
+                button.closest('.col-md-3').style.display = 'none';
+            });
+        });
+
+        // Предпросмотр выбранных файлов
+        const fileInput = document.querySelector('input[type="file"][name="files"]');
+        const previewContainer = document.getElementById('selected-files-preview');
+
+        fileInput.addEventListener('change', function(e) {
+            previewContainer.innerHTML = ''; // Очищаем предыдущие превью
+
+            // Для каждого выбранного файла
+            Array.from(e.target.files).forEach((file, index) => {
+                const col = document.createElement('div');
+                col.className = 'col-md-3 position-relative mb-3';
+
+                const card = document.createElement('div');
+                card.className = 'card shadow-sm';
+
+                // Проверяем тип файла
+                if (file.type.match('image.*')) {
+                    const img = document.createElement('img');
+                    img.className = 'card-img-top preview-image';
+                    img.style.height = '150px';
+                    img.style.objectFit = 'cover';
+
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        img.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+
+                    card.appendChild(img);
+                } else {
+                    const fileIcon = document.createElement('div');
+                    fileIcon.className = 'text-center py-4';
+
+                    const icon = document.createElement('i');
+                    icon.className = 'fas fa-file fa-3x text-muted';
+
+                    fileIcon.appendChild(icon);
+                    card.appendChild(fileIcon);
+                }
+
+                const cardBody = document.createElement('div');
+                cardBody.className = 'card-body';
+
+                const fileName = document.createElement('small');
+                fileName.className = 'd-block text-truncate mb-2';
+                fileName.textContent = file.name.length > 20 ?
+                    file.name.substring(0, 20) + '...' :
+                    file.name;
+
+                // Кнопка удаления для новых файлов
+                const deleteBtn = document.createElement('button');
+                deleteBtn.type = 'button';
+                deleteBtn.className = 'btn btn-sm btn-outline-danger delete-file d-flex align-items-center justify-content-center';
+                deleteBtn.dataset.fileIndex = index;
+                deleteBtn.innerHTML = '<iconify-icon icon="mdi:trash-outline" class="m-auto"></iconify-icon>';
+
+                // Позиционирование кнопки удаления
+                deleteBtn.style.position = 'absolute';
+                deleteBtn.style.top = '5px';
+                deleteBtn.style.right = '5px';
+                deleteBtn.style.zIndex = '10';
+
+                card.appendChild(deleteBtn);
+                cardBody.appendChild(fileName);
+                card.appendChild(cardBody);
+                col.appendChild(card);
+                previewContainer.appendChild(col);
+
+                // Настройка кнопки удаления для нового файла
+                setupDeleteButton(deleteBtn, function() {
+                    // Удаляем файл из FileList
+                    const dt = new DataTransfer();
+                    Array.from(fileInput.files).forEach((f, i) => {
+                        if (i !== parseInt(deleteBtn.dataset.fileIndex)) {
+                            dt.items.add(f);
+                        }
+                    });
+                    fileInput.files = dt.files;
+
+                    // Обновляем предпросмотр
+                    const event = new Event('change');
+                    fileInput.dispatchEvent(event);
+                });
+            });
+        });
+    });
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const uploadArea = document.getElementById('file-upload-area');
+    const fileInput = document.getElementById('file-input');
+    const previewContainer = document.getElementById('selected-files-preview');
+
+    // Открытие диалога выбора файла при клике на зону
+    uploadArea.querySelector('span').addEventListener('click', () => {
+        fileInput.click();
+    });
+
+    // Обработка перетаскивания файлов
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadArea.style.backgroundColor = '#e0e0e0';
+    });
+    uploadArea.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadArea.style.backgroundColor = '';
+    });
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadArea.style.backgroundColor = '';
+        handleFiles(e.dataTransfer.files);
+    });
+
+    // Обработка выбора файлов через input
+    fileInput.addEventListener('change', () => {
+        handleFiles(fileInput.files);
+    });
+
+    // Массив для хранения выбранных файлов
+    let selectedFiles = [];
+
+    function handleFiles(files) {
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+
+            // Проверка типа файла
+            if (!file.type.startsWith('image/')) continue;
+
+            // Проверка на дублирование
+            if (selectedFiles.some(f => f.name === file.name && f.size === file.size)) continue;
+
+            selectedFiles.push(file);
+        }
+        updatePreview();
+        updateFileInput();
+    }
+
+    function updatePreview() {
+        previewContainer.innerHTML = '';
+
+        selectedFiles.forEach((file, index) => {
+            const col = document.createElement('div');
+            col.className = 'col-md-3 position-relative mb-3';
+
+            const card = document.createElement('div');
+            card.className = 'card shadow-sm';
+
+            // Создаем изображение или иконку файла
+            if (file.type.startsWith('image/')) {
+                const img = document.createElement('img');
+                img.className = 'card-img-top preview-image';
+                img.style.height = '150px';
+                img.style.objectFit = 'cover';
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+                card.appendChild(img);
+            } else {
+                const fileIcon = document.createElement('div');
+                fileIcon.className = 'text-center py-4';
+
+                const icon = document.createElement('i');
+                icon.className = 'fas fa-file fa-3x text-muted';
+
+                fileIcon.appendChild(icon);
+                card.appendChild(fileIcon);
+            }
+
+            // Название файла
+            const cardBody = document.createElement('div');
+            cardBody.className = 'card-body';
+
+            const fileName = document.createElement('small');
+            fileName.className = 'd-block text-truncate mb-2';
+            fileName.textContent = file.name.length > 20 ? file.name.substring(0, 20) + '...' : file.name;
+
+            // Кнопка удаления
+            const deleteBtn = document.createElement('button');
+            deleteBtn.type = 'button';
+            deleteBtn.className = 'btn btn-sm btn-outline-danger delete-file d-flex align-items-center justify-content-center';
+            deleteBtn.innerHTML = '<iconify-icon icon="mdi:trash-outline" class="m-auto"></iconify-icon>';
+
+            // Позиционирование
+            deleteBtn.style.position = 'absolute';
+            deleteBtn.style.top = '5px';
+            deleteBtn.style.right = '5px';
+            deleteBtn.dataset.index = index;
+
+            // Обработчик удаления
+            deleteBtn.addEventListener('click', () => {
+                selectedFiles.splice(index, 1);
+                updatePreview();
+                updateFileInput();
+            });
+
+            card.appendChild(deleteBtn);
+            cardBody.appendChild(fileName);
+            card.appendChild(cardBody);
+            col.appendChild(card);
+            previewContainer.appendChild(col);
+        });
+    }
+
+    function updateFileInput() {
+        // Создаем новый DataTransfer для обновления input
+        const dt = new DataTransfer();
+        selectedFiles.forEach(f => dt.items.add(f));
+        fileInput.files = dt.files;
+    }
+});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Инициализация Sortable для существующих файлов
+    const existingFilesContainer = document.getElementById('existing-files-container');
+
+    if (existingFilesContainer) {
+        new Sortable(existingFilesContainer, {
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            chosenClass: 'sortable-chosen',
+            dragClass: 'sortable-drag',
+            onEnd: function(evt) {
+                updateMediaPositions();
+            }
+        });
+    }
+
+    // Функция для обновления позиций через AJAX
+    function updateMediaPositions() {
+        const mediaItems = document.querySelectorAll('.media-item');
+        const positions = [];
+
+        mediaItems.forEach((item, index) => {
+            const mediaId = item.dataset.mediaId; // UUID как строка
+            positions.push({
+                media_id: mediaId,
+                position: index + 1
+            });
+
+            // Обновляем отображение позиции
+            const positionElement = item.querySelector('.text-muted');
+            if (positionElement) {
+                positionElement.textContent = `Поз: ${index + 1}`;
+            }
+        });
+
+        // Отправка данных на сервер
+        fetch("{% url 'moderation:ajax_update_media_positions' %}", {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                product_id: "{{ object.id }}", // UUID как строка
+                positions: positions
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status !== 'success') {
+                console.error('Ошибка при сохранении позиций:', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+        });
+    }
+
+
+    // Стили для drag and drop
+    const style = document.createElement('style');
+    style.textContent = `
+        .sortable-ghost {
+            opacity: 0.5;
+            background: #c8ebfb;
+        }
+        .sortable-chosen {
+            background: #f8f9fa;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .sortable-drag {
+            opacity: 1 !important;
+            transform: rotate(5deg);
+        }
+        .media-item {
+            cursor: move;
+            transition: transform 0.2s;
+        }
+        .media-item:hover {
+            transform: translateY(-2px);
+        }
+    `;
+    document.head.appendChild(style);
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const choices = new Choices('#product-tags', {
+        removeItemButton: true,
+        searchEnabled: true,
+        placeholderValue: 'Выберите теги',
+        searchPlaceholderValue: 'Поиск тегов',
+        shouldSort: false,
+        // Можно добавить опцию для динамической загрузки тегов через AJAX
+    });
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const choices = new Choices('#product-tags', {
+        removeItemButton: true,
+        searchEnabled: true,
+        placeholderValue: 'Выберите теги',
+        searchPlaceholderValue: 'Поиск тегов',
+        shouldSort: false,
+        // Можно добавить опцию для динамической загрузки тегов через AJAX
+    });
+});
+
+    document.addEventListener('DOMContentLoaded', function() {
+    const uploadArea = document.getElementById('file-upload-area');
+    const fileInput = document.querySelector('input[type="file"][name="files"]');
+    const previewContainer = document.getElementById('selected-files-preview');
+
+    // Активируем скрытое поле формы при клике на зону
+    uploadArea.addEventListener('click', function(e) {
+        // Проверяем, что клик не по тексту "выберите файлы"
+        if (e.target === uploadArea || e.target.tagName === 'I' ||
+            e.target.tagName === 'H3' || e.target.tagName === 'P') {
+            fileInput.click();
+        }
+    });
+
+    // Обработка выбора файлов через input
+    fileInput.addEventListener('change', function() {
+        handleFiles(fileInput.files);
+    });
+
+    // Обработка перетаскивания файлов
+    uploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadArea.style.backgroundColor = '#e0e0e0';
+        uploadArea.style.borderColor = '#999';
+    });
+
+    uploadArea.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadArea.style.backgroundColor = '';
+        uploadArea.style.borderColor = '#ccc';
+    });
+
+    uploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadArea.style.backgroundColor = '';
+        uploadArea.style.borderColor = '#ccc';
+
+        if (e.dataTransfer.files.length > 0) {
+            // Создаем новый FileList из перетащенных файлов
+            handleFiles(e.dataTransfer.files);
+        }
+    });
+
+    function handleFiles(files) {
+        // Создаем новый DataTransfer для обновления input
+        const dt = new DataTransfer();
+
+        // Добавляем существующие файлы (если есть)
+        if (fileInput.files) {
+            for (let i = 0; i < fileInput.files.length; i++) {
+                dt.items.add(fileInput.files[i]);
+            }
+        }
+
+        // Добавляем новые файлы
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+
+            // Проверка типа файла
+            if (!file.type.startsWith('image/')) {
+                alert('Разрешены только изображения');
+                continue;
+            }
+
+            // Проверка на дублирование
+            let isDuplicate = false;
+            for (let j = 0; j < dt.items.length; j++) {
+                const existingFile = dt.files[j];
+                if (existingFile.name === file.name && existingFile.size === file.size) {
+                    isDuplicate = true;
+                    break;
+                }
+            }
+
+            if (!isDuplicate) {
+                dt.items.add(file);
+            }
+        }
+
+        // Обновляем input
+        fileInput.files = dt.files;
+
+        // Обновляем предпросмотр
+        updatePreview();
+    }
+
+    function updatePreview() {
+        previewContainer.innerHTML = '';
+
+        if (!fileInput.files || fileInput.files.length === 0) return;
+
+        Array.from(fileInput.files).forEach((file, index) => {
+            const col = document.createElement('div');
+            col.className = 'col-md-3 position-relative mb-3';
+
+            const card = document.createElement('div');
+            card.className = 'card shadow-sm';
+
+            // Создаем превью изображения
+            if (file.type.startsWith('image/')) {
+                const img = document.createElement('img');
+                img.className = 'card-img-top preview-image';
+                img.style.height = '150px';
+                img.style.objectFit = 'cover';
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+
+                card.appendChild(img);
+            }
+
+            // Название файла
+            const cardBody = document.createElement('div');
+            cardBody.className = 'card-body';
+
+            const fileName = document.createElement('small');
+            fileName.className = 'd-block text-truncate mb-2';
+            fileName.textContent = file.name.length > 20 ?
+                file.name.substring(0, 20) + '...' : file.name;
+
+            // Кнопка удаления
+            const deleteBtn = document.createElement('button');
+            deleteBtn.type = 'button';
+            deleteBtn.className = 'btn btn-sm btn-outline-danger delete-file';
+            deleteBtn.innerHTML = '<iconify-icon icon="mdi:trash-outline"></iconify-icon>';
+            deleteBtn.style.position = 'absolute';
+            deleteBtn.style.top = '5px';
+            deleteBtn.style.right = '5px';
+
+            // Обработчик удаления
+            deleteBtn.addEventListener('click', function() {
+                // Создаем новый FileList без удаленного файла
+                const dt = new DataTransfer();
+                Array.from(fileInput.files).forEach((f, i) => {
+                    if (i !== index) {
+                        dt.items.add(f);
+                    }
+                });
+
+                fileInput.files = dt.files;
+                updatePreview();
+            });
+
+            card.appendChild(deleteBtn);
+            cardBody.appendChild(fileName);
+            card.appendChild(cardBody);
+            col.appendChild(card);
+            previewContainer.appendChild(col);
+        });
+    }
+
+    // Инициализация предпросмотра при загрузке
+    updatePreview();
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Инициализация Choices для поля тегов
+    const tagsSelect = document.getElementById('{{ form.tags.id_for_label }}');
+    const choices = new Choices(tagsSelect, {
+        removeItemButton: true,
+        searchEnabled: true,
+        placeholderValue: 'Выберите теги',
+        searchPlaceholderValue: 'Поиск тегов',
+        shouldSort: false,
+        addItems: true,
+        addItemFilter: function(value) {
+            return value.length > 0;
+        }
+    });
+
+    // Функция для обновления списка тегов в Choices
+    function updateTagsChoices() {
+        fetch("{% url 'moderation:ajax_get_tags' %}")
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Очищаем текущие опции
+                    choices.clearStore();
+
+                    // Добавляем новые опции
+                    data.tags.forEach(tag => {
+                        choices.setChoices([{
+                            value: tag.id,
+                            label: tag.name,
+                            disabled: tag.blocked
+                        }], 'value', 'label', true);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка при загрузке тегов:', error);
+            });
+    }
+
+    // Добавление нового тега
+    document.getElementById('add-tag-btn').addEventListener('click', function() {
+        const tagName = document.getElementById('new-tag-name').value.trim();
+
+        if (!tagName) {
+            alert('Введите название тега');
+            return;
+        }
+
+        fetch("{% url 'moderation:ajax_create_tag' %}", {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                name: tagName
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Очищаем поле ввода
+                document.getElementById('new-tag-name').value = '';
+
+                // Обновляем список тегов
+                updateTagsList();
+                updateTagsChoices();
+
+                // Добавляем новый тег в выбранные
+                choices.setValueByChoice(data.tag.id);
+            } else {
+                alert('Ошибка: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+        });
+    });
+
+    // Редактирование тега
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.edit-tag')) {
+            const button = e.target.closest('.edit-tag');
+            const tagId = button.dataset.tagId;
+            const tagName = button.dataset.tagName;
+
+            const newName = prompt('Введите новое название тега:', tagName);
+
+            if (newName && newName !== tagName) {
+                fetch("{% url 'moderation:ajax_edit_tag' %}", {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({
+                        tag_id: tagId,
+                        name: newName
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        updateTagsList();
+                        updateTagsChoices();
+                    } else {
+                        alert('Ошибка: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    alert('Ошибка при редактировании тега');
+                });
+            }
+        }
+    });
+
+    // Блокировка/разблокировка тега
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.toggle-tag')) {
+            const button = e.target.closest('.toggle-tag');
+            const tagId = button.dataset.tagId;
+            const isBlocked = button.dataset.tagBlocked === 'true';
+
+            fetch("{% url 'moderation:ajax_toggle_tag' %}", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    tag_id: tagId,
+                    blocked: !isBlocked
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    updateTagsList();
+                    updateTagsChoices();
+                } else {
+                    alert('Ошибка: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert('Ошибка при изменении статуса тега');
+            });
+        }
+    });
+
+    // Функция для обновления списка тегов
+    function updateTagsList() {
+        fetch("{% url 'moderation:ajax_get_tags_list' %}")
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const tagsList = document.getElementById('tags-list');
+                    tagsList.innerHTML = '';
+
+                    data.tags.forEach(tag => {
+                        const tagItem = document.createElement('div');
+                        tagItem.className = `tag-item ${tag.blocked ? 'tag-blocked' : ''}`;
+                        tagItem.dataset.tagId = tag.id;
+
+                        tagItem.innerHTML = `
+                            <div class="tag-name">
+                                <span>${tag.name}</span>
+                                <span class="tag-status-badge ${tag.blocked ? 'status-blocked' : 'status-active'}">
+                                    ${tag.blocked ? 'заблокирован' : 'активен'}
+                                </span>
+                            </div>
+                            <div class="tag-actions">
+                                <button type="button" class="btn btn-sm btn-outline-primary edit-tag"
+                                        data-tag-id="${tag.id}" data-tag-name="${tag.name}">
+                                    <i class="ri-edit-line"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm ${tag.blocked ? 'btn-success' : 'btn-warning'} toggle-tag"
+                                        data-tag-id="${tag.id}" data-tag-blocked="${tag.blocked}">
+                                    <i class="${tag.blocked ? 'ri-check-line' : 'ri-close-line'}"></i>
+                                </button>
+                            </div>
+                        `;
+
+                        tagsList.appendChild(tagItem);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка при загрузке списка тегов:', error);
+            });
+    }
+
+    // Инициализация при загрузке
+    updateTagsChoices();
+});
+
+
+
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const expenseSelect = document.getElementById('expense-select');
+    const expenseQuantity = document.getElementById('expense-quantity');
+    const addExpenseBtn = document.getElementById('add-expense-btn');
+    const selectedExpensesList = document.getElementById('selected-expenses-list').querySelector('tbody');
+    const expensesDataContainer = document.getElementById('expenses-data-container');
+
+    // Функция для проверки, добавлен ли уже расходник
+    function isExpenseAdded(expenseId) {
+        return selectedExpensesList.querySelector(`tr[data-expense-id="${expenseId}"]`) !== null;
+    }
+
+    // Функция для добавления расходника в список
+    function addExpenseToTable(expenseId, expenseName, quantity) {
+        if (isExpenseAdded(expenseId)) {
+            alert('Этот расходник уже добавлен');
+            return;
+        }
+
+        const row = document.createElement('tr');
+        row.dataset.expenseId = expenseId;
+        row.innerHTML = `
+            <td>${expenseName}</td>
+            <td>
+                <input type="number"
+                       name="expense_quantity_${expenseId}"
+                       value="${quantity}"
+                       class="form-control form-control-sm expense-quantity"
+                       min="1">
+            </td>
+            <td class="text-center">
+                <button type="button" class="btn btn-sm btn-danger remove-expense">
+                    <i class="ri-delete-bin-line"></i>
+                </button>
+            </td>
+        `;
+
+        selectedExpensesList.appendChild(row);
+
+        // Добавляем скрытые поля для формы
+        const expenseInput = document.createElement('input');
+        expenseInput.type = 'hidden';
+        expenseInput.name = 'expenses';
+        expenseInput.value = expenseId;
+        expensesDataContainer.appendChild(expenseInput);
+
+        const quantityInput = document.createElement('input');
+        quantityInput.type = 'hidden';
+        quantityInput.name = `expense_quantity_${expenseId}`;
+        quantityInput.value = quantity;
+        expensesDataContainer.appendChild(quantityInput);
+
+        // Добавляем обработчик удаления
+        row.querySelector('.remove-expense').addEventListener('click', function() {
+            removeExpense(expenseId);
+        });
+
+        // Добавляем обработчик изменения количества
+        row.querySelector('.expense-quantity').addEventListener('change', function() {
+            updateExpenseQuantity(expenseId, this.value);
+        });
+    }
+
+    // Функция для удаления расходника
+    function removeExpense(expenseId) {
+        // Удаляем строку из таблицы
+        const row = selectedExpensesList.querySelector(`tr[data-expense-id="${expenseId}"]`);
+        if (row) {
+            row.remove();
+        }
+
+        // Удаляем скрытые поля
+        const expenseInputs = expensesDataContainer.querySelectorAll(`input[name="expenses"][value="${expenseId}"]`);
+        const quantityInputs = expensesDataContainer.querySelectorAll(`input[name="expense_quantity_${expenseId}"]`);
+
+        expenseInputs.forEach(input => input.remove());
+        quantityInputs.forEach(input => input.remove());
+    }
+
+    // Функция для обновления количества
+    function updateExpenseQuantity(expenseId, quantity) {
+        const quantityInput = expensesDataContainer.querySelector(`input[name="expense_quantity_${expenseId}"]`);
+        if (quantityInput) {
+            quantityInput.value = quantity;
+        }
+    }
+
+    // Обработчик кнопки добавления
+    addExpenseBtn.addEventListener('click', function() {
+        const selectedOption = expenseSelect.options[expenseSelect.selectedIndex];
+        const expenseId = expenseSelect.value;
+        const expenseName = selectedOption.dataset.name;
+        const quantity = expenseQuantity.value;
+
+        if (!expenseId) {
+            alert('Выберите расходник');
+            return;
+        }
+
+        if (!quantity || quantity < 1) {
+            alert('Введите корректное количество');
+            return;
+        }
+
+        addExpenseToTable(expenseId, expenseName, quantity);
+
+        // Сбрасываем форму
+        expenseSelect.value = '';
+        expenseQuantity.value = '1';
+    });
+
+    // Обработчики для уже существующих расходников
+    selectedExpensesList.querySelectorAll('.remove-expense').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const row = this.closest('tr');
+            const expenseId = row.dataset.expenseId;
+            removeExpense(expenseId);
+        });
+    });
+
+    selectedExpensesList.querySelectorAll('.expense-quantity').forEach(input => {
+        input.addEventListener('change', function() {
+            const row = this.closest('tr');
+            const expenseId = row.dataset.expenseId;
+            updateExpenseQuantity(expenseId, this.value);
+        });
+    });
+});
+
+document.querySelectorAll('.toggle-children').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const li = btn.closest('.category-item');
+        const childrenUl = li.querySelector('.category-children');
+        if (childrenUl) {
+            li.classList.toggle('expanded');
+            // Или так:
+            // childrenUl.classList.toggle('expanded');
+        }
+    });
+});
+document.querySelectorAll('.toggle-children').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const ul = btn.closest('.category-item').querySelector('.category-children');
+        if (ul) {
+            ul.classList.toggle('expanded');
+        }
+    });
+});
+</script>
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+{% endblock footerbottom %}

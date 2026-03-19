@@ -1,0 +1,174 @@
+{% extends 'site/shop5/base.html' %}
+{% load static generals_tag shop_tags %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<style>
+    .category-link > img {
+    height: 80px;
+    display:block!important;
+}
+    .product-media img:first-child {
+    position: relative;
+    opacity: 1;
+    height: 250px!important;
+}
+    .promo-banner {
+    background-color: #27393d;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    animation-duration: 1.2s;
+    padding: 50px 20px;
+  }
+
+  .promo-form input[type="email"] {
+    max-width: 100%;
+  }
+
+  .promo-buttons img {
+    background-color: #121315;
+    width: 183px;
+    height: 53px;
+  }
+.content-left .mr-auto{
+width: 50%; float: left;
+}
+.content-right{
+width: 50%;
+float: right;
+display: grid ;
+ justify-items: self-end;
+}
+  @media (max-width: 767.98px) {
+    .promo-banner {
+      text-align: center;
+    }
+    .promo-buttons {
+      justify-content: center !important;
+    }
+    .content-right{
+width: 100%;
+}
+  }
+    @media (max-width: 575px) {
+    .intro-slide2 .slide-image {
+        /* bottom: 0; */
+        left: 0;
+        height: 100px;
+        top: 0;
+    }
+    .product-media img:first-child {
+    position: relative;
+    opacity: 1;
+    height: 150px !important;
+}
+}
+    @media (max-width: 767px) {
+    .slide-animate h5,
+    .slide-animate .banner-title,
+    .slide-animate .btn {
+        color: #ff6e00 !important;
+        border-color: #ff6e00 !important; /* для outline-кнопки */
+    }
+    .slide-animate .btn i {
+        color: #ff6e00 !important;
+    }
+    .banner-content {
+        background: #2a2b2db8;
+        padding: 10px;
+        border-radius: 10px;
+    }
+    .swiper-wrapper {
+    z-index: 1;
+    height: auto;
+    height: 430px;
+}
+
+}
+.category-list-home {
+    border: 2px solid #dcdcdc;
+    border-radius: 20px;
+    padding: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+}
+ul.nav-filters.category-home-list li {
+    background: #F1F1F1;
+    padding: 5px 10px;
+    border-radius: 5px;
+    margin: 10px 15px;
+}
+</style>
+
+{% endblock head %}
+
+{% block content %}
+<main class="main">
+    <div class="container" style=" min-height: 1000px; ">
+        {% include 'site/shop5/include/profile_menu.html' %}
+
+        <div class="row ">
+
+            {% for product in is_bookmarked %}
+                       <div class="col-12 col-sm-6 col-md-4 mb-4 grid-item {% for category in product.category.all %}{{ category.slug }} {% endfor %}">
+                <div class="product text-center"
+                     style="border-radius: 20px; border: 1px solid #e9eef4; padding: 0px; box-shadow: 4px 6px 15px rgba(0, 0, 0, 0.15);">
+                    <figure class="product-media">
+                        <a href="{% url 'shop:products' product.slug %}">
+                            <img src="{% if product.image %}{{ product.image.url }}{% endif %}" alt="Product"
+                                 width="600" height="675"/>
+                        </a>
+                    </figure>
+                    <div class="product-details" style="border-radius: 20px 10px; margin: 0px 10px;">
+                        {% include 'site/shop5/include/bookmark-button.html' %}
+                        <h3 class="text-left product-name">
+                            <a href="{% url 'shop:products' product.slug %}"
+                               style="font-size: 22px; font-weight: bold;">{{ product.name }}</a>
+                        </h3>
+                        <div style="display: flex; justify-content: flex-end;">
+                            <div style="
+        background: #ededed;
+        border-radius: 10px;
+        padding: 6px 12px;
+        text-align: right;
+        color: #000;
+    ">
+                                <div style="font-size: 14px;">вес</div>
+                                <h5 style="margin: 0; font-weight: bold;">
+                                    {{ product.weight }}
+                                </h5>
+                            </div>
+                        </div>
+
+                        <div class="product-price d-flex justify-content-between align-items-center">
+
+                            <div class="price-container d-flex flex-column" style="align-items: flex-start;">
+                                <del class="old-price" style="font-size: 1.9rem; color: #999; margin-top: 2px;">
+                                    {{ product.price_old }} ₽
+                                </del>
+                                <ins class="new-price"
+                                     style="margin-top: -10px; font-size: 2rem; color: #333; font-weight: bold; text-decoration: none;">
+                                    {{ product.price }} ₽
+                                </ins>
+                            </div>
+                            {% include 'site/shop5/include/cart-button.html' %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% endfor %}
+        </div>
+    </div>
+</main>
+<script>
+    window.urls = {
+        bookmarkAdd: "{% url 'shop:bookmark-add' %}",
+        bookmarkDelete: "{% url 'shop:bookmark-delete' %}"
+    };
+</script>
+
+{% endblock content %}

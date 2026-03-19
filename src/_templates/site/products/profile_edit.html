@@ -1,0 +1,124 @@
+{% extends 'products/base_profile.html' %}
+{% load static generals_tag %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+{% block content %}
+<aside class="sidebar-area">
+  <div class="widget widget_categories">
+    <h3 class="widget_title">Редактирование профиля
+         </h3>
+  <div class="card mb-3">
+    <form method="post"  class="account__main-info" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="card-body">
+        <div class="row">
+          <div class="col-sm-3">
+            <h6 class="mb-0">Аватарка</h6>
+          </div>
+          <div class="col-sm-9 text-secondary">
+            {{ form.avatar }}
+          </div>
+        </div>
+        <hr>
+        <div class="row">
+          <div class="col-sm-3">
+            <h6 class="mb-0">Обложка</h6>
+          </div>
+          <div class="col-sm-9 text-secondary">
+            {{ form.cover }}
+          </div>
+        </div>
+        <hr>
+        <div class="row">
+          <div class="col-sm-3">
+            <h6 class="mb-0">Логин</h6>
+          </div>
+          <div class="col-sm-9 text-secondary">
+            {{ form.username }}
+          </div>
+        </div>
+        <hr>
+        <div class="row">
+          <div class="col-sm-3">
+            <h6 class="mb-0">Email</h6>
+          </div>
+          <div class="col-sm-9 text-secondary">
+            {{ form.email }}
+          </div>
+        </div>
+        <hr>
+        <div class="row">
+          <div class="col-sm-3">
+            <h6 class="mb-0">Телефон</h6>
+          </div>
+          <div class="col-sm-9 text-secondary">
+            {{ form.phone }}
+          </div>
+        </div>
+        <hr>
+        Публичная информация
+        <hr>
+        <div class="row">
+          <div class="col-sm-3">
+            <h6 class="mb-0">ФИО</h6>
+          </div>
+          <div class="col-sm-9 text-secondary">
+            {{ form.name }}
+          </div>
+        </div>
+        <hr>
+        <div class="row">
+          <div class="col-sm-3">
+            <h6 class="mb-0">Город</h6>
+          </div>
+          <div class="col-sm-9 text-secondary">
+            {{ form.city }}
+          </div>
+        </div>
+        <hr>
+        <div class="row">
+          <div class="col-sm-3">
+            <h6 class="mb-0">Дата рождения</h6>
+          </div>
+          <div class="col-sm-9 text-secondary">
+            {{ form.birthday }}
+          </div>
+        </div>
+
+        <hr>
+        <div class="row">
+          <div class="col-sm-3">
+            <h6 class="mb-0">Пол</h6>
+          </div>
+          <div class="col-sm-9 text-secondary">
+            {{ form.gender }}
+          </div>
+        </div>
+        <hr>
+        <div class="row">
+          <div class="col-sm-3">
+            <h6 class="mb-0">Описание</h6>
+          </div>
+          <div class="col-sm-9 text-secondary">
+            {{ form.description }}
+          </div>
+        </div>
+        <hr>
+        <div class="row">
+          <div class="col-sm-12">
+            <button type="submit" class="btn btn-info">
+              Сохранить
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+    </div>
+  </aside>
+{% endblock content %}
+{% block footer %}{% endblock footer %}

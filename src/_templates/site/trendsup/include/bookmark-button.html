@@ -1,0 +1,16 @@
+{% if user.is_authenticated %}
+  <div class="meta-action" id="bookmark_button_{{ product.id }}" data-product="{{ product.id }}">
+    <button
+      type="button"
+      class="bookmark btn btn-sm {% if product in is_bookmarked %}btn-outline-danger active{% else %}btn-outline-secondary{% endif %}"
+      data-type="{% if product in is_bookmarked %}bookmarkDelete{% else %}bookmarkAdd{% endif %}"
+      data-product="{{ product.id }}"
+      aria-pressed="{% if product in is_bookmarked %}true{% else %}false{% endif %}"
+      aria-label="{% if product in is_bookmarked %}Удалить из избранного{% else %}В избранное{% endif %}"
+      data-bs-toggle="tooltip" style="background: #dcb996; border-radius: 6px;"
+      title="{% if product in is_bookmarked %}Убрать из избранного{% else %}Добавить в избранное{% endif %}"
+    >
+      <i class="{% if product in is_bookmarked %}fas fa-heart{% else %}far fa-heart{% endif %}"></i>
+    </button>
+  </div>
+{% endif %}

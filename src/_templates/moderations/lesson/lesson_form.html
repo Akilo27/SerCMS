@@ -1,0 +1,707 @@
+{% extends 'moderations/base.html' %}
+{% load i18n %}
+{% load static  %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<style>
+    #saveTab {
+    display:none;
+    }
+</style>
+{% endblock head %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <div class="card-header">
+                <ul class="nav nav-pills nav-justified p-1 align-items-center">
+                    <li class="nav-item">
+                        <a href="#homePillJustified" data-bs-toggle="tab" aria-expanded="true" class="nav-link active">
+                            <span class="d-block d-sm-none"><i class="bx bx-home"></i></span>
+                            <span class="d-none d-sm-block">{% trans "Информация" %}</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#profilePillJustified" data-bs-toggle="tab" aria-expanded="false" class="nav-link">
+                            <span class="d-block d-sm-none"><i class="bx bx-user"></i></span>
+                            <span class="d-none d-sm-block">SEO</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#PasspardTabsJustified" data-bs-toggle="tab" aria-expanded="false" class="nav-link">
+                            <span class="d-block d-sm-none"><i class="ri-mail-line"></i></span>
+                            <span class="d-none d-sm-block">{% trans "Галерея" %}</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#messagesTabsJustified" data-bs-toggle="tab" aria-expanded="false" class="nav-link">
+                            <span class="d-block d-sm-none"><i class="ri-mail-line"></i></span>
+                            <span class="d-none d-sm-block">{% trans "Тесты" %}</span>
+                        </a>
+                    </li>
+
+                    <!-- Кнопка "Сохранить" справа -->
+                    <li class="nav-item ms-auto"  id="saveTabTrigger">
+                        <a href="#saveTab" class="btn btn-success px-3 py-1">
+                            <i class="ri-save-line me-1"></i>
+                            <span class="d-none d-sm-inline">{% trans "Сохранить" %}</span>
+                        </a>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.media }}
+                {{ form.non_field_errors }}
+                <button type="submit" class="btn btn-primary" id="saveTab">{% trans "Сохранить" %}</button>
+                <div class="tabbed-content button-tabs">
+                    <div class="tab-content pt-2 text-muted">
+                        <div class="tab-pane show active" id="homePillJustified">
+                            <div class="row" >
+                                <div class="col-9">
+                                    <div class="mb-3">
+                                        <label for="{{ form.name.id_for_label }}" class="form-label">{% trans "Название" %}</label>
+                                        {{ form.name }}
+                                        {{ form.name.errors }}
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="{{ form.description.id_for_label }}" class="form-label">{% trans "Описание" %}</label>
+                                        {{ form.description }}
+                                        {{ form.description.errors }}
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="{{ form.slug.id_for_label }}" class="form-label">Slug</label>
+                                        {{ form.slug }}
+                                        {{ form.slug.errors }}
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="{{ form.cover.id_for_label }}" class="form-label">{% trans "Обложка" %}</label>
+                                        {{ form.cover }}
+                                        {{ form.cover.errors }}
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="{{ form.image.id_for_label }}" class="form-label">{% trans "Изображение" %}</label>
+                                        {{ form.image }}
+                                        {{ form.image.errors }}
+                                    </div>
+                                </div>
+
+                                <div class="col-3">
+
+                                    <div class="mb-3">
+                                        <label for="{{ form.manufacturers.id_for_label }}" class="form-label">{% trans "Производители" %}</label>
+                                        {{ form.manufacturers }}
+                                        {{ form.manufacturers.errors }}
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="{{ form.assistant.id_for_label }}" class="form-label">{% trans "Ассистенты" %}</label>
+                                        {{ form.assistant }}
+                                        {{ form.assistant.errors }}
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="{{ form.time.id_for_label }}" class="form-label">{% trans "Длительность" %}</label>
+                                        {{ form.time }}
+                                        {{ form.time.errors }}
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="{{ form.quantity_files.id_for_label }}" class="form-label">{% trans "Количество файлов" %}</label>
+                                        {{ form.quantity_files }}
+                                        {{ form.quantity_files.errors }}
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="{{ form.quantity_tests.id_for_label }}" class="form-label">{% trans "Количество тестов" %}</label>
+                                        {{ form.quantity_tests }}
+                                        {{ form.quantity_tests.errors }}
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="{{ form.quantity_video.id_for_label }}" class="form-label">{% trans "Количество видео" %}</label>
+                                        {{ form.quantity_video }}
+                                        {{ form.quantity_video.errors }}
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="{{ form.price.id_for_label }}" class="form-label">{% trans "Цена" %}</label>
+                                        {{ form.price }}
+                                        {{ form.price.errors }}
+                                    </div>
+
+                                    <div class="mb-3 form-check">
+                                        {{ form.public }} <label class="form-check-label" for="{{ form.public.id_for_label }}">{% trans "Доступен всем" %}</label>
+                                        {{ form.public.errors }}
+                                    </div>
+
+                                    <div class="mb-3 form-check">
+                                        {{ form.publishet }} <label class="form-check-label" for="{{ form.publishet.id_for_label }}">{% trans "Опубликован" %}</label>
+                                        {{ form.publishet.errors }}
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+                        <div class="tab-pane" id="profilePillJustified">
+                            <div class="mb-3">
+                                <label for="{{ form.previev.id_for_label }}" class="form-label">{% trans "Превью" %}</label>
+                                {{ form.previev }}
+                                {{ form.previev.errors }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.title.id_for_label }}" class="form-label">{% trans "Мета-заголовок" %}</label>
+                                {{ form.title }}
+                                {{ form.title.errors }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.metadescription.id_for_label }}" class="form-label">{% trans "Мета-описание" %}</label>
+                                {{ form.metadescription }}
+                                {{ form.metadescription.errors }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.propertytitle.id_for_label }}" class="form-label">{% trans "Мета-заголовок ссылки" %}</label>
+                                {{ form.propertytitle }}
+                                {{ form.propertytitle.errors }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.propertydescription.id_for_label }}" class="form-label">{% trans "Мета-описание ссылки" %}</label>
+                                {{ form.propertydescription }}
+                                {{ form.propertydescription.errors }}
+                            </div>
+
+
+                        </div>
+                        <div class="tab-pane" id="PasspardTabsJustified">
+                            <h2 class="m-2">{% trans "Материалы урока" %}</h2>
+
+                            <div class="row">
+                                <div class="materials-list">
+                                    {% if materials %}
+                                    <ul class="materials">
+                                        {% for material in materials %}
+                                        <li class="material-item" id="material-{{ material.id }}">
+                                            <a href="{{ material.file.url }}" target="_blank" class="material-link">
+                                                <div class="material-info">
+                                                    <span class="material-name">{{ material.original_filename|truncatechars:40 }}</span> <!-- Ограничение символов -->
+                                                    <span class="material-size">{{ material.size|filesizeformat }}</span>
+                                                    <span class="material-type">{{ material.file_type }}</span> <!-- Формат файла -->
+                                                </div>
+                                            </a>
+                                            <!-- Кнопка удаления материала с AJAX -->
+                                            <button class="delete-btn" data-id="{{ material.id }}" data-url="{% url 'moderation:delete_material' material.id %}" onclick="deleteMaterial(event)">{% trans "Удалить" %}</button>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                    {% else %}
+                                    <div class="no-materials">
+                                        <p>{% trans "Нет материалов для этого урока" %}.</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Пример стилей -->
+                                <style>
+                                    .materials-list {
+                                        padding: 20px;
+                                        background-color: #f9f9f9;
+                                        border-radius: 8px;
+                                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                                    }
+
+                                    .materials {
+                                        list-style-type: none;
+                                        margin: 0;
+                                        padding: 0;
+                                    }
+
+                                    .material-item {
+                                        margin-bottom: 15px;
+                                        padding: 10px;
+                                        background-color: #ffffff;
+                                        border: 1px solid #ddd;
+                                        border-radius: 6px;
+                                        transition: all 0.3s ease;
+                                        display: flex;
+                                        justify-content: space-between;
+                                        align-items: center;
+                                    }
+
+                                    .material-item:hover {
+                                        background-color: #f0f0f0;
+                                        border-color: #bbb;
+                                    }
+
+                                    .material-link {
+                                        text-decoration: none;
+                                        color: #333;
+                                        flex-grow: 1;
+                                        display: flex;
+                                        flex-direction: column;
+                                    }
+
+                                    .material-info {
+                                        display: flex;
+                                        flex-direction: column;
+                                    }
+
+                                    .material-name {
+                                        font-weight: bold;
+                                        font-size: 16px;
+                                        margin-bottom: 5px;
+                                        white-space: nowrap;
+                                        overflow: hidden;
+                                        text-overflow: ellipsis;
+                                    }
+
+                                    .material-size {
+                                        font-size: 14px;
+                                        color: #555;
+                                    }
+
+                                    .material-type {
+                                        font-size: 14px;
+                                        color: #777;
+                                    }
+
+                                    .delete-btn {
+                                        background-color: #ff4d4d;
+                                        color: white;
+                                        border: none;
+                                        padding: 6px 12px;
+                                        border-radius: 4px;
+                                        cursor: pointer;
+                                        font-size: 14px;
+                                        transition: background-color 0.3s;
+                                    }
+
+                                    .delete-btn:hover {
+                                        background-color: #ff2a2a;
+                                    }
+
+                                    .no-materials {
+                                        text-align: center;
+                                        font-size: 16px;
+                                        color: #999;
+                                    }
+                                </style>
+
+                                <script>
+                                    // Функция для удаления материала через AJAX
+                                    function deleteMaterial(event) {
+                                        event.preventDefault();  // Предотвращаем стандартное поведение (переход)
+
+                                        const materialId = event.target.getAttribute("data-id");
+                                        const deleteUrl = event.target.getAttribute("data-url"); // Получаем URL для удаления
+
+                                        // Подтверждение удаления
+                                        if (!confirm("Вы уверены, что хотите удалить этот материал?")) return;
+
+                                        // Отправка запроса на сервер
+                                        fetch(deleteUrl, {
+                                            method: "DELETE",
+                                            headers: {
+                                                "X-CSRFToken": getCookie("csrftoken"),
+                                            },
+                                        })
+                                        .then((response) => response.json())
+                                        .then((data) => {
+                                            if (data.success) {
+                                                alert("Материал удален.");
+                                                document.getElementById(`material-${materialId}`).remove(); // Удаляем элемент из списка
+                                            } else {
+                                                alert("Ошибка при удалении материала.");
+                                            }
+                                        })
+                                        .catch((err) => {
+                                            console.error(err);
+                                            alert("Ошибка при удалении материала.");
+                                        });
+                                    }
+
+                                    // Функция для получения CSRF-токена
+                                    function getCookie(name) {
+                                        let cookieValue = null;
+                                        if (document.cookie && document.cookie !== "") {
+                                            for (let cookie of document.cookie.split(";")) {
+                                                cookie = cookie.trim();
+                                                if (cookie.startsWith(name + "=")) {
+                                                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        return cookieValue;
+                                    }
+                                </script>
+
+
+
+                                <div id="fileload" data-lessons="9e685bae-54a5-48b8-847e-be2112d8139b">
+                                    <input type="file" id="fileInput" multiple>
+                                    <progress id="progressBar" value="0" max="100" style="width: 100%;"></progress>
+                                </div>
+                            </div>
+                            <script>
+                                document.addEventListener("DOMContentLoaded", function () {
+                                    const fileInput = document.getElementById("fileInput");
+                                    const progressBar = document.getElementById("progressBar");
+                                    const lessonId = document.getElementById("fileload").getAttribute("data-lessons");
+
+                                    fileInput.addEventListener("change", function () {
+                                        const files = this.files;
+                                        if (files.length === 0) return;
+
+                                        let currentFileIndex = 0;
+
+                                        // Функция для загрузки файла по очереди
+                                        const uploadNextFile = () => {
+                                            if (currentFileIndex >= files.length) {
+                                                alert("Все файлы успешно загружены.");
+                                                return;
+                                            }
+
+                                            const file = files[currentFileIndex];
+                                            const CHUNK_SIZE = 1024 * 1024; // Размер чанка (1MB)
+                                            const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+                                            let temp_file_id = null;
+
+                                            const uploadChunk = (chunkIndex) => {
+                                                const start = chunkIndex * CHUNK_SIZE;
+                                                const end = Math.min(file.size, start + CHUNK_SIZE);
+                                                const chunk = file.slice(start, end);
+
+                                                const formData = new FormData();
+                                                formData.append("file", chunk);
+                                                formData.append("filename", file.name);
+                                                formData.append("chunk_index", chunkIndex);
+                                                formData.append("total_chunks", totalChunks);
+                                                formData.append("lesson_id", lessonId);
+                                                formData.append("total_size", file.size);
+                                                if (temp_file_id) {
+                                                    formData.append("temp_file_id", temp_file_id);
+                                                }
+
+                                                fetch("{% url 'moderation:lesson_chunk_upload' %}", {
+                                                    method: "POST",
+                                                    headers: { "X-CSRFToken": getCookie("csrftoken") },
+                                                    body: formData,
+                                                })
+                                                .then((response) => response.json())
+                                                .then((data) => {
+                                                    if (data.success) {
+                                                        temp_file_id = data.temp_file_id || temp_file_id;
+                                                        const progress = Math.floor(((chunkIndex + 1) / totalChunks) * 100);
+                                                        progressBar.value = progress;
+
+                                                        if (chunkIndex + 1 < totalChunks) {
+                                                            uploadChunk(chunkIndex + 1);
+                                                        } else {
+                                                            currentFileIndex++;
+                                                            uploadNextFile();  // Загружаем следующий файл после завершения текущего
+                                                        }
+                                                    } else {
+                                                        alert("Ошибка: " + data.error);
+                                                    }
+                                                })
+                                                .catch((err) => {
+                                                    console.error(err);
+                                                    alert("Ошибка при загрузке.");
+                                                });
+                                            };
+
+                                            uploadChunk(0); // Запускаем загрузку первого чанка
+                                        };
+
+                                        uploadNextFile(); // Начинаем загружать первый файл
+                                    });
+
+                                    // Функция для получения CSRF-токена
+                                    function getCookie(name) {
+                                        let cookieValue = null;
+                                        if (document.cookie && document.cookie !== "") {
+                                            for (let cookie of document.cookie.split(";")) {
+                                                cookie = cookie.trim();
+                                                if (cookie.startsWith(name + "=")) {
+                                                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        return cookieValue;
+                                    }
+                                });
+                            </script>
+                        </div>
+                        <!-- Скрытое поле для удаляемых файлов -->
+                        <input type="hidden" name="delete_files" id="delete_files" value="">
+
+                        <div class="tab-pane" id="messagesTabsJustified">
+                            <h2>{% trans "Создание теста" %}</h2>
+                            <div class="quiz-container">
+                                <div id="quiz-form">
+                                    <div id="questions-container">
+                                        <!-- Динамически добавляемые вопросы будут здесь -->
+                                    </div>
+
+                                    <div class="quiz-actions">
+                                        <button type="button" class="add-question-btn" onclick="addQuestion()">{% trans "Добавить вопрос" %}</button>
+                                    </div>
+
+                                    <!-- Скрытое поле для хранения данных в формате JSON -->
+                                    {{ form.resources }}
+                                </div>
+                            </div>
+
+                            <!-- Пример стилей -->
+                            <style>
+                                /* Контейнер квиза */
+    .quiz-container {
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Заголовок */
+    h2 {
+        text-align: center;
+    }
+
+    /* Вопросы и ответы */
+    .quiz-question, .quiz-answers, .quiz-actions {
+        margin-bottom: 20px;
+    }
+
+    /* Метки */
+    label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    /* Группа вариантов ответов */
+    .answer-group {
+        margin-bottom: 10px;
+    }
+
+    /* Вариант ответа */
+    .answer-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    /* Поля ввода для вариантов ответов и вопросов */
+    .answer-input,
+    .quiz-question input[type="text"] {
+        width: 100%; /* Растягиваем поле на всю ширину */
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+
+    /* Кнопка для добавления вариантов */
+    .add-answer-btn {
+        padding: 6px 12px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 4px;
+        border: none;
+        background-color: #ff9800;
+        color: white;
+        transition: background-color 0.3s;
+    }
+
+    .add-answer-btn:hover {
+        background-color: #ff7700;
+    }
+
+    /* Кнопка для добавления вопросов и сохранения */
+    .add-question-btn, .save-btn {
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 4px;
+        border: none;
+        background-color: #4CAF50;
+        color: white;
+        margin-top: 20px;
+    }
+
+    .add-question-btn:hover, .save-btn:hover {
+        opacity: 0.8;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 600px) {
+        .quiz-container {
+            padding: 15px;
+        }
+
+        .add-answer-btn, .add-question-btn, .save-btn {
+            width: 100%;
+            margin-top: 10px;
+        }
+    }
+                                textarea#id_resources {
+        display: none;
+    }
+
+                            </style>
+
+                            <script>
+                                let questionCount = 0;  // Счётчик количества вопросов
+
+    // Функция для добавления нового вопроса
+    function addQuestion() {
+        questionCount++;
+
+        const questionContainer = document.createElement('div');
+        questionContainer.classList.add('quiz-question');
+        questionContainer.setAttribute('id', `question-${questionCount}`);
+
+        questionContainer.innerHTML = `
+            <h3>Вопрос ${questionCount}</h3>
+            <label for="question-${questionCount}">Вопрос:</label>
+            <input type="text" id="question-${questionCount}" name="questions[${questionCount}][question]" placeholder="Введите вопрос" required oninput="saveQuizData()">
+
+            <label>Варианты ответов:</label>
+            <div class="answer-group" id="answer-group-${questionCount}">
+                <div class="answer-item">
+                    <input type="text" name="questions[${questionCount}][answers][]" class="answer-input" placeholder="Введите вариант ответа" required oninput="saveQuizData()">
+                    <label><input type="radio" name="questions[${questionCount}][correct_answer]" value="1" onchange="saveQuizData()"> Правильный ответ</label>
+                </div>
+            </div>
+            <button type="button" class="add-answer-btn" onclick="addAnswer(${questionCount})">Добавить вариант</button>
+        `;
+
+        document.getElementById('questions-container').appendChild(questionContainer);
+    }
+
+    // Функция для добавления нового варианта ответа для конкретного вопроса
+    function addAnswer(questionId) {
+        const answerGroup = document.getElementById(`answer-group-${questionId}`);
+        const newAnswerItem = document.createElement('div');
+        newAnswerItem.classList.add('answer-item');
+        newAnswerItem.innerHTML = `
+            <input type="text" name="questions[${questionId}][answers][]" class="answer-input" placeholder="Введите вариант ответа" required oninput="saveQuizData()">
+            <label><input type="radio" name="questions[${questionId}][correct_answer]" value="${answerGroup.children.length + 1}" onchange="saveQuizData()"> Правильный ответ</label>
+        `;
+        answerGroup.appendChild(newAnswerItem);
+    }
+
+    // Функция для сохранения данных в JSON и записи в поле textarea
+    function saveQuizData() {
+        const questions = [];
+        const questionElements = document.querySelectorAll('.quiz-question');
+
+        questionElements.forEach((questionElem, index) => {
+            const questionText = questionElem.querySelector('input[type="text"]').value;
+            const answerItems = questionElem.querySelectorAll('.answer-item');
+            const answers = [];
+
+            answerItems.forEach((answerElem, answerIndex) => {
+                const answerText = answerElem.querySelector('input[type="text"]').value;
+                const isCorrect = answerElem.querySelector('input[type="radio"]:checked') !== null;
+
+                answers.push({
+                    answer: answerText,
+                    is_correct: isCorrect
+                });
+            });
+
+            questions.push({
+                question: questionText,
+                answers: answers
+            });
+        });
+
+        const quizData = {
+            questions: questions
+        };
+
+        // Преобразуем в JSON и сохраняем в textarea
+        document.getElementById('id_resources').value = JSON.stringify(quizData);
+        console.log("Сохраненные данные:", quizData);  // Выводим данные в консоль для проверки
+    }
+
+    // Функция для загрузки данных из textarea и восстановления формы
+    function loadQuizData() {
+        const quizData = JSON.parse(document.getElementById('id_resources').value);
+
+        if (quizData.questions && quizData.questions.length > 0) {
+            quizData.questions.forEach((question, index) => {
+                addQuestion();  // Добавляем новый вопрос
+                const questionElem = document.getElementById(`question-${index + 1}`);
+
+                // Заполняем текст вопроса
+                questionElem.querySelector('input[type="text"]').value = question.question;
+
+                question.answers.forEach((answer, answerIndex) => {
+                    addAnswer(index + 1);  // Добавляем варианты ответов
+                    const answerElem = questionElem.querySelectorAll('.answer-item')[answerIndex];
+
+                    // Заполняем вариант ответа
+                    answerElem.querySelector('input[type="text"]').value = answer.answer;
+
+                    // Отмечаем правильный ответ
+                    if (answer.is_correct) {
+                        answerElem.querySelector('input[type="radio"]').checked = true;
+                    }
+                });
+            });
+        }
+    }
+
+    // Инициализация при загрузке страницы
+    document.addEventListener('DOMContentLoaded', function() {
+        loadQuizData();  // Загружаем данные из textarea при загрузке страницы
+    });
+
+                            </script>
+
+
+                        </div>
+                    </div>
+            </form>
+
+        </div>
+    </div>
+
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const trigger = document.getElementById('saveTabTrigger');
+        const realSubmit = document.getElementById('saveTab');
+
+        if (trigger && realSubmit) {
+            trigger.addEventListener('click', function (e) {
+                e.preventDefault(); // Отключаем переход по ссылке
+                realSubmit.click(); // Симулируем клик по кнопке submit
+            });
+        }
+    });
+</script>
+{% endblock content %}

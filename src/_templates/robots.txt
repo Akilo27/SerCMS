@@ -1,0 +1,42 @@
+# templates/robots.txt
+
+User-agent: *
+Disallow: /developer_management/
+Disallow: /search/
+Disallow: /
+Crawl-Delay: 5
+
+User-agent: Amazonbot
+Disallow: /catalog/
+Disallow: /manufacturerreviews/
+Disallow: /manufacturerfaqs/
+Disallow: /faqs/update/
+Disallow: /manufacturerorder/
+Disallow: /manufacturerapplications/
+Disallow: /catalog/*
+Disallow: /order/*
+Disallow: /application/*
+Disallow: /order/*/add_comment/
+Disallow: /aplication/*/add_comment/
+Disallow: /categories/
+Disallow: /manufacturers/
+Disallow: /submit-review/
+Disallow: /addcart/
+Disallow: /cart-item-count/
+Disallow: /cart-items/
+Disallow: /create-application/
+Disallow: /bookmark/add/
+Disallow: /bookmark/delete/
+Disallow: /add-faq/
+Disallow: /myorder/
+Disallow: /bookmarks/
+Disallow: /delete_selected_product/
+Disallow: /cart/update_quantity/
+Disallow: /mycart/
+Disallow: /update-cart-currency/
+
+{% if sitemaps %}
+{% for sitemap_name, sitemap in sitemaps.items %}
+Sitemap: {{ request.scheme }}://{{ request.get_host }}{% url 'django.contrib.sitemaps.views.sitemap' sitemap_name %}
+{% endfor %}
+{% endif %}

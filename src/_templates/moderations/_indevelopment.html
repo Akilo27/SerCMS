@@ -1,0 +1,14 @@
+{% extends 'moderations/base.html' %}
+{% load generals_tag static i18n %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+{% endblock head %}
+{% block content %}
+<div class="d-flex vh-100 justify-content-center align-items-center bg-light">
+    <h1 class="text-dark fw-bold">{% trans "В разработке" %}</h1>
+</div>
+{% endblock content %}

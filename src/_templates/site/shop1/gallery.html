@@ -1,0 +1,210 @@
+{% extends 'site/shop1/base.html' %}
+{% load static %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+{% block content %}
+<div id="wrapper" class="inner-pages ui-elements hd-white">
+    <!-- START SECTION HEADINGS -->
+    <div class="clearfix"></div>
+    <section class="headings">
+        <div class="text-heading text-center">
+            <div class="container">
+                <h1>Галерея</h1>
+                <h2><a href="{% url 'webmain:home' %}">Главная </a> &nbsp;/&nbsp; Галерея</h2>
+            </div>
+        </div>
+    </section>
+</div>
+<!-- END SECTION HEADINGS -->
+<!-- START SECTION sponsorship -->
+<main class="wd-content-layout content-layout-wrapper container wd-builder-off wd-grid-g wd-sidebar-hidden-md-sm wd-sidebar-hidden-sm"
+      role="main" style="--wd-col-lg:12;--wd-gap-lg:30px;--wd-gap-sm:20px;">
+    <aside class="wd-sidebar sidebar-container wd-grid-col sidebar-left"
+           style="--wd-col-lg:3;--wd-col-md:12;--wd-col-sm:12;">
+        <!-- START SECTION BLOG -->
+        <section class="page-content mb-10 pb-2">
+            <div class="container">
+                <div class="row gutter-lg">
+                    <aside class="sidebar right-sidebar blog-sidebar sidebar-fixed sticky-sidebar-wrapper">
+
+                        <h5 class="font-weight-bold mb-4">Поиск</h5>
+
+                        <!-- Форма поиска -->
+                        <form method="get" action="{% url 'webmain:galleries' %}">
+                            <div class="input-group">
+                                <input type="text" name="search" placeholder="Поиск по названию"
+                                       value="{{ search_query }}" class="form-control"/>
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="fa fa-search" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </aside>
+                </div>
+                {#% include 'site/shop1/include/paginations.html' with items=galleries %#}
+            </div>
+        </section>
+    </aside>
+    <div class="wd-content-area site-content wd-grid-col" style="--wd-col-lg:9;--wd-col-md:12;--wd-col-sm:12;">
+        <div class="col-lg-9 col-md-12 col-xs-12">
+            <div class="row" id="gallery-list">
+            </div>
+        </div>
+    </div>
+</main>
+<!-- END SECTION sponsorship -->
+
+{% endblock content %}
+{% block footerbottom %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const galleryList = document.getElementById('gallery-list');
+        let currentPage = 1;
+        let isLoading = false; // Флаг для предотвращения множественных запросов
+
+        const loadGalleries = (page) => {
+            if (isLoading) return; // Если уже загружаем данные, выходим
+            isLoading = true; // Устанавливаем флаг загрузки
+
+            const searchQuery = document.querySelector('input[name="search"]')?.value || '';
+            // Формируем URL без категорий и тегов
+            const url = `/galleries/?page=${page}${searchQuery ? `&search=${searchQuery}` : ''}`;
+
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error('Ошибка загрузки данных');
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    // Добавляем новые записи
+                    data.galleries.forEach((gallery) => {
+                      // Создаем основной контейнер карточки
+                      const galleryItem = document.createElement('div');
+                      galleryItem.className = 'gallery-item';
+                      galleryItem.style.marginBottom = '20px';
+                      galleryItem.style.boxSizing = 'border-box';
+
+                      // 1. Заголовок
+                      const titleLink = document.createElement('a');
+                      titleLink.href = gallery.url;
+                      titleLink.className = 'gallery-title';
+                      titleLink.style.display = 'block';
+                      titleLink.style.margin = '10px';
+
+                      const title = document.createElement('h3');
+                      title.textContent = gallery.name;
+
+                      title.style.textAlign = 'left';
+                      title.style.margin = '0';
+                      titleLink.appendChild(title);
+                      galleryItem.appendChild(titleLink);
+
+                      // 2. Изображение
+                      if (gallery.image) {
+                        const imageLink = document.createElement('a');
+                        imageLink.href = gallery.url;
+                        imageLink.className = 'gallery-image';
+                        imageLink.style.display = 'block';
+
+                        imageLink.style.margin = '0 10px';
+
+                        const img = document.createElement('img');
+                        img.src = gallery.image;
+                        img.alt = gallery.name;
+
+                        img.style.width = '100%';
+                        img.style.height = 'auto';
+                        img.style.display = 'block';
+
+                        imageLink.appendChild(img);
+                        galleryItem.appendChild(imageLink);
+                      }
+
+                      // 3. Контент
+                      const contentDiv = document.createElement('div');
+                      contentDiv.className = 'gallery-content';
+                      contentDiv.style.padding = '10px';
+                      contentDiv.style.boxSizing = 'border-box';
+
+                      // Описание
+                      const descriptionP = document.createElement('p');
+                      descriptionP.textContent = gallery.description;
+                      descriptionP.style.marginBottom = '10px';
+
+                      descriptionP.style.display = '-webkit-box';
+                      descriptionP.style.webkitBoxOrient = 'vertical';
+                      descriptionP.style.webkitLineClamp = '2';
+                      descriptionP.style.overflow = 'hidden';
+                      descriptionP.style.textOverflow = 'ellipsis';
+                      contentDiv.appendChild(descriptionP);
+
+                      // Блок с датой, автором и кнопкой "Прочитать..."
+                      const metaDiv = document.createElement('div');
+                      metaDiv.style.display = 'flex';
+                      metaDiv.style.justifyContent = 'space-between';
+                      metaDiv.style.alignItems = 'center';
+                      metaDiv.style.fontSize = '0.9rem';
+
+                      const metaInfo = document.createElement('div');
+                      const dateSpan = document.createElement('span');
+                      dateSpan.textContent = new Date(gallery.create).toLocaleDateString('en-GB');
+                      const authorSpan = document.createElement('span');
+                      authorSpan.textContent = gallery.author || 'Администрация';
+                      metaInfo.appendChild(dateSpan);
+                      metaInfo.appendChild(document.createTextNode(' - '));
+                      metaInfo.appendChild(authorSpan);
+                      metaDiv.appendChild(metaInfo);
+
+                      // Кнопка "Прочитать..."
+                      const readMoreLink = document.createElement('a');
+                      readMoreLink.href = gallery.url;
+                      readMoreLink.className = 'btn btn-primary';
+                      readMoreLink.textContent = 'Прочитать...';
+                      metaDiv.appendChild(readMoreLink);
+
+                      contentDiv.appendChild(metaDiv);
+                      galleryItem.appendChild(contentDiv);
+
+                      // Добавляем готовую карточку в контейнер галереи
+                      galleryList.appendChild(galleryItem);
+                    });
+
+                    // Проверяем наличие следующей страницы
+                    if (!data.has_next) {
+                        window.removeEventListener('scroll', handleScroll);
+                    } else {
+                        currentPage++;
+                    }
+
+                    isLoading = false;
+                })
+                .catch((error) => {
+                    console.error('Ошибка загрузки данных:', error);
+                    alert('Не удалось загрузить данные. Пожалуйста, попробуйте позже.');
+                    isLoading = false;
+                });
+        };
+
+        const handleScroll = () => {
+            const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+            if (scrollTop + clientHeight >= scrollHeight - 100) {
+                loadGalleries(currentPage);
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        loadGalleries(currentPage);
+    });
+</script>
+{% endblock footerbottom %}

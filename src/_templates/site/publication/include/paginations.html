@@ -1,0 +1,50 @@
+<nav aria-label="Pagination Navigation" class="pt-5">
+    <ul class="pagination justify-content-center">
+        {% if paginator.num_pages > 1 %}
+
+        <!-- Previous Button -->
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                <i class="fas fa-angle-left"></i>
+            </a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <a class="page-link" href="#" aria-label="Previous">
+                <i class="fas fa-angle-left"></i>
+            </a>
+        </li>
+        {% endif %}
+
+        <!-- Page Numbers -->
+        {% for i in paginator.page_range %}
+        {% if page_obj.number == i %}
+        <li class="page-item active">
+            <a class="page-link" href="#">{{ i }}</a>
+        </li>
+        {% elif i > page_obj.number|add:'-2' and i < page_obj.number|add:'3' %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+        </li>
+        {% endif %}
+        {% endfor %}
+
+        <!-- Next Button -->
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                <i class="fas fa-angle-right"></i>
+            </a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <a class="page-link" href="#" aria-label="Next">
+                <i class="fas fa-angle-right"></i>
+            </a>
+        </li>
+        {% endif %}
+
+        {% endif %}
+    </ul>
+</nav>

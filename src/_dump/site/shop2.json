@@ -1,0 +1,372 @@
+[
+  {
+    "page": "home",
+    "fields": {
+      "slide_1_image": {
+        "field": "",
+        "info": "/_media/jsontemplate/slide-3.jpg",
+        "type": "media"
+      },
+      "slide_1_title": {
+        "field": "Кроссовки для бега",
+        "info": [],
+        "type": "information"
+      },
+      "slide_1_description": {
+        "field": "Новое поступление",
+        "info": [],
+        "type": "information"
+      },
+      "slide_1_button": {
+        "field": "Каталог",
+        "info": [],
+        "type": "information"
+      },
+      "slide_1_button_link": {
+        "field": "#",
+        "info": [],
+        "type": "information"
+      },
+      "slide_2_image": {
+        "field": "Сертифицированая компания",
+        "info": "/_media/jsontemplate/slide-1.jpg",
+        "type": "media"
+      },
+      "slide_2_title": {
+        "field": "Образы",
+        "info": [],
+        "type": "information"
+      },
+      "slide_2_description": {
+        "field": "Просто выберете повод или стиль",
+        "info": [],
+        "type": "information"
+      },
+      "slide_2_button": {
+        "field": "Каталог",
+        "info": [],
+        "type": "information"
+      },
+      "slide_2_button_link": {
+        "field": "#",
+        "info": [],
+        "type": "information"
+      },
+      "slide_3_image": {
+        "field": "Сертифицированая компания",
+        "info": "/_media/jsontemplate/2.jpg",
+        "type": "media"
+      },
+      "slide_3_title": {
+        "field": "Аксессуары",
+        "info": [],
+        "type": "information"
+      },
+      "slide_3_description": {
+        "field": "<strong>Новинки</strong> 2025",
+        "info": [],
+        "type": "information"
+      },
+      "slide_3_button": {
+        "field": "Каталог",
+        "info": [],
+        "type": "information"
+      },
+      "slide_3_button_link": {
+        "field": "#",
+        "info": [],
+        "type": "information"
+      },
+      "banner_1_image": {
+        "field": "",
+        "info": "/_media/jsontemplate/1.jpg",
+        "type": "media"
+      },
+      "banner_1_title": {
+        "field": "Кеды Nike",
+        "info": [],
+        "type": "information"
+      },
+      "banner_1_description": {
+        "field": "<strong>Только</strong> оригинальная продукция",
+        "info": [],
+        "type": "information"
+      },
+      "banner_1_button": {
+        "field": "Открыть каталог",
+        "info": [],
+        "type": "information"
+      },
+      "banner_1_button_link": {
+        "field": "#",
+        "info": [],
+        "type": "information"
+      },
+      "banner_2_image": {
+        "field": "Сертифицированая компания",
+        "info": "/_media/jsontemplate/2-1-1.jpg",
+        "type": "media"
+      },
+      "banner_2_title": {
+        "field": "Часы для любых занятий",
+        "info": [],
+        "type": "information"
+      },
+      "banner_2_description": {
+        "field": "<strong>Премиальные</strong> материалы и высокое качество",
+        "info": [],
+        "type": "information"
+      },
+      "banner_2_button": {
+        "field": "Открыть каталог",
+        "info": [],
+        "type": "information"
+      },
+      "banner_2_button_link": {
+        "field": "#",
+        "info": [],
+        "type": "information"
+      },
+      "banner_3_image": {
+        "field": "Сертифицированая компания",
+        "info": "/_media/jsontemplate/2-4.jpg",
+        "type": "media"
+      },
+      "banner_3_title": {
+        "field": "Ремни из натуральной кожи",
+        "info": [],
+        "type": "information"
+      },
+      "banner_3_description": {
+        "field": "Универсальны для любого образа",
+        "info": [],
+        "type": "information"
+      },
+      "banner_3_button": {
+        "field": "Открыть каталог",
+        "info": [],
+        "type": "information"
+      },
+      "banner_3_button_link": {
+        "field": "#",
+        "info": [],
+        "type": "information"
+      },
+      "how_we_work_1_title": {
+        "field": "Бесплатная доставка и возврат товара",
+        "info": [],
+        "type": "information"
+      },
+      "how_we_work_1_description": {
+        "field": "Для всех заказов свыше 5000 рублей",
+        "info": [],
+        "type": "information"
+      },
+      "how_we_work_2_title": {
+        "field": "Безопастная оплата",
+        "info": [],
+        "type": "information"
+      },
+      "how_we_work_2_description": {
+        "field": "Мы гарантируем безопастную оплату",
+        "info": [],
+        "type": "information"
+      },
+      "how_we_work_3_title": {
+        "field": "Гарантия возврата денег",
+        "info": [],
+        "type": "information"
+      },
+      "how_we_work_3_description": {
+        "field": "Любой возврат в течение 30 дней",
+        "info": [],
+        "type": "information"
+      },
+      "how_we_work_4_title": {
+        "field": "Служба поддержки клиентов",
+        "info": [],
+        "type": "information"
+      },
+      "how_we_work_4_description": {
+        "field": "Позвоните или напишите нам по электронной почте в режиме 24/7",
+        "info": [],
+        "type": "information"
+      },
+      "hot_ones_title": {
+        "field": "Горячие Предложения Дня",
+        "info": [],
+        "type": "information"
+      },
+      "hot_ones": {
+        "field": "",
+        "info": [],
+        "type": "products"
+      },
+      "top_20_title": {
+        "field": "Топ-20 бестселлеров",
+        "info": [],
+        "type": "information"
+      },
+      "top_20": {
+        "field": "",
+        "info": [],
+        "type": "products"
+      },
+      "vendors_title": {
+        "field": "Лучшие поставщики",
+        "info": [],
+        "type": "information"
+      },
+      "vendors": {
+        "field": "",
+        "info": [],
+        "type": "vendors"
+      },
+      "bottom_banner_title": {
+        "field": "Рекомендуем посмотреть",
+        "info": [],
+        "type": "information"
+      },
+      "bottom_banner_1_image": {
+        "field": "",
+        "info": "/_media/jsontemplate/2.jpg",
+        "type": "media"
+      },
+      "bottom_banner_1_title": {
+        "field": "А вы готовы к пляжному сезону?",
+        "info": [],
+        "type": "information"
+      },
+      "bottom_banner_1_description": {
+        "field": "Успейте заказать со скидкой 30%",
+        "info": [],
+        "type": "information"
+      },
+      "bottom_banner_1_button": {
+        "field": "Открыть каталог",
+        "info": [],
+        "type": "information"
+      },
+      "bottom_banner_1_button_link": {
+        "field": "#",
+        "info": [],
+        "type": "information"
+      },
+      "bottom_banner_2_image": {
+        "field": "Сертифицированая компания",
+        "info": "/_media/jsontemplate/11.jpg",
+        "type": "media"
+      },
+      "bottom_banner_2_title": {
+        "field": "Для любителей активного отдыха",
+        "info": [],
+        "type": "information"
+      },
+      "bottom_banner_2_description": {
+        "field": "<strong>Коньки</strong> по выгодным ценам",
+        "info": [],
+        "type": "information"
+      },
+      "bottom_banner_2_button": {
+        "field": "Открыть каталог",
+        "info": [],
+        "type": "information"
+      },
+      "bottom_banner_2_button_link": {
+        "field": "#",
+        "info": [],
+        "type": "information"
+      }
+    }
+  },
+  {
+    "page": "about",
+    "fields": {
+      "about_title": {
+        "field": "О нашей компании",
+        "info": [],
+        "type": "information"
+      },
+      "about_description": {
+        "field": "Мы - компания, специализирующаяся на продаже одежды и аксессуаров, вдохновлённая стремлением к стилю, качеству и самовыражению. Наша философия проста и уникальна: мы верим, что каждый элемент вашего гардероба может стать отражением вашей индивидуальности. Мы предлагаем полный спектр услуг — от помощи в подборе идеального образа до предоставления эксклюзивных коллекций, которые подчеркнут вашу уникальность. Мы понимаем, насколько важен комфорт и уверенность в каждом выбранном вами аксессуаре или наряде. Именно поэтому наши специалисты готовы сопровождать вас на каждом этапе — будь то выбор одежды для особого случая или обновление базового гардероба. Мы не просто интернет-магазин, а место, где вы можете воплощать свои идеи и находить вдохновение для создания вашего неповторимого стиля. Наши коллекции — это результат сотрудничества с дизайнерами, которым мы доверяем, чтобы каждая вещь, представленная у нас, соответствовала самым высоким стандартам качества и моды. Мы стремимся превратить процесс выбора одежды и аксессуаров в увлекательное путешествие, в котором стиль встречается с индивидуальностью.",
+        "info": [],
+        "type": "information"
+      },
+      "about_button": {
+        "field": "Смотреть каталог",
+        "info": [],
+        "type": "information"
+      },
+      "about_button_link": {
+        "field": "#",
+        "info": [],
+        "type": "information"
+      },
+      "about_image": {
+        "field": "",
+        "info": "/_media/jsontemplate/slide-111.jpg",
+        "type": "media"
+      },
+      "about_info_titles_1": {
+        "field": "Успешно выполненных заказов",
+        "info": [],
+        "type": "information"
+      },
+      "about_info_description_1": {
+        "field": "Оперативная отправка заказов",
+        "info": [],
+        "type": "information"
+      },
+      "about_info_count_1": {
+        "field": "10000",
+        "info": [],
+        "type": "information"
+      },
+      "about_info_titles_2": {
+        "field": "Пользователей",
+        "info": [],
+        "type": "information"
+      },
+      "about_info_description_2": {
+        "field": "Нам доверяют",
+        "info": [],
+        "type": "information"
+      },
+      "about_info_count_2": {
+        "field": "2000",
+        "info": [],
+        "type": "information"
+      },
+      "about_info_titles_3": {
+        "field": "Столько лет мы уже работаем",
+        "info": [],
+        "type": "information"
+      },
+      "about_info_description_3": {
+        "field": "Опыт работы",
+        "info": [],
+        "type": "information"
+      },
+      "about_info_count_3": {
+        "field": "5",
+        "info": [],
+        "type": "information"
+      }
+    }
+  },
+  {
+    "page": "settings",
+    "fields": {
+      "min_price": {
+        "field": "100",
+        "info": [],
+        "type": "information"
+      },
+      "max_price": {
+        "field": "1000",
+        "info": [],
+        "type": "information"
+      }
+    }
+  }
+]

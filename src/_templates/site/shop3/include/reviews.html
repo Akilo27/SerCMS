@@ -1,0 +1,66 @@
+{% load static generals_tag l10n %}
+<br>
+<div class="panel" id="reviews-list">
+    {% if reviews and reviews|length > 0 %}
+    {% for review in reviews %}
+    <div class="review panel-body">
+        <div class="media-block">
+            <a class="media-left" href="#"><img class="img-circle img-sm" alt="Profile Picture" src="{{ review.author.avatar.url }}"></a>
+            <div class="media-body">
+                <p><strong>Автор:</strong> {{ review.author.username }}</p>
+                <div class="rating">
+                    <strong>Оценка:</strong>
+                    {% for star in review.starvalue|range_list %}
+                    {% if star <= review.starvalue %}
+                    <span class="fa fa-star"></span>
+                    {% else %}
+                    <span class="fa fa-star text-muted"></span>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+                <p>{{ review.text }}</p>
+                <hr>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+     <div class="review" style=" height: 300px;">
+    <p>Нет отзывов.</p>
+         </div>
+    {% endif %}
+</div>
+{% if reviews.has_previous %}
+<div>
+    <nav aria-label="Page navigation example">
+        <ul class="pagination">
+            {% if reviews.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?reviews_page={{ reviews.previous_page_number }}"  aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            {% endif %}
+            {% for num in reviews.paginator.page_range %}
+            {% if reviews.number == num %}
+            <li class="page-item active">
+                <a class="page-link" href="#">{{ num }}</a>
+            </li>
+            {% else %}
+            <li class="page-item">
+                <a class="page-link" href="?reviews_page={{ num }}">{{ num }}</a>
+            </li>
+            {% endif %}
+            {% endfor %}
+            {% if reviews.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?reviews_page={{ reviews.next_page_number }}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+{% endif %}

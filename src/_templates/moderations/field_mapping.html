@@ -1,0 +1,42 @@
+{% extends 'moderations/base.html' %}
+{% load i18n %}
+
+{% block title %}Настройка полей{% endblock %}
+
+{% block content %}
+    <h1>Настройка полей для импорта</h1>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <h4>{% trans "Данные из файла" %}:</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>{% trans "Поле в файле" %}</th>
+                    <th>{% trans "Маппинг в базе данных" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in sample_data %}
+                    <tr>
+                        {% for key, value in row.items %}
+                            <td>{{ key }}</td>
+                            <td>
+                                <select name="field_mapping">
+                                    <option value="">{% trans "Выберите поле" %}</option>
+                                    <option value="field1">{% trans "Поле" %} 1</option>
+                                    <option value="field2">{% trans "Поле" %} 2</option>
+                                    <option value="field3">{% trans "Поле" %} 3</option>
+                                    <!-- Добавьте ваши возможные маппинги -->
+                                </select>
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <button type="submit">{% trans "Запустить импорт" %}</button>
+    </form>
+{% endblock %}

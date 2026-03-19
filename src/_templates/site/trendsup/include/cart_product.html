@@ -1,0 +1,544 @@
+{% load static generals_tag shop_tags i18n %}
+
+{% get_user_cart_products request as cart_products %}
+<style>
+/* Общие стили для элементов корзины */
+#cart_product {
+    font-family: Arial, sans-serif;
+    transition: all 0.3s ease;
+}
+
+/* Заголовок корзины */
+.widget_title {
+    color: #7e5539;
+    font-size: 1.5em;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #7e5539;
+    padding-bottom: 5px;
+}
+
+/* Список товаров */
+.cart_list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* Элемент товара */
+.woocommerce-mini-cart-item {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 15px 0;
+    transition: all 0.3s ease;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.woocommerce-mini-cart-item.removing {
+    opacity: 0;
+    transform: translateY(-20px);
+    height: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.woocommerce-mini-cart-item.updating {
+    background-color: #fff9e6;
+}
+
+/* Изображение товара */
+.woocommerce-mini-cart-item img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border: 2px solid #7e5539;
+    border-radius: 4px;
+    margin-right: 15px;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.woocommerce-mini-cart-item img:hover {
+    border-color: #a0522d;
+    transform: scale(1.05);
+}
+
+/* Название товара */
+.product-name {
+    font-weight: bold;
+    color: #7e5539;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.product-name:hover {
+    text-decoration: underline;
+    color: #a0522d;
+}
+
+/* Контейнер деталей продукта */
+.product-detail {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    font-size: 0.9em;
+    color: #333;
+}
+
+/* Цена и количество */
+.price-box {
+    display: flex;
+    align-items: center;
+    margin-top: 8px;
+    gap: 10px;
+}
+
+/* Кнопки изменения количества */
+.quantity-controls {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+button.decrement,
+button.increment {
+    background-color: #f8f8f8;
+    color: #7e5539;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: all 0.2s;
+    min-width: 30px;
+}
+
+button.decrement:hover:not(:disabled),
+button.increment:hover:not(:disabled) {
+    background-color: #7e5539;
+    color: white;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.quantity-value {
+    padding: 5px 12px;
+    background: white;
+    min-width: 40px;
+    text-align: center;
+    font-weight: bold;
+}
+
+/* Цена товара */
+.product-price {
+    font-weight: bold;
+    color: #7e5539;
+    transition: color 0.3s;
+}
+
+.product-price.updating {
+    color: #e67e22;
+    animation: pulse 0.5s ease-in-out;
+}
+
+/* Удаление товара */
+.remove-item {
+    color: #e74c3c;
+    cursor: pointer;
+    font-size: 0.9em;
+    margin-top: 8px;
+    padding: 5px 0;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.remove-item:hover {
+    color: #c0392b;
+    transform: scale(1.05);
+}
+
+.remove-item:before {
+    content: "×";
+    font-size: 1.2em;
+}
+
+/* Общая сумма корзины */
+.woocommerce-mini-cart__total {
+    margin-top: 20px;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #7e5539;
+    padding: 15px;
+    background: #f9f5f0;
+    border-radius: 8px;
+    transition: all 0.3s;
+}
+
+.woocommerce-mini-cart__total.updating {
+    background: #fff3cd;
+    animation: shake 0.5s ease-in-out;
+}
+
+/* Кнопки перехода */
+.woocommerce-mini-cart__buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.woocommerce-mini-cart__buttons a {
+    flex: 1;
+    padding: 12px 20px;
+    background-color: #7e5539;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: all 0.3s;
+    text-align: center;
+    font-weight: 500;
+}
+
+.woocommerce-mini-cart__buttons a:hover {
+    background-color: #a0522d;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.woocommerce-mini-cart__buttons a:active {
+    transform: translateY(0);
+}
+
+/* Анимации */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Уведомления */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 6px;
+    color: white;
+    font-weight: 500;
+    z-index: 10000;
+    animation: slideIn 0.3s ease-out;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.notification.success {
+    background: #27ae60;
+}
+
+.notification.error {
+    background: #e74c3c;
+}
+
+.notification.info {
+    background: #3498db;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Индикатор загрузки */
+.loading {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #7e5539;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-left: 8px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Сообщение о пустой корзине */
+.empty-cart-message {
+    text-align: center;
+    padding: 40px 20px;
+    color: #7e5539;
+    font-style: italic;
+}
+
+.empty-cart-message.hidden {
+    display: none;
+}
+</style>
+
+<div class="sidemenu-wrapper sidemenu-cart d-none d-lg-block" id="cart_product">
+    <div class="sidemenu-content">
+        <button class="closeButton sideMenuCls"><i class="far fa-times"></i></button>
+        <div class="widget woocommerce widget_shopping_cart">
+            <h3 class="widget_title">{% trans 'Продукты в корзине' %}</h3>
+            <div class="widget_shopping_cart_content">
+                {% if cart_products.0 %}
+                <ul class="woocommerce-mini-cart cart_list product_list_widget" id="cart_product_canvas">
+                    {% for product in cart_products.0 %}
+                    <li class="woocommerce-mini-cart-item mini_cart_item" id="product-{{ product.product.slug }}" data-product-slug="{{ product.product.slug }}">
+                        <a href="{% url 'shop:products' product.product.slug %}">
+                            <img src="{% if product.product.image %}{{ product.product.image.url }}{% else %}{% static 'site/image.jpg' %}{% endif %}" alt="{{ product.product.name }}">
+                        </a>
+                        <div class="product-detail">
+                            <a href="{% url 'shop:products' product.product.slug %}" class="product-name">{{ product.product.name }}</a>
+                            <div class="price-box">
+                                <div class="quantity-controls">
+                                    <button class="decrement" data-product-slug="{{ product.product.slug }}"
+                                            {% if product.quantity <= 1 %}disabled{% endif %}>-</button>
+                                    <span class="quantity-value">{{ product.quantity }}</span>
+                                    <button class="increment" data-product-slug="{{ product.product.slug }}">+</button>
+                                </div>
+                                <span class="product-price">{% currency_conversion_for_products request product.product.price product.product.valute.id %}</span>
+                            </div>
+                            <span class="item-total">
+                                {% trans 'Сумма' %}:
+                                <span class="woocommerce-Price-amount amount">
+                                    {% currency_conversion_for_products request product.amount product.product.valute.id %}
+                                </span>
+                            </span>
+                            <div class="remove-item" data-product-slug="{{ product.product.slug }}">
+                                {% trans 'Удалить' %}
+                            </div>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="empty-cart-message" id="empty-cart-message">
+                    {% trans 'Ваша корзина пуста' %}
+                </div>
+                {% endif %}
+
+                <div id="cart-summary" {% if not cart_products.0 %}class="hidden"{% endif %}>
+                    <p class="woocommerce-mini-cart__total total" id="cart-total">
+                        <strong>{% trans 'Общая сумма' %}:</strong>
+                        <span class="woocommerce-Price-amount amount">
+                            <span class="woocommerce-Price-currencySymbol">{{ cart_products.6 }}</span>
+                        </span>
+                    </p>
+                    <p class="woocommerce-mini-cart__buttons buttons">
+                        <a href="{% url 'shop:my_cart' %}" class="th-btn wc-forward">
+                            {% trans 'Корзина' %}
+                        </a>
+                        <a href="{% url 'payment:checkout' %}" class="th-btn checkout wc-forward">
+                            {% trans 'Оформить' %}
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("Скрипт корзины загружен");
+
+    // Элементы DOM
+    const cartContainer = document.getElementById('cart_product_canvas');
+    const cartSummary = document.getElementById('cart-summary');
+    const emptyMessage = document.getElementById('empty-cart-message');
+    const cartTotalElement = document.getElementById('cart-total');
+
+    // Функция для показа уведомлений
+    function showNotification(message, type = 'success') {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+
+    // Функция для обновления интерфейса корзины
+    function updateCartUI(data) {
+        if (data.cart_empty) {
+            // Показываем сообщение о пустой корзине
+            if (cartSummary) cartSummary.classList.add('hidden');
+            if (emptyMessage) emptyMessage.classList.remove('hidden');
+            showNotification('Корзина очищена', 'info');
+        } else {
+            // Обновляем общую сумму
+            if (cartTotalElement) {
+                const totalAmount = cartTotalElement.querySelector('.woocommerce-Price-amount');
+                if (totalAmount) {
+                    if (data.cart_total_html) {
+                        totalAmount.innerHTML = data.cart_total_html;
+                    } else {
+                        totalAmount.textContent = data.cart_total;
+                    }
+                }
+            }
+            // Показываем элементы корзины
+            if (cartSummary) cartSummary.classList.remove('hidden');
+            if (emptyMessage) emptyMessage.classList.add('hidden');
+        }
+    }
+
+
+    // Функция для анимации обновления элемента
+    function animateElementUpdate(element, className, duration = 500) {
+        element.classList.add(className);
+        setTimeout(() => {
+            element.classList.remove(className);
+        }, duration);
+    }
+
+    // Обработчики событий
+    function setupEventListeners() {
+        // Обработчики для изменения количества
+        document.querySelectorAll('.increment, .decrement').forEach(button => {
+            button.addEventListener('click', handleQuantityChange);
+        });
+
+        // Обработчики для удаления товара
+        document.querySelectorAll('.remove-item').forEach(button => {
+            button.addEventListener('click', handleRemoveItem);
+        });
+    }
+
+    // Обработка изменения количества
+    async function handleQuantityChange(e) {
+        const button = e.currentTarget;
+        const slug = button.dataset.productSlug;
+        const isIncrement = button.classList.contains('increment');
+        const delta = isIncrement ? 1 : -1;
+
+        // Находим элемент товара
+        const productElement = document.getElementById(`product-${slug}`);
+        if (!productElement) return;
+
+        // Показываем состояние обновления
+        productElement.classList.add('updating');
+        button.disabled = true;
+
+        try {
+            const response = await fetch(`{% url 'shop:update_cart_item' '000' %}`.replace('000', slug), {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCSRFToken(),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    action: isIncrement ? 'increment' : 'decrement'
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Обновляем количество
+                const quantityElement = productElement.querySelector('.quantity-value');
+                quantityElement.textContent = data.new_quantity;
+
+                // Обновляем кнопки
+                const decrementButton = productElement.querySelector('.decrement');
+                decrementButton.disabled = data.new_quantity <= 1;
+
+                // Обновляем сумму товара
+                const totalElement = productElement.querySelector('.item-total .woocommerce-Price-amount');
+                if (totalElement) {
+                    totalElement.textContent = data.new_total;
+                }
+
+                // Анимируем обновление
+                animateElementUpdate(productElement.querySelector('.product-price'), 'updating');
+
+                // Обновляем общую сумму корзины
+                animateElementUpdate(cartTotalElement, 'updating');
+                updateCartUI(data);
+
+                showNotification('Корзина обновлена');
+            }
+        } catch (error) {
+            console.error('Ошибка:', error);
+            showNotification('Ошибка обновления', 'error');
+        } finally {
+            productElement.classList.remove('updating');
+            button.disabled = false;
+        }
+    }
+
+    // Обработка удаления товара
+    async function handleRemoveItem(e) {
+        const button = e.currentTarget;
+        const slug = button.dataset.productSlug;
+        const productElement = document.getElementById(`product-${slug}`);
+
+        if (!productElement) return;
+
+        // Анимация удаления
+        productElement.classList.add('removing');
+
+        try {
+            const response = await fetch(`{% url 'shop:remove_from_cart' '000' %}`.replace('000', slug), {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCSRFToken(),
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Ждем завершения анимации перед удалением из DOM
+                setTimeout(() => {
+                    productElement.remove();
+                    updateCartUI(data);
+                    showNotification('Товар удален из корзины');
+                }, 300);
+            }
+        } catch (error) {
+            console.error('Ошибка:', error);
+            productElement.classList.remove('removing');
+            showNotification('Ошибка удаления', 'error');
+        }
+    }
+
+    // Получение CSRF токена
+    function getCSRFToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+    }
+
+    // Инициализация
+    setupEventListeners();
+});
+</script>

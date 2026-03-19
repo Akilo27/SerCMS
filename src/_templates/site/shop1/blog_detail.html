@@ -1,0 +1,257 @@
+{% extends 'site/shop1/base.html' %}
+{% load static %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+{% block content %}
+<div id="wrapper" class="inner-pages ui-elements hd-white">
+
+<section class="headings">
+    <div class="text-heading text-center">
+        <div class="container">
+            <h1>Новости</h1>
+            <h2><a href="{% url 'webmain:home' %}">Главная </a> &nbsp;/&nbsp; <a href="{% url 'webmain:blogs' %}">Новости </a> &nbsp;/&nbsp; {{blog.name}}</h2>
+        </div>
+    </div>
+</section>
+<!-- END SECTION HEADINGS -->
+
+<!-- START SECTION BLOG -->
+<section class="blog blog-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-9 col-md-12 col-xs-12">
+                <div class="row">
+                    {{ blog.description|safe }}
+                </div>
+                <section class="comments pt-5">
+
+                    <div id="comments">
+                        <h3>{{ comments_count }} Комментарии</h3>
+                        <div id="comments-list">
+                            <p>Загрузка...</p>
+                        </div>
+                        <button id="load-more" class="btn btn-primary mt-3" style="display: none;">Загрузить ещё</button>
+                    </div>
+                </section>
+                <section class="leve-comments wpb">
+                    <h3 class="mb-5">Оставить комментарий</h3>
+                    <div class="row">
+                        <div class="col-md-12 data">
+                            <form id="commentForm" method="post">
+                                {% csrf_token %}
+
+                                {% if not request.user.is_authenticated %}
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <input type="text" name="first_name" class="form-control" placeholder="Имя" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <input type="text" name="last_name" class="form-control" placeholder="Фамилия" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <input type="email" name="email" class="form-control" placeholder="Email" required>
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                                <div class="col-md-12 form-group">
+                                    <textarea class="form-control" name="comment" rows="5" placeholder="Ваш комментарий" required></textarea>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary btn-lg mt-2">Оставить комментарий</button>
+                            </form>
+
+                            <div id="commentMessage"></div>
+
+
+
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+            <aside class="col-lg-3 col-md-12">
+                <div class="widget">
+                    <h5 class="font-weight-bold mb-4">Поиск</h5>
+
+                    <form method="get" action="{% url 'webmain:blogs' %}">
+                        <div class="input-group">
+                            <input type="text" name="search" placeholder="Поиск по названию или описанию"
+                                   value="{{ search_query }}" class="form-control" />
+
+                            <button class="btn btn-primary" type="submit">
+                                <i class="fa fa-search" aria-hidden="true"></i>
+                            </button>
+
+                        </div>
+                    </form>
+                    <div class="recent-post py-5">
+                        <h5 class="font-weight-bold">Категории</h5>
+                        <ul style="list-style-type: none;padding: 5px;">
+                            {% for category in categorys %}
+                            <li>
+                                <a href="{% url 'webmain:blogs' %}?category={{ category.id }}{% if selected_tag %}&tag={{ selected_tag }}{% endif %}">
+                                    <i class="fa fa-caret-right" aria-hidden="true"></i>
+                                    {{category.name}}
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="recent-post">
+                        <h5 class="font-weight-bold mb-4">Теги</h5>
+                        <div class="tags">
+                            {% for tag in tags %}
+                            <span>
+                                <a href="{% url 'webmain:blogs' %}?tag={{ tag.id }}{% if selected_category %}&category={{ selected_category }}{% endif %}" class="btn btn-outline-primary">
+                                    {{ tag.name }}
+                                </a>
+                            </span>
+                            {% endfor %}
+                        </div>
+
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+</section>
+</div>
+<!---Список коментариев--->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let slug = "{{ blog.slug }}";
+        let offset = 0;
+        const limit = 5;
+        let loadMoreButton = document.getElementById("load-more");
+        let commentsList = document.getElementById("comments-list");
+
+        let loadedComments = new Set();  // Храним ID загруженных комментариев
+
+        function loadComments(reset = false) {
+            let url = `/blog/${slug}/comments/?limit=${limit}&offset=${reset ? 0 : offset}`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (reset) {
+                        commentsList.innerHTML = "";  // Полностью очищаем при обновлении
+                        loadedComments.clear();
+                        offset = 0;
+                    }
+
+                    if (!data.comments || data.comments.length === 0) {
+                        if (offset === 0) commentsList.innerHTML = "<p>Комментариев пока нет.</p>";
+                        loadMoreButton.style.display = "none";
+                        return;
+                    }
+
+                    data.comments.forEach(comment => {
+                        let commentId = `${comment.author}_${comment.date}_${comment.comment}`;
+                        if (loadedComments.has(commentId)) return;  // Пропускаем дубли
+
+                        loadedComments.add(commentId);
+
+                        let commentHTML = `
+                        <div class="row mb-4">
+                            <ul class="col-12 commented">
+                                <li class="comm-inf">
+                                    <div class="col-md-2">
+                                        <img src="${comment.avatar}" class="img-fluid rounded-circle" alt="Avatar">
+                                    </div>
+                                    <div class="col-md-10 comments-info">
+                                        <h5 class="mb-1">${comment.author || "Аноним"}</h5>
+                                        <p class="mb-4">${comment.date}</p>
+                                        <p>${comment.comment}</p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        `;
+                        commentsList.insertAdjacentHTML("beforeend", commentHTML);
+                    });
+
+                    if (!reset) offset += limit; // Смещаем offset только при нажатии "Загрузить ещё"
+
+                    loadMoreButton.style.display = data.has_more ? "block" : "none";
+                })
+                .catch(error => console.error("Ошибка загрузки комментариев:", error));
+        }
+
+        // Кнопка "Загрузить ещё"
+        loadMoreButton.addEventListener("click", () => loadComments());
+
+        // Загружаем первую порцию сразу
+        loadComments();
+
+        // Автообновление каждые 10 секунд (загружает только новые)
+        setInterval(() => loadComments(true), 10000);
+    });
+</script>
+
+<!---Отправка комменария--->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById("commentForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+
+            let formData = new FormData(this);
+            let slug = "{{ blog.slug }}";
+            let url = `/blog/${slug}/add_comment/`;
+
+            fetch(url, {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    let messageBox = document.getElementById("commentMessage");
+                    if (data.success) {
+                        messageBox.innerHTML = `<p class="text-success">${data.message}</p>`;
+                        document.getElementById("commentForm").reset();
+
+                        // Добавляем комментарий в список (без перезагрузки)
+                        let commentsList = document.getElementById("comments-list");
+
+                        let newComment = `
+                    <div class="row mb-4">
+                        <ul class="col-12 commented">
+                            <li class="comm-inf">
+                                <div class="col-md-2">
+                                    <img src="${data.avatar}" class="img-fluid rounded-circle" alt="Avatar">
+                                </div>
+                                <div class="col-md-10 comments-info">
+                                    <h5 class="mb-1">${data.author || "Аноним"}</h5>
+                                    <p class="mb-4">${data.date}</p>
+                                    <p>${data.comment}</p>
+                                    <p class="text-muted"><i>(Комментарий на модерации)</i></p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                `;
+
+                        commentsList.insertAdjacentHTML("afterbegin", newComment); // Вставляем комментарий в начало списка
+                    } else {
+                        messageBox.innerHTML = `<p class="text-danger">Ошибка отправки комментария</p>`;
+                    }
+                })
+                .catch(error => console.error("Ошибка:", error));
+        });
+    });
+</script>
+
+<!-- END SECTION BLOG -->
+{% endblock content %}
+{% block footer %}{% endblock footer %}

@@ -1,0 +1,1071 @@
+{% extends 'site/shop4/base.html' %}
+{% load i18n %}
+{% load static  %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<style>
+    textarea#id_fragment {
+    width: 100%;
+}
+</style>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<style>
+    /* Стили для попапа */
+
+#search-results {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+#search-results div {
+    padding: 8px;
+    cursor: pointer;
+}
+
+.delete-file {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Центрируем иконку */
+.delete-file .iconify-icon {
+  margin: auto;
+  vertical-align: middle;
+}
+
+#search-results div:hover {
+    background-color: #eee;
+}
+.preview-image {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.preview-image:hover {
+    transform: scale(1.03);
+}
+
+.delete-file {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.card:hover .delete-file {
+    opacity: 1;
+}
+</style>
+<style>
+    .custom-alert {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+
+.custom-alert-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 350px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    animation: alertFadeIn 0.3s;
+}
+
+@keyframes alertFadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.custom-alert-buttons {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+    gap: 10px;
+}
+    textarea {
+        --tw-border-opacity: 1;
+        border-color: rgb(226 232 240 / var(--tw-border-opacity));
+        display: block;
+        width: 100%;
+        border-radius: .375rem;
+        border-width: 1px;
+        padding: .5rem 1rem;
+        font-size: .875rem;
+        font-weight: inherit;
+        line-height: inherit;
+        color: inherit;
+        margin: 0;
+        font-family: inherit;
+        resize: none;
+        height: 120px;
+    }
+    textarea:focus{
+        --tw-border-opacity: 1!important;
+        border-color: rgb(59 130 246 / var(--tw-border-opacity))!important;
+    }
+    .form-control[type="file"]:not(:disabled):not([readonly]) {
+        --tw-border-opacity: 1;
+        border-color: rgb(226 232 240 / var(--tw-border-opacity));
+        width: fit-content;
+        display: block;
+        border-radius: .375rem;
+        border-width: 1px;
+        font-size: .875rem;
+        height: auto!important;
+        padding: 5px 0px 5px 10px;
+    }
+    .django-ckeditor-widget {
+        width: 100%;
+    }
+    .cke_editor_id_description {
+        display: block !important;
+        background: #fff;
+        border: 0.0625rem solid #EEEEEE;
+        padding: 0.3125rem 1.25rem;
+        color: #6e6e6e;
+        border-radius: 0.5rem;
+        width: auto!important;
+    }
+    .choices__list--dropdown, .choices__list[aria-expanded] {
+        position: relative;
+        max-height: 120px;
+        overflow: auto;
+    }
+    .modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1040;
+        display: none;
+    }
+    .modal-backdrop.show {
+        display: block;
+    }
+#selected-files-preview .col-md-3 {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Стили для карточек превью */
+.preview-image {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.preview-image:hover {
+    transform: scale(1.03);
+}
+
+/* Кнопка удаления */
+.delete-file {
+    transition: all 0.2s;
+}
+
+.delete-file:hover {
+    background-color: #dc3545 !important;
+    color: white !important;
+}
+
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/hint/show-hint.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/hint/show-hint.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/hint/javascript-hint.min.js"></script>
+<link rel="stylesheet" type="text/css" href="lightbox_stylesheet.css">
+
+{% endblock head %}
+{% block content %}
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            <div class="card-header">
+                <ul class="nav nav-pills nav-justified p-1 align-items-center ">
+                    <li class="nav-item d-none">
+                        <a href="#homePillJustified" data-bs-toggle="tab" aria-expanded="true" class="nav-link active">
+                            <span class="d-block d-sm-none"><i class="bx bx-home"></i></span>
+                            <span class="d-none d-sm-block">Товар</span>
+                        </a>
+                    </li>
+                    <li class="nav-item d-none">
+                        <a href="#profilePillJustified" data-bs-toggle="tab" aria-expanded="false" class="nav-link">
+                            <span class="d-block d-sm-none"><i class="bx bx-user"></i></span>
+                            <span class="d-none d-sm-block">SEO</span>
+                        </a>
+                    </li>
+                    <li class="nav-item d-none">
+                        <a href="#PasspardTabsJustified" data-bs-toggle="tab" aria-expanded="false" class="nav-link">
+                            <span class="d-block d-sm-none"><i class="ri-mail-line"></i></span>
+                            <span class="d-none d-sm-block">Галерея</span>
+                        </a>
+                    </li>
+                    <li class="nav-item d-none">
+                        <a href="#messagesTabsJustified" data-bs-toggle="tab" aria-expanded="false" class="nav-link">
+                            <span class="d-block d-sm-none"><i class="ri-mail-line"></i></span>
+                            <span class="d-none d-sm-block">Склады</span>
+                        </a>
+                    </li>
+                    <li class="nav-item d-none">
+                        <a href="#StaticTabsJustified" data-bs-toggle="tab" aria-expanded="false" class="nav-link">
+                            <span class="d-block d-sm-none"><i class="ri-mail-line"></i></span>
+                            <span class="d-none d-sm-block">История цен</span>
+                        </a>
+                    </li>
+
+                    <!-- Кнопка "Сохранить" справа -->
+                    <li class="nav-item ms-auto" >
+                        <button type="button" class="btn btn-success px-3 py-1" id="saveTabTrigger">
+                            <i class="ri-save-line me-1"></i>
+                            <span class="d-sm-inline">Сохранить </span>
+                        </button>
+                    </li>
+
+                </ul>
+
+            </div>
+        </div>
+        <div class="card-body">
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.media }}
+                <div class="tabbed-content button-tabs">
+                    {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <strong>Ошибки при сохранении:</strong>
+                        <ul>
+                            {% for field, errors in form.errors.items %}
+                            <li><strong>{{ field }}:</strong> {{ errors|join:", " }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <div class="tab-content pt-2 text-muted">
+                        <div class="tab-pane show active" id="homePillJustified">
+                            <div class="row">
+                                <div class="col-9">
+                                    <div class="row">
+                                        <div class="col-3">
+                                            <label for="{{ form.type.id_for_label }}">{{ form.type.label }}</label><br>
+                                            {{ form.type }}
+                                            {% if form.type.help_text %}
+                                            <small>{{ form.type.help_text }}</small>
+                                            {% endif %}
+                                            {% for error in form.type.errors %}
+                                            <p style="color:red;">{{ error }}</p>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="col-3">
+                                            <label for="{{ form.typeofchoice.id_for_label }}">{{ form.typeofchoice.label }}</label><br>
+                                            {{ form.typeofchoice }}
+                                            {% if form.typeofchoice.help_text %}
+                                            <small>{{ form.typeofchoice.help_text }}</small>
+                                            {% endif %}
+                                            {% for error in form.typeofchoice.errors %}
+                                            <p style="color:red;">{{ error }}</p>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="col-2">
+                                            <label for="{{ form.price.id_for_label }}">{{ form.price.label }}</label><br>
+                                            {{ form.price }}
+                                            {% if form.price.help_text %}
+                                            <small>{{ form.price.help_text }}</small>
+                                            {% endif %}
+                                            {% for error in form.price.errors %}
+                                            <p style="color:red;">{{ error }}</p>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="col-2">
+                                            <label for="{{ form.costprice.id_for_label }}">{{ form.costprice.label }}</label><br>
+                                            {{ form.costprice }}
+                                            {% if form.costprice.help_text %}
+                                            <small>{{ form.costprice.help_text }}</small>
+                                            {% endif %}
+                                            {% for error in form.costprice.errors %}
+                                            <p style="color:red;">{{ error }}</p>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="col-2">
+                                            <div>
+                                                <label for="{{ form.valute.id_for_label }}">{{ form.valute.label }}</label><br>
+                                                {{ form.valute }}
+                                                {% if form.valute.help_text %}
+                                                <small>{{ form.valute.help_text }}</small>
+                                                {% endif %}
+                                                {% for error in form.valute.errors %}
+                                                <p style="color:red;">{{ error }}</p>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label><br>
+                                            {{ form.name }}
+                                            {% if form.name.help_text %}
+                                            {% endif %}
+                                            {% for error in form.name.errors %}
+                                            <p style="color:red;">{{ error }}</p>
+                                            {% endfor %}
+                                        </div>
+                                        <div>
+                                            <label for="{{ form.slug.id_for_label }}">{{ form.slug.label }}</label><br>
+                                            {{ form.slug }}
+                                            {% if form.slug.help_text %}
+                                            <small>{{ form.slug.help_text }}</small>
+                                            {% endif %}
+                                            {% for error in form.slug.errors %}
+                                            <p style="color:red;">{{ error }}</p>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label for="{{ form.fragment.id_for_label }}">{{ form.fragment.label }}</label><br>
+                                        {{ form.fragment }}
+                                        {% if form.fragment.help_text %}
+                                        <small>{{ form.fragment.help_text }}</small>
+                                        {% endif %}
+                                        {% for error in form.fragment.errors %}
+                                        <p style="color:red;">{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                    <div>
+                                        <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label><br>
+                                        {{ form.description }}
+                                        {% if form.description.help_text %}
+                                        <small>{{ form.description.help_text }}</small>
+                                        {% endif %}
+                                        {% for error in form.description.errors %}
+                                        <p style="color:red;">{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+
+                                <div class="col-3">
+                                    <div>
+                                        <label for="{{ form.image.id_for_label }}">{{ form.image.label }}</label><br>
+                                        {{ form.image }}
+                                        {% if form.image.help_text %}
+                                        <small>{{ form.image.help_text }}</small>
+                                        {% endif %}
+                                        {% for error in form.image.errors %}
+                                        <p style="color:red;">{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                    <div>
+                                        <label for="{{ form.category.id_for_label }}">{{ form.category.label }}</label><br>
+                                        {{ form.category }}
+                                        {% if form.category.help_text %}
+                                        <small>{{ form.category.help_text }}</small>
+                                        {% endif %}
+                                        {% for error in form.category.errors %}
+                                        <p style="color:red;">{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                    <div>
+                                        <label for="{{ form.manufacturers.id_for_label }}">{{ form.manufacturers.label }}</label><br>
+                                        {{ form.manufacturers }}
+                                        {% if form.manufacturers.help_text %}
+                                        <small>{{ form.manufacturers.help_text }}</small>
+                                        {% endif %}
+                                        {% for error in form.manufacturers.errors %}
+                                        <p style="color:red;">{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                    <div>
+                                        <label for="{{ form.site.id_for_label }}">{{ form.site.label }}</label><br>
+                                        {{ form.site }}
+                                        {% if form.site.help_text %}
+                                        <small>{{ form.site.help_text }}</small>
+                                        {% endif %}
+                                        {% for error in form.site.errors %}
+                                        <p style="color:red;">{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+
+                                    <div>
+                                        <label for="{{ form.variable.id_for_label }}">{{ form.variable.label }}</label><br>
+                                        {{ form.variable }}
+                                        {% if form.variable.help_text %}
+                                        <small>{{ form.variable.help_text }}</small>
+                                        {% endif %}
+                                        {% for error in form.variable.errors %}
+                                        <p style="color:red;">{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                    <div>
+                                        <label for="{{ form.atribute.id_for_label }}">{{ form.atribute.label }}</label><br>
+                                        {{ form.atribute }}
+                                        {% if form.atribute.help_text %}
+                                        <small>{{ form.atribute.help_text }}</small>
+                                        {% endif %}
+                                        {% for error in form.atribute.errors %}
+                                        <p style="color:red;">{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                    <div>
+                                        <label for="{{ form.stocks.id_for_label }}">{{ form.stocks.label }}</label><br>
+                                        {{ form.stocks }}
+                                        {% if form.stocks.help_text %}
+                                        <small>{{ form.stocks.help_text }}</small>
+                                        {% endif %}
+                                        {% for error in form.stocks.errors %}
+                                        <p style="color:red;">{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                    <div>
+                                        <label for="{{ form.order.id_for_label }}">{{ form.order.label }}</label><br>
+                                        {{ form.order }}
+                                        {% if form.order.help_text %}
+                                        <small>{{ form.order.help_text }}</small>
+                                        {% endif %}
+                                        {% for error in form.order.errors %}
+                                        <p style="color:red;">{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                    <div>
+                                        <label for="{{ form.review.id_for_label }}">{{ form.review.label }}</label><br>
+                                        {{ form.review }}
+                                        {% if form.review.help_text %}
+                                        <small>{{ form.review.help_text }}</small>
+                                        {% endif %}
+                                        {% for error in form.review.errors %}
+                                        <p style="color:red;">{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                    <div>
+                                        <label for="{{ form.faqs.id_for_label }}">{{ form.faqs.label }}</label><br>
+                                        {{ form.faqs }}
+                                        {% if form.faqs.help_text %}
+                                        <small>{{ form.faqs.help_text }}</small>
+                                        {% endif %}
+                                        {% for error in form.faqs.errors %}
+                                        <p style="color:red;">{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                    <div>
+                                        <label for="{{ form.comment.id_for_label }}">{{ form.comment.label }}</label><br>
+                                        {{ form.comment }}
+                                        {% if form.comment.help_text %}
+                                        <small>{{ form.comment.help_text }}</small>
+                                        {% endif %}
+                                        {% for error in form.comment.errors %}
+                                        <p style="color:red;">{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-3">
+                                    <div>
+                                        <label for="{{ form.weight.id_for_label }}">{{ form.weight.label }}</label><br>
+                                        {{ form.weight }}
+                                        {% if form.weight.help_text %}
+                                        <small>{{ form.weight.help_text }}</small>
+                                        {% endif %}
+                                        {% for error in form.weight.errors %}
+                                        <p style="color:red;">{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div>
+                                        <label for="{{ form.width.id_for_label }}">{{ form.width.label }}</label><br>
+                                        {{ form.width }}
+                                        {% if form.width.help_text %}
+                                        <small>{{ form.width.help_text }}</small>
+                                        {% endif %}
+                                        {% for error in form.width.errors %}
+                                        <p style="color:red;">{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div>
+                                        <label for="{{ form.height.id_for_label }}">{{ form.height.label }}</label><br>
+                                        {{ form.height }}
+                                        {% if form.height.help_text %}
+                                        <small>{{ form.height.help_text }}</small>
+                                        {% endif %}
+                                        {% for error in form.height.errors %}
+                                        <p style="color:red;">{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div>
+                                        <label for="{{ form.length.id_for_label }}">{{ form.length.label }}</label><br>
+                                        {{ form.length }}
+                                        {% if form.length.help_text %}
+                                        <small>{{ form.length.help_text }}</small>
+                                        {% endif %}
+                                        {% for error in form.length.errors %}
+                                        <p style="color:red;">{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="profilePillJustified">
+
+                            <div class="row">
+                                <div class="col-xl-6">
+                                    <div class="row">
+                                        <div class="mb-3">
+                                            <h6 class="mb-2">{% trans "Превью" %}</h6>
+                                        </div>
+                                        <div id="preview-preview-container"
+                                             class="mb-2 relative inline-block shadow-md bg-slate-100">
+                                            {% if blogs.previev %}
+                                            <img id="preview-preview" src="{{blogs.previev.url}}" alt=""
+                                                 style="max-height: 300px; max-width: 95%">
+                                            {% else %}
+                                            <div id="empty-preview" style="height:300px; border: 0.0625rem solid #EEEEEE; border-radius:0.5rem;width:80%;background: #fff;align-content: center;text-align: center;">
+                                                <h1 style="transform: rotate(20deg); color: #ababab">{% trans "Изображения нет" %}</h1>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="mb-3 single-form">
+                                            <div style="display: flex; align-items: center;">
+                                                <input class="form-file-input form-control" type="file" id="id_previev" name="previev"
+                                                       accept="image/*" onchange="previewImage(this, 'preview');">
+                                                <button type="button" class="btn btn-danger btn-sm clear-btn"
+                                                        style="margin-left: 5px; display:none; border-radius: 5px;"
+                                                        onclick="clearPreview()">
+                                                    {% trans "Очистить" %}
+                                                </button>
+                                                <input type="hidden" name="delete_previev" id="delete_previev" value="false">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xl-6">
+                                    <div class="row">
+                                        <div class="col-sm-3">
+                                            <h6 class="mb-2" style="width: max-content">{% trans "Мета-заголовок ссылки" %}</h6>
+                                        </div>
+                                        <div class="mb-3">
+                                            {{ form.propertytitle }}
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-3">
+                                            <h6 class="mb-2" style="width: max-content">{% trans "Мета-описание ссылки" %}</h6>
+                                        </div>
+                                        <div class="mb-3">
+                                            {{ form.propertydescription|safe }}
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-sm-3">
+                                            <h6 class="mb-2" style="width: max-content">{% trans "Заголовок" %}</h6>
+                                        </div>
+                                        <div class="mb-3">
+                                            {{ form.title }}
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-3">
+                                            <h6 class="mb-2">{% trans "Мета-описание" %}</h6>
+                                        </div>
+                                        <div class="mb-3">
+                                            {{ form.metadescription|safe }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="PasspardTabsJustified">
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <h6 class="mb-2">{% trans "Файлы" %}</h6>
+                                </div>
+                                <div class="mb-3">
+                                    <!-- Поле для загрузки новых файлов -->
+                                    <div class="mb-4">
+                                        {{ form.files }}
+                                    </div>
+
+                                    <!-- Контейнер для предпросмотра выбранных файлов -->
+                                    <div class="row g-3" id="selected-files-preview"></div>
+
+                                    <!-- Секция с существующими файлами -->
+                                    {% if existing_files %}
+                                    <div class="row g-3 mt-3">
+                                        {% for media in existing_files %}
+                                        <div class="col-md-3 position-relative">
+                                            <div class="card shadow-sm">
+                                                {% if media.image.name|lower|slice:"-4:" in ".jpg,.jpeg,.png,.gif,.webp" %}
+                                                <img src="{{ media.image.url }}" class="card-img-top preview-image"
+                                                     style="height: 150px; object-fit: cover"
+                                                     alt="{{ media.file.name }}">
+                                                {% else %}
+                                                <div class="text-center py-4">
+                                                    <i class="fas fa-file fa-3x text-muted"></i>
+                                                </div>
+                                                {% endif %}
+
+                                                <div class="card-body">
+                                                    <small class="d-block text-truncate mb-2">
+                                                        {{ media.file.name|slice:"32:" }}
+                                                    </small>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <a href="{{ media.file.url }}"
+                                                           target="_blank"
+                                                           class="btn btn-sm btn-outline-primary">
+                                                            <span class="iconify me-1" data-icon="mdi:download"></span>
+                                                            Посмотреть
+                                                        </a>
+                                                        <button type="button"
+                                                                class="btn btn-sm btn-outline-danger delete-file d-flex align-items-center justify-content-center"
+                                                                data-file-id="{{ media.id }}">
+                                                            <iconify-icon icon="mdi:trash-outline"
+                                                                          class="m-auto"></iconify-icon>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Скрытое поле для удаляемых файлов -->
+                            <input type="hidden" name="delete_files" id="delete_files" value="">
+                        </div>
+                        <button  class="d-none" type="submit" id="saveTab">Сохранить</button>
+            </form>
+
+            <div class="tab-pane" id="messagesTabsJustified">
+                <h4>Добавить наличие на складах</h4>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="storage-select">Склад:</label>
+                        <select id="storage-select" class="form-control">
+                            <option value="">Выберите склад</option>
+                            {% for storage in storages %}
+                            <option value="{{ storage.id }}">{{ storage.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="stock-quantity">Количество:</label>
+                        <input type="number" id="stock-quantity" class="form-control" min="0">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="button" id="add-stock" class="btn btn-secondary">Добавить</button>
+                    </div>
+                </div>
+
+                <form id="stock-form" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="product_id" value="{{ object.id }}">
+                    <table class="table table-bordered" id="stock-table">
+                        <thead>
+                        <tr>
+                            <th>Склад</th>
+                            <th>Количество</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for stock in stock_availability %}
+                        <tr data-storage-id="{{ stock.storage.id }}">
+                            <td>{{ stock.storage.name }}</td>
+                            <td><input type="number" name="quantity_{{ stock.storage.id }}" value="{{ stock.quantity }}" class="form-control"></td>
+                            <td><button type="button" class="btn btn-danger btn-sm remove-row">Удалить</button></td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                    <button type="submit" class="btn btn-primary">Сохранить наличие</button>
+                </form>
+
+                <div id="stock-message" class="mt-2"></div>
+
+                <script>
+                    document.getElementById('add-stock').addEventListener('click', function () {
+                      const storageSelect = document.getElementById('storage-select');
+                      const quantityInput = document.getElementById('stock-quantity');
+
+                      const storageId = storageSelect.value;
+                      const storageName = storageSelect.options[storageSelect.selectedIndex].text;
+                      const quantity = quantityInput.value;
+
+                      if (!storageId || !quantity) {
+                        alert('Выберите склад и укажите количество');
+                        return;
+                      }
+
+                      // Проверка на дубликат
+                      if (document.querySelector(`#stock-table tr[data-storage-id="${storageId}"]`)) {
+                        alert('Этот склад уже добавлен');
+                        return;
+                      }
+
+                      const tbody = document.querySelector('#stock-table tbody');
+                      const row = document.createElement('tr');
+                      row.setAttribute('data-storage-id', storageId);
+                      row.innerHTML = `
+                        <td>${storageName}</td>
+                        <td><input type="number" name="quantity_${storageId}" value="${quantity}" class="form-control"></td>
+                        <td><button type="button" class="btn btn-danger btn-sm remove-row">Удалить</button></td>
+                      `;
+                      tbody.appendChild(row);
+
+                      storageSelect.value = '';
+                      quantityInput.value = '';
+                    });
+
+                    // Удаление строки
+                    document.addEventListener('click', function (e) {
+                      if (e.target.classList.contains('remove-row')) {
+                        e.target.closest('tr').remove();
+                      }
+                    });
+
+                    // Отправка через AJAX
+                    document.getElementById('stock-form').addEventListener('submit', function (e) {
+                      e.preventDefault();
+
+                      const productId = document.querySelector('input[name="product_id"]').value;
+                      const rows = document.querySelectorAll('#stock-table tbody tr');
+                      const stocks = [];
+
+                      rows.forEach(row => {
+                        const storageId = row.getAttribute('data-storage-id');
+                        const quantity = parseInt(row.querySelector('input').value) || 0;
+                        stocks.push({ storage_id: storageId, quantity: quantity });
+                      });
+
+                      fetch("{% url 'moderation:ajax_create_stock' %}", {
+                        method: "POST",
+                        headers: {
+                          'Content-Type': 'application/json',
+                          'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: JSON.stringify({
+                          product_id: productId,
+                          stocks: stocks
+                        })
+                      })
+                      .then(response => response.json())
+                      .then(data => {
+                        const msg = document.getElementById('stock-message');
+                        if (data.status === 'success') {
+                          msg.innerHTML = `<div class="alert alert-success">Сохранено</div>`;
+                        } else {
+                          msg.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+                        }
+                      })
+                      .catch(error => {
+                        console.error(error);
+                        document.getElementById('stock-message').innerHTML = `<div class="alert alert-danger">Ошибка сохранения</div>`;
+                      });
+                    });
+                </script>
+
+
+
+            </div>
+
+            <div class="tab-pane" id="StaticTabsJustified">
+                <h3>Цены продукта</h3>
+
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>Тип цены</th>
+                        <th>Цена</th>
+                        <th>Оптовая цена</th>
+                        <th>Скидка (%)</th>
+                        <th>Дата изменения</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td><strong>старые цены</strong></td>
+                        <td colspan="4"></td>
+                    </tr>
+                    {% for price in productsprice %}
+                    <tr>
+                        <td></td>
+                        <td>{{ price.price }}</td>
+                        <td>{{ price.wholesale_price }}</td>
+                        <td>{{ price.discount }}</td>
+                        <td>{{ price.create|date:"d.m.Y H:i" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5">Нет данных</td></tr>
+                    {% endfor %}
+
+                    <tr>
+                        <td><strong>Старые закупочные цены</strong></td>
+                        <td colspan="4"></td>
+                    </tr>
+                    {% for cost in costprice %}
+                    <tr>
+                        <td></td>
+                        <td>{{ cost.price }}</td>
+                        <td>{{ cost.wholesale_price }}</td>
+                        <td>{{ cost.discount }}</td>
+                        <td>{{ cost.create|date:"d.m.Y H:i" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5">Нет данных</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+
+
+</div>
+<!-- Кастомный алерт -->
+<div id="custom-alert" class="custom-alert">
+    <div class="custom-alert-content">
+        <h5>Подтверждение удаления</h5>
+        <p>Вы уверены, что хотите удалить этот файл?</p>
+        <div class="custom-alert-buttons">
+            <button id="alert-cancel" class="btn btn-secondary">Отмена</button>
+            <button id="alert-confirm" class="btn btn-danger">Удалить</button>
+        </div>
+    </div>
+</div>
+<script>
+console.log("Скрипт загружен");
+
+document.addEventListener("DOMContentLoaded", function () {
+    console.log("DOM готов");
+    const trigger = document.getElementById("saveTabTrigger");
+    const hiddenButton = document.getElementById("saveTab");
+
+    if (trigger) {
+        console.log("Найдена кнопка saveTabTrigger");
+        trigger.addEventListener("click", function (e) {
+            console.log("Кнопка saveTabTrigger нажата!");
+            if (hiddenButton) {
+                hiddenButton.click();
+                console.log("Кнопка saveTab нажата программно");
+            } else {
+                console.warn("Кнопка saveTab не найдена");
+            }
+        });
+    } else {
+        console.warn("Кнопка saveTabTrigger не найдена");
+    }
+});
+</script>
+{% endblock content %}
+
+{% block footerbottom %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('form').forEach(form => {
+            form.querySelectorAll('input, select, textarea').forEach(field => {
+                if (field.type === 'checkbox' || field.type === 'radio') {
+                    field.classList.add('form-check-input');
+                } else {
+                    field.classList.add('form-control');
+                }
+            });
+        });
+    });
+</script>
+<script src="{% static 'site/website/js/ui-lement.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const trigger = document.getElementById('saveTabTrigger');
+        const realSubmit = document.getElementById('saveTab');
+
+        if (trigger && realSubmit) {
+            trigger.addEventListener('click', function (e) {
+                e.preventDefault(); // Отключаем переход по ссылке
+                realSubmit.click(); // Симулируем клик по кнопке submit
+            });
+        }
+    });
+</script>
+
+
+
+
+
+
+<!--ДОП. ФАЙЛЫ-->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Элементы кастомного алерта
+        const customAlert = document.getElementById('custom-alert');
+        const alertConfirm = document.getElementById('alert-confirm');
+        const alertCancel = document.getElementById('alert-cancel');
+
+        let currentFileToDelete = null;
+        let currentDeleteCallback = null;
+
+        // Показ кастомного алерта
+        function showCustomAlert(callback) {
+            currentDeleteCallback = callback;
+            customAlert.style.display = 'flex';
+        }
+
+        // Скрытие кастомного алерта
+        function hideCustomAlert() {
+            customAlert.style.display = 'none';
+            currentFileToDelete = null;
+            currentDeleteCallback = null;
+        }
+
+        // Обработчики кнопок алерта
+        alertConfirm.addEventListener('click', function() {
+            if (currentDeleteCallback) {
+                currentDeleteCallback();
+            }
+            hideCustomAlert();
+        });
+
+        alertCancel.addEventListener('click', hideCustomAlert);
+
+        // Обработка удаления существующих файлов
+        const deleteButtons = document.querySelectorAll('.delete-file');
+        const deleteFilesInput = document.getElementById('delete_files');
+        let deletedFiles = [];
+
+        function setupDeleteButton(button, deleteCallback) {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                currentFileToDelete = this;
+                showCustomAlert(deleteCallback);
+            });
+        }
+
+        // Для существующих файлов из БД
+        deleteButtons.forEach(button => {
+            setupDeleteButton(button, function() {
+                const fileId = button.dataset.fileId;
+                deletedFiles.push(fileId);
+                deleteFilesInput.value = deletedFiles.join(',');
+                button.closest('.col-md-3').style.display = 'none';
+            });
+        });
+
+        // Предпросмотр выбранных файлов
+        const fileInput = document.querySelector('input[type="file"][name="files"]');
+        const previewContainer = document.getElementById('selected-files-preview');
+
+        fileInput.addEventListener('change', function(e) {
+            previewContainer.innerHTML = ''; // Очищаем предыдущие превью
+
+            // Для каждого выбранного файла
+            Array.from(e.target.files).forEach((file, index) => {
+                const col = document.createElement('div');
+                col.className = 'col-md-3 position-relative mb-3';
+
+                const card = document.createElement('div');
+                card.className = 'card shadow-sm';
+
+                // Проверяем тип файла
+                if (file.type.match('image.*')) {
+                    const img = document.createElement('img');
+                    img.className = 'card-img-top preview-image';
+                    img.style.height = '150px';
+                    img.style.objectFit = 'cover';
+
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        img.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+
+                    card.appendChild(img);
+                } else {
+                    const fileIcon = document.createElement('div');
+                    fileIcon.className = 'text-center py-4';
+
+                    const icon = document.createElement('i');
+                    icon.className = 'fas fa-file fa-3x text-muted';
+
+                    fileIcon.appendChild(icon);
+                    card.appendChild(fileIcon);
+                }
+
+                const cardBody = document.createElement('div');
+                cardBody.className = 'card-body';
+
+                const fileName = document.createElement('small');
+                fileName.className = 'd-block text-truncate mb-2';
+                fileName.textContent = file.name.length > 20 ?
+                    file.name.substring(0, 20) + '...' :
+                    file.name;
+
+                // Кнопка удаления для новых файлов
+                const deleteBtn = document.createElement('button');
+                deleteBtn.type = 'button';
+                deleteBtn.className = 'btn btn-sm btn-outline-danger delete-file d-flex align-items-center justify-content-center';
+                deleteBtn.dataset.fileIndex = index;
+                deleteBtn.innerHTML = '<iconify-icon icon="mdi:trash-outline" class="m-auto"></iconify-icon>';
+
+                // Позиционирование кнопки удаления
+                deleteBtn.style.position = 'absolute';
+                deleteBtn.style.top = '5px';
+                deleteBtn.style.right = '5px';
+                deleteBtn.style.zIndex = '10';
+
+                card.appendChild(deleteBtn);
+                cardBody.appendChild(fileName);
+                card.appendChild(cardBody);
+                col.appendChild(card);
+                previewContainer.appendChild(col);
+
+                // Настройка кнопки удаления для нового файла
+                setupDeleteButton(deleteBtn, function() {
+                    // Удаляем файл из FileList
+                    const dt = new DataTransfer();
+                    Array.from(fileInput.files).forEach((f, i) => {
+                        if (i !== parseInt(deleteBtn.dataset.fileIndex)) {
+                            dt.items.add(f);
+                        }
+                    });
+                    fileInput.files = dt.files;
+
+                    // Обновляем предпросмотр
+                    const event = new Event('change');
+                    fileInput.dispatchEvent(event);
+                });
+            });
+        });
+    });
+</script>
+{% endblock footerbottom %}

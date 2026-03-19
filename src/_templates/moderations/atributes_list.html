@@ -1,0 +1,7 @@
+{% for atribute in attributes %}
+  <div class="atribute-item" data-id="{{ atribute.id }}">
+    <strong>{{ atribute.name }}</strong> | {{ atribute.slug }}
+    <button class="edit-atribute" data-id="{{ atribute.id }}">✏️</button>
+    <button class="delete-atribute" data-id="{{ atribute.id }}">🗑️</button>
+  </div>
+{% endfor %}

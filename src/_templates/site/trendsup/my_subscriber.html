@@ -1,0 +1,175 @@
+{% extends 'site/trendsup/base.html' %}
+{% load static generals_tag i18n %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<style>
+    .alert.alert-info {
+    color: #fff;
+    background-color: #dcb996 !important;
+}
+</style>
+{% endblock head %}
+{% block content %}
+<main class="main">
+    <div class="page-content mb-8 mt-5">
+        <div class="container">
+            <div class="tab-vertical row gutter-lg">
+                <div class="col-xxl-3 col-lg-3">
+                    <aside class="sidebar-area">
+
+                        <div class="widget widget_categories widget-profile">
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <div class="profile-avatar">
+                                    {# порядок проверок: Profile.avatar -> user.avatar -> user.image -> дефолт #}
+                                    {% if user.profile.avatar %}
+                                    <img src="{{ user.profile.avatar.url }}" alt="{{ user.get_full_name|default:user.username }}">
+                                    {% elif user.avatar %}
+                                    <img src="{{ user.avatar.url }}" alt="{{ user.get_full_name|default:user.username }}">
+                                    {% elif user.image %}
+                                    <img src="{{ user.image.url }}" alt="{{ user.get_full_name|default:user.username }}">
+                                    {% else %}
+                                    <img src="{% static 'img/default-avatar.png' %}" alt="avatar">
+                                    {% endif %}
+                                </div>
+
+                                <div class="profile-meta">
+                                    {% if user.last_name or user.first_name %}
+                                    <h6 class="mb-0">{{ user.last_name }} {{ user.first_name }}</h6>
+                                    {% elif user.get_full_name %}
+                                    <h6 class="mb-0">{{ user.get_full_name }}</h6>
+                                    {% else %}
+                                    <h6 class="mb-0">{{ user.username }}</h6>
+                                    {% endif %}
+                                    <div class="text-muted">@{{ user.username }}</div>
+                                </div>
+                            </div>
+                            {% include 'site/trendsup/include/profile_menu.html' %}
+                        </div>
+                    </aside>
+                </div>
+                <div class="col-xxl-9 col-lg-9">
+                    <div class="tab-content" id="nav-tabContent">
+
+                        <div class="row g-3">
+                            {% for m in manufacturers_subscriber %}
+                            <div class="col-xl-4 col-md-6">
+                                <div class="th-team team-card">
+                                    <div class="img-wrap">
+                                        <div class="shape bg-mask"
+                                             style="mask-image: url('{{ STATIC_URL|default_if_none:'' }}assets/img/bg/team_card_bg.png');
+                      -webkit-mask-image: url('{{ STATIC_URL|default_if_none:'' }}assets/img/bg/team_card_bg.png');">
+                                        </div>
+
+                                        <div class="team-img">
+                                            {% if m.logo %}
+                                            <img src="{{ m.logo.url }}" alt="{{ m.name|default:'Производитель' }}">
+                                            {% elif m.image %}
+                                            <img src="{{ m.image.url }}" alt="{{ m.name|default:'Производитель' }}">
+                                            {% else %}
+                                            <img src="{% static 'img/team/team_1_2.jpg' %}" alt="{{ m.name|default:'Производитель' }}">
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <div class="box-content">
+                                        {# подзаголовок (при желании подставь категорию/страну/тип) #}
+                                        <button class="btn btn-hero toggle-subscription" data-id="{{ m.id }}">
+                                            {% if m.category %}{{ m.category.name }}{% else %}
+                                            {% trans 'Отписаться' %}
+                                            {% endif %}
+                                          </button>
+
+                                        <h3 class="box-title">
+                                            {% if m.slug %}
+                                            {# замените на ваш реальный URL-нейм #}
+                                            <a href="{% url 'shop:manufacturers' m.slug %}">{{ m.name }}</a>
+                                            {% else %}
+                                            <a href="#">{{ m.name }}</a>
+                                            {% endif %}
+                                        </h3>
+                                    </div>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="col-12">
+                                <div class="alert alert-info mb-0">{% trans "Подписок на производителей пока нет" %}.</div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+
+                        {# пагинация #}
+                        {% if manufacturers_subscriber.paginator.num_pages > 1 %}
+                        <nav class="mt-3">
+                            <ul class="pagination">
+                                {% if manufacturers_subscriber.has_previous %}
+                                <li class="page-item"><a class="page-link" href="?page={{ manufacturers_subscriber.previous_page_number }}">{% trans "Назад" %}</a></li>
+                                {% else %}<li class="page-item disabled"><span class="page-link">{% trans "Назад" %}</span></li>{% endif %}
+
+                                {% for p in manufacturers_subscriber.paginator.page_range %}
+                                {% if p == manufacturers_subscriber.number %}
+                                <li class="page-item active"><span class="page-link">{{ p }}</span></li>
+                                {% elif p >= manufacturers_subscriber.number|add:-2 and p <= manufacturers_subscriber.number|add:2 %}
+                                <li class="page-item"><a class="page-link" href="?page={{ p }}">{{ p }}</a></li>
+                                {% endif %}
+                                {% endfor %}
+
+                                {% if manufacturers_subscriber.has_next %}
+                                <li class="page-item"><a class="page-link" href="?page={{ manufacturers_subscriber.next_page_number }}">{% trans "Вперёд" %}</a></li>
+                                {% else %}<li class="page-item disabled"><span class="page-link">{% trans "Вперёд" %}</span></li>{% endif %}
+                            </ul>
+                        </nav>
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const buttons = document.querySelectorAll('.btn.btn-hero');
+
+    buttons.forEach(button => {
+        button.addEventListener('click', function() {
+            const manufacturerId = this.getAttribute('data-id');
+            const action = this.innerText.trim() === 'Подписаться' ? 'subscribe' : 'unsubscribe';
+
+            // Отправляем AJAX запрос
+            fetch("{% url 'shop:profile-subscribe' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: JSON.stringify({
+                    'manufacturer_id': manufacturerId,
+                    'action': action
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'subscribed') {
+                    this.innerHTML = '{% trans "Отписаться" %}';
+                } else if (data.status === 'unsubscribed') {
+                    this.innerHTML = '{% trans "Подписаться" %}';
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+            });
+        });
+    });
+});
+</script>
+{% endblock content %}
+
+{% block footertop %}
+
+{% endblock footertop %}

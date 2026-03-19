@@ -1,0 +1,103 @@
+{% extends 'site/shop2/base.html' %}
+{% load static generals_tag %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+
+{% block content %}
+<style>
+    .login-popup {
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+      width: 40%;
+    }
+    .page-content {
+        display: flex !important;
+        flex-direction: column;
+    }
+</style>
+<main class="main login-page">
+    <!-- Start of Page Header -->
+
+    <!-- End of Breadcrumb -->
+    <div class="page-content">
+        <div class="page-content d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+            <h1 style="display: flex;justify-content: center;">Регистрация</h1>
+            <div class="login-popup">
+
+                <form method="POST" class="register-form" id="register-form">
+                    {% csrf_token %}
+                    <div class="tab-nav-boxed tab-nav-center tab-nav-underline">
+<!--                        <ul class="nav nav-tabs text-uppercase" role="tablist">-->
+<!--                            <li class="nav-item">-->
+<!--                                <a href="{% url 'webmain:login' %}" class="nav-link ">Вход</a>-->
+<!--                            </li>-->
+<!--                            <li class="nav-item">-->
+<!--                                <a href="{% url 'webmain:signup' %}" class="nav-link active">Регистрация</a>-->
+<!--                            </li>-->
+<!--                        </ul>-->
+                        <div class="tab-content">
+                            <div class="tab-pane active">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Логин</label>
+                                <input type="text" class="form-control {% if form.username.errors %}is-invalid{% endif %}" id="username" placeholder="логин" name="username" value="{{ form.username.value|default:'' }}">
+                                <!-- Выводим ошибки для поля "username" -->
+                                {% if form.username.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.username.errors %}
+                                    <p class="mb-0">{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control {% if form.email.errors %}is-invalid{% endif %}" id="email" placeholder="email" name="email" value="{{ form.email.value|default:'' }}">
+                                <!-- Выводим ошибки для поля "email" -->
+                                {% if form.email.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.email.errors %}
+                                    <p class="mb-0">{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="password1" class="form-label">Пароль</label>
+                                <input type="password" class="form-control {% if form.password1.errors %}is-invalid{% endif %}" id="password1" placeholder="Пароль" name="password1">
+                                <!-- Выводим ошибки для поля "password1" -->
+                                {% if form.password1.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.password1.errors %}
+                                    <p class="mb-0">{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="password2" class="form-label">Повторите пароль</label>
+                                <input type="password" class="form-control {% if form.password2.errors %}is-invalid{% endif %}" id="password2" placeholder="Повторите пароль" name="password2">
+                                <!-- Выводим ошибки для поля "password2" -->
+                                {% if form.password2.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.password2.errors %}
+                                    <p class="mb-0">{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                                <button type="submit" class="btn rounded full-width w-100" style="background: #74BBC6;color: #fff;"> Зарегистрироваться</button>
+                        </div>
+                        </div>
+                    </div>
+                </form>
+                </div>
+            <a href="{% url 'webmain:login' %}" style="color: black; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5); padding: 10px; margin-top: 10px;" class="">Вход</a>
+            </div>
+    </div>
+</main>
+{% endblock content %}

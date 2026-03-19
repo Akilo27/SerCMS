@@ -1,0 +1,91 @@
+<style>
+    a.nav-link.active {
+    color: #D83C3C !important;
+}
+ @media (max-width: 768px) {
+    .tabs-scroll-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 15px;
+}
+
+.tabs-scroll-wrapper .nav-tabs {
+background: #F2F2F2;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    display: flex;
+    overflow-x: auto;
+    padding: 5px;
+        border-radius: 50px;
+}
+a.nav-link.active {
+    background: #fff;
+    border-radius: 50px;
+}
+.tabs-scroll-wrapper .nav-item {
+    flex: 0 0 auto;
+    margin-right: 10px;
+    padding: 0px;
+}
+
+.tabs-scroll-wrapper .nav-link {
+    padding: 10px 12px;
+    white-space: nowrap;
+}
+a.nav-link.active {
+    font-size: 10px;
+    padding: 10px 20px !important;
+}
+a.nav-link {
+    font-size: 10px;
+}
+/* Скрыть скроллбар по желанию */
+  .tabs-scroll-wrapper .nav-tabs::-webkit-scrollbar {
+    display: none !important;
+  }
+
+}
+    .nav-item {
+    padding: 10px 0px;
+    margin: 0;
+    }
+.category-wrapper{
+    display:none!important;
+    }
+</style>
+<div class="tabs-scroll-wrapper">
+
+    <ul class="nav nav-tabs mb-6" role="tablist">
+        {% with app_name=request.resolver_match.namespace url_name=request.resolver_match.url_name %}
+        <li class="nav-item">
+            <a class="nav-link {% if url_name == 'edit_profile' %} active {% endif %}"
+               href="{% url 'useraccount:edit_profile' %}" >
+                МОЙ ПРОФИЛЬ</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if url_name == 'purchased_products_list' %} active {% endif %}"
+               href="{% url 'shop:purchased_products_list' %}">
+                ПЕРСОНАЛЬНЫЕ АКЦИИ</a>
+        </li>
+        <li class="nav-item">
+            <a href="{% url 'shop:my_order' %}"
+               class="nav-link {% if app_name == 'shop' and url_name == 'my_order' %} active {% endif %}" >
+                ИСТОРИЯ ЗАКАЗОВ</a>
+        </li>
+        <li class="nav-item">
+            <a href="{% url 'shop:bookmark_list' %}" class="nav-link {% if url_name == 'bookmark_list' %}active{% endif %}"
+               class="{% if app_name == 'shop' and url_name == 'bookmark_list' %} active {% endif %}">
+                ЛЮБИМЫЕ БЛЮДА</a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link {% if url_name == 'tickets' %} active {% endif %}"
+               href="{% url 'useraccount:tickets' %}">
+                ПОДДЕРЖКА</a>
+        </li>
+        {% endwith %}
+        <li class="nav-item">
+            <a class="nav-link" href="{#% url 'useraccount:logout' %#}" >ВЫЙТИ</a>
+        </li>
+    </ul>
+</div>

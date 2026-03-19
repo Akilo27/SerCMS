@@ -1,0 +1,10 @@
+{% for manufacturer in manufacturers %}
+<div class="swiper-slide">
+     <div class="brand-card" data_manufacturer="{{ manufacturer.id }}"> <a href="{% url 'shop:manufacturers' manufacturer.slug %}">
+            <img src="{% if manufacturer.image %}{{ manufacturer.image.url }}{% endif %}" width="270" height="303" alt="product" />
+        </a></div>
+</div>
+{% endfor %}
+
+
+

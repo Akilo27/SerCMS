@@ -1,0 +1,554 @@
+{% extends 'site/website/base.html' %}
+{% load static generals_tag %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<link rel="stylesheet" href="{% static 'site/website/css/search.css' %}">
+<link rel="stylesheet" href="{% static 'site/website/css/datedropper.css' %}">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.css" rel="stylesheet">
+
+{% endblock head %}
+{% block content %}
+<div id="wrapper" class="inner-pages listing homepage-4 agents hd-white">
+    <!-- START SECTION HEADINGS -->
+    <div class="clearfix"></div>
+    <section class="headings">
+        <div class="text-heading text-center">
+            <div class="container">
+                <h1>Поиск объявления</h1>
+                <h2><a href="{% url 'webmain:home' %}">Главная </a> &nbsp;/&nbsp; Объвлениия</h2>
+            </div>
+        </div>
+    </section>
+    <!-- END SECTION HEADINGS -->
+    <section class="properties-right featured portfolio blog pt-5">
+        <div class="container">
+            <!-- START SECTION BLOG -->
+
+            <div class="row">
+                <div class="col-lg-8 col-md-12 blog-pots">
+                    <section class="headings-2 pt-0">
+                        <div class="pro-wrapper">
+                            <div class="detail-wrapper-body">
+                                <div class="listing-title-bar">
+
+                                </div>
+                            </div>
+                            <div class="cod-pad single detail-wrapper mr-2 mt-0 d-flex justify-content-md-end align-items-center grid">
+                                <div class="input-group border rounded input-group-lg w-auto mr-4">
+
+                                </div>
+                                <div class="sorting-options">
+                                    <a href="{% url 'publication:advertisement_search' %}" class="change-view-btn active-view-btn">
+                                        <i class="fa fa-th-large"></i>
+                                    </a>
+                                    <a href="{% url 'publication:advertisementmap' %}" class="change-view-btn lde">
+                                        <i class="fa fa-map-marker"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <div class="row">
+                        {% if search_results %}
+                        {% for advertisement in search_results %}
+                        <div class="item col-lg-6 col-md-6 col-xs-12 landscapes sale">
+                            <div class="project-single" data-aos="fade-up">
+                                <div class="project-inner project-head">
+                                    <div class="homes">
+                                        <!-- homes img -->
+                                        <a href="{% url 'publication:advertisement' advertisement.slug %}" class="homes-img">
+                                            <div class="homes-price">{{advertisement.price}}</div>
+                                            {% with advertisement.galleryadvertisement_set.all|first as first_image %}
+                                            {% if first_image %}
+                                            <img class="img-responsive"  src="{{ first_image.image.url }}" alt="Первое изображение">
+                                            {% else %}
+                                            <img class="img-responsive"  src="/static/default_image.png" alt="Изображение по умолчанию">
+                                            {% endif %}
+                                            {% endwith %}
+                                        </a>
+                                    </div>
+
+                                </div>
+                                <!-- homes content -->
+                                <div class="homes-content">
+                                    <!-- homes address -->
+                                    <h3><a href="{% url 'publication:advertisement' advertisement.slug %}">{{advertisement.name}}</a></h3>
+                                    <p class="homes-address mb-3">
+                                        <a href="{% url 'publication:advertisement' advertisement.slug %}">
+                                            <i class="fa fa-map-marker"></i><span>{{advertisement.address}}</span>
+                                        </a>
+                                    </p>
+                                    <!-- homes List -->
+                                    <ul class="homes-list clearfix pb-3">
+                                        <li class="the-icons">
+                                            <i class="flaticon-bed mr-2" aria-hidden="true"></i>
+                                            <span>{{advertisement.bedrooms}} Cпален</span>
+                                        </li>
+                                        <li class="the-icons">
+                                            <i class="flaticon-bathtub mr-2" aria-hidden="true"></i>
+                                            <span>{{advertisement.bathrooms}} Комнат</span>
+                                        </li>
+                                        <li class="the-icons">
+                                            <i class="flaticon-square mr-2" aria-hidden="true"></i>
+                                            <span>{{advertisement.area}} Площадь</span>
+                                        </li>
+                                        <li class="the-icons">
+                                            <i class="flaticon-car mr-2" aria-hidden="true"></i>
+                                            <span>{{advertisement.garages}} Гаражей</span>
+                                        </li>
+                                    </ul>
+                                    <div class="footer">
+                                        <a href="{% url 'publication:advertisement' advertisement.slug %}">
+                                            <img src="{{advertisement.author.avatar.url}}" alt="" class="mr-2"> {{advertisement.author.username}}
+                                        </a>
+                                        <span>{{advertisement.create|date:"d/m/Y"}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <p>Результатов не найдено.</p>
+                        {% endif %}
+                    </div>
+                    {% include 'site/website/include/paginations.html' with items=search_results %}
+                </div>
+                <aside class="col-lg-4 col-md-12 car">
+                    <div class="widget">
+                        <!-- Search Fields -->
+                        <div class="widget-boxed main-search-field">
+                            <div class="widget-boxed-header">
+                                <h4>Найти</h4>
+                            </div>
+                            <!-- Search Form -->
+                            <div class="trip-search">
+                                <form method="get" action="{% url 'publication:advertisement_search' %}" class="form">
+
+                                    <!-- Form Lookin for -->
+                                    <div class="form-group looking">
+                                        <div class="first-select wide">
+                                            <div class="main-search-input-item">
+                                                <input type="text" name="search" placeholder="Поиск..." value="{{ request.GET.search }}">
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!--/ End Form Lookin for -->
+                                    <!-- Form Location -->
+                                    <div class="form-group looking">
+                                        <div class="first-select wide">
+                                             <span class="current" style="margin-left: 19px;z-index: 1000;position: relative;">
+                                                <i class="fa fa-map-marker"></i>
+                                            </span>
+                                            <div class="main-search-input-item" style="margin-top: -38px;">
+                                                <input type="text" name="address" placeholder="&nbsp;&nbsp;&nbsp; Город..." value="{{ request.GET.address }}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!--/ End Form Location -->
+                                    <div class="form-group beds" style="display:none;">
+                                        <label>Свободные даты</label>
+                                        <input type="text"
+                                               id="reservation-date"
+                                               data-lock="from"
+                                               data-lang="ru"
+                                               data-large-mode="true"
+                                               data-min-year="{{min_year}}"
+                                               data-max-year="{{max_year}}"
+                                               data-theme="my-style"
+                                               class="form-control"
+                                               readonly>
+                                        <div class="clear"></div>
+                                    </div>
+                                    <!-- Form Categories -->
+                                    <div class="form-group">
+                                        <label>Категории</label>
+                                        <select name="category" class="form-control" style="width: 100%">
+                                            <option value="">Все категории</option>
+                                            {% for category in categories %}
+                                            <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:"s" %}selected{% endif %}>
+                                            {{ category.name }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+
+                                    </div>
+                                    <!--/ End Form Categories -->
+                                    <!-- Form Property Status -->
+                                    <div class="form-group">
+                                        <label>Комнат</label>
+                                        <select name="rooms" class="form-control" style="width: 100%">
+                                            <option value="">Количество комнат</option>
+                                            {% for i in settings.rooms|range_list %}
+                                            <option value="{{ i }}" {% if request.GET.rooms == i|stringformat:"s" %}selected{% endif %}>
+                                            {{ i }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Спален</label>
+                                        <select name="bedrooms" class="form-control" style="width: 100%">
+                                            <option value="">Количество спален</option>
+                                            {% for i in settings.bedrooms|range_list %}
+                                            <option value="{{ i }}" {% if request.GET.rooms == i|stringformat:"s" %}selected{% endif %}>
+                                            {{ i }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <!--/ End Form Property Status -->
+                                    <!-- Form Bedrooms -->
+
+                                    <!--/ End Form Bedrooms -->
+                                    <div class="clear"></div>
+                                    <div class="form-group beds">
+                                        <label for="priceRange">Цена</label>
+                                        <div id="priceRange" class="mb-3"></div>
+                                        <div class="d-flex justify-content-between">
+                                            <input type="number" id="priceMin" name="price_min" class="form-control me-2" value="{{ request.GET.price_min }}" placeholder="От">
+                                            <input type="number" id="priceMax" name="price_max" class="form-control" value="{{ request.GET.price_max }}" placeholder="До">
+                                        </div>
+                                    </div>
+                                    <!-- More Search Options -->
+                                    <a href="#" class="more-search-options-trigger margin-bottom-10 margin-top-30" data-open-title="Дополнительно" data-close-title="Дополнительно"></a>
+
+                                    <div class="more-search-options relative">
+                                        <!-- Checkboxes -->
+                                        <div class="checkboxes one-in-row margin-bottom-10">
+                                            {% for tag in tags %}
+                                            <input type="checkbox" name="tags" value="{{ tag.id }}"
+                                                   {% if tag.id|stringformat:"s" in selected_tags %}checked{% endif %}>
+                                            <label for="check-{{ forloop.counter }}">{{ tag.name }}</label>
+                                            {% endfor %}
+                                        </div>
+                                        <!-- Checkboxes / End -->
+                                    </div>
+                                    <!-- More Search Options / End -->
+                                    <div class="col-lg-12 no-pds">
+                                        <div class="at-col-default-mar">
+                                            <button class="btn btn-default hvr-bounce-to-right" type="submit">Найти</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <!--/ End Search Form -->
+
+
+                        </div>
+                        <div class="widget-boxed mt-5 d-none">
+                            <div class="widget-boxed-header mb-5">
+                                <h4>Feature Properties</h4>
+                            </div>
+                            <div class="widget-boxed-body">
+                                <div class="slick-lancers">
+                                    <div class="agents-grid mr-0">
+                                        <div class="listing-item compact">
+                                            <a href="https://code-theme.com/html/findhouses/properties-details.html" class="listing-img-container">
+                                                <div class="listing-badges">
+                                                    <span class="featured">$ 230,000</span>
+                                                    <span>For Sale</span>
+                                                </div>
+                                                <div class="listing-img-content">
+                                                    <span class="listing-compact-title">House Luxury <i>New York</i></span>
+                                                    <ul class="listing-hidden-content">
+                                                        <li>Area <span>720 sq ft</span></li>
+                                                        <li>Rooms <span>6</span></li>
+                                                        <li>Beds <span>2</span></li>
+                                                        <li>Baths <span>3</span></li>
+                                                    </ul>
+                                                </div>
+                                                <img src="images/feature-properties/fp-1.jpg" alt="">
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="agents-grid mr-0">
+                                        <div class="listing-item compact">
+                                            <a href="https://code-theme.com/html/findhouses/properties-details.html" class="listing-img-container">
+                                                <div class="listing-badges">
+                                                    <span class="featured">$ 6,500</span>
+                                                    <span class="rent">For Rent</span>
+                                                </div>
+                                                <div class="listing-img-content">
+                                                    <span class="listing-compact-title">House Luxury <i>Los Angles</i></span>
+                                                    <ul class="listing-hidden-content">
+                                                        <li>Area <span>720 sq ft</span></li>
+                                                        <li>Rooms <span>6</span></li>
+                                                        <li>Beds <span>2</span></li>
+                                                        <li>Baths <span>3</span></li>
+                                                    </ul>
+                                                </div>
+                                                <img src="images/feature-properties/fp-2.jpg" alt="">
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="agents-grid mr-0">
+                                        <div class="listing-item compact">
+                                            <a href="https://code-theme.com/html/findhouses/properties-details.html" class="listing-img-container">
+                                                <div class="listing-badges">
+                                                    <span class="featured">$ 230,000</span>
+                                                    <span>For Sale</span>
+                                                </div>
+                                                <div class="listing-img-content">
+                                                    <span class="listing-compact-title">House Luxury <i>San Francisco</i></span>
+                                                    <ul class="listing-hidden-content">
+                                                        <li>Area <span>720 sq ft</span></li>
+                                                        <li>Rooms <span>6</span></li>
+                                                        <li>Beds <span>2</span></li>
+                                                        <li>Baths <span>3</span></li>
+                                                    </ul>
+                                                </div>
+                                                <img src="images/feature-properties/fp-3.jpg" alt="">
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="agents-grid mr-0">
+                                        <div class="listing-item compact">
+                                            <a href="https://code-theme.com/html/findhouses/properties-details.html" class="listing-img-container">
+                                                <div class="listing-badges">
+                                                    <span class="featured">$ 6,500</span>
+                                                    <span class="rent">For Rent</span>
+                                                </div>
+                                                <div class="listing-img-content">
+                                                    <span class="listing-compact-title">House Luxury <i>Miami FL</i></span>
+                                                    <ul class="listing-hidden-content">
+                                                        <li>Area <span>720 sq ft</span></li>
+                                                        <li>Rooms <span>6</span></li>
+                                                        <li>Beds <span>2</span></li>
+                                                        <li>Baths <span>3</span></li>
+                                                    </ul>
+                                                </div>
+                                                <img src="images/feature-properties/fp-4.jpg" alt="">
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="agents-grid mr-0">
+                                        <div class="listing-item compact">
+                                            <a href="https://code-theme.com/html/findhouses/properties-details.html" class="listing-img-container">
+                                                <div class="listing-badges">
+                                                    <span class="featured">$ 230,000</span>
+                                                    <span>For Sale</span>
+                                                </div>
+                                                <div class="listing-img-content">
+                                                    <span class="listing-compact-title">House Luxury <i>Chicago IL</i></span>
+                                                    <ul class="listing-hidden-content">
+                                                        <li>Area <span>720 sq ft</span></li>
+                                                        <li>Rooms <span>6</span></li>
+                                                        <li>Beds <span>2</span></li>
+                                                        <li>Baths <span>3</span></li>
+                                                    </ul>
+                                                </div>
+                                                <img src="images/feature-properties/fp-5.jpg" alt="">
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="agents-grid mr-0">
+                                        <div class="listing-item compact">
+                                            <a href="https://code-theme.com/html/findhouses/properties-details.html" class="listing-img-container">
+                                                <div class="listing-badges">
+                                                    <span class="featured">$ 6,500</span>
+                                                    <span class="rent">For Rent</span>
+                                                </div>
+                                                <div class="listing-img-content">
+                                                    <span class="listing-compact-title">House Luxury <i>Toronto CA</i></span>
+                                                    <ul class="listing-hidden-content">
+                                                        <li>Area <span>720 sq ft</span></li>
+                                                        <li>Rooms <span>6</span></li>
+                                                        <li>Beds <span>2</span></li>
+                                                        <li>Baths <span>3</span></li>
+                                                    </ul>
+                                                </div>
+                                                <img src="images/feature-properties/fp-6.jpg" alt="">
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="widget-boxed mt-5">
+                            <div class="widget-boxed-header">
+                                <h4>Рекомендуемые</h4>
+                            </div>
+                            <div class="widget-boxed-body">
+                                <div class="recent-post">
+                                    {% for advertisement in advertisements_with_active_tariffs %}
+                                    <div class="recent-main">
+                                        <div class="recent-img">
+                                            <a href="{% url 'publication:advertisement' advertisement.slug %}">
+
+                                                {% with advertisement.galleryadvertisement_set.all|first as first_image %}
+                                                {% if first_image %}
+                                                <img class="img-responsive"  src="{{ first_image.image.url }}" alt="Первое изображение">
+                                                {% else %}
+                                                <img class="img-responsive"  src="/static/default_image.png" alt="Изображение по умолчанию">
+                                                {% endif %}
+                                                {% endwith %}
+                                            </a>
+                                        </div>
+                                        <div class="info-img">
+                                            <a href="{% url 'publication:advertisement' advertisement.slug %}"><h6>{{ advertisement.name }}</h6></a>
+                                            <p>{{ advertisement.price }}</p>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </section>
+</div>
+<!-- END SECTION BLOG -->
+{% endblock content %}
+{% block footerbottom %}
+<style>
+    .nice-select.form-control {
+        width: 100%;
+    }
+    .nice-select.open .list {
+        width: 99% !important;
+    }
+    .noUi-connect {
+        background: #274abb!important;
+        height: 2px!important;
+    }
+    .noUi-horizontal .noUi-handle {
+        width: 15px;
+        height: 15px;
+        right: -10px;
+        top: -6px;
+        border-radius: 50%;
+    }
+    .noUi-target {
+        background: none;
+        border-radius: none;
+        border: none;
+        box-shadow: none;
+    }
+</style>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Получаем элементы
+        const slider = document.getElementById('priceRange');
+        const inputMin = document.getElementById('priceMin');
+        const inputMax = document.getElementById('priceMax');
+
+        // Значения, поступающие с сервера
+        let minPrice = {{ settings.min_price }};
+        let maxPrice = {{ settings.max_price }};
+
+        // Проверяем, что minPrice <= maxPrice
+        if (minPrice > maxPrice) {
+            console.warn(`Некорректные значения: minPrice (${minPrice}) > maxPrice (${maxPrice}). Переставляем значения.`);
+            [minPrice, maxPrice] = [maxPrice, minPrice];
+        }
+
+        // Проверяем, существуют ли элементы
+        if (slider && inputMin && inputMax) {
+            console.log('Инициализация слайдера');
+
+            // Создаем слайдер noUiSlider
+            noUiSlider.create(slider, {
+                start: [minPrice, maxPrice], // Начальные значения
+                connect: true, // Линия соединения между ползунками
+                range: {
+                    min: minPrice, // Минимальное значение
+                    max: maxPrice  // Максимальное значение
+                },
+                step: 10, // Шаг изменения
+                format: {
+                    to: value => Math.round(value),
+                    from: value => Number(value)
+                }
+            });
+
+            // Логируем начальные значения для проверки
+            console.log('Min price:', minPrice);
+            console.log('Max price:', maxPrice);
+
+            // Обновление полей ввода при изменении слайдера
+            slider.noUiSlider.on('update', function (values, handle) {
+                console.log('Слайдер обновлен:', values);
+                if (handle === 0) {
+                    inputMin.value = values[0]; // Значение левого ползунка
+                    console.log('Input Min обновлено:', values[0]);
+                } else {
+                    inputMax.value = values[1]; // Значение правого ползунка
+                    console.log('Input Max обновлено:', values[1]);
+                }
+            });
+
+            // Обновление слайдера при изменении полей ввода
+            inputMin.addEventListener('input', function () {
+                const minValue = Number(this.value);
+                const maxValue = Number(inputMax.value);
+                console.log('Input Min изменен:', minValue);
+
+                // Проверяем границы и обновляем значения
+                if (minValue < minPrice) {
+                    inputMin.value = minPrice;
+                } else if (minValue > maxValue) {
+                    inputMin.value = maxValue;
+                }
+                slider.noUiSlider.set([
+                    Math.max(minValue, minPrice), null
+                ]);
+            });
+
+            inputMax.addEventListener('input', function () {
+                const minValue = Number(inputMin.value);
+                const maxValue = Number(this.value);
+                console.log('Input Max изменен:', maxValue);
+
+                // Проверяем границы и обновляем значения
+                if (maxValue > maxPrice) {
+                    inputMax.value = maxPrice;
+                } else if (maxValue < minValue) {
+                    inputMax.value = minValue;
+                }
+                slider.noUiSlider.set([
+                    null, Math.min(maxValue, maxPrice)]);
+            });
+        } else {
+            console.error('Не удалось найти элементы для слайдера');
+        }
+    });
+
+
+
+
+
+
+
+</script>
+<script>
+    $(document).ready(function () {
+        // Подключаем DateDropper
+        $('#reservation-date').dateDropper({
+            largeMode: true,
+            lang: 'ru'
+        });
+    });
+
+</script>
+<script src="{% static 'site/website/js/search.js' %}"></script>
+<script src="{% static 'site/website/js/searched.js' %}"></script>
+<script src="{% static 'site/website/js/rangeSlider.js' %}"></script>
+<script src="{% static 'site/website/js/smooth-scroll.min.js' %}"></script>
+<script src="{% static 'site/website/js/light.js' %}"></script>
+<script src="{% static 'site/website/js/ajaxchimp.min.js' %}"></script>
+<script src="{% static 'site/website/js/newsletter.js' %}"></script>
+<script src="{% static 'site/website/js/inner.js' %}"></script>
+<script src="{% static 'site/website/js/datedropper.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.js"></script>
+<script src="{% static 'site/website/js/slick4.js' %}"></script>
+<script src="{% static 'site/website/js/tether.min.js' %}"></script>
+
+{% endblock footerbottom %}

@@ -1,0 +1,66 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{% trans "Order Flow" %}</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    .section-title {
+      background: #007bff;
+      color: white;
+      padding: 10px 20px;
+      display: inline-block;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+
+    .flow-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .step {
+      position: relative;
+      background: #00a99d;
+      color: white;
+      padding: 15px 30px;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+
+    .step::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      right: -15px;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-top: 15px solid transparent;
+      border-bottom: 15px solid transparent;
+      border-left: 15px solid #00a99d;
+    }
+
+    .step:last-child::after {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="flow-container">
+    <div class="step">{% trans "Sending Inquiry" %}</div>
+    <div class="step">{% trans "Communicate Requirements" %}</div>
+    <div class="step">{% trans "Confirm Sample" %}</div>
+    <div class="step">{% trans "Confirm Order" %}</div>
+  </div>
+
+
+</body>
+</html>

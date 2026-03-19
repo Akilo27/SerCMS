@@ -1,0 +1,74 @@
+{% extends 'products/base_profile.html' %}
+{% load static generals_tag %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+{% block content %}
+<aside class="sidebar-area">
+    <div class="widget widget_categories">
+        <h3 class="widget_title"><i class="fa-solid fa-reply"></i>
+            Написать сообщение
+        </h3>
+        <div class="th-comment-form">
+            <div class="form-title">
+                <p class="form-text">Дождитесь ответа администраторов перед отправкой дополнительной информации *</p>
+            </div>
+            <form id="commentForm" method="post" enctype="multipart/form-data" action="{% url 'moderation:add_comment' ticket.id %}">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-12 form-group">
+                        {{ form.content }}
+                        <i class="far fa-pencil"></i>
+                    </div>
+                    <div class="col-8 form-group mb-0">
+                        {{ form.files }}
+                    </div>
+                    <div class="col-4 form-group mb-0">
+                        <button class="th-btn">Отправить</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="th-comments-wrap">
+            <ul class="comment-list" id="list-ticket">
+                {% for comments in ticket_comments %}
+                <li class="th-comment-item">
+                    <div class="th-post-comment">
+                        <div class="comment-avater">
+                            <img src="{% if comments.author.avatar %}{{comments.author.avatar.url}}{% endif %}" alt="Comment Author">
+                        </div>
+                        <div class="comment-content">
+                    <span class="commented-on">
+                        <i class="far fa-calendar"></i>
+                        {{comments.date}}
+                    </span>
+                            <h3 class="name">{{comments.author.username}}</h3>
+                            <p class="text">
+                                {{comments.content}}
+                            </p>
+                            {% if comments.media.all %}
+                            <div class="col flex-column">
+                                {% for media in comments.media.all %}
+                                <a class="btn btn-primary btn-hover-dark"  href="{{ media.file.url }}">
+                                    <i class="fa fa-file-o"></i>
+                                    {{ media.get_file_name }}
+                                </a>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% include 'products/include/paginations.html' with items=ticket_comments %}
+</aside>
+
+{% endblock content %}
+{% block footer %}{% endblock footer %}

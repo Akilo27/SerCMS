@@ -1,0 +1,243 @@
+{% extends 'moderations/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %}{% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+
+{% block head %}
+{% endblock head %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title">{% trans 'Редактировать имущество' %}</h4>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label for="{{ form.name.id_for_label }}" class="form-label">{% trans 'Название' %}</label>
+                {{ form.name }}
+                {{ form.name.errors }}
+            </div>
+
+            <div class="mb-3">
+                <label for="{{ form.inventory_number.id_for_label }}" class="form-label">{% trans 'Инвентарный номер' %}</label>
+                {{ form.inventory_number }}
+                {{ form.inventory_number.errors }}
+            </div>
+
+            <div class="mb-3">
+                <label for="{{ form.description.id_for_label }}" class="form-label">{% trans 'Описание' %}</label>
+                {{ form.description }}
+                {{ form.description.errors }}
+            </div>
+
+            <div class="mb-3">
+                <label for="{{ form.purchase_date.id_for_label }}" class="form-label">{% trans 'Дата покупки' %}</label>
+                {{ form.purchase_date }}
+                {{ form.purchase_date.errors }}
+            </div>
+
+            <div class="mb-3">
+                <label for="{{ form.warranty_expiration.id_for_label }}" class="form-label">{% trans 'Окончание гарантии' %}</label>
+                {{ form.warranty_expiration }}
+                {{ form.warranty_expiration.errors }}
+            </div>
+
+            <div class="mb-3">
+                <label for="{{ form.is_active.id_for_label }}" class="form-label">{% trans 'Активно' %}</label>
+                {{ form.is_active }}
+                {{ form.is_active.errors }}
+            </div>
+
+            <div class="mb-3">
+                <label for="{{ form.location.id_for_label }}" class="form-label">{% trans 'Расположение' %}</label>
+                {{ form.location }}
+                {{ form.location.errors }}
+            </div>
+
+            <div class="mb-3">
+                <label for="{{ form.responsible_person.id_for_label }}" class="form-label">{% trans 'Ответственный' %}</label>
+                {{ form.responsible_person }}
+                {{ form.responsible_person.errors }}
+            </div>
+
+            <button type="submit" class="btn btn-primary">{% trans 'Сохранить' %}</button>
+            <a href="{% url 'moderation:asset_list' %}" class="btn btn-secondary">{% trans 'Назад к списку' %}</a>
+        </form>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('form').forEach(form => {
+            form.querySelectorAll('input, select, textarea').forEach(field => {
+                if (field.type === 'checkbox' || field.type === 'radio') {
+                    field.classList.add('form-check-input');
+                } else {
+                    field.classList.add('form-control');
+                }
+            });
+        });
+    });
+</script>
+<h4 class="card-title">{% trans 'История использования имущества' %}</h4>
+<div id="usage-list"></div>
+<button id="show-usage-form-btn">Добавить использование</button>
+<!-- Форма добавления использования -->
+<form id="usage-form" style="display:none; margin-top: 1em;">
+    <label>Пользователь:
+        <select name="user" id="usage-user-select" required></select>
+    </label><br>
+    <label>Дата выдачи:
+        <input type="datetime-local" name="taken_at" id="usage-taken-at" required>
+    </label><br>
+    <label>Цель:
+        <input type="text" name="purpose" id="usage-purpose">
+    </label><br>
+    <button type="submit">Добавить</button>
+    <button type="button" id="cancel-usage-form">Отмена</button>
+</form>
+
+<br>
+<br>
+<br>
+<h4 class="card-title">{% trans 'Запись о техническом обслуживании' %}</h4>
+<div id="maintenance-list"></div>
+<button id="show-maintenance-form-btn">Добавить ТО</button>
+
+
+<!-- Форма добавления ТО -->
+<form id="maintenance-form" style="display:none; margin-top: 1em;">
+    <label>{% trans "Дата обслуживания" %}:
+        <input type="date" name="date" id="maintenance-date" required>
+    </label><br>
+    <label>{% trans "Выполнил" %}:
+        <input type="text" name="performed_by" id="maintenance-performed-by" required>
+    </label><br>
+    <label>{% trans "Описание" %}:
+        <textarea name="description" id="maintenance-description" required></textarea>
+    </label><br>
+    <label>{% trans "Следующее ТО" %}:
+        <input type="date" name="next_due_date" id="maintenance-next-due-date">
+    </label><br>
+    <button type="submit">{% trans "Добавить" %}</button>
+    <button type="button" id="cancel-maintenance-form">{% trans "Отмена" %}</button>
+</form>
+
+
+<!-- Модальные окна или формы для создания (пример простого prompt) -->
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    const assetId = "{{ object.id }}";
+
+    function loadUsage() {
+        $.get(`/ru/moderation/assets/${assetId}/usage/`, function(data){
+            $('#usage-list').html(data);
+        });
+    }
+
+    function loadMaintenance() {
+        $.get(`/ru/moderation/assets/${assetId}/maintenance/`, function(data){
+            $('#maintenance-list').html(data);
+        });
+    }
+
+    // Загрузка списка пользователей для селекта
+    function loadUsers() {
+        $.get('/ru/moderation/users/json/', function(data){
+            const select = $('#usage-user-select');
+            select.empty();
+            data.forEach(user => {
+                select.append(`<option value="${user.id}">${user.username}</option>`);
+            });
+        });
+    }
+
+    $(document).ready(function(){
+        loadUsage();
+        loadMaintenance();
+        loadUsers();
+
+        // Показ формы добавления использования
+        $('#show-usage-form-btn').click(function(){
+            $('#usage-form').show();
+        });
+        $('#cancel-usage-form').click(function(){
+            $('#usage-form').hide();
+        });
+
+        // Показ формы добавления ТО
+        $('#show-maintenance-form-btn').click(function(){
+            $('#maintenance-form').show();
+        });
+        $('#cancel-maintenance-form').click(function(){
+            $('#maintenance-form').hide();
+        });
+
+        // Отправка формы использования
+        $('#usage-form').submit(function(e){
+            e.preventDefault();
+            const user = $('#usage-user-select').val();
+            const taken_at = $('#usage-taken-at').val();
+            const purpose = $('#usage-purpose').val();
+            $.post(`/ru/moderation/assets/${assetId}/usage/create/`, {
+                user: user,
+                taken_at: taken_at,
+                purpose: purpose,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            }).done(function(){
+                loadUsage();
+                $('#usage-form').hide();
+                $('#usage-form')[0].reset();
+            });
+        });
+
+        // Отправка формы ТО
+        $('#maintenance-form').submit(function(e){
+            e.preventDefault();
+            const date = $('#maintenance-date').val();
+            const performed_by = $('#maintenance-performed-by').val();
+            const description = $('#maintenance-description').val();
+            const next_due_date = $('#maintenance-next-due-date').val();
+            $.post(`/ru/moderation/assets/${assetId}/maintenance/create/`, {
+                date: date,
+                performed_by: performed_by,
+                description: description,
+                next_due_date: next_due_date,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            }).done(function(){
+                loadMaintenance();
+                $('#maintenance-form').hide();
+                $('#maintenance-form')[0].reset();
+            });
+        });
+
+        // Удаление usage
+        $('#usage-list').on('click', '.delete-usage-btn', function(){
+            const id = $(this).data('id');
+            if(confirm('Удалить использование?')){
+                $.post(`/ru/moderation/assets/usage/${id}/delete/`, {csrfmiddlewaretoken: '{{ csrf_token }}'})
+                    .done(loadUsage);
+            }
+        });
+
+        // Удаление maintenance
+        $('#maintenance-list').on('click', '.delete-maintenance-btn', function(){
+            const id = $(this).data('id');
+            if(confirm('Удалить ТО?')){
+                $.post(`/ru/moderation/assets/maintenance/${id}/delete/`, {csrfmiddlewaretoken: '{{ csrf_token }}'})
+                    .done(loadMaintenance);
+            }
+        });
+    });
+
+</script>
+
+{% endblock content %}

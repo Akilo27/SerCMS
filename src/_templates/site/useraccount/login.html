@@ -1,0 +1,79 @@
+{% extends 'site/shop1/base.html' %}
+{% load static generals_tag i18n %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+{% block content %}
+<div id="wrapper" class="inner-pages ui-elements hd-white">
+    <!-- START SECTION HEADINGS -->
+    <div class="clearfix"></div>
+
+    <section class="headings">
+        <div class="text-heading text-center">
+            <div class="container">
+                <h1>Авторизация</h1>
+                <h2><a href="{% url 'webmain:home' %}">Главная </a> &nbsp;/&nbsp; Авторизация</h2>
+            </div>
+        </div>
+    </section>
+    <!-- END SECTION HEADINGS -->
+    <div id="login">
+        <div class="login">
+            <form method="post" id="login-form">
+                {% csrf_token %}
+
+                <!-- Вывод ошибок формы -->
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {{ form.non_field_errors|join:", " }}
+                </div>
+                {% endif %}
+
+                <div class="form-group">
+                    <label>{% trans 'Логин или Email' %}</label>
+                    <input type="text" class="form-control" name="identifier" placeholder="{% trans 'Введите логин или email' %}" id="identifier">
+                    <i class="icon_mail_alt"></i>
+                    {% if form.identifier.errors %}
+                    <div class="text-danger">{{ form.identifier.errors|join:", " }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label>{% trans 'Пароль' %}</label>
+                    <input type="password" class="form-control" name="password" placeholder="{% trans 'Введите пароль' %}">
+                    <i class="icon_lock_alt"></i>
+                    {% if form.password.errors %}
+                    <div class="text-danger">{{ form.password.errors|join:", " }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="fl-wrap filter-tags clearfix add_bottom_30">
+                    <div class="float-left">
+                        <div class="filter-tags-wrap">
+                            <label>Забыли пароль? </label>
+                        </div>
+                    </div>
+                    <div class="float-right mt-1">
+                        <a id="forgot" href="{% url 'webmain:password_reset' %}">{% trans 'Сбросить пароль' %}</a>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn_1 rounded full-width">{% trans 'Войти' %}</button>
+
+                <div class="text-center add_top_10">Нет аккаунта?
+                    <strong>
+                        <a href="{% url 'webmain:signup' %}">{% trans 'Зарегистрироваться' %}</a>
+                    </strong>
+                </div>
+            </form>
+
+
+        </div>
+    </div>
+    <!-- END SECTION LOGIN -->
+</div>
+{% endblock content %}
+{% block footer %}{% endblock footer %}

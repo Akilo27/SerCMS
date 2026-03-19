@@ -1,0 +1,334 @@
+{% extends 'products/base.html' %}
+{% load static generals_tag shop_tags %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+{% block content %}
+<div class="breadcumb-wrapper background-image" >
+    <div class="container">
+        <div class="breadcumb-content">
+            <h1 class="breadcumb-title">{{category.name}}</h1>
+            <ul class="breadcumb-menu">
+                <li><a href="{% url 'webmain:home' %}">Главная</a></li>
+                <li><a href="{% url 'shop:catalogs' %}">Каталог</a></li>
+                <li>{{category.name}}</li>
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="container" >
+    <div class="row" >
+        <div class="col-md-3" >
+            <section class="space-top space-extra-bottom">
+                <div class="th-sort-bar">
+                    <div class="row justify-content-between align-items-center">
+                        <h3>Фильтры&nbsp;</h3>
+                    </div>
+                </div>
+                <div class=" d-lg-block" data-filter-status="true" style="margin: 5px; align-items: center; justify-content: center;">
+                    <form method="GET" action="{% url 'shop:catalogs' %}">
+                        <div class="d-grid">
+                            <button class="th-btn" style=" margin: 5px; padding: 10px 5px; min-width: 120px; " type="submit">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-funnel" viewBox="0 0 16 16">
+                                    <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5zm1 .5v1.308l4.372 4.858A.5.5 0 0 1 7 8.5v5.306l2-.666V8.5a.5.5 0 0 1 .128-.334L13.5 3.308V2z"/>
+                                </svg>
+                                Фильтр
+                            </button>
+                            <a href="{% url 'shop:catalogs' %}" class="th-btn" style=" margin: 5px; padding: 10px 5px; min-width: 120px; " type="submit">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-repeat" viewBox="0 0 16 16">
+                                    <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41m-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9"/>
+                                    <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5 5 0 0 0 8 3M3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9z"/>
+                                </svg>
+                                Сбросить
+                            </a>
+                        </div>
+
+                        <div class="py-3">
+                            <h5 class="font-weight-bold">Цена</h5>
+
+                            <div class="collapse show" id="price1" style="">
+                                <div class="middle">
+                                    <div class="multi-range-slider">
+                                        <input type="range" name="min_price" id="input-left1"
+                                               min="0"
+                                               max="{% currency_conversion request default_max_price%}"
+                                               value="{{ current_min_price }}">
+                                        <!-- Поле для максимальной цены -->
+                                        <input type="range" name="max_price" id="input-right1"
+                                               min="0"
+                                               max="{% currency_conversion request default_max_price%}"
+                                               value="{{ current_max_price }}">
+                                        <div class="slider">
+                                            <div class="track"></div>
+                                            <div class="range" style="left: 10%; right: 50%;"></div>
+                                            <div class="thumb left" style="left: 10%;"></div>
+                                            <div class="thumb right" style="right: 50%;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex align-items-center justify-content-between mt-2">
+                                    {% if valute.default == False %}
+                                    <div><span id="amount-left1" class="font-weight-bold">{% currency_conversion request default_min_price%} </span> {{valute.icon_code}}</div>
+                                    <div><span id="amount-right1" class="font-weight-bold">{% currency_conversion request default_max_price%} </span> {{valute.icon_code}}</div>
+                                    {% else %}
+                                    <div><span id="amount-left1" class="font-weight-bold">{{ default_min_price }}</span> {{valute.icon_code}}</div>
+                                    <div><span id="amount-right1" class="font-weight-bold">{{ default_max_price }}</span> {{valute.icon_code}}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <span>Цена от</span>
+                            <input type="number" min="0" max="{% currency_conversion request default_max_price%}" name="min_price" value="{{ current_min_price }}"  placeholder="Цена от" class="filter-price">
+                            <br>
+                            <br>
+                            <span>Цена до</span>
+                            <input type="number"  min="0" max="{% currency_conversion request default_max_price%}" name="max_price" value="{{ current_max_price }}" placeholder="Цена до" class="filter-price">
+                        </div>
+
+                        <div class="py-3 product-meta" style=" background: #0000000a; border-radius: 5px;padding: 10px;">
+                            <h5 class="font-weight-bold">Категории</h5>
+                            <ul class="list-group" style=" height: 400px; overflow: auto; ">
+                                {% get_categories_with_count request.get_host as categories_with_count %}
+                                {% for category in categories_with_count %}
+                                <div class="d-flex align-items-center category-div" data-category-id="{{ category.id }}" style="{% if category.name|length > 22 %} padding: 0 5px;{% else %} padding: 5px;{%endif%}">
+                                    <input type="checkbox" class="form-check-input hidden" id="category{{ category.id }}"
+                                           name="category" value="{{ category.id }}" style="border-color: #f2a100; width: 1.5em; height: 1.5em;"
+                                           {% if category.id|stringformat:"s" in selected_categories %} checked {% endif %}>
+                                    <label class="form-check-label" for="category{{ category.id }}" style="padding-top: 3px; padding-left: 20px; line-height: 20px; width: 150px;">
+                                        <span class="category-name" style="font-weight: 410; font-size: 0.8em;font-weight: 410;
+    font-size: 0.8em;
+    display: inline-block;
+    max-width: 130px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;">{{ category.name }}</span>
+                                    </label>
+                                    <span class="badge badge-primary badge-pill" style="font-size: 0.8em; font-weight: 430;width: 60px;position:unset!important;border-radius:5px">{{ category.product_count }}</span>
+                                </div>
+                                {% endfor %}
+                            </ul>
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+
+                                    checkboxes.forEach(checkbox => {
+                                        checkbox.addEventListener('change', function() {
+                                            const parentDiv = this.closest('.category-div');
+                                            if (this.checked) {
+                                                parentDiv.style.backgroundColor = '#ffcf6f';
+                                            } else {
+                                                parentDiv.style.backgroundColor = ''; // Удаляем стиль, если чекбокс не выбран
+                                            }
+                                        });
+
+                                        // Устанавливаем начальное состояние при загрузке страницы
+                                        const parentDiv = checkbox.closest('.category-div');
+                                        if (checkbox.checked) {
+                                            parentDiv.style.backgroundColor = '#ffcf6f';
+                                        } else {
+                                            parentDiv.style.backgroundColor = ''; // Удаляем стиль, если чекбокс не выбран
+                                        }
+                                    });
+                                });
+                            </script>
+
+                        </div>
+                        <div class="py-3">
+                            <h5 class="font-weight-bold">Рейтинг</h5>
+                            <div class="rating">
+                                <div class="form-inline d-flex align-items-center py-2">
+                                    <label class="tick form-check-label" for="rating5">
+                                        <input type="checkbox" id="rating5" class="form-check-input hidden" name="rating" value="5" {% if "5" in selected_ratings %} checked {% endif %}>
+                                        <span class="fa fa-star"></span>
+                                        <span class="fa fa-star"></span>
+                                        <span class="fa fa-star"></span>
+                                        <span class="fa fa-star"></span>
+                                        <span class="fa fa-star"></span>
+                                    </label>
+                                </div>
+                                <div class="form-inline d-flex align-items-center py-2">
+                                    <label class="tick form-check-label"  for="rating4" >
+                                        <input type="checkbox" id="rating4" class="form-check-input hidden"  name="rating" value="4"{% if "4" in selected_ratings %} checked {% endif %}> <span class="fa fa-star"></span> <span class="fa fa-star"></span> <span class="fa fa-star"></span> <span class="fa fa-star"></span> <span class="fa fa-star  text-muted"></span> </label> </div>
+                                <div class="form-inline d-flex align-items-center py-2">
+                                    <label class="tick form-check-label"  for="rating3">
+                                        <input type="checkbox" id="rating3" class="form-check-input hidden"  name="rating" value="3"{% if "3" in selected_ratings %} checked {% endif %}> <span class="fa fa-star"></span> <span class="fa fa-star"></span> <span class="fa fa-star"></span> <span class="fa fa-star  text-muted"></span> <span class="fa fa-star  text-muted"></span> </label> </div>
+                                <div class="form-inline d-flex align-items-center py-2">
+                                    <label class="tick form-check-label"  for="rating2">
+                                        <input type="checkbox" id="rating2" class="form-check-input hidden"  name="rating" value="2"{% if "2" in selected_ratings %} checked {% endif %}> <span class="fa fa-star"></span> <span class="fa fa-star"></span> <span class="fa fa-star  text-muted"></span> <span class="fa fa-star  text-muted"></span> <span class="fa fa-star  text-muted"></span> </label> </div>
+                                <div class="form-inline d-flex align-items-center py-2">
+                                    <label class="tick form-check-label" for="rating1">
+                                        <input type="checkbox" id="rating1" class="form-check-input hidden"  name="rating" value="2"{% if "1" in selected_ratings %} checked {% endif %}> <span class="fa fa-star"></span> <span class="fa fa-star  text-muted"></span> <span class="fa fa-star  text-muted"></span> <span class="fa fa-star  text-muted"></span> <span class="fa fa-star  text-muted"></span> </label> </div>
+                            </div>
+                        </div>
+                        <div class="py-3">
+                            {% for variable in variables_with_atributes %}
+                            <h5 class="font-weight-bold">{{ variable.name }}</h5>
+
+                            {% if variable.type == 1 %}
+                            <div class="mt-2 mr-1">
+                                {% for atribute in variable.atribute_set.all %}
+                                <div class="form-check">
+                                    <input type="checkbox" id="atribute{{ atribute.id }}" name="atribute_{{variable.slug}}" value="{{ atribute.id }}"
+                                           {% if atribute.id|stringformat:"s" in selected_attributes.values  %} checked {% endif %}>
+                                    <label for="atribute{{ atribute.id }}">
+                                        {{ atribute.name }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                            {% elif variable.type == 2 %}
+                            <select class="form-select" name="atribute_{{variable.slug}}">  <!-- Используем name="atribute" для отправки в GET -->
+                                <!-- Добавляем опцию "Без фильтров" -->
+                                <option value="">Без фильтров</option>
+                                {% for atribute in variable.atribute_set.all %}
+                                <option value="{{ atribute.id }}"
+                                        {% if atribute.id|stringformat:"s" in selected_attributes.values %} selected {% endif %}>  <!-- Устанавливаем selected -->
+                                {{ atribute.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+
+                            {% endif %}
+                            {% endfor %}
+
+                        </div>
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                let timeout = null;
+
+                                document.querySelectorAll('input[type="checkbox"]').forEach(function(checkbox) {
+                                    checkbox.addEventListener('change', function() {
+                                        if (timeout) {
+                                            clearTimeout(timeout);
+                                        }
+
+                                        timeout = setTimeout(function() {
+                                            checkbox.form.submit();
+                                        }, 2000);  // 2 секунды
+                                    });
+                                });
+                            });
+                        </script>
+                    </form>
+                </div>
+            </section>
+        </div>
+        <div class="col-md-9" >
+            <section class="space-top space-extra-bottom">
+                <div class="container">
+                    <div class="th-sort-bar">
+                        <div class="row justify-content-between align-items-center">
+                            <div class="col-md">
+                                <p class="woocommerce-result-count">Показано {{ page_obj.start_index }}–{{ page_obj.end_index }} из {{ paginator.count }} элементов</p>
+                            </div>
+                            <div class="col-md-auto">
+                                <select id="filterSelect" class="form-select" aria-label="Фильтр">
+                                    <option disabled {% if not request.GET.filterprice %} selected {% endif %}>Цена</option>
+                                    <option value="4" {% if request.GET.filterprice == "4" %} selected {% endif %}>По убыванию</option>
+                                    <option value="5" {% if request.GET.filterprice == "5" %} selected {% endif %}>По возрастанию</option>
+                                </select>
+                                <script> document.getElementById("filterSelect").addEventListener("change", function () {
+                                    var selectedOption = this.value;
+
+                                    if (selectedOption) {
+                                        var currentUrl = new URL(window.location.href);  // Get the current URL
+                                        currentUrl.searchParams.set("filterprice", selectedOption);  // Set or update `filter`
+                                        window.location.href = currentUrl.toString();  // Navigate to the updated URL
+                                    }
+                                });
+                                </script>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row gy-40">
+                        {% for product in products %}
+                        <div class="col-xl-4 col-lg-4 col-sm-6">
+                            <div class="th-product product-grid">
+                                <div class="product-img">
+                                    <img style="height:200px; object-fit: cover;" src="{% if product.image %}{{ product.image.url }}{% else %}{% static 'site/image.jpg' %}{% endif %}" alt="Product Image">
+                                    <div class="actions">
+                                        {% if not user.type == 2 %}
+                                        {% include 'products/include/bookmark_btn.html' %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="product-content">
+                                    {% if not user.type == 2 %}
+                                    {% if product.quantity == 0 and product.order %}
+                                    {% include 'products/include/form_applications.html' %}
+                                    {% else %}
+                                    {% include 'products/include/cart_button.html' %}
+                                    {% endif %}
+                                    {% endif %}
+                                    {% if product.category %}
+                                    <a href="{{ category.all.last.get_absolute_url }}" class="product-category">{{ category.all.last.name }}</a>
+                                    {% endif %}
+                                    <h3 class="product-title"><a href="{{ product.get_absolute_url }}" style="    max-width: 100%;
+    text-decoration: none;
+    color: inherit;
+    white-space: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.5;
+    height: 3em;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    display: -webkit-box;">{{ product.name }}</a></h3>
+                                    {% if product.price %}
+                                    {% if valute != product.valute %}
+                                    {% if product.type == 1 %}
+                                    <span class="price" style="    color: #017D03;
+    font-weight: 600;
+    font-size: 20px;">{% currency_conversion_for_products request product.price product.valute.id %} {{valute.icon_code}}</span>
+                                    {% else %}
+                                    <span class="price" style="    color: #017D03;
+    font-weight: 600;
+    font-size: 20px;">{% currency_conversion_for_products request product.productsvariable_set.all.first.price product.valute.id %} {{valute.icon_code}}</span>
+                                    {% endif %}
+                                    {% else %}
+                                    {% if product.type == 1 %}
+                                    <span class="price" style="    color: #017D03;
+    font-weight: 600;
+    font-size: 20px;">{{ product.price }} {{valute.icon_code}}</span>
+                                    {% else %}
+                                    <span class="price" style="    color: #017D03;
+    font-weight: 600;
+    font-size: 20px;">{{ product.productsvariable_set.all.first.price }} {{valute.icon_code}}</span>
+                                    {% endif %}
+                                    {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% include 'products/include/paginations.html' with items=products %}
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+ <style>
+        .form-check-input.hidden {
+            display: none;
+        }
+
+        /* Стили для звезд */
+        .fa-star {
+            color: #ddd; /* Неактивная звезда */
+            margin-right: 2px;
+        }
+
+        /* Когда чекбокс отмечен, звезды становятся желтыми */
+        input[type="checkbox"]:checked ~ .fa-star {
+            color: #ffcc00; /* Желтый цвет активной звезды */
+        }
+    </style>
+{% endblock content %}
+{% block footer %}{% endblock footer %}

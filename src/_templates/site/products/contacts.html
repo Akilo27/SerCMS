@@ -1,0 +1,176 @@
+{% extends 'products/base.html' %}
+{% load static generals_tag %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+
+{% block content %}
+<!-- Contact Section Start -->
+<div class="section section-padding-02"></div>
+<div class="section section-padding">
+    <div class="container">
+        <div class="row gy-4">
+            <div class="col-xl-3 col-md-4">
+                <!-- My Account Menu Start -->
+                <div class="space">
+                    <div class="container">
+                        <div class="my-account-menu">
+                            <ul class="nav account-menu-list flex-column">
+                                {% for contact in contacts %}
+                                <li class="th-btn btn-fw">
+                                    <a class="{% if forloop.first %} active{% endif %}" data-bs-toggle="pill"
+                                       href="#pills-{{forloop.counter}}" style="color:#fff;">
+                                        {{contact.departments}}
+                                    </a>
+                                </li>
+                                <br>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- My Account Menu End -->
+            </div>
+            <div class="col-xl-9 col-md-8 " id="responsive-div">
+                <!-- Tab content start -->
+                <div class="tab-content my-account-tab">
+                    {% for contact in contacts %}
+                    <div class="tab-pane fade {% if forloop.first %}show active{% endif %}"
+                         id="pills-{{forloop.counter}}" >
+                        <div class="contact-wrapper">
+                            <div class="gx-0  space">
+                                <div class="row">
+                                    <div class="col-lg-5">
+                                                <div class="contact-feature">
+                                                    <div class="box-icon">
+                                                        <i class="fa-light fa-location-dot"></i>
+                                                    </div>
+                                                    <div class="media-body">
+                                                        <h3 class="box-title">Адрес</h3>
+                                                        <p class="box-text">{{contact.adress}}</p>
+                                                    </div>
+                                                </div>
+                                                <br>
+                                                <div class="contact-feature">
+                                                    <div class="box-icon bg-theme2">
+                                                        <i class="fa-light fa-phone"></i>
+                                                    </div>
+                                                    <div class="media-body">
+                                                        <h3 class="box-title">Телефон</h3>
+                                                        <p class="box-text">
+                                                            <a href="tel:{{contact.phone}}">{{contact.phone}}</a>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <br>
+                                                <div class="contact-feature">
+                                                    <div class="box-icon bg-title">
+                                                        <i class="fa-light fa-envelope"></i>
+                                                    </div>
+                                                    <div class="media-body">
+                                                        <h3 class="box-title">Эл.Почта</h3>
+                                                        <p class="box-text">
+                                                            <a href="mailto:{{contact.email}}">{{contact.email}}</a>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <br>
+                                                <div class="contact-feature">
+                                                    <div class="media-body"><h3 class="box-title">Наши социальные сети</h3>
+                                                        <div class="th-social">
+                                                            {% for soclink in contact.sociallinks.all %}
+                                                            <a target="_blank" href="{{soclink.link}}"
+                                                              previewlistener="true"><i class="{{soclink.iconfa}}"></i>
+                                                            </a>
+                                                            {% endfor %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                    </div>
+                                    <div class="col-lg-7">
+                                        <!-- Contact Form Start  -->
+                                        <div class="container"  >
+                                            <div class="contact-feature">
+                                            {{contact.map|safe}}
+                                            </div>
+                                            {{pagecontent|safe }}
+                                        </div>
+
+                                        <!-- Contact Form End  -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                </div>
+                <!-- Tab content End -->
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <!-- Contact Form Start  -->
+
+    <form method="post" class="contact-form input-smoke ajax-contact">
+        <h2 class="sec-title"> Связать с нами ?</h2>
+        <h6 class="title">Заполните форму и мы свяжемся с вами.</h6>
+        {% csrf_token %}
+        <div class="row">
+            <div class="form-group col-md-6">
+                <input type="text" name="name" required placeholder="Ваше Имя*">
+                <i class="fal fa-user"></i>
+            </div>
+            <div class="form-group col-md-6">
+                <input type="email" name="email" required placeholder="Электронная почта *">
+                <i class="fal fa-envelope"></i>
+            </div>
+            <div class="form-group col-md-6">
+                <input type="text" name="subject" required placeholder="Предмет">
+
+            </div>
+            <div class="form-group col-md-6">
+                <input type="text" name="phone" required placeholder="Номер телефона">
+                <i class="fal fa-phone"></i>
+            </div>
+            <div class="form-group col-12">
+                <textarea name="message" required placeholder="Оставь свой комментарий здесь"></textarea>
+                <i class="fal fa-pencil"></i>
+            </div>
+            <p class="form-message"></p>
+            <div class="form-btn col-12">
+                <button type="submit" class="th-btn btn-fw">
+                    Отправить<i class="fas fa-chevrons-right ms-2"></i>
+                </button>
+
+            </div>
+        </div>
+    </form>
+
+    <!-- Contact Form End  -->
+</div>
+<!-- Contact Section End -->
+<script>
+    function updateClasses() {
+        const element = document.getElementById('responsive-div');
+        if (window.innerWidth <= 1200) {
+            element.classList.remove('col-xl-9', 'col-md-8');
+            element.classList.add('col-xl-12', 'col-md-12');
+        } else {
+            element.classList.remove('col-xl-12', 'col-md-12');
+            element.classList.add('col-xl-9', 'col-md-8');
+        }
+    }
+
+    // Вызываем функцию при загрузке страницы
+    window.addEventListener('load', updateClasses);
+
+    // Вызываем функцию при изменении размера окна
+    window.addEventListener('resize', updateClasses);
+</script>
+{% endblock content %}

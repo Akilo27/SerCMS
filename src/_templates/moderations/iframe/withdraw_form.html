@@ -1,0 +1,91 @@
+{% load i18n %}
+{% load static %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+{% endblock head %}
+
+{% block content %}
+
+
+    <div>
+        <form method="post" class="requisites-info" enctype="multipart/form-data" id="requisitesForm">
+            {% csrf_token %}
+            <div style="background-color: white">
+                <div class="row">
+                    <div class="col-xl-12">
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <h6 class="mb-2" style="width: max-content">{% trans "Сумма" %}</h6>
+                            </div>
+                            <div class="mb-3">
+                                {{ form.amount }}
+                                {{ form.user }}
+                            </div>
+                        </div>
+                        <div class="row">
+                        <div class="col-sm-12 form-btn">
+                            <button type="submit"
+                                    class="btn btn-success"
+                                    style="margin-top: 10px; width: 100%">
+                                {% trans "Отправить" %}
+                            </button>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div><!--end card-->
+
+<script>
+    $(document).ready(function() {
+        $('#requisitesForm').on('submit', function(event) {
+            event.preventDefault(); // Предотвращаем стандартное поведение формы
+
+            $.ajax({
+                type: $(this).attr('method'),
+                url: $(this).attr('action'),
+                data: $(this).serialize(),
+                success: function(response) {
+                    // Обработка успешного ответа, если необходимо
+                    window.parent.location.reload(); // Обновляем родительскую страницу
+                },
+                error: function(xhr, status, error) {
+                    // Обработка ошибок, если необходимо
+                    console.error(error);
+                }
+            });
+        });
+    });
+</script>
+<style>
+    .form-control[type="file"]:not(:disabled):not([readonly]) {
+        --tw-border-opacity: 1;
+        border-color: rgb(226 232 240 / var(--tw-border-opacity));
+        width: fit-content;
+        display: block;
+        border-radius: .375rem;
+        border-width: 1px;
+        font-size: .875rem;
+        height: auto!important;
+        padding: 5px 0px 5px 10px;
+    }
+
+    textarea#id_about {
+        display: block !important;
+        background: #fff;
+        border: 0.0625rem solid #EEEEEE;
+        padding: 0.3125rem 0.25rem;
+        color: #6e6e6e;
+        border-radius: 0.5rem;
+    }
+    body {
+        background: white;
+    }
+</style>
+{% endblock content %}

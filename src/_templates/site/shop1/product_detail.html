@@ -1,0 +1,227 @@
+{% extends 'site/shop1/base.html' %}
+{% load static generals_tag %}
+{% load shop_tags %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+
+{% block head %}
+
+{% endblock head %}
+{% block content %}
+
+<section class="product-area">
+    <div class="container">
+        <div class="row" style="display: flex; gap: 20px;">
+            <!-- Левая часть: основное изображение + миниатюры -->
+            <div style="width: 60%;">
+                <div class="product-single-thumb">
+                    <a href="{% if product.image %}{{ product.image.url }}{% else %}/_static/site/furbar/images/nophotoyeti.jpg{% endif %}">
+                        <img src="{% if product.image %}{{ product.image.url }}{% else %}/_static/site/furbar/images/nophotoyeti.jpg{% endif %}"
+                             alt="{{ product.name }}" style="width: 570px; height: 675px; object-fit: cover;">
+                    </a>
+                </div>
+
+                <!-- Лента миниатюр изображений -->
+                <!-- Лента миниатюр изображений с кнопками листания -->
+                <div style="display: flex; align-items: center; gap: 10px; position: relative;">
+                    <!-- Левая кнопка листания -->
+                    <button onclick="scrollThumbnails(-1)"
+                            style="position: absolute; left: -30px; height: 100%; background: transparent; border: none; cursor: pointer;">
+                        ❮
+                    </button>
+
+                    <div id="thumbnailContainer"
+                         style="display: flex; gap: 10px; overflow-x: auto; scroll-behavior: smooth; width: 100%;">
+                        <img src="{% if product.image %}{{ product.image.url }}{% else %}/_static/site/furbar/images/nophotoyeti.jpg{% endif %}"
+                             alt="Миниатюра" style="width: 80px; height: 80px;">
+                        {% for image in gallery %}
+                        <img src="{{ image.image.url }}" alt="Миниатюра" style="width: 80px; height: 80px;">
+                        {% endfor %}
+                    </div>
+
+                    <!-- Правая кнопка листания -->
+                    <button onclick="scrollThumbnails(1)"
+                            style="position: absolute; right: -30px; height: 100%; background: transparent; border: none; cursor: pointer;">
+                        ❯
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Правая часть: информация о товаре -->
+            <div style="width: 60%; display: flex; flex-direction: column; gap: 15px;">
+                <!-- Блок с количеством, корзиной и избранным -->
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <form method="post" action="{% url 'shop:add_to_cart' %}" data-product-id="{{ product.id }}">
+                        {% csrf_token %}
+                        <input name="quantity" type="number" value="1" min="1" max="{{ product.quantity }}"
+                               style="width: 50px;">
+                        <button type="submit">В корзину</button>
+                    </form>
+
+                    {% if user.is_authenticated %}
+                    <div id="bookmark_button_{{ product.id }}" data-product="{{ product.id }}">
+                        {% if product in is_bookmarked %}
+                        <button type="button" style="cursor: pointer;" data-type="bookmarkDelete"
+                                data-product="{{ product.id }}">Удалить из избранного
+                        </button>
+                        {% else %}
+                        <button type="button" style="cursor: pointer;" data-type="bookmarkAdd"
+                                data-product="{{ product.id }}">Добавить в избранное
+                        </button>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Название товара -->
+                <h3>{{ product.name }}</h3>
+
+                <!-- Цена -->
+                <div class="prices">
+                    {% if valute != product.valute %}
+                    {% if product.type == 1 %}
+                    <span>{% currency_conversion_for_products request product.price product.valute.id %} {{ valute.icon_code }}</span>
+                    {% else %}
+                    <span>{% currency_conversion_for_products request product.productsvariable_set.all.first.price product.valute.id %} {{ valute.icon_code }}</span>
+                    {% endif %}
+                    {% else %}
+                    {% if product.type == 1 %}
+                    <span>{{ product.price }} {{ valute.icon_code }}</span>
+                    {% else %}
+                    <span>{{ product.productsvariable_set.all.first.price }} {{ valute.icon_code }}</span>
+                    {% endif %}
+                    {% endif %}
+                </div>
+
+                <!-- Фрагмент -->
+                <p>{{ product.fragment|safe }}</p>
+
+                <!-- Категория, Наличие, Производитель -->
+                <div>
+                    <span>Категории:</span> <a href="{{ product.category.url }}">{{ product.category.first }}</a><br>
+                    <span>На складе:</span> {{ product.quantity }}<br>
+                    <span>Производитель:</span> <a href="{% url 'shop:manufacturers' product.manufacturers.slug %}">{{ product.manufacturers }}</a>
+                </div>
+
+                <!-- Добавляем небольшой отступ -->
+                <div style="margin-top: 15px;"></div>
+
+                <!-- Вкладки -->
+                <div>
+                    <nav style="display: flex; gap: 15px;">
+                        <button onclick="openTab('description')">Описание</button>
+                        <button onclick="openTab('characteristics')">Характеристики</button>
+                        <button onclick="openTab('reviews')">Отзывы</button>
+                        <button onclick="openTab('faq')">Вопросы</button>
+                    </nav>
+                </div>
+
+
+                <!-- Контент вкладок -->
+                <div id="description" class="tab-content" style="display: block;">
+                    <p>{{ product.description|safe }}</p>
+                </div>
+
+                <div id="characteristics" class="tab-content" style="display: none;">
+                    <table border="1" style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                        <tr>
+                            <th>№</th>
+                            <th>Название</th>
+                            <th>Значение</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for atribute in product.atribute.all %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ atribute.variable.name }}</td>
+                            <td>{{ atribute.name }}</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="reviews" class="tab-content" style="display: none;">
+                    {% include 'site/shop1/include/form_reviews.html' %}
+                    {% include 'site/shop1/include/reviews.html' %}
+                </div>
+
+                <div id="faq" class="tab-content" style="display: none;">
+                    {% include 'site/shop1/include/form_faqs.html' %}
+                    {% include 'site/shop1/include/faqs.html' %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- JavaScript для переключения вкладок -->
+<script>
+    function openTab(tabId) {
+        var tabs = document.querySelectorAll('.tab-content');
+        tabs.forEach(tab => tab.style.display = 'none'); // Скрываем все вкладки
+
+        document.getElementById(tabId).style.display = 'block'; // Показываем нужную вкладку
+    }
+
+    function scrollThumbnails(direction) {
+        const container = document.getElementById("thumbnailContainer");
+        container.scrollBy({ left: direction * 100, behavior: 'smooth' });
+    }
+
+</script>
+
+{% endblock content %}
+
+{% block footer %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        console.log("DOM полностью загружен и разобран");
+
+        // Находим все кнопки увеличения и уменьшения количества
+        var minusButtons = document.querySelectorAll('.qtyminus');
+        var plusButtons = document.querySelectorAll('.qtyplus');
+
+        console.log("Найдено кнопок минус:", minusButtons.length);
+        console.log("Найдено кнопок плюс:", plusButtons.length);
+
+        // Добавляем обработчики событий для кнопок уменьшения
+        minusButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                console.log("Кнопка минус нажата");
+                var input = this.parentNode.querySelector('.qty');
+                var value = parseInt(input.value, 10);
+                if (value > 1) {
+                    input.value = value - 1;
+                }
+                console.log("Новое значение:", input.value);
+            });
+        });
+
+        // Добавляем обработчики событий для кнопок увеличения
+        plusButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                console.log("Кнопка плюс нажата");
+                var input = this.parentNode.querySelector('.qty');
+                var value = parseInt(input.value, 10);
+                var max = parseInt(input.getAttribute('maxlength'), 10);
+                if (value < max) {
+                    input.value = value + 1;
+                }
+                console.log("Новое значение:", input.value);
+            });
+        });
+    });
+
+
+
+
+</script>
+
+{% endblock footer %}
