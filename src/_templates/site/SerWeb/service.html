@@ -1,0 +1,1041 @@
+{% extends 'site/SerWeb/base.html' %}
+{% load static generals_tag i18n cache %}
+
+{% block title %}{{ seo_title|default:"Услуги веб-студии SerWeb" }}{% endblock title %}
+{% block description %}{{ seo_description|default:"Полный комплекс услуг по веб-разработке: создание сайтов, веб-приложений, Telegram ботов, SEO оптимизация и техническая поддержка. Индивидуальный подход и современные технологии." }}{% endblock description %}
+
+{% block propertytitle %}{% if seo_propertytitle %}{{ seo_propertytitle }}{% else %}Услуги веб-разработки | SerWeb{% endif %}{% endblock propertytitle %}
+{% block propertydescription %}{% if seo_propertydescription %}{{ seo_propertydescription }}{% else %}Разрабатываем современные цифровые решения под ключ{% endif %}{% endblock propertydescription %}
+{% block propertyimage %}{% if seo_previev %}{{ seo_previev.url }}{% else %}{% static 'site/serweb/img/services-og.jpg' %}{% endif %}{% endblock propertyimage %}
+
+{% block head %}
+<style>
+    /* Дополнительные стили для страницы услуг */
+    .services-hero {
+        background: linear-gradient(135deg, var(--sw-black) 0%, var(--sw-primary-dark) 100%);
+        padding: 80px 0 60px;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 40px;
+    }
+
+    .services-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 50%;
+        height: 100%;
+        background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20 L80 20 L80 80 L20 80 Z' fill='none' stroke='%236C3CE9' stroke-width='0.5' opacity='0.2'/%3E%3C/svg%3E");
+        background-size: 50px 50px;
+        opacity: 0.3;
+        pointer-events: none;
+    }
+
+    .services-hero-title {
+        font-size: 56px;
+        font-weight: 800;
+        line-height: 1.1;
+        margin-bottom: 20px;
+        color: var(--sw-white);
+    }
+
+    .services-hero-title span {
+        color: var(--sw-primary-light);
+        display: block;
+        font-size: 64px;
+    }
+
+    .services-hero-text {
+        font-size: 18px;
+        color: rgba(255, 255, 255, 0.8);
+        max-width: 600px;
+        margin-bottom: 30px;
+    }
+
+    .services-stats {
+        display: flex;
+        gap: 40px;
+        margin-top: 40px;
+    }
+
+    .services-stat-item {
+        text-align: center;
+    }
+
+    .services-stat-number {
+        font-size: 42px;
+        font-weight: 800;
+        color: var(--sw-primary);
+        line-height: 1;
+    }
+
+    .services-stat-label {
+        font-size: 14px;
+        color: var(--sw-gray);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .services-filter {
+        margin-bottom: 40px;
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .services-filter-btn {
+        padding: 10px 25px;
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 30px;
+        color: var(--sw-white);
+        font-size: 15px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--sw-transition);
+    }
+
+    .services-filter-btn:hover,
+    .services-filter-btn.active {
+        background: var(--sw-primary);
+        border-color: var(--sw-primary);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(108, 60, 233, 0.3);
+    }
+
+    .services-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 30px;
+        margin: 50px 0;
+        opacity: 1;
+        transition: opacity 0.3s ease;
+    }
+
+    .services-grid.loading {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    .service-card {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        overflow: hidden;
+        transition: var(--sw-transition);
+        position: relative;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .service-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--sw-primary);
+        box-shadow: 0 10px 30px rgba(108, 60, 233, 0.2);
+    }
+
+    .service-card.featured {
+        border: 2px solid var(--sw-primary);
+        position: relative;
+    }
+
+    .service-card.featured::before {
+        content: '🔥 Популярное';
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: var(--sw-primary);
+        color: white;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        z-index: 2;
+    }
+
+    .service-image {
+        height: 240px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .service-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .service-card:hover .service-image img {
+        transform: scale(1.05);
+    }
+
+    .service-image-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(10,10,10,0.8) 100%);
+        pointer-events: none;
+    }
+
+    .service-icon {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        width: 60px;
+        height: 60px;
+        background: var(--sw-primary);
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 30px;
+        color: white;
+        z-index: 2;
+        transform: rotate(10deg);
+        transition: var(--sw-transition);
+    }
+
+    .service-card:hover .service-icon {
+        transform: rotate(0deg);
+        background: var(--sw-white);
+        color: var(--sw-primary);
+    }
+
+    .service-content {
+        padding: 25px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .service-category {
+        display: inline-block;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--sw-primary);
+        margin-bottom: 10px;
+    }
+
+    .service-title {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 15px;
+        color: var(--sw-white);
+    }
+
+    .service-title a {
+        color: inherit;
+        transition: var(--sw-transition);
+    }
+
+    .service-title a:hover {
+        color: var(--sw-primary);
+    }
+
+    .service-description {
+        color: var(--sw-gray);
+        margin-bottom: 20px;
+        line-height: 1.6;
+        flex: 1;
+    }
+
+    .service-features {
+        list-style: none;
+        margin-bottom: 20px;
+    }
+
+    .service-features li {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 14px;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .service-features li i {
+        color: var(--sw-primary);
+        font-size: 12px;
+    }
+
+    .service-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: auto;
+        padding-top: 20px;
+        border-top: 1px solid var(--sw-gray-dark);
+    }
+
+    .service-price {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--sw-primary);
+    }
+
+    .service-price small {
+        font-size: 14px;
+        font-weight: 400;
+        color: var(--sw-gray);
+    }
+
+    .service-btn {
+        padding: 12px 25px;
+        background: transparent;
+        border: 1px solid var(--sw-primary);
+        border-radius: 30px;
+        color: var(--sw-white);
+        font-weight: 600;
+        transition: var(--sw-transition);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .service-btn:hover {
+        background: var(--sw-primary);
+        color: white;
+        transform: translateX(5px);
+    }
+
+    .services-load-more {
+        text-align: center;
+        margin: 50px 0;
+    }
+
+    .services-loader {
+        display: inline-block;
+        width: 40px;
+        height: 40px;
+        border: 3px solid var(--sw-gray-dark);
+        border-top-color: var(--sw-primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .services-empty {
+        text-align: center;
+        padding: 80px 20px;
+        color: var(--sw-gray);
+        font-size: 18px;
+    }
+
+    .services-empty i {
+        font-size: 60px;
+        color: var(--sw-primary);
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+
+    .services-cta {
+        background: linear-gradient(135deg, var(--sw-primary-dark), var(--sw-black));
+        border-radius: 30px;
+        padding: 60px;
+        margin: 60px 0;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .services-cta::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(108,60,233,0.2) 0%, transparent 70%);
+        animation: rotate 20s linear infinite;
+    }
+
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    .services-cta-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .services-cta h2 {
+        font-size: 42px;
+        font-weight: 800;
+        color: white;
+        margin-bottom: 20px;
+    }
+
+    .services-cta p {
+        font-size: 18px;
+        color: rgba(255, 255, 255, 0.8);
+        max-width: 600px;
+        margin: 0 auto 30px;
+    }
+
+    .services-cta-buttons {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .service-skeleton {
+        background: var(--sw-black-light);
+        border-radius: 20px;
+        padding: 20px;
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    .service-skeleton-image {
+        height: 200px;
+        background: var(--sw-gray-dark);
+        border-radius: 15px;
+        margin-bottom: 20px;
+    }
+
+    .service-skeleton-line {
+        height: 20px;
+        background: var(--sw-gray-dark);
+        border-radius: 10px;
+        margin-bottom: 10px;
+    }
+
+    .service-skeleton-line.short {
+        width: 60%;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    @media (max-width: 768px) {
+        .services-hero-title {
+            font-size: 40px;
+        }
+        .services-hero-title span {
+            font-size: 48px;
+        }
+        .services-stats {
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .services-grid {
+            grid-template-columns: 1fr;
+        }
+        .services-cta {
+            padding: 40px 20px;
+        }
+        .services-cta h2 {
+            font-size: 32px;
+        }
+    }
+</style>
+{% endblock head %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb-list">
+                <li class="breadcrumb-item"><a href="{% url 'webmain:home' %}"><i class="fa fa-home me-1"></i>{% trans 'Главная' %}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{% trans 'Услуги' %}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<style>
+    .breadcrumbs {
+        background: var(--sw-black-light);
+        padding: 15px 0;
+        border-bottom: 1px solid var(--sw-gray-dark);
+    }
+
+    .breadcrumb-list {
+        display: flex;
+        list-style: none;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .breadcrumb-item {
+        font-size: 14px;
+    }
+
+    .breadcrumb-item:not(:last-child)::after {
+        content: '/';
+        margin-left: 10px;
+        color: var(--sw-gray);
+    }
+
+    .breadcrumb-item a {
+        color: var(--sw-gray);
+        transition: var(--sw-transition);
+    }
+
+    .breadcrumb-item a:hover {
+        color: var(--sw-primary);
+    }
+
+    .breadcrumb-item.active {
+        color: var(--sw-white);
+    }
+</style>
+{% endblock breadcrumbs %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="services-hero">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-7">
+                <h1 class="services-hero-title wow fadeInUp" data-wow-delay="0.2s">
+                    {% trans "Услуги" %} <span>{% trans "веб-студии" %}</span>
+                </h1>
+                <p class="services-hero-text wow fadeInUp" data-wow-delay="0.3s">
+                    {% trans "Мы предлагаем полный комплекс услуг по созданию и развитию цифровых продуктов. От простого лендинга до сложной CRM-системы — реализуем проекты любой сложности." %}
+                </p>
+
+                <div class="services-stats wow fadeInUp" data-wow-delay="0.4s">
+                    <div class="services-stat-item">
+                        <div class="services-stat-number">100+</div>
+                        <div class="services-stat-label">{% trans "проектов" %}</div>
+                    </div>
+                    <div class="services-stat-item">
+                        <div class="services-stat-number">5 лет</div>
+                        <div class="services-stat-label">{% trans "на рынке" %}</div>
+                    </div>
+                    <div class="services-stat-item">
+                        <div class="services-stat-number">15+</div>
+                        <div class="services-stat-label">{% trans "специалистов" %}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5 d-none d-lg-block">
+                <div class="services-hero-image wow fadeInRight" data-wow-delay="0.5s">
+                    <img src="{% static 'site/serweb/img/services-hero.svg' %}" alt="Services" class="img-fluid" onerror="this.src='https://via.placeholder.com/500x400/6C3CE9/FFFFFF?text=Services'">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container">
+    <!-- Filter Buttons -->
+    <div class="services-filter wow fadeInUp" data-wow-delay="0.3s">
+        <button type="button" class="services-filter-btn active" data-filter="all">{% trans "Все услуги" %}</button>
+        <button type="button" class="services-filter-btn" data-filter="development">{% trans "Разработка" %}</button>
+        <button type="button" class="services-filter-btn" data-filter="design">{% trans "Дизайн" %}</button>
+        <button type="button" class="services-filter-btn" data-filter="marketing">{% trans "Маркетинг" %}</button>
+        <button type="button" class="services-filter-btn" data-filter="support">{% trans "Поддержка" %}</button>
+    </div>
+
+    <!-- Services Grid -->
+    <div class="services-grid" id="services-grid">
+        <!-- Services will be loaded here via JavaScript -->
+        <div class="service-skeleton">
+            <div class="service-skeleton-image"></div>
+            <div class="service-skeleton-line"></div>
+            <div class="service-skeleton-line short"></div>
+            <div class="service-skeleton-line"></div>
+        </div>
+        <div class="service-skeleton">
+            <div class="service-skeleton-image"></div>
+            <div class="service-skeleton-line"></div>
+            <div class="service-skeleton-line short"></div>
+            <div class="service-skeleton-line"></div>
+        </div>
+        <div class="service-skeleton">
+            <div class="service-skeleton-image"></div>
+            <div class="service-skeleton-line"></div>
+            <div class="service-skeleton-line short"></div>
+            <div class="service-skeleton-line"></div>
+        </div>
+    </div>
+
+    <!-- Load More Button -->
+    <div class="services-load-more" id="load-more-container" style="display: none;">
+        <button class="sw-btn sw-btn-outline" id="load-more-btn">
+            <i class="fa fa-rotate-right me-2"></i>
+            {% trans "Загрузить еще" %}
+        </button>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="services-loader" id="services-loader" style="display: none;"></div>
+</div>
+
+<!-- CTA Section -->
+<section class="container">
+    <div class="services-cta wow fadeInUp" data-wow-delay="0.2s">
+        <div class="services-cta-content">
+            <h2>{% trans "Нужна консультация?" %}</h2>
+            <p>{% trans "Оставьте заявку, и мы свяжемся с вами в течение 30 минут, чтобы обсудить ваш проект и подобрать оптимальное решение" %}</p>
+            <div class="services-cta-buttons">
+                <a href="{% url 'shop:my_order' %}" class="sw-btn sw-btn-primary">
+                    <i class="fa fa-pen-to-square me-2"></i>
+                    {% trans "Заказать проект" %}
+                </a>
+                <a href="{% url 'webmain:contacts' %}" class="sw-btn sw-btn-outline">
+                    <i class="fa fa-phone me-2"></i>
+                    {% trans "Связаться с нами" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Section (optional, можно добавить позже) -->
+<section class="container mt-5 mb-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="sw-section-title text-start">
+                <span class="sw-section-subtitle">{% trans "FAQ" %}</span>
+                <h2 class="sw-section-main-title">{% trans "Часто задаваемые" %} <span>{% trans "вопросы" %}</span></h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h4>{% trans "Сколько времени занимает разработка сайта?" %}</h4>
+                    <i class="fa fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>{% trans "Сроки зависят от сложности проекта. Лендинг — от 2 недель, интернет-магазин — от 4 недель, уникальные веб-приложения — от 6 недель. Точные сроки определяем после брифа." %}</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h4>{% trans "Входит ли SEO в стоимость разработки?" %}</h4>
+                    <i class="fa fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>{% trans "Базовая SEO-оптимизация (мета-теги, структура, скорость загрузки) входит во все тарифы. Продвинутое SEO и контент-маркетинг — оплачиваются отдельно." %}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h4>{% trans "Предоставляете ли вы хостинг?" %}</h4>
+                    <i class="fa fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>{% trans "Да, мы предоставляем хостинг на высокопроизводительных серверах. Первый месяц бесплатно при заказе разработки." %}</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h4>{% trans "Можно ли заказать только дизайн?" %}</h4>
+                    <i class="fa fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>{% trans "Да, мы принимаем заказы на разработку дизайна отдельно от верстки и программирования. Вы получите макеты в Figma." %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .faq-item {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 15px;
+        margin-bottom: 15px;
+        overflow: hidden;
+    }
+
+    .faq-question {
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        transition: var(--sw-transition);
+    }
+
+    .faq-question:hover {
+        background: rgba(108, 60, 233, 0.1);
+    }
+
+    .faq-question h4 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--sw-white);
+    }
+
+    .faq-question i {
+        color: var(--sw-primary);
+        transition: var(--sw-transition);
+    }
+
+    .faq-question.active i {
+        transform: rotate(180deg);
+    }
+
+    .faq-answer {
+        padding: 0 20px;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+        background: rgba(0,0,0,0.2);
+    }
+
+    .faq-answer.show {
+        padding: 0 20px 20px;
+        max-height: 200px;
+    }
+
+    .faq-answer p {
+        color: var(--sw-gray);
+        margin: 0;
+    }
+</style>
+{% endblock content %}
+
+{% block footerbottom %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    'use strict';
+
+    // Configuration
+    const CONFIG = {
+        initialPage: 1,
+        perPage: 6,
+        apiUrl: '/api/services/', // Замените на ваш реальный эндпоинт
+        loadingDelay: 300
+    };
+
+    // State
+    let state = {
+        currentPage: CONFIG.initialPage,
+        isLoading: false,
+        hasMore: true,
+        filter: 'all',
+        services: []
+    };
+
+    // DOM Elements
+    const grid = document.getElementById('services-grid');
+    const loader = document.getElementById('services-loader');
+    const loadMoreBtn = document.getElementById('load-more-btn');
+    const loadMoreContainer = document.getElementById('load-more-container');
+    const filterBtns = document.querySelectorAll('.services-filter-btn');
+
+    // Utility functions
+    const showLoader = () => {
+        if (loader) loader.style.display = 'inline-block';
+        if (grid) grid.classList.add('loading');
+    };
+
+    const hideLoader = () => {
+        if (loader) loader.style.display = 'none';
+        if (grid) grid.classList.remove('loading');
+    };
+
+    const showLoadMore = (show) => {
+        if (loadMoreContainer) {
+            loadMoreContainer.style.display = show ? 'block' : 'none';
+        }
+    };
+
+    // Create service card HTML
+    const createServiceCard = (service, isFeatured = false) => {
+        const iconMap = {
+            'website': 'fa-globe',
+            'bot': 'fa-robot',
+            'app': 'fa-mobile-screen',
+            'design': 'fa-pen-ruler',
+            'seo': 'fa-chart-line',
+            'support': 'fa-headset'
+        };
+
+        const icon = service.icon || iconMap[service.category] || 'fa-code';
+        const price = service.price ? `${service.price} ₽` : 'по запросу';
+        const features = service.features || ['Индивидуальный подход', 'Современные технологии', 'Адаптивный дизайн'];
+
+        return `
+            <div class="service-card ${isFeatured ? 'featured' : ''} wow fadeInUp" data-wow-delay="0.1s" data-category="${service.category || 'all'}">
+                <div class="service-image">
+                    <img src="${service.image || 'https://via.placeholder.com/350x240/6C3CE9/FFFFFF?text=' + encodeURIComponent(service.name)}"
+                         alt="${service.name}"
+                         loading="lazy">
+                    <div class="service-image-overlay"></div>
+                    <div class="service-icon">
+                        <i class="fa ${icon}"></i>
+                    </div>
+                </div>
+                <div class="service-content">
+                    <span class="service-category">${service.category_name || 'Разработка'}</span>
+                    <h3 class="service-title">
+                        <a href="${service.url || '#'}">${service.name}</a>
+                    </h3>
+                    <p class="service-description">${service.short_description || service.description || 'Описание услуги'}</p>
+
+                    <ul class="service-features">
+                        ${features.slice(0, 3).map(f => `
+                            <li><i class="fa fa-circle-check"></i> ${f}</li>
+                        `).join('')}
+                    </ul>
+
+                    <div class="service-meta">
+                        <div class="service-price">
+                            ${price} <small>${service.price_note || ''}</small>
+                        </div>
+                        <a href="${service.url || '#'}" class="service-btn">
+                            ${service.button_text || 'Подробнее'}
+                            <i class="fa fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        `;
+    };
+
+    // Load services from API
+    const loadServices = async (page = 1, filter = 'all', append = true) => {
+        if (state.isLoading) return;
+
+        state.isLoading = true;
+        showLoader();
+
+        try {
+            // Имитация задержки API (убрать в production)
+            await new Promise(resolve => setTimeout(resolve, CONFIG.loadingDelay));
+
+            // Здесь должен быть реальный API запрос
+            // const response = await fetch(`${CONFIG.apiUrl}?page=${page}&filter=${filter}`);
+            // const data = await response.json();
+
+            // Тестовые данные (заменить на реальные)
+            const mockServices = [
+                {
+                    id: 1,
+                    name: '{% trans "Разработка сайтов" %}',
+                    category: 'development',
+                    category_name: '{% trans "Разработка" %}',
+                    image: null,
+                    description: '{% trans "Создание сайтов любой сложности: от лендингов до интернет-магазинов и корпоративных порталов." %}',
+                    features: ['{% trans "Адаптивный дизайн" %}', '{% trans "SEO-оптимизация" %}', '{% trans "Админ-панель" %}'],
+                    price: 'от 50 000',
+                    url: '/services/web-development/'
+                },
+                {
+                    id: 2,
+                    name: '{% trans "Telegram боты" %}',
+                    category: 'development',
+                    category_name: '{% trans "Разработка" %}',
+                    image: null,
+                    description: '{% trans "Создание умных ботов для автоматизации бизнеса, рассылок, поддержки клиентов и продаж." %}',
+                    features: ['{% trans "Интеграция с CRM" %}', '{% trans "Платежные системы" %}', '{% trans "Аналитика" %}'],
+                    price: 'от 25 000',
+                    url: '/services/telegram-bots/',
+                    featured: true
+                },
+                {
+                    id: 3,
+                    name: '{% trans "Веб-приложения" %}',
+                    category: 'development',
+                    category_name: '{% trans "Разработка" %}',
+                    image: null,
+                    description: '{% trans "Разработка сложных веб-приложений, CRM-систем, личных кабинетов и дашбордов." %}',
+                    features: ['{% trans "Реальное время" %}', '{% trans "Масштабирование" %}', '{% trans "API интеграции" %}'],
+                    price: 'от 150 000',
+                    url: '/services/web-apps/'
+                },
+                {
+                    id: 4,
+                    name: '{% trans "UI/UX Дизайн" %}',
+                    category: 'design',
+                    category_name: '{% trans "Дизайн" %}',
+                    image: null,
+                    description: '{% trans "Разработка современного, удобного и конверсионного дизайна для сайтов и приложений." %}',
+                    features: ['{% trans "Прототипирование" %}', '{% trans "Анализ ЦА" %}', '{% trans "Анимация интерфейсов" %}'],
+                    price: 'от 30 000',
+                    url: '/services/design/'
+                },
+                {
+                    id: 5,
+                    name: '{% trans "SEO продвижение" %}',
+                    category: 'marketing',
+                    category_name: '{% trans "Маркетинг" %}',
+                    image: null,
+                    description: '{% trans "Комплексное продвижение сайтов в поисковых системах, рост трафика и позиций." %}',
+                    features: ['{% trans "Аудит сайта" %}', '{% trans "Сбор семантики" %}', '{% trans "Оптимизация контента" %}'],
+                    price: 'от 20 000/мес',
+                    url: '/services/seo/'
+                },
+                {
+                    id: 6,
+                    name: '{% trans "Техническая поддержка" %}',
+                    category: 'support',
+                    category_name: '{% trans "Поддержка" %}',
+                    image: null,
+                    description: '{% trans "Обслуживание и доработка сайтов, хостинг, мониторинг, обновления и безопасность." %}',
+                    features: ['{% trans "24/7 мониторинг" %}', '{% trans "Резервное копирование" %}', '{% trans "Обновления" %}'],
+                    price: 'от 5 000/мес',
+                    url: '/services/support/'
+                }
+            ];
+
+            // Фильтрация
+            let filteredServices = filter === 'all'
+                ? mockServices
+                : mockServices.filter(s => s.category === filter);
+
+            // Пагинация
+            const start = (page - 1) * CONFIG.perPage;
+            const end = start + CONFIG.perPage;
+            const pageServices = filteredServices.slice(start, end);
+
+            // Обновление состояния
+            if (!append) {
+                state.services = pageServices;
+                grid.innerHTML = '';
+            } else {
+                state.services = [...state.services, ...pageServices];
+            }
+
+            state.hasMore = end < filteredServices.length;
+
+            // Рендеринг
+            if (append && page > 1) {
+                // Добавляем новые карточки
+                pageServices.forEach(service => {
+                    grid.insertAdjacentHTML('beforeend', createServiceCard(service, service.featured));
+                });
+            } else {
+                // Полный рендеринг
+                const html = pageServices.map(service =>
+                    createServiceCard(service, service.featured)
+                ).join('');
+                grid.innerHTML = html;
+            }
+
+            // Показываем/скрываем кнопку "Загрузить еще"
+            showLoadMore(state.hasMore);
+
+            // Обновляем WOW.js для новых элементов
+            if (window.WOW) {
+                new WOW().init();
+            }
+
+            state.currentPage = page;
+
+        } catch (error) {
+            console.error('Error loading services:', error);
+            grid.innerHTML = `
+                <div class="services-empty">
+                    <i class="fa fa-circle-exclamation"></i>
+                    <p>{% trans "Не удалось загрузить услуги. Пожалуйста, попробуйте позже." %}</p>
+                </div>
+            `;
+        } finally {
+            state.isLoading = false;
+            hideLoader();
+        }
+    };
+
+    // Filter change handler
+    const handleFilterChange = (filter) => {
+        if (filter === state.filter) return;
+
+        state.filter = filter;
+        state.currentPage = 1;
+
+        // Update active button
+        filterBtns.forEach(btn => {
+            if (btn.dataset.filter === filter) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+
+        // Reload services
+        loadServices(1, filter, false);
+    };
+
+    // Load more handler
+    const handleLoadMore = () => {
+        if (state.hasMore && !state.isLoading) {
+            loadServices(state.currentPage + 1, state.filter, true);
+        }
+    };
+
+    // Event listeners
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            handleFilterChange(btn.dataset.filter);
+        });
+    });
+
+    if (loadMoreBtn) {
+        loadMoreBtn.addEventListener('click', handleLoadMore);
+    }
+
+    // Infinite scroll (опционально)
+    let scrollTimeout;
+    window.addEventListener('scroll', () => {
+        if (scrollTimeout) clearTimeout(scrollTimeout);
+
+        scrollTimeout = setTimeout(() => {
+            if (!state.hasMore || state.isLoading) return;
+
+            const scrollPosition = window.innerHeight + window.scrollY;
+            const threshold = document.documentElement.scrollHeight - 1000;
+
+            if (scrollPosition >= threshold) {
+                handleLoadMore();
+            }
+        }, 100);
+    });
+
+    // Initial load
+    loadServices(CONFIG.initialPage, 'all', false);
+
+    // FAQ Accordion
+    document.querySelectorAll('.faq-question').forEach(question => {
+        question.addEventListener('click', function() {
+            const answer = this.nextElementSibling;
+            const isActive = this.classList.contains('active');
+
+            // Close all
+            document.querySelectorAll('.faq-question').forEach(q => {
+                q.classList.remove('active');
+                q.nextElementSibling.classList.remove('show');
+            });
+
+            // Open current if not active
+            if (!isActive) {
+                this.classList.add('active');
+                answer.classList.add('show');
+            }
+        });
+    });
+});
+</script>
+{% endblock footerbottom %}

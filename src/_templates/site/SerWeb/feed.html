@@ -1,0 +1,616 @@
+{% extends 'site/SerWeb/base.html' %}
+{% load static generals_tag i18n %}
+
+{% block title %}{{ seo_title|default:"Лента активности | SerWeb" }}{% endblock title %}
+{% block description %}{{ seo_description|default:"Лента активности пользователя: отзывы, рейтинги и публикации" }}{% endblock description %}
+
+{% block propertytitle %}{% if seo_propertytitle %}{{ seo_propertytitle }}{% else %}Лента активности SerWeb{% endif %}{% endblock propertytitle %}
+{% block propertydescription %}{% if seo_propertydescription %}{{ seo_propertydescription }}{% else %}Активность пользователя в системе{% endif %}{% endblock propertydescription %}
+{% block propertyimage %}{% if seo_previev %}{{ seo_previev.url }}{% else %}{% static 'site/serweb/img/feed-og.jpg' %}{% endif %}{% endblock propertyimage %}
+
+{% block head %}
+<style>
+    /* Стили для страницы ленты SerWeb */
+    .feed-wrapper {
+        padding: 40px 0;
+    }
+
+    .feed-grid {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 30px;
+    }
+
+    @media (max-width: 992px) {
+        .feed-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Сайдбар профиля */
+    .profile-sidebar {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        padding: 25px;
+        height: fit-content;
+    }
+
+    .profile-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--sw-gray-dark);
+        margin-bottom: 20px;
+    }
+
+    .profile-avatar {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 3px solid var(--sw-primary);
+        flex-shrink: 0;
+    }
+
+    .profile-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .profile-info h5 {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--sw-white);
+        margin-bottom: 5px;
+    }
+
+    .profile-info .profile-username {
+        font-size: 14px;
+        color: var(--sw-gray);
+        margin-bottom: 0;
+    }
+
+    .profile-menu {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .profile-menu-item {
+        margin-bottom: 5px;
+    }
+
+    .profile-menu-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 15px;
+        color: var(--sw-gray);
+        border-radius: 12px;
+        transition: var(--sw-transition);
+        font-weight: 500;
+    }
+
+    .profile-menu-link i {
+        width: 20px;
+        color: var(--sw-primary);
+        transition: var(--sw-transition);
+    }
+
+    .profile-menu-link:hover,
+    .profile-menu-link.active {
+        background: rgba(108, 60, 233, 0.1);
+        color: var(--sw-white);
+    }
+
+    .profile-menu-link:hover i,
+    .profile-menu-link.active i {
+        color: var(--sw-primary-light);
+    }
+
+    /* Основной контент */
+    .feed-content {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        padding: 30px;
+    }
+
+    .feed-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--sw-white);
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid var(--sw-gray-dark);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .feed-title i {
+        color: var(--sw-primary);
+    }
+
+    /* Пустое состояние */
+    .feed-empty {
+        text-align: center;
+        padding: 60px 20px;
+        background: var(--sw-black);
+        border: 1px dashed var(--sw-gray-dark);
+        border-radius: 15px;
+    }
+
+    .feed-empty-icon {
+        font-size: 64px;
+        color: var(--sw-gray-dark);
+        margin-bottom: 20px;
+    }
+
+    .feed-empty h3 {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--sw-white);
+        margin-bottom: 10px;
+    }
+
+    .feed-empty p {
+        color: var(--sw-gray);
+        margin-bottom: 25px;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .feed-empty-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 28px;
+        background: var(--sw-primary);
+        color: white;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: var(--sw-transition);
+        border: none;
+        cursor: pointer;
+    }
+
+    .feed-empty-btn:hover {
+        background: var(--sw-primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(108, 60, 233, 0.3);
+    }
+
+    /* Элементы ленты (будут использоваться когда появятся данные) */
+    .feed-item {
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 15px;
+        transition: var(--sw-transition);
+    }
+
+    .feed-item:hover {
+        border-color: var(--sw-primary);
+        transform: translateX(5px);
+    }
+
+    .feed-item-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+
+    .feed-item-avatar {
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 2px solid var(--sw-primary);
+    }
+
+    .feed-item-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .feed-item-info h4 {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--sw-white);
+        margin-bottom: 5px;
+    }
+
+    .feed-item-meta {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        font-size: 13px;
+        color: var(--sw-gray);
+    }
+
+    .feed-item-meta i {
+        color: var(--sw-primary);
+        margin-right: 5px;
+    }
+
+    .feed-item-content {
+        color: var(--sw-gray);
+        line-height: 1.6;
+        margin-bottom: 15px;
+    }
+
+    .feed-item-actions {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding-top: 15px;
+        border-top: 1px solid var(--sw-gray-dark);
+    }
+
+    .feed-item-action {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--sw-gray);
+        font-size: 14px;
+        transition: var(--sw-transition);
+        cursor: pointer;
+        background: transparent;
+        border: none;
+    }
+
+    .feed-item-action:hover {
+        color: var(--sw-primary);
+    }
+
+    .feed-item-action i {
+        font-size: 16px;
+    }
+
+    /* Рейтинг */
+    .rating {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+    }
+
+    .rating i {
+        color: #ffbb00;
+        font-size: 14px;
+    }
+
+    .rating .empty {
+        color: var(--sw-gray-dark);
+    }
+
+    .rating-value {
+        margin-left: 8px;
+        font-size: 13px;
+        color: var(--sw-gray);
+    }
+
+    /* Теги */
+    .tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+    }
+
+    .tag {
+        padding: 4px 12px;
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        font-size: 12px;
+        color: var(--sw-gray);
+        transition: var(--sw-transition);
+    }
+
+    .tag:hover {
+        border-color: var(--sw-primary);
+        color: var(--sw-white);
+    }
+
+    /* Хлебные крошки */
+    .feed-breadcrumbs {
+        margin-bottom: 30px;
+    }
+
+    .breadcrumb-list {
+        display: flex;
+        list-style: none;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .breadcrumb-item {
+        font-size: 14px;
+        color: var(--sw-gray);
+    }
+
+    .breadcrumb-item:not(:last-child)::after {
+        content: '/';
+        margin-left: 10px;
+        color: var(--sw-gray);
+    }
+
+    .breadcrumb-item a {
+        color: var(--sw-gray);
+        transition: var(--sw-transition);
+    }
+
+    .breadcrumb-item a:hover {
+        color: var(--sw-primary);
+    }
+
+    .breadcrumb-item.active {
+        color: var(--sw-white);
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .feed-content {
+            padding: 20px;
+        }
+
+        .feed-title {
+            font-size: 20px;
+        }
+
+        .feed-empty {
+            padding: 40px 15px;
+        }
+
+        .feed-empty-icon {
+            font-size: 48px;
+        }
+    }
+
+    /* Скрываем старые стили */
+    #reiting {
+        display: none;
+    }
+</style>
+{% endblock head %}
+
+{% block breadcrumbs %}
+<div class="feed-breadcrumbs">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb-list">
+                <li class="breadcrumb-item"><a href="{% url 'webmain:home' %}"><i class="fa fa-home me-1"></i>{% trans 'Главная' %}</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'useraccount:profile' %}">{% trans 'Личный кабинет' %}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{% trans 'Лента' %}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+{% endblock breadcrumbs %}
+
+{% block content %}
+<div class="feed-wrapper">
+    <div class="container">
+        <div class="feed-grid">
+            <!-- Сайдбар профиля -->
+            <aside class="profile-sidebar">
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        {% if user.profile.avatar %}
+                            <img src="{{ user.profile.avatar.url }}" alt="{{ user.get_full_name|default:user.username }}">
+                        {% elif user.avatar %}
+                            <img src="{{ user.avatar.url }}" alt="{{ user.get_full_name|default:user.username }}">
+                        {% elif user.image %}
+                            <img src="{{ user.image.url }}" alt="{{ user.get_full_name|default:user.username }}">
+                        {% else %}
+                            <img src="{% static 'site/serweb/img/default-avatar.svg' %}" alt="avatar" onerror="this.src='https://placehold.co/70x70/6C3CE9/FFFFFF?text={{ user.username|first|upper }}'">
+                        {% endif %}
+                    </div>
+                    <div class="profile-info">
+                        <h5>{% if user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.username }}{% endif %}</h5>
+                        <p class="profile-username">@{{ user.username }}</p>
+                    </div>
+                </div>
+
+                {% include 'site/SerWeb/include/profile_menu.html' %}
+            </aside>
+
+            <!-- Основной контент - Лента -->
+            <div class="feed-content">
+                <h1 class="feed-title">
+                    <i class="fa fa-rss"></i>
+                    {% trans "Лента активности" %}
+                </h1>
+
+                <!-- Пустое состояние (пока нет активности) -->
+                <div class="feed-empty">
+                    <div class="feed-empty-icon">
+                        <i class="fa fa-newspaper"></i>
+                    </div>
+                    <h3>{% trans "Здесь пока пусто" %}</h3>
+                    <p>{% trans "Когда вы начнете оставлять отзывы, комментировать или добавлять проекты в избранное, они появятся в этой ленте" %}</p>
+
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'shop:catalogs' %}" class="feed-empty-btn">
+                        <i class="fa fa-compass me-2"></i>
+                        {% trans 'Перейти к портфолио' %}
+                    </a>
+                    {% else %}
+                    <a href="{% url 'useraccount:login' %}" class="feed-empty-btn">
+                        <i class="fa fa-sign-in me-2"></i>
+                        {% trans 'Войти' %}
+                    </a>
+                    {% endif %}
+                </div>
+
+                <!-- Пример того, как будут выглядеть элементы ленты (скрыто, пока нет данных) -->
+                <div style="display: none;">
+                    <!-- Элемент ленты с отзывом -->
+                    <div class="feed-item">
+                        <div class="feed-item-header">
+                            <div class="feed-item-avatar">
+                                <img src="https://placehold.co/46x46/6C3CE9/FFFFFF?text=User" alt="User">
+                            </div>
+                            <div class="feed-item-info">
+                                <h4>{% trans 'Вы оставили отзыв' %}</h4>
+                                <div class="feed-item-meta">
+                                    <span><i class="fa fa-clock"></i> 2 часа назад</span>
+                                    <span>
+                                        <div class="rating">
+                                            <i class="fa-solid fa-star"></i>
+                                            <i class="fa-solid fa-star"></i>
+                                            <i class="fa-solid fa-star"></i>
+                                            <i class="fa-solid fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <span class="rating-value">4.0</span>
+                                        </div>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="feed-item-content">
+                            {% trans 'Отличный проект! Команда SerWeb выполнила работу качественно и в срок. Особенно понравился дизайн и внимание к деталям.' %}
+                        </div>
+                        <div class="feed-item-actions">
+                            <button class="feed-item-action">
+                                <i class="fa fa-heart"></i>
+                                <span>12</span>
+                            </button>
+                            <button class="feed-item-action">
+                                <i class="fa fa-comment"></i>
+                                <span>3</span>
+                            </button>
+                            <button class="feed-item-action">
+                                <i class="fa fa-share"></i>
+                                <span>{% trans 'Поделиться' %}</span>
+                            </button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag">#веб-разработка</span>
+                            <span class="tag">#дизайн</span>
+                        </div>
+                    </div>
+
+                    <!-- Элемент ленты с избранным -->
+                    <div class="feed-item">
+                        <div class="feed-item-header">
+                            <div class="feed-item-avatar">
+                                <img src="https://placehold.co/46x46/4B2AA3/FFFFFF?text=Proj" alt="Project">
+                            </div>
+                            <div class="feed-item-info">
+                                <h4>{% trans 'Добавлено в избранное' %}</h4>
+                                <div class="feed-item-meta">
+                                    <span><i class="fa fa-clock"></i> 1 день назад</span>
+                                    <span><i class="fa fa-folder"></i> Интернет-магазин</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="feed-item-content">
+                            <strong>{% trans 'Название проекта:' %}</strong> {% trans 'Fashion Store' %}
+                        </div>
+                        <div class="feed-item-actions">
+                            <button class="feed-item-action">
+                                <i class="fa-solid fa-heart" style="color: #dc3545;"></i>
+                                <span>{% trans 'В избранном' %}</span>
+                            </button>
+                            <a href="#" class="feed-item-action">
+                                <i class="fa fa-eye"></i>
+                                <span>{% trans 'Посмотреть' %}</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Скрываем старые неиспользуемые стили -->
+<style>
+    /* Переопределяем старые классы, если они где-то используются */
+    .panel, .media-block, .thumbnail, .btn-trans, .mar-top {
+        /* Ничего не делаем, они не должны влиять */
+    }
+
+    /* Гарантируем, что рейтинг скрыт */
+    #reiting {
+        display: none !important;
+    }
+</style>
+{% endblock content %}
+
+{% block footertop %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    'use strict';
+
+    // Здесь будет код для загрузки реальной ленты через API
+    // Пока просто заглушка
+
+    console.log('Feed page loaded');
+
+    // Пример функции для загрузки ленты (раскомментировать когда будет API)
+    /*
+    async function loadFeed() {
+        try {
+            const response = await fetch('/api/user/feed/', {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.items && data.items.length > 0) {
+                    renderFeed(data.items);
+                }
+            }
+        } catch (error) {
+            console.error('Error loading feed:', error);
+        }
+    }
+
+    function renderFeed(items) {
+        // Скрываем пустое состояние
+        const emptyState = document.querySelector('.feed-empty');
+        if (emptyState) {
+            emptyState.style.display = 'none';
+        }
+
+        // Создаем контейнер для элементов ленты
+        const feedContainer = document.createElement('div');
+        feedContainer.className = 'feed-items';
+
+        // Добавляем каждый элемент
+        items.forEach(item => {
+            feedContainer.appendChild(createFeedItem(item));
+        });
+
+        // Вставляем в DOM
+        const feedContent = document.querySelector('.feed-content');
+        feedContent.appendChild(feedContainer);
+    }
+
+    function createFeedItem(item) {
+        const div = document.createElement('div');
+        div.className = 'feed-item';
+        // ... заполнение данными
+        return div;
+    }
+
+    // Загружаем ленту при загрузке страницы
+    loadFeed();
+    */
+});
+</script>
+{% endblock footertop %}

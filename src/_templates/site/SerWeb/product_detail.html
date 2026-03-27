@@ -1,0 +1,2048 @@
+{% extends 'site/SerWeb/base.html' %}
+{% load static shop_tags generals_tag i18n %}
+
+{% block title %}{{ seo_title|default:product.name }}{% endblock title %}
+{% block description %}{{ seo_description|default:product.description|striptags|truncatechars:160 }}{% endblock description %}
+
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }}{% else %}{% static 'site/serweb/img/product-og.jpg' %}{% endif %}{% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle|default:product.name }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription|default:product.image.url }}{% endblock propertyimage %}
+
+{% block head %}
+<!-- Swiper CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+<style>
+    /* ===== СТИЛИ ДЛЯ СТРАНИЦЫ ТОВАРА SERWEB ===== */
+    :root {
+        --sw-primary: #6C3CE9;
+        --sw-primary-dark: #4B2AA3;
+        --sw-primary-light: #9B7EFF;
+        --sw-black: #0A0A0A;
+        --sw-black-light: #1A1A1A;
+        --sw-gray-dark: #2D2D2D;
+        --sw-gray: #6B6B6B;
+        --sw-gray-light: #F5F5F5;
+        --sw-white: #FFFFFF;
+    }
+
+    .product-wrapper {
+        padding: 40px 0;
+    }
+
+    /* Хлебные крошки */
+    .product-breadcrumbs {
+        margin-bottom: 30px;
+    }
+
+    .breadcrumb-list {
+        display: flex;
+        list-style: none;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .breadcrumb-item {
+        font-size: 14px;
+        color: var(--sw-gray);
+    }
+
+    .breadcrumb-item:not(:last-child)::after {
+        content: '/';
+        margin-left: 10px;
+        color: var(--sw-gray);
+    }
+
+    .breadcrumb-item a {
+        color: var(--sw-gray);
+        transition: all 0.2s ease;
+    }
+
+    .breadcrumb-item a:hover {
+        color: var(--sw-primary);
+    }
+
+    .breadcrumb-item.active {
+        color: var(--sw-white);
+    }
+
+    /* ===== ГАЛЕРЕЯ ТОВАРА ===== */
+    .product-gallery {
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+    }
+
+    .product-thumbs {
+        width: 100px;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-height: 500px;
+        overflow-y: auto;
+        padding-right: 5px;
+    }
+
+    .product-thumb {
+        width: 100px;
+        height: 100px;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: var(--sw-black);
+    }
+
+    .product-thumb:hover {
+        border-color: var(--sw-primary);
+        transform: scale(1.05);
+    }
+
+    .product-thumb.active {
+        border-color: var(--sw-primary);
+        box-shadow: 0 0 0 2px var(--sw-primary-light);
+    }
+
+    .product-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .product-main-image {
+        flex: 1;
+        position: relative;
+        border-radius: 20px;
+        overflow: hidden;
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+    }
+
+    .product-main-image img {
+        width: 100%;
+        height: auto;
+        display: block;
+        transition: transform 0.3s ease;
+        cursor: zoom-in;
+    }
+
+    .product-main-image img.zoomed {
+        transform: scale(1.5);
+    }
+
+    .zoom-lens {
+        position: absolute;
+        border: 2px solid var(--sw-primary);
+        width: 100px;
+        height: 100px;
+        background: rgba(255,255,255,0.1);
+        cursor: crosshair;
+        display: none;
+        pointer-events: none;
+    }
+
+    .zoom-result {
+        position: absolute;
+        top: 0;
+        left: 105%;
+        width: 400px;
+        height: 400px;
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 12px;
+        overflow: hidden;
+        background: var(--sw-black);
+        display: none;
+        z-index: 100;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .zoom-result img {
+        position: absolute;
+        max-width: none;
+    }
+
+    @media (max-width: 768px) {
+        .product-gallery {
+            flex-direction: column;
+        }
+
+        .product-thumbs {
+            width: 100%;
+            flex-direction: row;
+            order: -1;
+            justify-content: center;
+            max-height: none;
+            overflow-y: visible;
+        }
+
+        .product-thumb {
+            width: 70px;
+            height: 70px;
+        }
+
+        .zoom-result {
+            display: none !important;
+        }
+    }
+
+    /* ===== ИНФОРМАЦИЯ О ТОВАРЕ ===== */
+    .product-info {
+        padding-left: 20px;
+    }
+
+    .product-category {
+        display: inline-block;
+        font-size: 14px;
+        color: var(--sw-primary);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 10px;
+        background: rgba(108,60,233,0.1);
+        padding: 4px 12px;
+        border-radius: 20px;
+    }
+
+    .product-title {
+        font-size: 32px;
+        font-weight: 800;
+        color: var(--sw-white);
+        margin-bottom: 15px;
+        line-height: 1.2;
+    }
+
+    .product-brand {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+        padding: 10px 15px;
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 12px;
+    }
+
+    .product-brand img {
+        max-height: 50px;
+        width: auto;
+        border-radius: 8px;
+    }
+
+    .product-brand a {
+        color: var(--sw-white);
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+    .product-brand a:hover {
+        color: var(--sw-primary);
+    }
+
+    .product-meta {
+        color: var(--sw-gray);
+        font-size: 14px;
+        margin-bottom: 15px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .product-meta span {
+        color: var(--sw-white);
+        font-weight: 600;
+    }
+
+    /* QR-код */
+    .product-qr {
+        margin: 15px 0;
+        text-align: center;
+    }
+
+    .product-qr img {
+        border-radius: 12px;
+        border: 1px solid var(--sw-gray-dark);
+        padding: 5px;
+        background: white;
+    }
+
+    /* ===== ЦЕНА ===== */
+    .product-price-block {
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 16px;
+        padding: 20px;
+        margin: 20px 0;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .product-price {
+        font-size: 36px;
+        font-weight: 800;
+        color: var(--sw-primary);
+    }
+
+    .product-price small {
+        font-size: 16px;
+        color: var(--sw-gray);
+        font-weight: 400;
+        margin-left: 8px;
+    }
+
+    .product-old-price {
+        font-size: 18px;
+        color: var(--sw-gray);
+        text-decoration: line-through;
+    }
+
+    /* ===== РЕЙТИНГ ===== */
+    .product-rating {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 15px 0;
+    }
+
+    .stars {
+        display: flex;
+        gap: 2px;
+        color: #ffbb00;
+    }
+
+    .stars i {
+        font-size: 16px;
+    }
+
+    .rating-count {
+        color: var(--sw-gray);
+        font-size: 14px;
+    }
+
+    .rating-count a {
+        color: inherit;
+        text-decoration: underline;
+    }
+
+    .rating-count a:hover {
+        color: var(--sw-primary);
+    }
+
+    /* ===== АТРИБУТЫ ТОВАРА ===== */
+    .product-attributes {
+        margin: 25px 0;
+    }
+
+    .attribute-group {
+        margin-bottom: 25px;
+    }
+
+    .attribute-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--sw-white);
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .attribute-title i {
+        color: var(--sw-primary);
+    }
+
+    .attribute-options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .attribute-option {
+        position: relative;
+        cursor: pointer;
+    }
+
+    .attribute-option input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .attribute-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 50px;
+        padding: 10px 18px;
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 30px;
+        color: var(--sw-white);
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+    .attribute-option:hover .attribute-content {
+        border-color: var(--sw-primary);
+        background: rgba(108,60,233,0.1);
+    }
+
+    .attribute-option input[type="radio"]:checked + .attribute-content {
+        background: var(--sw-primary);
+        border-color: var(--sw-primary);
+        color: white;
+    }
+
+    .attribute-option.with-image .attribute-content {
+        padding: 4px;
+    }
+
+    .attribute-option.with-image img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .attribute-select {
+        width: 100%;
+        max-width: 300px;
+        padding: 12px 40px 12px 15px;
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 12px;
+        color: var(--sw-white);
+        font-size: 15px;
+        cursor: pointer;
+        outline: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236C3CE9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 15px center;
+    }
+
+    .select2-container--default .select2-selection--single {
+        background: var(--sw-black) !important;
+        border: 1px solid var(--sw-gray-dark) !important;
+        border-radius: 12px !important;
+        height: 46px !important;
+        padding: 8px 15px !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: var(--sw-white) !important;
+        line-height: 28px !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 44px !important;
+        right: 10px !important;
+    }
+
+    .select2-dropdown {
+        background: var(--sw-black-light) !important;
+        border: 1px solid var(--sw-gray-dark) !important;
+        border-radius: 12px !important;
+    }
+
+    .select2-results__option {
+        color: var(--sw-white) !important;
+        padding: 10px 15px !important;
+    }
+
+    .select2-results__option--highlighted {
+        background: var(--sw-primary) !important;
+    }
+
+    /* ===== КОЛИЧЕСТВО ===== */
+    .product-quantity {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin: 20px 0;
+    }
+
+    .quantity-control {
+        display: flex;
+        align-items: center;
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 30px;
+        overflow: hidden;
+    }
+
+    .quantity-btn {
+        width: 44px;
+        height: 44px;
+        background: transparent;
+        border: none;
+        color: var(--sw-white);
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .quantity-btn:hover {
+        background: var(--sw-primary);
+        color: white;
+    }
+
+    .quantity-input {
+        width: 70px;
+        height: 44px;
+        background: transparent;
+        border: none;
+        text-align: center;
+        color: var(--sw-white);
+        font-weight: 600;
+        font-size: 16px;
+    }
+
+    .quantity-input::-webkit-outer-spin-button,
+    .quantity-input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    .stock-status {
+        color: var(--sw-gray);
+        font-size: 14px;
+    }
+
+    .stock-status.in-stock {
+        color: #4CAF50;
+    }
+
+    .stock-status.out-of-stock {
+        color: #f44336;
+    }
+
+    /* ===== КНОПКИ ДЕЙСТВИЙ ===== */
+    .product-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin: 25px 0;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 14px 28px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 15px;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        border: 1px solid transparent;
+        text-decoration: none;
+    }
+
+    .btn-primary {
+        background: var(--sw-primary);
+        color: white;
+        flex: 2;
+    }
+
+    .btn-primary:hover {
+        background: var(--sw-primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(108, 60, 233, 0.3);
+    }
+
+    .btn-outline {
+        background: transparent;
+        border: 1px solid var(--sw-gray-dark);
+        color: var(--sw-white);
+        flex: 1;
+    }
+
+    .btn-outline:hover {
+        border-color: var(--sw-primary);
+        color: var(--sw-primary);
+    }
+
+    .btn-icon {
+        width: 52px;
+        height: 52px;
+        padding: 0;
+        border-radius: 12px;
+        flex: 0 0 auto;
+    }
+
+    .btn-icon i {
+        font-size: 18px;
+    }
+
+    .btn-wishlist.active {
+        background: rgba(220, 53, 69, 0.1);
+        border-color: #dc3545;
+        color: #dc3545;
+    }
+
+    .btn-wishlist.active:hover {
+        background: #dc3545;
+        color: white;
+    }
+
+    .btn-compare.active {
+        background: rgba(108, 60, 233, 0.1);
+        border-color: var(--sw-primary);
+        color: var(--sw-primary);
+    }
+
+    /* Кнопка слежения за ценой */
+    .btn-price-follow {
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        color: var(--sw-white);
+        padding: 12px 20px;
+        border-radius: 30px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-price-follow:hover {
+        border-color: var(--sw-primary);
+        color: var(--sw-primary);
+    }
+
+    .btn-price-follow.active {
+        background: var(--sw-primary);
+        color: white;
+        border-color: var(--sw-primary);
+    }
+
+    .btn-price-follow i {
+        font-size: 14px;
+    }
+
+    /* ===== СОЦИАЛЬНЫЕ КНОПКИ ===== */
+    .social-share {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin: 25px 0;
+        padding: 15px 0;
+        border-top: 1px solid var(--sw-gray-dark);
+        border-bottom: 1px solid var(--sw-gray-dark);
+    }
+
+    .social-share span {
+        color: var(--sw-gray);
+        font-size: 14px;
+    }
+
+    .social-icons {
+        display: flex;
+        gap: 8px;
+    }
+
+    .social-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--sw-white);
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    .social-icon:hover {
+        background: var(--sw-primary);
+        border-color: var(--sw-primary);
+        color: white;
+        transform: translateY(-3px);
+    }
+
+    /* ===== ТАБЫ ===== */
+    .product-tabs {
+        margin-top: 50px;
+    }
+
+    .tabs-header {
+        display: flex;
+        gap: 5px;
+        border-bottom: 1px solid var(--sw-gray-dark);
+        margin-bottom: 30px;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .tabs-header::-webkit-scrollbar {
+        display: none;
+    }
+
+    .tab-btn {
+        padding: 15px 25px;
+        background: transparent;
+        border: none;
+        color: var(--sw-gray);
+        font-weight: 600;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        position: relative;
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        color: var(--sw-white);
+    }
+
+    .tab-btn.active {
+        color: var(--sw-primary);
+    }
+
+    .tab-btn.active::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--sw-primary);
+    }
+
+    .tab-pane {
+        display: none;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .tab-pane.active {
+        display: block;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Описание */
+    .product-description {
+        color: var(--sw-gray);
+        line-height: 1.8;
+    }
+
+    .product-description h1,
+    .product-description h2,
+    .product-description h3,
+    .product-description h4 {
+        color: var(--sw-white);
+        margin: 20px 0 10px;
+    }
+
+    .product-description ul,
+    .product-description ol {
+        padding-left: 20px;
+        margin: 10px 0;
+    }
+
+    .product-description li {
+        margin-bottom: 5px;
+    }
+
+    /* Характеристики */
+    .specs-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--sw-black);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .specs-table tr {
+        border-bottom: 1px solid var(--sw-gray-dark);
+    }
+
+    .specs-table tr:last-child {
+        border-bottom: none;
+    }
+
+    .specs-table td {
+        padding: 15px 20px;
+        color: var(--sw-white);
+    }
+
+    .specs-table td:first-child {
+        color: var(--sw-gray);
+        font-weight: 500;
+        width: 200px;
+        background: rgba(255,255,255,0.02);
+    }
+</style>
+{% endblock head %}
+{% block breadcrumbs %}
+<div class="product-breadcrumbs">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb-list">
+                <li class="breadcrumb-item"><a href="{% url 'webmain:home' %}"><i class="fa fa-home me-1"></i>{% trans 'Главная' %}</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'shop:catalogs' %}">{% trans 'Каталог' %}</a></li>
+                {% for category in product.category.all %}
+                <li class="breadcrumb-item"><a href="{% url 'shop:categories' category.slug %}">{{ category.name }}</a></li>
+                {% endfor %}
+                <li class="breadcrumb-item active" aria-current="page">{{ product.name|truncatechars:30 }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+{% endblock breadcrumbs %}
+
+{% block content %}
+<div class="product-wrapper">
+    <div class="container">
+        <div class="row">
+            <!-- ===== ГАЛЕРЕЯ ТОВАРА ===== -->
+            <div class="col-lg-6">
+                <div class="product-gallery">
+                    <!-- Миниатюры -->
+                    <div class="product-thumbs">
+                        <div class="product-thumb active" data-index="0">
+                            <img src="{% if product.image %}{{ product.image.url }}{% else %}{% static 'site/serweb/img/product-placeholder.svg' %}{% endif %}"
+                                 alt="{{ product.name }}"
+                                 onerror="this.src='https://placehold.co/100x100/6C3CE9/FFFFFF?text=Product'">
+                        </div>
+                        {% for gallery_image in product.productsgallery_set.all %}
+                        <div class="product-thumb" data-index="{{ forloop.counter }}">
+                            <img src="{{ gallery_image.image.url }}" alt="{{ product.name }} {{ forloop.counter }}">
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Основное изображение с зумом -->
+                    <div class="product-main-image" id="main-image-container">
+                        <img src="{% if product.image %}{{ product.image.url }}{% else %}{% static 'site/serweb/img/product-placeholder.svg' %}{% endif %}"
+                             id="main-product-image"
+                             alt="{{ product.name }}">
+                        <div class="zoom-lens" id="zoom-lens"></div>
+                        <div class="zoom-result" id="zoom-result">
+                            <img src="{% if product.image %}{{ product.image.url }}{% else %}{% static 'site/serweb/img/product-placeholder.svg' %}{% endif %}"
+                                 id="zoom-image">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== ИНФОРМАЦИЯ О ТОВАРЕ ===== -->
+            <div class="col-lg-6">
+                <div class="product-info">
+                    <!-- Категория -->
+                    <span class="product-category">
+                        {% for category in product.category.all %}
+                            {{ category.name }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </span>
+
+                    <!-- Название -->
+                    <h1 class="product-title">{{ product.name }}</h1>
+
+                    <!-- Бренд/Производитель -->
+                    {% with manufacturer=product.manufacturers.first %}
+                    {% if manufacturer %}
+                    <div class="product-brand">
+                        {% if manufacturer.image %}
+                        <img src="{{ manufacturer.image.url }}" alt="{{ manufacturer.name }}">
+                        {% endif %}
+                        <a href="{% url 'shop:manufacturers' manufacturer.slug %}">{{ manufacturer.name }}</a>
+                    </div>
+                    {% endif %}
+                    {% endwith %}
+
+                    <!-- Рейтинг -->
+                    <div class="product-rating">
+                        <div class="stars" id="product-stars">
+                            {% for i in "12345"|make_list %}
+                                {% if forloop.counter <= product.average_rating|floatformat:0 %}
+                                <i class="fa-solid fa-star"></i>
+                                {% else %}
+                                <i class="fa fa-star"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <span class="rating-count">
+                            <a href="#reviews-tab" onclick="switchTab('reviews')">{{ product.review_count }} {% trans 'отзывов' %}</a>
+                        </span>
+                    </div>
+
+                    <!-- Артикул и мета-информация -->
+                    <div class="product-meta">
+                        <div>{% trans 'Артикул' %}: <span>{{ product.article }}</span></div>
+                        {% if product.vendor_code %}
+                        <div>{% trans 'Код производителя' %}: <span>{{ product.vendor_code }}</span></div>
+                        {% endif %}
+                    </div>
+
+                    <!-- QR-код (если есть) -->
+                    {% if product.qr_code %}
+                    <div class="product-qr">
+                        <img src="{{ product.qr_code.url }}" alt="QR {{ product.name }}" width="80" height="80">
+                    </div>
+                    {% endif %}
+
+                    <!-- ===== ЦЕНА ===== -->
+                    <div class="product-price-block">
+                        <span class="product-price" id="product-price">
+                            {% if product_variable.price %}
+                                {{ product_variable.price }}
+                            {% else %}
+                                {{ product.price }}
+                            {% endif %}
+                            <small>{{ valute.icon_code }}</small>
+                        </span>
+                        {% if product.old_price %}
+                        <span class="product-old-price">{{ product.old_price }} {{ valute.icon_code }}</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- ===== АТРИБУТЫ (ВАРИАЦИИ) ===== -->
+                    {% if attributes_by_variable %}
+                    <div class="product-attributes" id="product-attributes"
+                         data-variations="{{ variable_json|escapejs }}"
+                         data-product-id="{{ product.id }}">
+
+                        {% for variable, attributes in attributes_by_variable.items %}
+                        <div class="attribute-group" data-variable-id="{{ variable.id }}" data-variable-type="{{ variable.type }}">
+                            <div class="attribute-title">
+                                <i class="fa fa-tag"></i>
+                                {{ variable.name }} <span style="color: var(--sw-primary);">*</span>
+                            </div>
+
+                            {% if variable.type == 1 %}
+                            <!-- Радио-кнопки (цвет/изображения) -->
+                            <div class="attribute-options">
+                                {% for attribute in attributes %}
+                                <label class="attribute-option {% if attribute.image %}with-image{% endif %}">
+                                    <input type="radio"
+                                           name="attribute_{{ variable.id }}"
+                                           value="{{ attribute.id }}"
+                                           data-price="{{ attribute.price }}"
+                                           data-slug="{{ attribute.slug }}"
+                                           {% if attribute.slug in selected_attributes %}checked{% endif %}>
+                                    <span class="attribute-content">
+                                        {% if attribute.image %}
+                                            <img src="{{ attribute.image.url }}" alt="{{ attribute.name }}" title="{{ attribute.name }}">
+                                        {% else %}
+                                            {{ attribute.name }}
+                                        {% endif %}
+                                    </span>
+                                </label>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <!-- Выпадающий список -->
+                            <select class="attribute-select select2" name="attribute_{{ variable.id }}" data-variable-id="{{ variable.id }}">
+                                {% for attribute in attributes %}
+                                <option value="{{ attribute.id }}"
+                                        data-price="{{ attribute.price }}"
+                                        data-slug="{{ attribute.slug }}"
+                                        {% if attribute.slug in selected_attributes %}selected{% endif %}>
+                                    {{ attribute.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+
+                        <input type="hidden" name="variation_slug" id="variation-slug" value="{{ selected_variation_slug|default:'' }}">
+                    </div>
+                    {% endif %}
+
+                    <!-- ===== КОЛИЧЕСТВО ===== -->
+                    <div class="product-quantity">
+                        <div class="quantity-control">
+                            <button type="button" class="quantity-btn quantity-minus" id="quantity-minus">
+                                <i class="fa fa-minus"></i>
+                            </button>
+                            <input type="number" class="quantity-input" id="product-quantity"
+                                   value="1" min="1" max="{{ product.quantity|default:99 }}">
+                            <button type="button" class="quantity-btn quantity-plus" id="quantity-plus">
+                                <i class="fa fa-plus"></i>
+                            </button>
+                        </div>
+                        <span class="stock-status {% if product.quantity > 0 %}in-stock{% else %}out-of-stock{% endif %}" id="stock-status">
+                            {% if product.quantity > 0 %}
+                                <i class="fa fa-circle-check"></i> {% trans 'В наличии' %} ({{ product.quantity }})
+                            {% else %}
+                                <i class="fa fa-circle-xmark"></i> {% trans 'Нет в наличии' %}
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <!-- ===== КНОПКИ ДЕЙСТВИЙ ===== -->
+                    <div class="product-actions">
+                        <!-- Форма добавления в корзину -->
+                        <form method="post" action="{% url 'shop:add_to_cart' %}" id="add-to-cart-form" class="add-to-cart-form" data-product-id="{{ product.id }}" style="display: contents;">
+                            {% csrf_token %}
+                            <input type="hidden" name="product_id" value="{{ product.id }}" id="cart-product-id">
+                            <input type="hidden" name="variation_slug" id="cart-variation-slug" value="{{ selected_variation_slug|default:'' }}">
+                            <input type="hidden" name="quantity" id="cart-quantity" value="1">
+
+                            <button type="submit" class="btn btn-primary" id="add-to-cart-btn" {% if product.quantity == 0 %}disabled{% endif %}>
+                                <i class="fa fa-cart-plus"></i>
+                                <span>{% trans 'В корзину' %}</span>
+                            </button>
+                        </form>
+
+                        <!-- Кнопка избранного -->
+                        <button class="btn btn-icon btn-outline btn-wishlist bookmark {% if product in user.bookmarks.all %}active{% endif %}"
+                                id="bookmark-btn"
+                                data-product="{{ product.id }}"
+                                data-type="{% if product in user.bookmarks.all %}bookmarkDelete{% else %}bookmarkAdd{% endif %}"
+                                title="{% trans 'В избранное' %}">
+                            <i class="fa-{% if product in user.bookmarks.all %}solid{% else %}regular{% endif %} fa-heart"></i>
+                        </button>
+
+                        <!-- Кнопка сравнения -->
+                        <button class="btn btn-icon btn-outline btn-compare add-to-compare"
+                                id="compare-btn"
+                                data-id="{{ product.id }}"
+                                title="{% trans 'Сравнить' %}">
+                            <i class="fa fa-scale-balanced"></i>
+                        </button>
+
+                        <!-- Кнопка слежения за ценой -->
+                        <button class="btn-price-follow {% if product in user.price_follows.all %}active{% endif %}"
+                                id="price-follow-btn"
+                                data-id="{{ product.id }}">
+                            <i class="fa fa-bell"></i>
+                            <span>{% if product in user.price_follows.all %}{% trans 'Вы следите за ценой' %}{% else %}{% trans 'Следить за ценой' %}{% endif %}</span>
+                        </button>
+                    </div>
+
+                    <!-- ===== СОЦИАЛЬНЫЕ КНОПКИ ===== -->
+                    <div class="social-share">
+                        <span>{% trans 'Поделиться' %}:</span>
+                        <div class="social-icons">
+                            <a href="#" class="social-icon" onclick="shareFacebook(); return false;" title="Facebook">
+                                <i class="fa-brands fa-facebook-f"></i>
+                            </a>
+                            <a href="#" class="social-icon" onclick="shareTwitter(); return false;" title="Twitter">
+                                <i class="fa-brands fa-x-twitter"></i>
+                            </a>
+                            <a href="#" class="social-icon" onclick="shareVK(); return false;" title="VK">
+                                <i class="fa-brands fa-vk"></i>
+                            </a>
+                            <a href="#" class="social-icon" onclick="shareTelegram(); return false;" title="Telegram">
+                                <i class="fa-brands fa-telegram"></i>
+                            </a>
+                            <a href="#" class="social-icon" onclick="shareWhatsapp(); return false;" title="WhatsApp">
+                                <i class="fa-brands fa-whatsapp"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== ТАБЫ ===== -->
+        <div class="product-tabs">
+            <div class="tabs-header">
+                <button class="tab-btn active" data-tab="description">{% trans 'Описание' %}</button>
+                <button class="tab-btn" data-tab="specs">{% trans 'Характеристики' %}</button>
+                <button class="tab-btn" data-tab="reviews" id="reviews-tab-btn">{% trans 'Отзывы' %} ({{ product.review_count }})</button>
+                <button class="tab-btn" data-tab="faq">{% trans 'Вопросы' %} ({{ product.faq_count|default:'0' }})</button>
+            </div>
+
+            <div class="tabs-content">
+                <!-- Описание -->
+                <div class="tab-pane active" id="tab-description">
+                    <div class="product-description">
+                        {{ product.description|safe }}
+                    </div>
+                </div>
+
+                <!-- Характеристики -->
+                <div class="tab-pane" id="tab-specs">
+                    {% if product.atribute.exists %}
+                    <table class="specs-table">
+                        {% for attribute in product.atribute.all %}
+                        <tr>
+                            <td>{{ attribute.variable.name }}</td>
+                            <td>{{ attribute.name }}</td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                    {% else %}
+                    <p class="text-gray">{% trans 'Характеристики не указаны' %}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Отзывы -->
+                <div class="tab-pane" id="tab-reviews">
+                    <div id="reviews-section">
+                        {% include 'site/SerWeb/include/form_reviews.html' %}
+
+                        <div class="reviews-header">
+                            <div class="review-filters">
+                                <button type="button" class="btn btn-outline btn-sm active" data-sort="new" id="sort-new">{% trans 'Новые' %}</button>
+                                <button type="button" class="btn btn-outline btn-sm" data-sort="popular" id="sort-popular">{% trans 'Популярные' %}</button>
+                            </div>
+                        </div>
+
+                        <div id="reviews-container" data-product-id="{{ product.id }}"></div>
+
+                        <div class="text-center mt-4" id="reviews-load-more-container">
+                            <button id="load-more-reviews" class="btn btn-outline" style="display: none;">{% trans 'Загрузить ещё' %}</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Вопросы -->
+                <div class="tab-pane" id="tab-faq">
+                    <div id="faq-section">
+                        {% include 'site/SerWeb/include/form_faqs.html' %}
+
+                        <div id="faqs-container" data-product-id="{{ product.id }}"></div>
+
+                        <div class="text-center mt-4" id="faqs-load-more-container">
+                            <button id="load-more-faqs" class="btn btn-outline" style="display: none;">{% trans 'Загрузить ещё' %}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== ТОВАРЫ ОТ ЭТОГО ПРОДАВЦА ===== -->
+        {% if related_products %}
+        <section class="mt-5">
+            <h2 class="section-title">{% trans 'Товары от этого продавца' %}</h2>
+            <div class="swiper related-products-slider" id="related-products-slider">
+                <div class="swiper-wrapper" id="related-products-wrapper" data-product-ids="{% for p in related_products %}{{ p.id }}{% if not forloop.last %},{% endif %}{% endfor %}">
+                    <!-- Будут загружены через JS -->
+                </div>
+                <div class="swiper-button-next"></div>
+                <div class="swiper-button-prev"></div>
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- ===== ПОПУЛЯРНЫЕ ТОВАРЫ ===== -->
+        {% if popular_products %}
+        <section class="mt-5">
+            <h2 class="section-title">{% trans 'Популярные товары' %}</h2>
+            <div class="swiper popular-products-slider" id="popular-products-slider">
+                <div class="swiper-wrapper" id="popular-products-wrapper" data-product-ids="{% for p in popular_products %}{{ p.id }}{% if not forloop.last %},{% endif %}{% endfor %}">
+                    <!-- Будут загружены через JS -->
+                </div>
+                <div class="swiper-button-next"></div>
+                <div class="swiper-button-prev"></div>
+            </div>
+        </section>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Контейнер для уведомлений -->
+<div id="toast-container"></div>
+
+<!-- Скрытые данные для JS -->
+{{ variable_json|json_script:"product-variations-data" }}
+<script id="product-data" type="application/json">
+{
+    "id": "{{ product.id }}",
+    "name": "{{ product.name|escapejs }}",
+    "price": {{ product.price }},
+    "currency": "{{ valute.icon_code|escapejs }}",
+    "quantity": {{ product.quantity }},
+    "review_count": {{ product.review_count }},
+    "average_rating": {{ product.average_rating|default:0 }},
+    "is_bookmarked": {% if product in user.bookmarks.all %}true{% else %}false{% endif %},
+    "is_price_followed": {% if product in user.price_follows.all %}true{% else %}false{% endif %}
+}
+</script>
+{% endblock content %}
+{% block footer %}
+<!-- Swiper JS -->
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+(function() {
+    'use strict';
+
+    // ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ =====
+    window.urls = {
+        bookmarkAdd: "{% url 'shop:bookmark-add' %}",
+        bookmarkDelete: "{% url 'shop:bookmark-delete' %}",
+        compareAdd: "{% url 'shop:compare_add' '00000000-0000-0000-0000-000000000000' %}",
+        addToCart: "{% url 'shop:add_to_cart' %}",
+        togglePriceFollow: "{% url 'shop:toggle_price_reduction' %}",
+        loadReviews: `/product/{{ product.id }}/load-reviews/`,
+        loadFaqs: `/product/{{ product.id }}/load-faqs/`,
+        loadProductsByIds: `/products/by-ids/`
+    };
+
+    // ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
+    function getCSRFToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+    }
+
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+
+        const toast = document.createElement('div');
+        toast.className = `product-toast ${type}`;
+        toast.innerHTML = `
+            <i class="fa fa-${type === 'success' ? 'circle-check' : 'circle-exclamation'}"></i>
+            <span>${message}</span>
+            <span class="toast-close" onclick="this.parentElement.remove()">
+                <i class="fa fa-times"></i>
+            </span>
+        `;
+
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.remove();
+            }
+        }, 3000);
+    }
+
+    // ===== ФУНКЦИИ ШЕРИНГА =====
+    window.shareFacebook = function() {
+        window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(window.location.href), '_blank', 'width=600,height=400');
+    };
+    window.shareTwitter = function() {
+        window.open('https://twitter.com/intent/tweet?url=' + encodeURIComponent(window.location.href) + '&text=' + encodeURIComponent(document.title), '_blank', 'width=600,height=400');
+    };
+    window.shareVK = function() {
+        window.open('https://vk.com/share.php?url=' + encodeURIComponent(window.location.href), '_blank', 'width=600,height=400');
+    };
+    window.shareTelegram = function() {
+        window.open('https://t.me/share/url?url=' + encodeURIComponent(window.location.href) + '&text=' + encodeURIComponent(document.title), '_blank', 'width=600,height=400');
+    };
+    window.shareWhatsapp = function() {
+        window.open('https://wa.me/?text=' + encodeURIComponent(document.title + ' ' + window.location.href), '_blank', 'width=600,height=400');
+    };
+
+    // ===== ПЕРЕКЛЮЧЕНИЕ ТАБОВ =====
+    window.switchTab = function(tabId) {
+        const tabBtn = document.querySelector(`[data-tab="${tabId}"]`);
+        if (tabBtn) tabBtn.click();
+    };
+
+    // ===== ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ =====
+    document.addEventListener('DOMContentLoaded', function() {
+        // === ГАЛЕРЕЯ ===
+        initGallery();
+
+        // === ЗУМ ИЗОБРАЖЕНИЯ ===
+        initZoom();
+
+        // === КОЛИЧЕСТВО ===
+        initQuantityControls();
+
+        // === АТРИБУТЫ/ВАРИАЦИИ ===
+        initAttributes();
+
+        // === SELECT2 ===
+        initSelect2();
+
+        // === ТАБЫ ===
+        initTabs();
+
+        // === ИЗБРАННОЕ ===
+        initBookmark();
+
+        // === СРАВНЕНИЕ ===
+        initCompare();
+
+        // === СЛЕЖЕНИЕ ЗА ЦЕНОЙ ===
+        initPriceFollow();
+
+        // === ФОРМА ДОБАВЛЕНИЯ В КОРЗИНУ ===
+        initAddToCart();
+
+        // === ОТЗЫВЫ ===
+        initReviews();
+
+        // === ВОПРОСЫ ===
+        initFaqs();
+
+        // === СЛАЙДЕРЫ ТОВАРОВ ===
+        initProductSliders();
+
+        // === МОБИЛЬНЫЕ СТИЛИ ===
+        applyMobileStyles();
+    });
+
+    // ===== ГАЛЕРЕЯ =====
+    function initGallery() {
+        const mainImage = document.getElementById('main-product-image');
+        const thumbnails = document.querySelectorAll('.product-thumb');
+
+        if (!mainImage || !thumbnails.length) return;
+
+        thumbnails.forEach(thumb => {
+            thumb.addEventListener('click', function() {
+                const img = this.querySelector('img').src;
+                mainImage.src = img;
+
+                // Обновляем зум-изображение
+                const zoomImg = document.getElementById('zoom-image');
+                if (zoomImg) zoomImg.src = img;
+
+                thumbnails.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    }
+
+    // ===== ЗУМ ИЗОБРАЖЕНИЯ =====
+    function initZoom() {
+        const container = document.getElementById('main-image-container');
+        const mainImage = document.getElementById('main-product-image');
+        const lens = document.getElementById('zoom-lens');
+        const result = document.getElementById('zoom-result');
+        const zoomImage = document.getElementById('zoom-image');
+
+        if (!container || !mainImage || !lens || !result || !zoomImage) return;
+
+        // Только для десктопа
+        if (window.innerWidth <= 768) return;
+
+        const lensSize = 100;
+        lens.style.width = lensSize + 'px';
+        lens.style.height = lensSize + 'px';
+
+        container.addEventListener('mouseenter', function() {
+            lens.style.display = 'block';
+            result.style.display = 'block';
+        });
+
+        container.addEventListener('mouseleave', function() {
+            lens.style.display = 'none';
+            result.style.display = 'none';
+        });
+
+        container.addEventListener('mousemove', function(e) {
+            const rect = container.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            let lensX = x - lensSize / 2;
+            let lensY = y - lensSize / 2;
+
+            lensX = Math.max(0, Math.min(lensX, rect.width - lensSize));
+            lensY = Math.max(0, Math.min(lensY, rect.height - lensSize));
+
+            lens.style.left = lensX + 'px';
+            lens.style.top = lensY + 'px';
+
+            const zoomX = (lensX / rect.width) * 100;
+            const zoomY = (lensY / rect.height) * 100;
+
+            zoomImage.style.left = '-' + (zoomX * 2) + '%';
+            zoomImage.style.top = '-' + (zoomY * 2) + '%';
+        });
+    }
+
+    // ===== КОЛИЧЕСТВО =====
+    function initQuantityControls() {
+        const minusBtn = document.getElementById('quantity-minus');
+        const plusBtn = document.getElementById('quantity-plus');
+        const input = document.getElementById('product-quantity');
+        const cartQuantity = document.getElementById('cart-quantity');
+
+        if (!minusBtn || !plusBtn || !input || !cartQuantity) return;
+
+        const max = parseInt(input.max) || 99;
+
+        minusBtn.addEventListener('click', function() {
+            let val = parseInt(input.value) || 1;
+            if (val > 1) {
+                val--;
+                input.value = val;
+                cartQuantity.value = val;
+            }
+        });
+
+        plusBtn.addEventListener('click', function() {
+            let val = parseInt(input.value) || 1;
+            if (val < max) {
+                val++;
+                input.value = val;
+                cartQuantity.value = val;
+            }
+        });
+
+        input.addEventListener('change', function() {
+            let val = parseInt(this.value) || 1;
+            val = Math.max(1, Math.min(val, max));
+            this.value = val;
+            cartQuantity.value = val;
+        });
+    }
+
+    // ===== АТРИБУТЫ/ВАРИАЦИИ =====
+    function initAttributes() {
+        const attributesBlock = document.getElementById('product-attributes');
+        if (!attributesBlock) return;
+
+        const variationsData = JSON.parse(document.getElementById('product-variations-data')?.textContent || '[]');
+        const priceSpan = document.getElementById('product-price');
+        const variationSlugInput = document.getElementById('variation-slug');
+        const cartVariationSlug = document.getElementById('cart-variation-slug');
+
+        if (!variationsData.length) return;
+
+        function updatePrice() {
+            const selectedAttrs = {};
+
+            // Собираем выбранные атрибуты
+            document.querySelectorAll('[name^="attribute_"]').forEach(input => {
+                if (input.tagName === 'SELECT') {
+                    selectedAttrs[input.dataset.variableId] = input.value;
+                } else if (input.type === 'radio' && input.checked) {
+                    const variableId = input.name.split('_')[1];
+                    selectedAttrs[variableId] = input.value;
+                }
+            });
+
+            // Ищем подходящую вариацию
+            let foundVariation = null;
+            for (const variation of variationsData) {
+                let match = true;
+                for (const [varId, attrId] of Object.entries(selectedAttrs)) {
+                    if (!variation.attributes || variation.attributes[varId] != attrId) {
+                        match = false;
+                        break;
+                    }
+                }
+                if (match) {
+                    foundVariation = variation;
+                    break;
+                }
+            }
+
+            if (foundVariation) {
+                // Обновляем цену
+                if (priceSpan) {
+                    priceSpan.innerHTML = foundVariation.price + ' <small>{{ valute.icon_code }}</small>';
+                }
+
+                // Обновляем slug вариации
+                if (variationSlugInput) variationSlugInput.value = foundVariation.slug;
+                if (cartVariationSlug) cartVariationSlug.value = foundVariation.slug;
+
+                // Обновляем доступное количество
+                const stockSpan = document.getElementById('stock-status');
+                const addBtn = document.getElementById('add-to-cart-btn');
+                if (stockSpan && foundVariation.quantity !== undefined) {
+                    if (foundVariation.quantity > 0) {
+                        stockSpan.innerHTML = `<i class="fa fa-circle-check"></i> {% trans 'В наличии' %} (${foundVariation.quantity})`;
+                        stockSpan.className = 'stock-status in-stock';
+                        if (addBtn) addBtn.disabled = false;
+                    } else {
+                        stockSpan.innerHTML = `<i class="fa fa-circle-xmark"></i> {% trans 'Нет в наличии' %}`;
+                        stockSpan.className = 'stock-status out-of-stock';
+                        if (addBtn) addBtn.disabled = true;
+                    }
+
+                    // Обновляем максимум в поле количества
+                    const quantityInput = document.getElementById('product-quantity');
+                    if (quantityInput) {
+                        quantityInput.max = foundVariation.quantity || 0;
+                        if (parseInt(quantityInput.value) > foundVariation.quantity) {
+                            quantityInput.value = foundVariation.quantity || 1;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Обработчики для радио-кнопок
+        document.querySelectorAll('[name^="attribute_"]').forEach(input => {
+            if (input.type === 'radio') {
+                input.addEventListener('change', updatePrice);
+            } else if (input.tagName === 'SELECT') {
+                input.addEventListener('change', updatePrice);
+            }
+        });
+
+        // Первоначальное обновление
+        updatePrice();
+    }
+
+    // ===== SELECT2 =====
+    function initSelect2() {
+        if (typeof $ !== 'undefined' && $.fn.select2) {
+            $('.select2').select2({
+                minimumResultsForSearch: -1,
+                dropdownParent: $('.product-attributes'),
+                width: '100%'
+            });
+        }
+    }
+
+    // ===== ТАБЫ =====
+    function initTabs() {
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabPanes = document.querySelectorAll('.tab-pane');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const tab = this.dataset.tab;
+
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabPanes.forEach(p => p.classList.remove('active'));
+
+                this.classList.add('active');
+                document.getElementById(`tab-${tab}`).classList.add('active');
+
+                // Обновляем URL без перезагрузки
+                const url = new URL(window.location);
+                url.hash = tab;
+                history.replaceState(null, '', url);
+            });
+        });
+
+        // Активация по хэшу в URL
+        if (window.location.hash) {
+            const hash = window.location.hash.substring(1);
+            const tabBtn = document.querySelector(`[data-tab="${hash}"]`);
+            if (tabBtn) tabBtn.click();
+        }
+    }
+
+    // ===== ИЗБРАННОЕ =====
+    function initBookmark() {
+        const bookmarkBtn = document.getElementById('bookmark-btn');
+        if (!bookmarkBtn) return;
+
+        bookmarkBtn.addEventListener('click', async function() {
+            const productId = this.dataset.product;
+            const action = this.dataset.type;
+
+            try {
+                const response = await fetch(
+                    action === 'bookmarkAdd' ? window.urls.bookmarkAdd : window.urls.bookmarkDelete,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-CSRFToken': getCSRFToken()
+                        },
+                        body: new URLSearchParams({ product_id: productId })
+                    }
+                );
+
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    if (action === 'bookmarkAdd') {
+                        this.dataset.type = 'bookmarkDelete';
+                        this.innerHTML = '<i class="fa-solid fa-heart"></i>';
+                        this.classList.add('active');
+                        showToast('{% trans "Добавлено в избранное" %}');
+                    } else {
+                        this.dataset.type = 'bookmarkAdd';
+                        this.innerHTML = '<i class="fa fa-heart"></i>';
+                        this.classList.remove('active');
+                        showToast('{% trans "Удалено из избранного" %}');
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('{% trans "Ошибка" %}', 'error');
+            }
+        });
+    }
+
+    // ===== СРАВНЕНИЕ =====
+    function initCompare() {
+        const compareBtn = document.getElementById('compare-btn');
+        if (!compareBtn) return;
+
+        compareBtn.addEventListener('click', async function() {
+            const productId = this.dataset.id;
+
+            try {
+                const response = await fetch(
+                    window.urls.compareAdd.replace('00000000-0000-0000-0000-000000000000', productId),
+                    {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCSRFToken()
+                        }
+                    }
+                );
+
+                const data = await response.json();
+
+                if (data.ok) {
+                    showToast('{% trans "Добавлено в сравнение" %}');
+                    this.classList.add('active');
+                    setTimeout(() => this.classList.remove('active'), 500);
+                } else {
+                    showToast(data.message || '{% trans "Ошибка" %}', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('{% trans "Ошибка сети" %}', 'error');
+            }
+        });
+    }
+
+    // ===== СЛЕЖЕНИЕ ЗА ЦЕНОЙ =====
+    function initPriceFollow() {
+        const followBtn = document.getElementById('price-follow-btn');
+        if (!followBtn) return;
+
+        followBtn.addEventListener('click', async function() {
+            const productId = this.dataset.id;
+
+            try {
+                const response = await fetch(window.urls.togglePriceFollow, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCSRFToken(),
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({ product_id: productId })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const span = this.querySelector('span');
+                    if (data.is_added) {
+                        this.classList.add('active');
+                        span.textContent = '{% trans "Вы следите за ценой" %}';
+                        showToast('{% trans "Теперь вы будете получать уведомления о снижении цены" %}');
+                    } else {
+                        this.classList.remove('active');
+                        span.textContent = '{% trans "Следить за ценой" %}';
+                        showToast('{% trans "Вы отписались от уведомлений о цене" %}');
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('{% trans "Ошибка" %}', 'error');
+            }
+        });
+    }
+
+    // ===== ДОБАВЛЕНИЕ В КОРЗИНУ =====
+    function initAddToCart() {
+        const form = document.getElementById('add-to-cart-form');
+        if (!form) return;
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showToast('{% trans "Товар добавлен в корзину" %}');
+
+                    // Обновляем счетчик корзины
+                    const cartCount = document.querySelector('.sw-badge');
+                    if (cartCount && data.cart_count) {
+                        cartCount.textContent = data.cart_count;
+                        cartCount.style.display = data.cart_count > 0 ? 'flex' : 'none';
+                    }
+                } else {
+                    showToast(data.message || '{% trans "Ошибка добавления" %}', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('{% trans "Ошибка сети" %}', 'error');
+            }
+        });
+    }
+
+    // ===== ОТЗЫВЫ =====
+    function initReviews() {
+        const container = document.getElementById('reviews-container');
+        if (!container) return;
+
+        let page = 1;
+        let sort = 'new';
+        let hasNext = true;
+        const loadMoreBtn = document.getElementById('load-more-reviews');
+        const sortNew = document.getElementById('sort-new');
+        const sortPopular = document.getElementById('sort-popular');
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('ru-RU', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+        }
+
+        function renderReview(review) {
+            const stars = '★'.repeat(review.starvalue) + '☆'.repeat(5 - review.starvalue);
+
+            return `
+                <div class="review-item">
+                    <div class="review-header">
+                        <div class="review-author">
+                            <div class="review-avatar">
+                                <img src="${review.avatar || '{% static 'site/serweb/img/default-avatar.svg' %}'}" alt="${review.author}">
+                            </div>
+                            <div class="review-author-info">
+                                <h4>${review.author}</h4>
+                                <div class="review-date">${formatDate(review.created_at)}</div>
+                            </div>
+                        </div>
+                        <div class="review-rating">
+                            ${stars.split('').map(s => `<i class="fa-${s === '★' ? 'solid' : 'regular'} fa-star"></i>`).join('')}
+                        </div>
+                    </div>
+                    <div class="review-text">${review.text}</div>
+                    ${review.images && review.images.length ? `
+                    <div class="review-images">
+                        ${review.images.map(img => `
+                            <a href="${img.url}" target="_blank" class="review-image">
+                                <img src="${img.url}" alt="">
+                            </a>
+                        `).join('')}
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        async function loadReviews() {
+            try {
+                const response = await fetch(`${window.urls.loadReviews}?page=${page}&sort=${sort}`);
+                const data = await response.json();
+
+                data.reviews.forEach(review => {
+                    container.insertAdjacentHTML('beforeend', renderReview(review));
+                });
+
+                hasNext = data.has_next;
+                if (hasNext && loadMoreBtn) {
+                    loadMoreBtn.style.display = 'inline-block';
+                    page++;
+                } else if (loadMoreBtn) {
+                    loadMoreBtn.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error loading reviews:', error);
+            }
+        }
+
+        if (sortNew) {
+            sortNew.addEventListener('click', function() {
+                sort = 'new';
+                page = 1;
+                container.innerHTML = '';
+                sortNew.classList.add('active');
+                sortPopular?.classList.remove('active');
+                loadReviews();
+            });
+        }
+
+        if (sortPopular) {
+            sortPopular.addEventListener('click', function() {
+                sort = 'popular';
+                page = 1;
+                container.innerHTML = '';
+                sortPopular.classList.add('active');
+                sortNew?.classList.remove('active');
+                loadReviews();
+            });
+        }
+
+        if (loadMoreBtn) {
+            loadMoreBtn.addEventListener('click', loadReviews);
+        }
+
+        // Первая загрузка
+        loadReviews();
+    }
+
+    // ===== ВОПРОСЫ =====
+    function initFaqs() {
+        const container = document.getElementById('faqs-container');
+        if (!container) return;
+
+        let page = 1;
+        let hasNext = true;
+        const loadMoreBtn = document.getElementById('load-more-faqs');
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('ru-RU', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+        }
+
+        function renderFaq(faq) {
+            return `
+                <div class="review-item">
+                    <div class="review-header">
+                        <div class="review-author">
+                            <div class="review-avatar">
+                                <img src="${faq.avatar || '{% static 'site/serweb/img/default-avatar.svg' %}'}" alt="${faq.author}">
+                            </div>
+                            <div class="review-author-info">
+                                <h4>${faq.author}</h4>
+                                <div class="review-date">${formatDate(faq.created_at)}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="review-text"><strong>{% trans 'Вопрос' %}:</strong> ${faq.question}</div>
+                    ${faq.answer ? `
+                    <div class="review-text" style="margin-top: 15px; padding-left: 20px; border-left: 2px solid var(--sw-primary);">
+                        <strong>{% trans 'Ответ' %}:</strong> ${faq.answer}
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        async function loadFaqs() {
+            try {
+                const response = await fetch(`${window.urls.loadFaqs}?page=${page}`);
+                const data = await response.json();
+
+                data.faqs.forEach(faq => {
+                    container.insertAdjacentHTML('beforeend', renderFaq(faq));
+                });
+
+                hasNext = data.has_next;
+                if (hasNext && loadMoreBtn) {
+                    loadMoreBtn.style.display = 'inline-block';
+                    page++;
+                } else if (loadMoreBtn) {
+                    loadMoreBtn.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error loading faqs:', error);
+            }
+        }
+
+        if (loadMoreBtn) {
+            loadMoreBtn.addEventListener('click', loadFaqs);
+        }
+
+        loadFaqs();
+    }
+
+    // ===== СЛАЙДЕРЫ ТОВАРОВ =====
+    function initProductSliders() {
+        // Функция загрузки товаров по ID
+        async function loadProductsByIds(wrapperId) {
+            const wrapper = document.getElementById(wrapperId);
+            if (!wrapper) return;
+
+            const ids = wrapper.dataset.productIds;
+            if (!ids) return;
+
+            try {
+                const response = await fetch(`${window.urls.loadProductsByIds}?ids=${encodeURIComponent(ids)}`);
+                const data = await response.json();
+
+                wrapper.innerHTML = '';
+                data.products.forEach(product => {
+                    const slide = document.createElement('div');
+                    slide.className = 'swiper-slide';
+
+                    slide.innerHTML = `
+                        <div class="product-card">
+                            <div class="product-card-image">
+                                <img src="${product.image || 'https://placehold.co/300x200/6C3CE9/FFFFFF?text=Product'}" alt="${product.name}">
+                            </div>
+                            <div class="product-card-content">
+                                <h3 class="product-card-title">
+                                    <a href="${product.url}">${product.name}</a>
+                                </h3>
+                                <div class="product-card-price">${product.price} {{ valute.icon_code }}</div>
+                                <div class="product-card-rating">
+                                    ${'★'.repeat(Math.round(product.rating))}${'☆'.repeat(5 - Math.round(product.rating))}
+                                </div>
+                                <button class="btn btn-primary btn-sm add-to-cart-quick" data-id="${product.id}">
+                                    {% trans 'В корзину' %}
+                                </button>
+                            </div>
+                        </div>
+                    `;
+
+                    wrapper.appendChild(slide);
+                });
+
+                // Инициализируем Swiper после загрузки товаров
+                new Swiper(`#${wrapperId.replace('-wrapper', '-slider')}`, {
+                    slidesPerView: 1,
+                    spaceBetween: 20,
+                    navigation: {
+                        nextEl: '.swiper-button-next',
+                        prevEl: '.swiper-button-prev',
+                    },
+                    breakpoints: {
+                        576: { slidesPerView: 2 },
+                        768: { slidesPerView: 3 },
+                        992: { slidesPerView: 4 }
+                    }
+                });
+            } catch (error) {
+                console.error('Error loading products:', error);
+            }
+        }
+
+        loadProductsByIds('related-products-wrapper');
+        loadProductsByIds('popular-products-wrapper');
+    }
+
+    // ===== МОБИЛЬНЫЕ СТИЛИ =====
+    function applyMobileStyles() {
+        if (window.innerWidth <= 768) {
+            const style = document.createElement('style');
+            style.textContent = `
+                .product-actions {
+                    flex-direction: column;
+                }
+                .btn-primary, .btn-outline {
+                    width: 100%;
+                }
+                .social-share {
+                    flex-direction: column;
+                    align-items: flex-start;
+                }
+                .tabs-header {
+                    justify-content: flex-start;
+                }
+                .tab-btn {
+                    padding: 12px 15px;
+                    font-size: 14px;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    }
+})();
+</script>
+
+<!-- Дополнительные стили для уведомлений -->
+<style>
+    .product-toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-left: 4px solid var(--sw-primary);
+        border-radius: 12px;
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        animation: slideIn 0.3s ease;
+    }
+
+    .product-toast.success {
+        border-left-color: #4CAF50;
+    }
+
+    .product-toast.success i {
+        color: #4CAF50;
+    }
+
+    .product-toast.error {
+        border-left-color: #dc3545;
+    }
+
+    .product-toast.error i {
+        color: #dc3545;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    .toast-close {
+        margin-left: auto;
+        cursor: pointer;
+        opacity: 0.7;
+    }
+
+    .toast-close:hover {
+        opacity: 1;
+    }
+
+    .review-images {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 15px;
+    }
+
+    .review-image {
+        width: 80px;
+        height: 80px;
+        border-radius: 8px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .review-image:hover {
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(108,60,233,0.3);
+    }
+
+    .review-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .section-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--sw-white);
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid var(--sw-gray-dark);
+    }
+</style>
+{% endblock footer %}

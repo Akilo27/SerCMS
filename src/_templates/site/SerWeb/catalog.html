@@ -1,0 +1,1499 @@
+{% extends 'site/SerWeb/base.html' %}
+{% load static generals_tag shop_tags i18n %}
+
+{% block title %}{{ seo_title|default:"Каталог проектов | SerWeb" }}{% endblock title %}
+{% block description %}{{ seo_description|default:"Портфолио веб-студии SerWeb: сайты, веб-приложения, Telegram боты. Более 100 успешных проектов." }}{% endblock description %}
+
+{% block propertytitle %}{% if seo_propertytitle %}{{ seo_propertytitle }}{% else %}Каталог проектов SerWeb{% endif %}{% endblock propertytitle %}
+{% block propertydescription %}{% if seo_propertydescription %}{{ seo_propertydescription }}{% else %}Примеры наших работ в веб-разработке{% endif %}{% endblock propertydescription %}
+{% block propertyimage %}{% if seo_previev %}{{ seo_previev.url }}{% else %}{% static 'site/serweb/img/catalog-og.jpg' %}{% endif %}{% endblock propertyimage %}
+
+{% block head %}
+<style>
+    /* Стили для каталога SerWeb */
+    .catalog-wrapper {
+        padding: 40px 0;
+    }
+
+    .catalog-grid {
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 30px;
+    }
+
+    @media (max-width: 1200px) {
+        .catalog-grid {
+            grid-template-columns: 280px 1fr;
+        }
+    }
+
+    @media (max-width: 992px) {
+        .catalog-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Сайдбар фильтров */
+    .filters-sidebar {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        padding: 25px;
+        height: fit-content;
+        position: sticky;
+        top: 100px;
+    }
+
+    .filters-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid var(--sw-gray-dark);
+    }
+
+    .filters-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--sw-white);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .filters-title i {
+        color: var(--sw-primary);
+    }
+
+    .filters-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .filter-section {
+        margin-bottom: 25px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--sw-gray-dark);
+    }
+
+    .filter-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .filter-section-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--sw-white);
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .filter-section-title i {
+        color: var(--sw-primary);
+        font-size: 14px;
+    }
+
+    /* Ценовой диапазон */
+    .price-range {
+        padding: 10px 0;
+    }
+
+    .multi-range-slider {
+        position: relative;
+        width: 100%;
+        height: 60px;
+        margin: 20px 0;
+    }
+
+    .slider {
+        position: relative;
+        width: 100%;
+        height: 4px;
+        background: var(--sw-gray-dark);
+        border-radius: 2px;
+    }
+
+    .slider .track {
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 100%;
+        background: var(--sw-gray-dark);
+        border-radius: 2px;
+    }
+
+    .slider .range {
+        position: absolute;
+        height: 100%;
+        background: var(--sw-primary);
+        border-radius: 2px;
+    }
+
+    .slider .thumb {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        background: var(--sw-white);
+        border: 2px solid var(--sw-primary);
+        border-radius: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        cursor: pointer;
+        transition: transform 0.2s;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .slider .thumb:hover,
+    .slider .thumb.active {
+        transform: translate(-50%, -50%) scale(1.2);
+        background: var(--sw-primary);
+    }
+
+    .slider .thumb.left {
+        left: 0%;
+    }
+
+    .slider .thumb.right {
+        left: 100%;
+        transform: translate(-50%, -50%);
+    }
+
+    .slider input[type="range"] {
+        position: absolute;
+        pointer-events: none;
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 4px;
+        background: transparent;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    .slider input[type="range"]::-webkit-slider-thumb {
+        pointer-events: all;
+        -webkit-appearance: none;
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        background: transparent;
+        cursor: pointer;
+        border: none;
+    }
+
+    .price-values {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 15px;
+        padding: 10px;
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 10px;
+    }
+
+    .price-value {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: var(--sw-white);
+        font-weight: 600;
+    }
+
+    .price-value span {
+        color: var(--sw-primary);
+    }
+
+    /* Чекбоксы и радио */
+    .filter-options {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .filter-option {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        color: var(--sw-gray);
+        transition: var(--sw-transition);
+    }
+
+    .filter-option:hover {
+        color: var(--sw-white);
+    }
+
+    .filter-option input[type="checkbox"],
+    .filter-option input[type="radio"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: var(--sw-primary);
+    }
+
+    .filter-option .count {
+        margin-left: auto;
+        font-size: 12px;
+        color: var(--sw-gray-dark);
+    }
+
+    /* Рейтинг звездами */
+    .rating-option {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        color: var(--sw-gray);
+    }
+
+    .rating-stars {
+        display: flex;
+        gap: 2px;
+        color: #ffbb00;
+    }
+
+    .rating-stars .empty {
+        color: var(--sw-gray-dark);
+    }
+
+    /* Категории с деревом */
+    .category-tree {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .category-item {
+        margin-bottom: 8px;
+    }
+
+    .category-header {
+        display: flex;
+        align-items: center;
+        padding: 10px 12px;
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 10px;
+        cursor: pointer;
+        transition: var(--sw-transition);
+    }
+
+    .category-header:hover {
+        border-color: var(--sw-primary);
+        background: rgba(108, 60, 233, 0.1);
+    }
+
+    .category-header input[type="checkbox"] {
+        margin-right: 10px;
+        accent-color: var(--sw-primary);
+    }
+
+    .category-name {
+        flex: 1;
+        color: var(--sw-white);
+        font-weight: 500;
+    }
+
+    .category-count {
+        background: var(--sw-gray-dark);
+        color: var(--sw-gray);
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        margin-right: 10px;
+    }
+
+    .dropdown-arrow {
+        color: var(--sw-gray);
+        font-size: 12px;
+        transition: transform 0.3s;
+    }
+
+    .category-header.expanded .dropdown-arrow {
+        transform: rotate(180deg);
+    }
+
+    .subcategory-list,
+    .subsubcategory-list {
+        list-style: none;
+        padding-left: 25px;
+        margin-top: 5px;
+    }
+
+    .subcategory-item,
+    .subsubcategory-item {
+        margin-bottom: 5px;
+        padding: 8px 12px;
+        background: rgba(255,255,255,0.02);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+    }
+
+    .subcategory-item:hover,
+    .subsubcategory-item:hover {
+        background: rgba(108, 60, 233, 0.05);
+    }
+
+    .subcategory-item input[type="checkbox"],
+    .subsubcategory-item input[type="checkbox"] {
+        margin-right: 10px;
+        accent-color: var(--sw-primary);
+    }
+
+    .subcategory-item label,
+    .subsubcategory-item label {
+        flex: 1;
+        color: var(--sw-gray);
+        cursor: pointer;
+        margin: 0;
+    }
+
+    .subcategory-count,
+    .subsubcategory-count {
+        color: var(--sw-gray-dark);
+        font-size: 12px;
+    }
+
+    /* Кнопки */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 14px;
+        transition: var(--sw-transition);
+        cursor: pointer;
+        border: 1px solid transparent;
+    }
+
+    .btn-primary {
+        background: var(--sw-primary);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: var(--sw-primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(108, 60, 233, 0.3);
+    }
+
+    .btn-outline {
+        background: transparent;
+        border: 1px solid var(--sw-gray-dark);
+        color: var(--sw-white);
+    }
+
+    .btn-outline:hover {
+        border-color: var(--sw-primary);
+        color: var(--sw-primary);
+        background: rgba(108, 60, 233, 0.1);
+    }
+
+    .btn-sm {
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+
+    /* Сортировка */
+    .catalog-toolbar {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 15px;
+        padding: 15px 20px;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .result-count {
+        color: var(--sw-gray);
+        font-size: 15px;
+    }
+
+    .result-count strong {
+        color: var(--sw-white);
+    }
+
+    .sort-select {
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 30px;
+        padding: 10px 35px 10px 15px;
+        color: var(--sw-white);
+        font-size: 14px;
+        cursor: pointer;
+        outline: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236C3CE9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        min-width: 200px;
+    }
+
+    /* Сетка товаров */
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 25px;
+    }
+
+    /* Карточка товара */
+    .product-card {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        overflow: hidden;
+        transition: var(--sw-transition);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--sw-primary);
+        box-shadow: 0 10px 30px rgba(108, 60, 233, 0.2);
+    }
+
+    .product-image {
+        position: relative;
+        height: 200px;
+        overflow: hidden;
+        background: linear-gradient(45deg, var(--sw-black), var(--sw-primary-dark));
+    }
+
+    .product-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .product-card:hover .product-image img {
+        transform: scale(1.05);
+    }
+
+    .product-tag {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        background: var(--sw-primary);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        z-index: 2;
+    }
+
+    .product-actions {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        opacity: 0;
+        transform: translateX(10px);
+        transition: var(--sw-transition);
+        z-index: 2;
+    }
+
+    .product-card:hover .product-actions {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .product-action-btn {
+        width: 40px;
+        height: 40px;
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--sw-white);
+        font-size: 16px;
+        transition: var(--sw-transition);
+        cursor: pointer;
+        backdrop-filter: blur(5px);
+    }
+
+    .product-action-btn:hover {
+        background: var(--sw-primary);
+        border-color: var(--sw-primary);
+        color: white;
+    }
+
+    .product-slider {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+    }
+
+    .slides-wrapper {
+        display: flex;
+        height: 100%;
+        transition: transform 0.3s ease;
+    }
+
+    .slide-img {
+        min-width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .slider-dots {
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 5px;
+        z-index: 3;
+    }
+
+    .slider-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.5);
+        cursor: pointer;
+        transition: var(--sw-transition);
+    }
+
+    .slider-dot.active {
+        background: var(--sw-primary);
+        transform: scale(1.2);
+    }
+
+    .product-content {
+        padding: 20px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .product-title {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .product-title a {
+        color: var(--sw-white);
+        transition: var(--sw-transition);
+    }
+
+    .product-title a:hover {
+        color: var(--sw-primary);
+    }
+
+    .product-category {
+        font-size: 13px;
+        color: var(--sw-primary);
+        margin-bottom: 10px;
+    }
+
+    .product-price {
+        font-size: 22px;
+        font-weight: 800;
+        color: var(--sw-primary);
+        margin-bottom: 10px;
+    }
+
+    .product-rating {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 15px;
+    }
+
+    .product-rating .stars {
+        color: #ffbb00;
+        display: flex;
+        gap: 2px;
+    }
+
+    .product-rating .stars i {
+        font-size: 13px;
+    }
+
+    .product-rating .count {
+        color: var(--sw-gray);
+        font-size: 13px;
+    }
+
+    .product-form {
+        margin-top: auto;
+    }
+
+    .quantity {
+        display: flex;
+        align-items: center;
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 30px;
+        overflow: hidden;
+        width: 120px;
+    }
+
+    .quantity-btn {
+        width: 36px;
+        height: 36px;
+        background: transparent;
+        border: none;
+        color: var(--sw-white);
+        font-size: 14px;
+        cursor: pointer;
+        transition: var(--sw-transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .quantity-btn:hover {
+        background: var(--sw-primary);
+        color: white;
+    }
+
+    .quantity input {
+        width: 48px;
+        height: 36px;
+        background: transparent;
+        border: none;
+        text-align: center;
+        color: var(--sw-white);
+        font-weight: 600;
+    }
+
+    .quantity input::-webkit-outer-spin-button,
+    .quantity input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    .add-to-cart-btn {
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    /* Пагинация */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 40px;
+    }
+
+    .page-item {
+        display: inline-block;
+    }
+
+    .page-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 40px;
+        height: 40px;
+        padding: 0 8px;
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 10px;
+        color: var(--sw-white);
+        font-size: 14px;
+        font-weight: 500;
+        transition: var(--sw-transition);
+    }
+
+    .page-link:hover {
+        background: var(--sw-primary);
+        border-color: var(--sw-primary);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .page-item.active .page-link {
+        background: var(--sw-primary);
+        border-color: var(--sw-primary);
+        color: white;
+    }
+
+    .page-item.disabled .page-link {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    /* Уведомления */
+    .custom-alert {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: var(--sw-primary);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 10px;
+        z-index: 9999;
+        opacity: 0;
+        transition: opacity 0.3s;
+        box-shadow: 0 5px 20px rgba(108, 60, 233, 0.3);
+    }
+
+    .custom-alert.show {
+        opacity: 1;
+    }
+
+    /* Хлебные крошки */
+    .catalog-breadcrumbs {
+        margin-bottom: 30px;
+    }
+
+    .breadcrumb-list {
+        display: flex;
+        list-style: none;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .breadcrumb-item {
+        font-size: 14px;
+        color: var(--sw-gray);
+    }
+
+    .breadcrumb-item:not(:last-child)::after {
+        content: '/';
+        margin-left: 10px;
+        color: var(--sw-gray);
+    }
+
+    .breadcrumb-item a {
+        color: var(--sw-gray);
+        transition: var(--sw-transition);
+    }
+
+    .breadcrumb-item a:hover {
+        color: var(--sw-primary);
+    }
+
+    .breadcrumb-item.active {
+        color: var(--sw-white);
+    }
+
+    /* Мобильная адаптация */
+    @media (max-width: 992px) {
+        .filters-sidebar {
+            position: static;
+            margin-bottom: 20px;
+        }
+    }
+
+    /* Спиннер для сравнения */
+    .compare-spinner {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        border: 2px solid var(--sw-gray-dark);
+        border-top-color: var(--sw-primary);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Скрываем старые стили */
+    .th-sort-bar .woocommerce-result-count {
+        color: var(--sw-gray) !important;
+    }
+</style>
+{% endblock head %}
+
+{% block breadcrumbs %}
+<div class="catalog-breadcrumbs">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb-list">
+                <li class="breadcrumb-item"><a href="{% url 'webmain:home' %}"><i class="fa fa-home me-1"></i>{% trans 'Главная' %}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{% trans 'Каталог проектов' %}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+{% endblock breadcrumbs %}
+
+{% block content %}
+<div class="catalog-wrapper">
+    <div class="container">
+        <div class="catalog-grid">
+            <!-- Сайдбар с фильтрами -->
+            <aside class="filters-sidebar">
+                <div class="filters-header">
+                    <h2 class="filters-title">
+                        <i class="fa fa-sliders"></i>
+                        {% trans 'Фильтры' %}
+                    </h2>
+                    <div class="filters-actions">
+                        <a href="{% url 'shop:catalogs' %}" class="btn btn-outline btn-sm">
+                            <i class="fa fa-rotate-right"></i>
+                            {% trans 'Сбросить' %}
+                        </a>
+                    </div>
+                </div>
+
+                <form method="GET" action="{% url 'shop:catalogs' %}" id="filter-form">
+                    <!-- Ценовой диапазон -->
+                    <div class="filter-section">
+                        <h3 class="filter-section-title">
+                            <i class="fa fa-ruble-sign"></i>
+                            {% trans 'Цена' %}
+                        </h3>
+                        <div class="price-range">
+                            <div class="multi-range-slider" id="price-range">
+                                <div class="slider">
+                                    <div class="track"></div>
+                                    <div class="range" id="price-range-bar"></div>
+                                    <div class="thumb left" id="price-thumb-left"></div>
+                                    <div class="thumb right" id="price-thumb-right"></div>
+
+                                    <input type="range" name="min_price" id="input-left"
+                                           min="{{ default_min_price }}"
+                                           max="{{ default_max_price }}"
+                                           value="{{ current_min_price }}">
+                                    <input type="range" name="max_price" id="input-right"
+                                           min="{{ default_min_price }}"
+                                           max="{{ default_max_price }}"
+                                           value="{{ current_max_price }}">
+                                </div>
+                            </div>
+
+                            <div class="price-values">
+                                <div class="price-value">
+                                    <span>{% trans 'от' %}</span>
+                                    <span id="amount-left">{{ current_min_price }}</span> {{ valute.name }}
+                                </div>
+                                <div class="price-value">
+                                    <span>{% trans 'до' %}</span>
+                                    <span id="amount-right">{{ current_max_price }}</span> {{ valute.name }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Категории -->
+                    <div class="filter-section">
+                        <h3 class="filter-section-title">
+                            <i class="fa fa-folder"></i>
+                            {% trans 'Категории' %}
+                        </h3>
+                        <ul class="category-tree">
+                            {% for category in all_categories %}
+                                {% if not category.parent %}
+                                <li class="category-item">
+                                    <div class="category-header" onclick="toggleCategory(this)">
+                                        <input type="checkbox"
+                                               name="category"
+                                               value="{{ category.id }}"
+                                               id="cat-{{ category.id }}"
+                                               {% if category.id|stringformat:"s" in selected_categories %}checked{% endif %}
+                                               onclick="event.stopPropagation()">
+                                        <span class="category-name">{{ category.name }}</span>
+                                        <span class="category-count">{{ category.product_count }}</span>
+                                        {% if category.children.exists %}
+                                            <span class="dropdown-arrow">▼</span>
+                                        {% endif %}
+                                    </div>
+
+                                    {% if category.children.exists %}
+                                    <ul class="subcategory-list" style="display: none;">
+                                        {% for subcat in category.children.all %}
+                                        <li class="subcategory-item">
+                                            <input type="checkbox"
+                                                   name="category"
+                                                   value="{{ subcat.id }}"
+                                                   id="cat-{{ subcat.id }}"
+                                                   {% if subcat.id|stringformat:"s" in selected_categories %}checked{% endif %}>
+                                            <label for="cat-{{ subcat.id }}">{{ subcat.name }}</label>
+                                            <span class="subcategory-count">{{ subcat.product_count }}</span>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                    {% endif %}
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <!-- Производители -->
+                    <div class="filter-section">
+                        <h3 class="filter-section-title">
+                            <i class="fa fa-building"></i>
+                            {% trans 'Производители' %}
+                        </h3>
+                        <div class="filter-options">
+                            {% for manufacturer in all_manufacturers %}
+                            <label class="filter-option">
+                                <input type="checkbox" name="manufacturer" value="{{ manufacturer.id }}"
+                                       {% if manufacturer.id|stringformat:"s" in selected_manufacturers %}checked{% endif %}>
+                                {{ manufacturer.name }}
+                                <span class="count">{{ manufacturer.products_count|default:'0' }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Бренды -->
+                    <div class="filter-section">
+                        <h3 class="filter-section-title">
+                            <i class="fa fa-trademark"></i>
+                            {% trans 'Бренды' %}
+                        </h3>
+                        <div class="filter-options">
+                            {% for brand in all_brands %}
+                            <label class="filter-option">
+                                <input type="checkbox" name="brand" value="{{ brand.id }}"
+                                       {% if brand.id|stringformat:"s" in selected_brands %}checked{% endif %}>
+                                {{ brand.name }}
+                                <span class="count">{{ brand.products_count|default:'0' }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Рейтинг -->
+                    <div class="filter-section">
+                        <h3 class="filter-section-title">
+                            <i class="fa fa-star"></i>
+                            {% trans 'Рейтинг' %}
+                        </h3>
+                        <div class="filter-options">
+                            {% for i in "54321"|make_list %}
+                            <label class="rating-option">
+                                <input type="checkbox" name="rating" value="{{ i }}"
+                                       {% if i in selected_ratings %}checked{% endif %}>
+                                <span class="rating-stars">
+                                    {% for j in "12345"|make_list %}
+                                        {% if forloop.counter <= i|add:0 %}
+                                            <i class="fa-solid fa-star"></i>
+                                        {% else %}
+                                            <i class="fa fa-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Атрибуты товаров -->
+                    {% for variable in variables_with_atributes %}
+                    <div class="filter-section">
+                        <h3 class="filter-section-title">
+                            <i class="fa fa-gear"></i>
+                            {{ variable.name }}
+                        </h3>
+                        <div class="filter-options">
+                            {% if variable.type == 1 %}
+                                {% for atribute in variable.atribute_set.all %}
+                                <label class="filter-option">
+                                    <input type="checkbox"
+                                           name="atribute_{{ variable.slug }}"
+                                           value="{{ atribute.id }}"
+                                           {% if atribute.id|stringformat:"s" in selected_attributes.values %}checked{% endif %}>
+                                    {{ atribute.name }}
+                                </label>
+                                {% endfor %}
+                            {% elif variable.type == 2 %}
+                                <select class="sort-select" name="atribute_{{ variable.slug }}" style="width: 100%;">
+                                    <option value="">{% trans 'Все' %}</option>
+                                    {% for atribute in variable.atribute_set.all %}
+                                    <option value="{{ atribute.id }}"
+                                            {% if atribute.id|stringformat:"s" in selected_attributes.values %}selected{% endif %}>
+                                        {{ atribute.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 20px;">
+                        <i class="fa fa-magnifying-glass"></i>
+                        {% trans 'Применить фильтры' %}
+                    </button>
+                </form>
+            </aside>
+
+            <!-- Основной контент -->
+            <div class="main-content">
+                <!-- Панель сортировки -->
+                <div class="catalog-toolbar">
+                    <div class="result-count">
+                        {% trans 'Найдено' %} <strong>{{ products|length }}</strong> {% trans 'проектов' %}
+                    </div>
+
+                    <select id="sortSelect" class="sort-select" onchange="window.location.href=this.value">
+                        <option value="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}sort=default">
+                            {% trans 'По умолчанию' %}
+                        </option>
+                        <option value="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}sort=newest"
+                                {% if request.GET.sort == 'newest' %}selected{% endif %}>
+                            {% trans 'Сначала новые' %}
+                        </option>
+                        <option value="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}sort=oldest"
+                                {% if request.GET.sort == 'oldest' %}selected{% endif %}>
+                            {% trans 'Сначала старые' %}
+                        </option>
+                        <option value="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}sort=price_asc"
+                                {% if request.GET.sort == 'price_asc' %}selected{% endif %}>
+                            {% trans 'Сначала дешевле' %}
+                        </option>
+                        <option value="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}sort=price_desc"
+                                {% if request.GET.sort == 'price_desc' %}selected{% endif %}>
+                            {% trans 'Сначала дороже' %}
+                        </option>
+                        <option value="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}sort=rating"
+                                {% if request.GET.sort == 'rating' %}selected{% endif %}>
+                            {% trans 'По рейтингу' %}
+                        </option>
+                    </select>
+                </div>
+
+                <!-- Сетка товаров -->
+                <div class="products-grid" id="products-list">
+                    {% for product in products %}
+                    <div class="product-card">
+                        <div class="product-image">
+                            {% if product.images.all %}
+                            <div class="product-slider">
+                                <div class="slides-wrapper">
+                                    {% for image in product.images.all %}
+                                    <img src="{{ image.image.url }}" alt="{{ product.name }}" class="slide-img">
+                                    {% endfor %}
+                                </div>
+                                <div class="slider-dots">
+                                    {% for image in product.images.all %}
+                                    <span class="slider-dot {% if forloop.first %}active{% endif %}"></span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% elif product.image %}
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                            {% else %}
+                            <img src="https://placehold.co/300x200/6C3CE9/FFFFFF?text={{ product.name|urlencode }}" alt="{{ product.name }}">
+                            {% endif %}
+
+                            {% if product.reklama %}
+                            <span class="product-tag">{% trans 'Реклама' %}</span>
+                            {% endif %}
+
+                            <div class="product-actions">
+                                <a href="#" class="product-action-btn add-to-compare" data-id="{{ product.id }}" title="{% trans 'Сравнить' %}">
+                                    <i class="fa fa-scale-balanced"></i>
+                                </a>
+                                <a href="#" class="product-action-btn bookmark"
+                                   data-type="{% if product.is_bookmarked %}bookmarkDelete{% else %}bookmarkAdd{% endif %}"
+                                   data-product="{{ product.id }}"
+                                   title="{% trans 'В избранное' %}">
+                                    <i class="fa-{% if product.is_bookmarked %}solid{% else %}regular{% endif %} fa-heart"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="product-content">
+                            <div class="product-category">
+                                {% if product.category %}
+                                {{ product.category.name }}
+                                {% endif %}
+                            </div>
+
+                            <h3 class="product-title">
+                                <a href="{{ product.get_absolute_url }}">{{ product.name }}</a>
+                            </h3>
+
+                            <div class="product-price">
+                                {{ product.price }} {{ valute.name }}
+                            </div>
+
+                            <div class="product-rating">
+                                <span class="stars">
+                                    {% for i in "12345"|make_list %}
+                                        {% if forloop.counter <= product.rating|floatformat:0 %}
+                                            <i class="fa-solid fa-star"></i>
+                                        {% else %}
+                                            <i class="fa fa-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </span>
+                                <span class="count">({{ product.review_count|default:'0' }})</span>
+                            </div>
+
+                            <div class="product-form">
+                                <form method="post" action="{% url 'shop:add_to_cart' %}" class="add-to-cart-form" data-product-id="{{ product.id }}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="product_id" value="{{ product.id }}">
+                                    <input type="hidden" name="variation_slug" value="{{ product.variation_slug|default:'' }}">
+
+                                    <div class="quantity">
+                                        <button type="button" class="quantity-btn quantity-minus">
+                                            <i class="fa fa-minus"></i>
+                                        </button>
+                                        <input type="number" name="quantity" value="1" min="1" max="51" class="quantity-input">
+                                        <button type="button" class="quantity-btn quantity-plus">
+                                            <i class="fa fa-plus"></i>
+                                        </button>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary add-to-cart-btn">
+                                        <i class="fa fa-cart-plus"></i>
+                                        {% trans 'В корзину' %}
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state" style="grid-column: 1/-1; text-align: center; padding: 60px;">
+                        <i class="fa fa-box-open" style="font-size: 48px; color: var(--sw-gray-dark); margin-bottom: 20px;"></i>
+                        <h3>{% trans 'Товары не найдены' %}</h3>
+                        <p>{% trans 'Попробуйте изменить параметры фильтрации' %}</p>
+                        <a href="{% url 'shop:catalogs' %}" class="btn btn-primary" style="margin-top: 20px;">
+                            <i class="fa fa-rotate-right"></i>
+                            {% trans 'Сбросить фильтры' %}
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Пагинация -->
+                {% if products.paginator.num_pages > 1 %}
+                <nav>
+                    <ul class="pagination">
+                        {% if products.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ products.previous_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">
+                                <i class="fa fa-chevron-left"></i>
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link"><i class="fa fa-chevron-left"></i></span>
+                        </li>
+                        {% endif %}
+
+                        {% for p in products.paginator.page_range %}
+                            {% if p == products.number %}
+                            <li class="page-item active"><span class="page-link">{{ p }}</span></li>
+                            {% elif p >= products.number|add:-2 and p <= products.number|add:2 %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ p }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">{{ p }}</a>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if products.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ products.next_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">
+                                <i class="fa fa-chevron-right"></i>
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link"><i class="fa fa-chevron-right"></i></span>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Контейнер для уведомлений -->
+<div id="custom-alert" class="custom-alert"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    'use strict';
+
+    // Функции для уведомлений
+    window.showCustomAlert = function(message, type = 'success') {
+        const alertBox = document.getElementById('custom-alert');
+        alertBox.textContent = message;
+        alertBox.style.background = type === 'success' ? 'var(--sw-primary)' : '#dc3545';
+        alertBox.classList.add('show');
+
+        setTimeout(() => {
+            alertBox.classList.remove('show');
+        }, 3000);
+    };
+
+    // CSRF токен
+    function getCSRFToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+    }
+
+    // Обработка ценового диапазона
+    const priceRange = document.getElementById('price-range');
+    if (priceRange) {
+        const leftInput = document.getElementById('input-left');
+        const rightInput = document.getElementById('input-right');
+        const leftThumb = document.getElementById('price-thumb-left');
+        const rightThumb = document.getElementById('price-thumb-right');
+        const rangeBar = document.getElementById('price-range-bar');
+        const amountLeft = document.getElementById('amount-left');
+        const amountRight = document.getElementById('amount-right');
+
+        function updatePriceRange() {
+            const min = parseInt(leftInput.min);
+            const max = parseInt(leftInput.max);
+
+            leftInput.value = Math.min(parseInt(leftInput.value), parseInt(rightInput.value));
+            rightInput.value = Math.max(parseInt(rightInput.value), parseInt(leftInput.value));
+
+            const leftPercent = ((leftInput.value - min) / (max - min)) * 100;
+            const rightPercent = ((rightInput.value - min) / (max - min)) * 100;
+
+            leftThumb.style.left = leftPercent + '%';
+            rightThumb.style.left = rightPercent + '%';
+            rangeBar.style.left = leftPercent + '%';
+            rangeBar.style.right = (100 - rightPercent) + '%';
+
+            amountLeft.textContent = leftInput.value;
+            amountRight.textContent = rightInput.value;
+        }
+
+        leftInput.addEventListener('input', updatePriceRange);
+        rightInput.addEventListener('input', updatePriceRange);
+
+        // Отложенная отправка формы после изменения цены
+        let priceTimer;
+        leftInput.addEventListener('change', () => {
+            clearTimeout(priceTimer);
+            priceTimer = setTimeout(() => document.getElementById('filter-form').submit(), 1000);
+        });
+        rightInput.addEventListener('change', () => {
+            clearTimeout(priceTimer);
+            priceTimer = setTimeout(() => document.getElementById('filter-form').submit(), 1000);
+        });
+
+        updatePriceRange();
+    }
+
+    // Раскрытие категорий
+    window.toggleCategory = function(element) {
+        const sublist = element.nextElementSibling;
+        if (sublist && sublist.classList.contains('subcategory-list')) {
+            if (sublist.style.display === 'none') {
+                sublist.style.display = 'block';
+                element.classList.add('expanded');
+            } else {
+                sublist.style.display = 'none';
+                element.classList.remove('expanded');
+            }
+        }
+    };
+
+    // Автоотправка формы при изменении чекбоксов
+    let filterTimer;
+    document.querySelectorAll('input[type="checkbox"], select').forEach(input => {
+        input.addEventListener('change', function() {
+            clearTimeout(filterTimer);
+            filterTimer = setTimeout(() => {
+                document.getElementById('filter-form').submit();
+            }, 1000);
+        });
+    });
+
+    // Количество товаров
+    document.addEventListener('click', function(e) {
+        const plusBtn = e.target.closest('.quantity-plus');
+        const minusBtn = e.target.closest('.quantity-minus');
+
+        if (plusBtn || minusBtn) {
+            const container = (plusBtn || minusBtn).closest('.quantity');
+            const input = container.querySelector('.quantity-input');
+            const min = parseInt(input.min) || 1;
+            const max = parseInt(input.max) || 51;
+            let val = parseInt(input.value) || min;
+
+            if (plusBtn) val = Math.min(max, val + 1);
+            if (minusBtn) val = Math.max(min, val - 1);
+
+            input.value = val;
+        }
+    });
+
+    // Добавление в избранное
+    document.addEventListener('click', async function(e) {
+        const bookmarkBtn = e.target.closest('.bookmark');
+        if (!bookmarkBtn) return;
+
+        e.preventDefault();
+
+        const productId = bookmarkBtn.dataset.product;
+        const action = bookmarkBtn.dataset.type;
+        const csrfToken = getCSRFToken();
+
+        try {
+            const response = await fetch(
+                action === 'bookmarkAdd' ? window.urls?.bookmarkAdd : window.urls?.bookmarkDelete,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: new URLSearchParams({ product_id: productId })
+                }
+            );
+
+            const data = await response.json();
+
+            if (data.status === 'success') {
+                if (action === 'bookmarkAdd') {
+                    bookmarkBtn.dataset.type = 'bookmarkDelete';
+                    bookmarkBtn.innerHTML = '<i class="fa-solid fa-heart"></i>';
+                } else {
+                    bookmarkBtn.dataset.type = 'bookmarkAdd';
+                    bookmarkBtn.innerHTML = '<i class="fa fa-heart"></i>';
+                }
+                showCustomAlert('{% trans "Добавлено в избранное" %}');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    });
+
+    // Добавление в сравнение
+    document.addEventListener('click', async function(e) {
+        const compareBtn = e.target.closest('.add-to-compare');
+        if (!compareBtn) return;
+
+        e.preventDefault();
+
+        const productId = compareBtn.dataset.id;
+        const csrfToken = getCSRFToken();
+
+        // Показываем спиннер
+        const spinner = document.createElement('div');
+        spinner.className = 'compare-spinner';
+        compareBtn.appendChild(spinner);
+
+        try {
+            const url = "{% url 'shop:compare_add' '00000000-0000-0000-0000-000000000000' %}".replace(
+                '00000000-0000-0000-0000-000000000000', productId
+            );
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.ok) {
+                showCustomAlert('{% trans "Добавлено в сравнение" %}');
+            } else {
+                showCustomAlert(data.message || '{% trans "Ошибка" %}', 'error');
+            }
+        } catch (err) {
+            console.error(err);
+            showCustomAlert('{% trans "Ошибка сети" %}', 'error');
+        } finally {
+            setTimeout(() => spinner.remove(), 2000);
+        }
+    });
+
+    // Добавление в корзину
+    document.addEventListener('submit', async function(e) {
+        const form = e.target.closest('.add-to-cart-form');
+        if (!form) return;
+
+        e.preventDefault();
+
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                showCustomAlert('{% trans "Товар добавлен в корзину" %}');
+
+                // Обновляем счетчик корзины
+                const cartCount = document.querySelector('.sw-badge');
+                if (cartCount && data.cart_count) {
+                    cartCount.textContent = data.cart_count;
+                    cartCount.style.display = data.cart_count > 0 ? 'flex' : 'none';
+                }
+            } else {
+                showCustomAlert(data.message || '{% trans "Ошибка добавления" %}', 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showCustomAlert('{% trans "Ошибка сети" %}', 'error');
+        }
+    });
+
+    // Инициализация слайдеров
+    document.querySelectorAll('.product-slider').forEach(slider => {
+        const slidesWrapper = slider.querySelector('.slides-wrapper');
+        const dots = slider.querySelectorAll('.slider-dot');
+        let currentSlide = 0;
+
+        function showSlide(index) {
+            slidesWrapper.style.transform = `translateX(-${index * 100}%)`;
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === index);
+            });
+        }
+
+        dots.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                currentSlide = index;
+                showSlide(currentSlide);
+            });
+        });
+
+        // Автопереключение при наведении
+        let slideInterval;
+        slider.addEventListener('mouseenter', () => {
+            slideInterval = setInterval(() => {
+                currentSlide = (currentSlide + 1) % dots.length;
+                showSlide(currentSlide);
+            }, 3000);
+        });
+
+        slider.addEventListener('mouseleave', () => {
+            clearInterval(slideInterval);
+        });
+    });
+});
+</script>
+{% endblock content %}

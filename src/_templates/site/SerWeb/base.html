@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+{% load static generals_tag i18n shop_tags %}
+{% get_user_cart_products request as cart_products %}
+
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+
+    <title>{% with request|get_settings as data %}{% if data and data.setting %}{{ data.setting.name }}{% else %}SerWeb{% endif %}{% endwith %} - {% block title %}{% endblock title %}</title>
+    <meta content="{% block description %}{% endblock description %}" name="description">
+    <meta property="og:title" content="{% block propertytitle %} {% endblock propertytitle %}">
+    <meta property="og:description" content="{% block propertydescription %}{% endblock propertydescription %}">
+    <meta property="og:image" content="{% block propertyimage %}{% endblock propertyimage %}">
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="{% with request|get_settings as data %}{% if data and data.setting and data.setting.favicon %}{{ data.setting.favicon.url }}{% else %}{% static 'site/serweb/img/favicon.ico' %}{% endif %}{% endwith %}" />
+
+    <!-- Analytics -->
+    {% with request|get_settings as data %}{% if data and data.setting and data.setting.yandex_metrica %}{{ data.setting.yandex_metrica|safe }}{% endif %}{% endwith %}
+    {% with request|get_settings as data %}{% if data and data.setting and data.setting.google_analitic %}{{ data.setting.google_analitic|safe }}{% endif %}{% endwith %}
+
+    {% block head %}{% endblock head %}
+
+    <!-- Правильное подключение Font Awesome 6 (только ОДИН раз) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- УБЕРИТЕ ЭТИ СТРОКИ - они конфликтуют и вызывают 404 -->
+    <!--
+    <link rel="stylesheet" href="{% static 'site/frutin/css/app.min.css' %}">
+    <link rel="stylesheet" href="{% static 'site/frutin/css/fontawesome.min.css' %}">
+    <link rel="stylesheet" href="{% static 'site/frutin/css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css">
+    <script src="{% static 'site/frutin/js/vendor/jquery-3.6.0.min.js' %}"></script>
+    -->
+
+    <style>
+        /* CSS Variables */
+        :root {
+            --sw-primary: #6C3CE9;
+            --sw-primary-dark: #4B2AA3;
+            --sw-primary-light: #9B7EFF;
+            --sw-black: #0A0A0A;
+            --sw-black-light: #1A1A1A;
+            --sw-gray-dark: #2D2D2D;
+            --sw-gray: #6B6B6B;
+            --sw-white: #FFFFFF;
+            --sw-font-main: 'Inter', sans-serif;
+            --sw-border-radius: 16px;
+            --sw-border-radius-sm: 8px;
+            --sw-transition: all 0.2s ease;
+            --sw-container-width: 1320px;
+            --sw-header-bg: rgba(10, 10, 10, 0.95);
+            --sw-footer-bg: #000000;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--sw-font-main);
+            background-color: var(--sw-black);
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.6;
+            font-size: 16px;
+            overflow-x: hidden;
+        }
+
+        a {
+            color: var(--sw-white);
+            text-decoration: none;
+            transition: var(--sw-transition);
+        }
+
+        a:hover {
+            color: var(--sw-primary-light);
+        }
+
+        .container {
+            max-width: var(--sw-container-width);
+            margin: 0 auto;
+            padding: 0 20px;
+            width: 100%;
+        }
+
+        /* Header */
+        .sw-header {
+            background: var(--sw-header-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--sw-gray-dark);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .sw-header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 80px;
+        }
+
+        .sw-logo img {
+            height: 50px;
+            width: auto;
+            display: block;
+        }
+
+        .sw-nav {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .sw-nav-list {
+            display: flex;
+            list-style: none;
+            gap: 28px;
+        }
+
+        .sw-nav-link {
+            font-weight: 500;
+            font-size: 16px;
+            color: var(--sw-white);
+            opacity: 0.8;
+            transition: var(--sw-transition);
+            position: relative;
+        }
+
+        .sw-nav-link:hover,
+        .sw-nav-link.active {
+            opacity: 1;
+            color: var(--sw-primary);
+        }
+
+        .sw-nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%) scaleX(0);
+            width: 20px;
+            height: 2px;
+            background: var(--sw-primary);
+            transition: var(--sw-transition);
+            border-radius: 2px;
+        }
+
+        .sw-nav-link:hover::after,
+        .sw-nav-link.active::after {
+            transform: translateX(-50%) scaleX(1);
+        }
+
+        .sw-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .sw-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 28px;
+            border-radius: var(--sw-border-radius-sm);
+            font-weight: 600;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            transition: var(--sw-transition);
+            background: transparent;
+            color: var(--sw-white);
+            border: 1px solid var(--sw-gray-dark);
+        }
+
+        .sw-btn-primary {
+            background: var(--sw-primary);
+            border-color: var(--sw-primary);
+            color: var(--sw-white);
+        }
+
+        .sw-btn-primary:hover {
+            background: var(--sw-primary-dark);
+            border-color: var(--sw-primary-dark);
+        }
+
+        .sw-icon-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border-radius: var(--sw-border-radius-sm);
+            background: var(--sw-black-light);
+            color: var(--sw-white);
+            border: 1px solid var(--sw-gray-dark);
+            transition: var(--sw-transition);
+            font-size: 18px;
+            position: relative;
+        }
+
+        .sw-icon-btn:hover {
+            border-color: var(--sw-primary);
+            color: var(--sw-primary);
+            background: rgba(108, 60, 233, 0.1);
+        }
+
+        .sw-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--sw-primary);
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Top Bar */
+        .sw-top-bar {
+            background: var(--sw-black-light);
+            border-bottom: 1px solid var(--sw-gray-dark);
+            padding: 10px 0;
+            font-size: 14px;
+        }
+
+        .sw-top-bar .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .sw-top-links {
+            display: flex;
+            list-style: none;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .sw-top-links a {
+            opacity: 0.7;
+            color: var(--sw-white);
+        }
+
+        .sw-top-links a:hover {
+            opacity: 1;
+            color: var(--sw-primary);
+        }
+
+        .sw-language-select {
+            background: transparent;
+            border: 1px solid var(--sw-gray-dark);
+            color: var(--sw-white);
+            padding: 6px 12px;
+            border-radius: var(--sw-border-radius-sm);
+            font-size: 14px;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .sw-language-select option {
+            background: var(--sw-black-light);
+        }
+
+        .sw-contact-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sw-contact-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--sw-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+        }
+
+        .sw-contact-text {
+            font-weight: 500;
+        }
+
+        .sw-contact-text small {
+            display: block;
+            font-size: 12px;
+            opacity: 0.6;
+        }
+
+        /* Mobile menu */
+        .sw-mobile-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+        }
+
+        .sw-mobile-toggle span {
+            width: 24px;
+            height: 2px;
+            background: var(--sw-white);
+            border-radius: 2px;
+            transition: var(--sw-transition);
+        }
+
+        .sw-mobile-nav {
+            display: none;
+            background: var(--sw-black-light);
+            border-top: 1px solid var(--sw-gray-dark);
+            padding: 20px 0;
+        }
+
+        .sw-mobile-nav-list {
+            list-style: none;
+        }
+
+        .sw-mobile-nav-item {
+            margin-bottom: 15px;
+        }
+
+        .sw-mobile-nav-link {
+            display: block;
+            padding: 10px 0;
+            color: var(--sw-white);
+            font-size: 16px;
+        }
+
+        /* Main Content */
+        .sw-main {
+            min-height: 60vh;
+            padding: 40px 0;
+        }
+
+        /* Footer */
+        .sw-footer {
+            background: var(--sw-footer-bg);
+            border-top: 1px solid var(--sw-gray-dark);
+            padding: 60px 0 20px;
+        }
+
+        .sw-footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1.5fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .sw-footer-logo {
+            margin-bottom: 20px;
+        }
+
+        .sw-footer-logo img {
+            height: 40px;
+            width: auto;
+        }
+
+        .sw-footer-about {
+            opacity: 0.7;
+            font-size: 14px;
+            margin-bottom: 20px;
+            max-width: 300px;
+        }
+
+        .sw-social-links {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .sw-social-link {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--sw-black-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--sw-white);
+            border: 1px solid var(--sw-gray-dark);
+            transition: var(--sw-transition);
+        }
+
+        .sw-social-link:hover {
+            background: var(--sw-primary);
+            border-color: var(--sw-primary);
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        .sw-footer-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--sw-white);
+        }
+
+        .sw-footer-menu {
+            list-style: none;
+        }
+
+        .sw-footer-menu li {
+            margin-bottom: 12px;
+        }
+
+        .sw-footer-menu a {
+            opacity: 0.7;
+            font-size: 15px;
+        }
+
+        .sw-footer-menu a:hover {
+            opacity: 1;
+            color: var(--sw-primary);
+        }
+
+        .sw-subscribe-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .sw-subscribe-form input {
+            background: var(--sw-black-light);
+            border: 1px solid var(--sw-gray-dark);
+            border-radius: var(--sw-border-radius-sm);
+            padding: 12px 16px;
+            color: var(--sw-white);
+            width: 100%;
+        }
+
+        .sw-subscribe-btn {
+            width: 100%;
+        }
+
+        .sw-copyright {
+            border-top: 1px solid var(--sw-gray-dark);
+            padding-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            opacity: 0.7;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .sw-payments {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .sw-payments img {
+            height: 24px;
+            width: auto;
+            filter: brightness(0) invert(1);
+            opacity: 0.7;
+        }
+
+        .sw-payment-text {
+            color: var(--sw-gray);
+            font-size: 12px;
+        }
+
+        /* Scroll to top */
+        .scrollToTop {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--sw-primary);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: var(--sw-transition);
+            pointer-events: none;
+            z-index: 99;
+            border: none;
+            cursor: pointer;
+        }
+
+        .scrollToTop.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .scrollToTop:hover {
+            background: var(--sw-primary-dark);
+            transform: scale(1.1);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sw-footer-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 30px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sw-nav-list {
+                display: none;
+            }
+
+            .sw-mobile-toggle {
+                display: flex;
+            }
+
+            .sw-header-actions .sw-btn {
+                display: none;
+            }
+
+            .sw-top-bar .container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .sw-footer-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sw-copyright {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .sw-payments {
+                justify-content: center;
+            }
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Language & Top Bar -->
+    <div class="sw-top-bar">
+        <div class="container">
+            <!-- Language switcher -->
+            <form action="{% url 'set_language' %}" method="post" id="language-form">
+                {% csrf_token %}
+                <input name="next" type="hidden" value="{{ request.path }}">
+                <select name="language" id="language-select" class="sw-language-select" onchange="this.form.submit()">
+                    {% get_current_language as LANGUAGE_CODE %}
+                    {% get_available_languages as LANGUAGES %}
+                    {% get_language_info_list for LANGUAGES as languages %}
+                    {% for language in languages %}
+                        <option value="{{ language.code }}" {% if language.code == LANGUAGE_CODE %}selected{% endif %}>
+                            {{ language.name_local }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </form>
+
+            <!-- Top links -->
+
+            <!-- Contact info -->
+            <div class="sw-contact-info">
+                {% with request|get_settings as setting %}
+                    {% if setting and setting.settings and setting.settings.phone_default %}
+                        <div class="sw-contact-icon">
+                            <i class="fa-solid fa-phone"></i>
+                        </div>
+                        <div class="sw-contact-text">
+                            <strong>{{ setting.settings.phone_default.title_contact|default:"Свяжитесь с нами" }}</strong>
+                            <small>{{ setting.settings.phone_default.information_contact|default:"+7 (495) 123-45-67" }}</small>
+                        </div>
+                    {% else %}
+                        <div class="sw-contact-icon">
+                            <i class="fa-solid fa-phone"></i>
+                        </div>
+                        <div class="sw-contact-text">
+                            <strong>Круглосуточно</strong>
+                            <small>+7 (495) 123-45-67</small>
+                        </div>
+                    {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Header -->
+    <header class="sw-header">
+        <div class="container">
+            <div class="sw-header-inner">
+                <!-- Logo -->
+                <div class="sw-logo">
+                    <a href="{% url 'webmain:home' %}">
+                        <img src="{% with request|get_settings as data %}{% if data and data.setting and data.setting.logo %}{{ data.setting.logo.url }}{% else %}{% static 'site/serweb/img/logo.svg' %}{% endif %}{% endwith %}"
+                             alt="SerWeb"
+                             onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'150\' height=\'50\' viewBox=\'0 0 150 50\'%3E%3Crect width=\'150\' height=\'50\' fill=\'%236C3CE9\'/%3E%3Ctext x=\'20\' y=\'32\' font-family=\'Inter\' font-size=\'20\' fill=\'white\'%3ESerWeb%3C/text%3E%3C/svg%3E'">
+                    </a>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <nav class="sw-nav">
+                    <ul class="sw-nav-list">
+                        <li><a href="{% url 'webmain:home' %}" class="sw-nav-link {% if request.path == '/' %}active{% endif %}">{% trans 'Главная' %}</a></li>
+                        <li><a href="{% url 'webmain:about' %}" class='sw-nav-link {% if 'contacts' in request.path %}active{% endif %}'">{% trans 'О компании' %}</a></li>
+                        <li><a href="{% url 'shop:catalogs' %}" class="sw-nav-link {% if 'catalog' in request.path %}active{% endif %}">{% trans 'Портфолио' %}</a></li>
+                        <li><a href="{% url 'webmain:services' %}" class="sw-nav-link {% if 'services' in request.path %}active{% endif %}">{% trans 'Услуги' %}</a></li>
+                        <li><a href="{% url 'webmain:blogs' %}" class="sw-nav-link {% if 'blog' in request.path %}active{% endif %}">{% trans 'Блог' %}</a></li>
+                        <li><a href="{% url 'webmain:contacts' %}" class="sw-nav-link {% if 'contacts' in request.path %}active{% endif %}">{% trans 'Контакты' %}</a></li>
+                        <li><a href="{% url 'hr:vacancys' %}" class='sw-nav-link {% if 'contacts' in request.path %}active{% endif %}'">{% trans 'Карьера' %}</a></li>
+                    </ul>
+                </nav>
+
+                <!-- Header Actions -->
+                <div class="sw-header-actions">
+                    <a href="#" class="sw-icon-btn" title="Поиск">
+                        <i class="fa-solid fa-search"></i>
+                    </a>
+
+                    <a href="{% if user.is_authenticated %}{% url 'useraccount:edit_profile' %}{% else %}{% url 'webmain:login' %}{% endif %}"
+                       class="sw-icon-btn"
+                       title="Личный кабинет">
+                        <i class="fa fa-user"></i>
+                    </a>
+
+                    <a href="{% url 'shop:my_cart' %}" class="sw-icon-btn" title="Корзина">
+                        <i class="fa fa-shopping-cart"></i>
+                        {% if cart_products.2 > 0 %}
+                            <span class="sw-badge">{{ cart_products.2 }}</span>
+                        {% endif %}
+                    </a>
+
+                    <a href="{% url 'shop:my_order' %}" class="sw-btn sw-btn-primary">
+                        {% trans 'Заказать сайт' %}
+                    </a>
+
+                    <button class="sw-mobile-toggle" id="mobileMenuToggle" aria-label="Меню">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Navigation -->
+    <div class="sw-mobile-nav" id="mobileNav" style="display: none;">
+        <div class="container">
+            <ul class="sw-mobile-nav-list">
+                <li class="sw-mobile-nav-item"><a href="{% url 'webmain:home' %}" class="sw-mobile-nav-link">{% trans 'Главная' %}</a></li>
+                <li class="sw-mobile-nav-item"><a href="{% url 'shop:catalogs' %}" class="sw-mobile-nav-link">{% trans 'Портфолио' %}</a></li>
+                <li class="sw-mobile-nav-item"><a href="{% url 'webmain:services' %}" class="sw-mobile-nav-link">{% trans 'Услуги' %}</a></li>
+                <li class="sw-mobile-nav-item"><a href="{% url 'webmain:blogs' %}" class="sw-mobile-nav-link">{% trans 'Блог' %}</a></li>
+                <li class="sw-mobile-nav-item"><a href="{% url 'webmain:contacts' %}" class="sw-mobile-nav-link">{% trans 'Контакты' %}</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('mobileMenuToggle')?.addEventListener('click', function() {
+            const mobileNav = document.getElementById('mobileNav');
+            if (mobileNav.style.display === 'none' || !mobileNav.style.display) {
+                mobileNav.style.display = 'block';
+            } else {
+                mobileNav.style.display = 'none';
+            }
+        });
+    </script>
+
+    <!-- Main Content -->
+    <main class="sw-main">
+        <div class="container">
+            {% block content %}{% endblock content %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="sw-footer">
+        <div class="container">
+            <div class="sw-footer-grid">
+                <!-- About -->
+                <div>
+                    <div class="sw-footer-logo">
+                        <img src="{% with request|get_settings as data %}{% if data and data.setting and data.setting.logo %}{{ data.setting.logo.url }}{% else %}{% static 'site/serweb/img/logo.svg' %}{% endif %}{% endwith %}"
+                             alt="SerWeb"
+                             onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'150\' height=\'40\' viewBox=\'0 0 150 40\'%3E%3Crect width=\'150\' height=\'40\' fill=\'%236C3CE9\'/%3E%3Ctext x=\'20\' y=\'26\' font-family=\'Inter\' font-size=\'18\' fill=\'white\'%3ESerWeb%3C/text%3E%3C/svg%3E'">
+                    </div>
+                    <div class="sw-footer-about">
+                        {{ settings.description|default:"Создаем современные веб-решения с душой. Более 100 успешных проектов."|safe }}
+                    </div>
+                    <div class="sw-social-links">
+                        {% with request|get_settings as setting %}
+                            {% if setting and setting.social_default %}
+                                {% for item in setting.social_default %}
+                                    <a href="{{ item.information_contact }}" class="sw-social-link" target="_blank" rel="noopener" title="{{ item.title_contact }}">
+                                        <i class="fa-brands fa-{{ item.title_contact|lower }}"></i>
+                                    </a>
+                                {% endfor %}
+                            {% else %}
+                                <a href="#" class="sw-social-link"><i class="fa-brands fa-telegram"></i></a>
+                                <a href="#" class="sw-social-link"><i class="fa-brands fa-whatsapp"></i></a>
+                                <a href="#" class="sw-social-link"><i class="fa-brands fa-github"></i></a>
+                                <a href="#" class="sw-social-link"><i class="fa-brands fa-vk"></i></a>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+                </div>
+
+                <!-- Information -->
+                <div>
+                    <h4 class="sw-footer-title">{% trans 'Информация' %}</h4>
+                    <ul class="sw-footer-menu">
+                        <li><a href="{% url 'webmain:home' %}">{% trans 'Главная' %}</a></li>
+                        <li><a href="{% url 'webmain:about' %}">{% trans 'О нас' %}</a></li>
+                        <li><a href="{% url 'webmain:services' %}">{% trans 'Услуги' %}</a></li>
+                        <li><a href="{% url 'webmain:blogs' %}">{% trans 'Блог' %}</a></li>
+                        <li><a href="{% url 'webmain:contacts' %}">{% trans 'Контакты' %}</a></li>
+                    </ul>
+                </div>
+
+                <!-- Legal -->
+                <div>
+                    <h4 class="sw-footer-title">{% trans 'Документы' %}</h4>
+                    <ul class="sw-footer-menu">
+                        {% get_pages as pages %}
+                        {% if pages %}
+                            {% for page in pages %}
+                                {% if page.pagetype == 2 %}
+                                    <li><a href="{% url 'webmain:page' page.slug %}">{% trans 'Пользовательское соглашение' %}</a></li>
+                                {% elif page.pagetype == 3 %}
+                                    <li><a href="{% url 'webmain:page' page.slug %}">{% trans 'Политика конфиденциальности' %}</a></li>
+                                {% elif page.pagetype == 4 %}
+                                    <li><a href="{% url 'webmain:page' page.slug %}">{% trans 'Политика Cookie' %}</a></li>
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <li><a href="#">{% trans 'Пользовательское соглашение' %}</a></li>
+                            <li><a href="#">{% trans 'Политика конфиденциальности' %}</a></li>
+                            <li><a href="#">{% trans 'Политика Cookie' %}</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+                <!-- Subscription -->
+                <div>
+                    <h4 class="sw-footer-title">{% trans 'Рассылка' %}</h4>
+                    <p style="opacity: 0.7; font-size: 14px; margin-bottom: 15px;">{% trans 'Будьте в курсе новых работ и акций' %}</p>
+
+                    {% render_subscription_form as subscription_form_context %}
+                    <form method="post" action="{% url 'moderation:subscribe' %}" class="sw-subscribe-form">
+                        {% csrf_token %}
+                        <input type="email" name="email" class="sw-subscribe-input" placeholder="{% trans 'Ваш email' %}" required>
+                        <button type="submit" class="sw-btn sw-btn-primary sw-subscribe-btn">{% trans 'Подписаться' %}</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Copyright -->
+            <div class="sw-copyright">
+                <div>
+                    &copy; {% now "Y" %} SerWeb.
+                    {% if settings.content %}
+                        {{ settings.content|safe }}
+                    {% else %}
+                        {% trans 'Все права защищены.' %}
+                    {% endif %}
+                </div>
+                <div class="sw-payments">
+                    <span class="sw-payment-text">{% trans 'Принимаем к оплате:' %}</span>
+                    <span class="sw-payment-text">Visa, Mastercard, МИР</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scroll to top -->
+    <a href="#" class="scrollToTop" id="scrollTop">
+        <i class="fa-solid fa-arrow-up"></i>
+    </a>
+
+    <script>
+        window.addEventListener('scroll', function() {
+            const btn = document.getElementById('scrollTop');
+            if (window.scrollY > 300) {
+                btn.classList.add('visible');
+            } else {
+                btn.classList.remove('visible');
+            }
+        });
+
+        document.getElementById('scrollTop')?.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+
+    <!-- Include templates -->
+
+
+    {% block footerbottom %}{% endblock footerbottom %}
+</body>
+</html>

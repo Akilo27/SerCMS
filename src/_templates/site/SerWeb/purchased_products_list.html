@@ -1,0 +1,1101 @@
+{% extends 'site/SerWeb/base.html' %}
+{% load static shop_tags generals_tag i18n %}
+
+{% block title %}{{ seo_title|default:"Купоны и адреса | SerWeb" }}{% endblock title %}
+{% block description %}{{ seo_description|default:"Управление купонами и адресами доставки в личном кабинете SerWeb" }}{% endblock description %}
+
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }}{% else %}{% static 'site/serweb/img/coupons-og.jpg' %}{% endif %}{% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle|default:"Купоны и адреса SerWeb" }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription|default:"Управление купонами" }}{% endblock propertyimage %}
+
+{% block head %}
+<!-- Подключаем стили DaData -->
+<link href="https://cdn.jsdelivr.net/npm/suggestions-jquery@latest/dist/css/suggestions.min.css" rel="stylesheet">
+
+<style>
+    /* Стили для страницы купонов и адресов SerWeb */
+    .coupons-wrapper {
+        padding: 40px 0;
+    }
+
+    .coupons-grid {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 30px;
+    }
+
+    @media (max-width: 992px) {
+        .coupons-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Сайдбар профиля */
+    .profile-sidebar {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        padding: 25px;
+        height: fit-content;
+    }
+
+    .profile-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--sw-gray-dark);
+        margin-bottom: 20px;
+    }
+
+    .profile-avatar {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 3px solid var(--sw-primary);
+        flex-shrink: 0;
+    }
+
+    .profile-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .profile-info h5 {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--sw-white);
+        margin-bottom: 5px;
+    }
+
+    .profile-info .profile-username {
+        font-size: 14px;
+        color: var(--sw-gray);
+        margin-bottom: 0;
+    }
+
+    .profile-menu {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .profile-menu-item {
+        margin-bottom: 5px;
+    }
+
+    .profile-menu-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 15px;
+        color: var(--sw-gray);
+        border-radius: 12px;
+        transition: var(--sw-transition);
+        font-weight: 500;
+    }
+
+    .profile-menu-link i {
+        width: 20px;
+        color: var(--sw-primary);
+        transition: var(--sw-transition);
+    }
+
+    .profile-menu-link:hover,
+    .profile-menu-link.active {
+        background: rgba(108, 60, 233, 0.1);
+        color: var(--sw-white);
+    }
+
+    .profile-menu-link:hover i,
+    .profile-menu-link.active i {
+        color: var(--sw-primary-light);
+    }
+
+    /* Основной контент */
+    .coupons-content {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        padding: 30px;
+    }
+
+    .section-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--sw-white);
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid var(--sw-gray-dark);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .section-title i {
+        color: var(--sw-primary);
+    }
+
+    /* Карточки купонов */
+    .coupons-grid-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 40px;
+    }
+
+    .coupon-card {
+        background: linear-gradient(135deg, var(--sw-primary-dark), var(--sw-primary));
+        border-radius: 16px;
+        overflow: hidden;
+        transition: var(--sw-transition);
+        position: relative;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .coupon-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(108, 60, 233, 0.4);
+    }
+
+    .coupon-header {
+        display: flex;
+        justify-content: flex-end;
+        padding: 15px;
+        background: rgba(0, 0, 0, 0.1);
+    }
+
+    .coupon-terms-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 20px;
+        padding: 5px 12px;
+        color: white;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--sw-transition);
+        backdrop-filter: blur(5px);
+    }
+
+    .coupon-terms-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    .coupon-body {
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .coupon-info {
+        color: white;
+    }
+
+    .coupon-pay {
+        font-size: 14px;
+        opacity: 0.9;
+        margin-bottom: 5px;
+    }
+
+    .coupon-amount {
+        font-size: 28px;
+        font-weight: 800;
+        line-height: 1.2;
+    }
+
+    .coupon-receive {
+        font-size: 14px;
+        opacity: 0.9;
+        margin-top: 5px;
+    }
+
+    .coupon-logo {
+        width: 60px;
+        height: 60px;
+        background: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .coupon-logo img {
+        width: 40px;
+        height: 40px;
+        object-fit: contain;
+    }
+
+    .coupon-terms {
+        background: rgba(0, 0, 0, 0.2);
+        padding: 15px;
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 13px;
+        line-height: 1.5;
+        display: none;
+    }
+
+    .coupon-terms.show {
+        display: block;
+    }
+
+    .coupon-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        background: rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(5px);
+    }
+
+    .coupon-status {
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.8);
+        margin: 0;
+    }
+
+    .coupon-btn {
+        background: white;
+        border: none;
+        border-radius: 25px;
+        padding: 8px 20px;
+        color: var(--sw-primary);
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+        transition: var(--sw-transition);
+    }
+
+    .coupon-btn:hover {
+        background: var(--sw-primary);
+        color: white;
+        transform: scale(1.05);
+    }
+
+    .coupon-btn.activated {
+        background: #4CAF50;
+        color: white;
+        cursor: default;
+    }
+
+    /* Адреса */
+    .addresses-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .add-address-btn {
+        background: var(--sw-primary);
+        border: none;
+        border-radius: 12px;
+        padding: 10px 20px;
+        color: white;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: var(--sw-transition);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .add-address-btn:hover {
+        background: var(--sw-primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(108, 60, 233, 0.3);
+    }
+
+    .addresses-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .address-card {
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 16px;
+        padding: 20px;
+        transition: var(--sw-transition);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .address-card:hover {
+        border-color: var(--sw-primary);
+        box-shadow: 0 5px 15px rgba(108, 60, 233, 0.1);
+    }
+
+    .address-info {
+        flex: 1;
+    }
+
+    .address-label {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--sw-white);
+        margin-bottom: 5px;
+    }
+
+    .address-text {
+        color: var(--sw-gray);
+        font-size: 14px;
+        margin-bottom: 5px;
+    }
+
+    .address-coords {
+        font-size: 12px;
+        color: var(--sw-gray-dark);
+    }
+
+    .address-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .address-action {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--sw-white);
+        cursor: pointer;
+        transition: var(--sw-transition);
+    }
+
+    .address-action:hover {
+        background: var(--sw-primary);
+        border-color: var(--sw-primary);
+        color: white;
+    }
+
+    .address-action.edit:hover {
+        background: var(--sw-primary);
+    }
+
+    .address-action.delete:hover {
+        background: #dc3545;
+        border-color: #dc3545;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        background: var(--sw-black);
+        border: 1px dashed var(--sw-gray-dark);
+        border-radius: 16px;
+        color: var(--sw-gray);
+    }
+
+    .empty-state i {
+        font-size: 48px;
+        color: var(--sw-gray-dark);
+        margin-bottom: 15px;
+    }
+
+    /* Модальное окно */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(5px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+
+    .modal-content {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        width: 90%;
+        max-width: 500px;
+        max-height: 90vh;
+        overflow-y: auto;
+        animation: modalFadeIn 0.3s ease;
+    }
+
+    @keyframes modalFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .modal-header {
+        padding: 20px 25px;
+        border-bottom: 1px solid var(--sw-gray-dark);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--sw-white);
+        margin: 0;
+    }
+
+    .modal-close {
+        background: transparent;
+        border: none;
+        color: var(--sw-gray);
+        font-size: 24px;
+        cursor: pointer;
+        transition: var(--sw-transition);
+    }
+
+    .modal-close:hover {
+        color: var(--sw-white);
+    }
+
+    .modal-body {
+        padding: 25px;
+    }
+
+    .modal-footer {
+        padding: 20px 25px;
+        border-top: 1px solid var(--sw-gray-dark);
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    /* Формы */
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--sw-white);
+        font-weight: 500;
+        font-size: 14px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 12px;
+        color: var(--sw-white);
+        font-size: 14px;
+        transition: var(--sw-transition);
+    }
+
+    .form-control:focus {
+        border-color: var(--sw-primary);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(108, 60, 233, 0.2);
+    }
+
+    .form-control::placeholder {
+        color: var(--sw-gray);
+        opacity: 0.7;
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    /* Кнопки */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px 20px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 14px;
+        transition: var(--sw-transition);
+        cursor: pointer;
+        border: 1px solid transparent;
+    }
+
+    .btn-primary {
+        background: var(--sw-primary);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: var(--sw-primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(108, 60, 233, 0.3);
+    }
+
+    .btn-outline {
+        background: transparent;
+        border: 1px solid var(--sw-gray-dark);
+        color: var(--sw-white);
+    }
+
+    .btn-outline:hover {
+        border-color: var(--sw-primary);
+        color: var(--sw-primary);
+    }
+
+    /* Уведомления */
+    .coupon-toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 99999;
+        min-width: 300px;
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-left: 4px solid var(--sw-primary);
+        border-radius: 12px;
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        animation: slideIn 0.3s ease;
+    }
+
+    .coupon-toast.success {
+        border-left-color: #4CAF50;
+    }
+
+    .coupon-toast.success i {
+        color: #4CAF50;
+    }
+
+    .coupon-toast.error {
+        border-left-color: #dc3545;
+    }
+
+    .coupon-toast.error i {
+        color: #dc3545;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    .toast-close {
+        margin-left: auto;
+        cursor: pointer;
+        opacity: 0.7;
+    }
+
+    .toast-close:hover {
+        opacity: 1;
+    }
+
+    /* Скрытые поля */
+    .d-none {
+        display: none !important;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .coupons-grid-cards {
+            grid-template-columns: 1fr;
+        }
+
+        .address-card {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .address-actions {
+            align-self: flex-end;
+        }
+    }
+</style>
+{% endblock head %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb-list">
+                <li class="breadcrumb-item"><a href="{% url 'webmain:home' %}"><i class="fa fa-home me-1"></i>{% trans 'Главная' %}</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'useraccount:profile' %}">{% trans 'Личный кабинет' %}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{% trans 'Купоны и адреса' %}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<style>
+    .breadcrumbs {
+        background: var(--sw-black-light);
+        padding: 15px 0;
+        border-bottom: 1px solid var(--sw-gray-dark);
+    }
+
+    .breadcrumb-list {
+        display: flex;
+        list-style: none;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .breadcrumb-item {
+        font-size: 14px;
+        color: var(--sw-gray);
+    }
+
+    .breadcrumb-item:not(:last-child)::after {
+        content: '/';
+        margin-left: 10px;
+        color: var(--sw-gray);
+    }
+
+    .breadcrumb-item a {
+        color: var(--sw-gray);
+        transition: var(--sw-transition);
+    }
+
+    .breadcrumb-item a:hover {
+        color: var(--sw-primary);
+    }
+
+    .breadcrumb-item.active {
+        color: var(--sw-white);
+    }
+</style>
+{% endblock breadcrumbs %}
+
+{% block content %}
+<div class="coupons-wrapper">
+    <div class="container">
+        <div class="coupons-grid">
+            <!-- Сайдбар профиля -->
+            <aside class="profile-sidebar">
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        {% if user.profile.avatar %}
+                            <img src="{{ user.profile.avatar.url }}" alt="{{ user.get_full_name|default:user.username }}">
+                        {% elif user.avatar %}
+                            <img src="{{ user.avatar.url }}" alt="{{ user.get_full_name|default:user.username }}">
+                        {% elif user.image %}
+                            <img src="{{ user.image.url }}" alt="{{ user.get_full_name|default:user.username }}">
+                        {% else %}
+                            <img src="{% static 'site/serweb/img/default-avatar.svg' %}" alt="avatar" onerror="this.src='https://placehold.co/70x70/6C3CE9/FFFFFF?text={{ user.username|first|upper }}'">
+                        {% endif %}
+                    </div>
+                    <div class="profile-info">
+                        <h5>{% if user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.username }}{% endif %}</h5>
+                        <p class="profile-username">@{{ user.username }}</p>
+                    </div>
+                </div>
+
+                {% include 'site/SerWeb/include/profile_menu.html' %}
+            </aside>
+
+            <!-- Основной контент -->
+            <div class="coupons-content">
+                <!-- Секция купонов -->
+                <section class="mb-5">
+                    <h2 class="section-title">
+                        <i class="fa fa-ticket"></i>
+                        {% trans "Мои купоны" %}
+                    </h2>
+
+                    <div class="coupons-grid-cards">
+                        {% for promotion in personal_promotions %}
+                        <div class="coupon-card" data-id="{{ promotion.id }}">
+                            <div class="coupon-header">
+                                <button class="coupon-terms-btn" onclick="toggleTerms(this)">
+                                    {% trans "Условия" %}
+                                </button>
+                            </div>
+
+                            <div class="coupon-body">
+                                <div class="coupon-info">
+                                    <div class="coupon-pay">{% trans "Вы платите" %}</div>
+                                    <div class="coupon-amount">{{ promotion.pay_amount }} ₽</div>
+                                    <div class="coupon-receive">{% trans "Вы получаете" %} {{ promotion.receive_amount }} ₽</div>
+                                </div>
+                                <div class="coupon-logo">
+                                    {% if promotion.logo %}
+                                        <img src="{{ promotion.logo.url }}" alt="Логотип">
+                                    {% else %}
+                                        <img src="{% static 'site/serweb/img/logo-icon.svg' %}" alt="SerWeb">
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="coupon-terms" id="terms-{{ promotion.id }}">
+                                {{ promotion.terms|safe }}
+                            </div>
+
+                            <div class="coupon-footer">
+                                <p class="coupon-status">
+                                    {% if promotion.is_active %}
+                                        <i class="fa fa-circle-check me-1" style="color: #4CAF50;"></i>
+                                        {% trans "Активен" %}
+                                    {% else %}
+                                        <i class="fa fa-circle me-1"></i>
+                                        {% trans "Не активирован" %}
+                                    {% endif %}
+                                </p>
+                                <button class="coupon-btn {% if promotion.is_active %}activated{% endif %}"
+                                        onclick="activateCoupon(this, {{ promotion.id }})"
+                                        {% if promotion.is_active %}disabled{% endif %}>
+                                    {% if promotion.is_active %}
+                                        {% trans "Активирован" %}
+                                    {% else %}
+                                        {% trans "Активировать" %}
+                                    {% endif %}
+                                </button>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="empty-state">
+                            <i class="fa fa-ticket"></i>
+                            <h4>{% trans "У вас пока нет купонов" %}</h4>
+                            <p>{% trans "Следите за акциями и специальными предложениями" %}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <!-- Секция адресов -->
+                <section>
+                    <div class="addresses-header">
+                        <h2 class="section-title" style="border-bottom: none; margin-bottom: 0;">
+                            <i class="fa fa-location-dot"></i>
+                            {% trans "Мои адреса" %}
+                        </h2>
+                        <button class="add-address-btn" id="add-address-btn">
+                            <i class="fa fa-plus"></i>
+                            {% trans "Добавить адрес" %}
+                        </button>
+                    </div>
+
+                    <!-- Скрытое поле для хранения адресов в JSON -->
+                    <textarea id="id_adresses" class="d-none" name="addresses">{{ user.addresses|default:'[]' }}</textarea>
+
+                    <!-- Список адресов -->
+                    <div class="addresses-list" id="addresses-list">
+                        <!-- Адреса будут загружаться динамически -->
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для адресов -->
+<div class="modal-overlay d-none" id="addressModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title" id="modalTitle">{% trans "Добавление адреса" %}</h3>
+            <button class="modal-close" onclick="closeModal()">
+                <i class="fa fa-times"></i>
+            </button>
+        </div>
+
+        <form id="address-form" class="modal-body">
+            <input type="hidden" id="address-index" name="index" value="">
+            <input type="hidden" id="address-lat" name="lat" value="">
+            <input type="hidden" id="address-lon" name="lon" value="">
+
+            <div class="form-group">
+                <label for="address-label" class="form-label">{% trans "Название адреса" %}</label>
+                <input type="text" class="form-control" id="address-label" placeholder="{% trans 'Например: Дом, Работа' %}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="address-value" class="form-label">{% trans "Адрес" %}</label>
+                <input type="text" class="form-control" id="address-value" placeholder="{% trans 'Введите адрес' %}" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">{% trans "Координаты" %}</label>
+                <div class="text-gray small">
+                    {% trans "Будут определены автоматически при выборе адреса" %}
+                </div>
+            </div>
+        </form>
+
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeModal()">
+                {% trans "Отмена" %}
+            </button>
+            <button type="submit" form="address-form" class="btn btn-primary">
+                {% trans "Сохранить" %}
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Контейнер для уведомлений -->
+<div id="toast-container"></div>
+
+<!-- Подключаем скрипты -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/suggestions-jquery@latest/dist/js/jquery.suggestions.min.js"></script>
+
+<script>
+// Глобальные функции для модального окна
+function closeModal() {
+    document.getElementById('addressModal').classList.add('d-none');
+}
+
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `coupon-toast ${type}`;
+    toast.innerHTML = `
+        <i class="fa fa-${type === 'success' ? 'circle-check' : 'circle-exclamation'}"></i>
+        <span>${message}</span>
+        <span class="toast-close" onclick="this.parentElement.remove()">
+            <i class="fa fa-times"></i>
+        </span>
+    `;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.remove();
+        }
+    }, 5000);
+}
+
+function toggleTerms(btn) {
+    const card = btn.closest('.coupon-card');
+    const terms = card.querySelector('.coupon-terms');
+
+    if (terms.classList.contains('show')) {
+        terms.classList.remove('show');
+        btn.textContent = '{% trans "Условия" %}';
+    } else {
+        terms.classList.add('show');
+        btn.textContent = '{% trans "Скрыть" %}';
+    }
+}
+
+function activateCoupon(btn, couponId) {
+    if (btn.disabled) return;
+
+    // Имитация активации (заменить на реальный AJAX)
+    btn.classList.add('activated');
+    btn.textContent = '{% trans "Активирован" %}';
+    btn.disabled = true;
+
+    const statusSpan = btn.closest('.coupon-footer').querySelector('.coupon-status');
+    statusSpan.innerHTML = '<i class="fa fa-circle-check me-1" style="color: #4CAF50;"></i> {% trans "Активен" %}';
+
+    showToast('{% trans "Купон успешно активирован" %}', 'success');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    'use strict';
+
+    // DaData API ключ
+    const api_key = 'f57f601d1ae22f609d5f8ae6b3601e9ec3e9a85d';
+
+    // Элементы DOM
+    const textarea = document.getElementById('id_adresses');
+    const listContainer = document.getElementById('addresses-list');
+    const addBtn = document.getElementById('add-address-btn');
+    const modal = document.getElementById('addressModal');
+    const form = document.getElementById('address-form');
+    const labelInput = document.getElementById('address-label');
+    const addressInput = document.getElementById('address-value');
+    const indexInput = document.getElementById('address-index');
+    const latInput = document.getElementById('address-lat');
+    const lonInput = document.getElementById('address-lon');
+    const modalTitle = document.getElementById('modalTitle');
+
+    // Получение адресов из textarea
+    function getAddresses() {
+        try {
+            return JSON.parse(textarea.value.trim() || '[]');
+        } catch (e) {
+            console.warn('Ошибка парсинга JSON:', e);
+            return [];
+        }
+    }
+
+    // Сохранение адресов в textarea
+    function setAddresses(addresses) {
+        textarea.value = JSON.stringify(addresses, null, 2);
+        renderAddresses();
+    }
+
+    // Отображение адресов
+    function renderAddresses() {
+        const addresses = getAddresses();
+        listContainer.innerHTML = '';
+
+        if (!addresses.length) {
+            listContainer.innerHTML = `
+                <div class="empty-state">
+                    <i class="fa fa-location-dot"></i>
+                    <h4>{% trans "Адреса не добавлены" %}</h4>
+                    <p>{% trans "Нажмите кнопку выше, чтобы добавить адрес доставки" %}</p>
+                </div>
+            `;
+            return;
+        }
+
+        addresses.forEach((addr, index) => {
+            const card = document.createElement('div');
+            card.className = 'address-card';
+            card.innerHTML = `
+                <div class="address-info">
+                    <div class="address-label">${addr.label || '{% trans "Без названия" %}'}</div>
+                    <div class="address-text">${addr.address || '—'}</div>
+                    <div class="address-coords">lat: ${addr.lat || '–'}, lon: ${addr.lon || '–'}</div>
+                </div>
+                <div class="address-actions">
+                    <span class="address-action edit" data-index="${index}" title="{% trans 'Редактировать' %}">
+                        <i class="fa fa-pen-to-square"></i>
+                    </span>
+                    <span class="address-action delete" data-index="${index}" title="{% trans 'Удалить' %}">
+                        <i class="fa fa-trash-can"></i>
+                    </span>
+                </div>
+            `;
+            listContainer.appendChild(card);
+        });
+    }
+
+    // Открытие модального окна
+    function openModal(editIndex = null) {
+        if (editIndex !== null) {
+            const addr = getAddresses()[editIndex];
+            labelInput.value = addr.label || '';
+            addressInput.value = addr.address || '';
+            latInput.value = addr.lat || '';
+            lonInput.value = addr.lon || '';
+            indexInput.value = editIndex;
+            modalTitle.textContent = '{% trans "Редактирование адреса" %}';
+        } else {
+            form.reset();
+            indexInput.value = '';
+            modalTitle.textContent = '{% trans "Добавление адреса" %}';
+        }
+
+        modal.classList.remove('d-none');
+
+        // Инициализация DaData
+        setTimeout(() => {
+            if ($.fn.suggestions) {
+                $('#address-value').suggestions({
+                    token: api_key,
+                    type: 'ADDRESS',
+                    hint: false,
+                    bounds: "city-settlement-street-house",
+                    onSelect: function(suggestion) {
+                        const lat = suggestion.data.geo_lat || '';
+                        const lon = suggestion.data.geo_lon || '';
+
+                        addressInput.dataset.lat = lat;
+                        addressInput.dataset.lon = lon;
+                        latInput.value = lat;
+                        lonInput.value = lon;
+                    }
+                });
+            }
+        }, 100);
+    }
+
+    // Обработчики событий
+    addBtn.addEventListener('click', () => openModal());
+
+    listContainer.addEventListener('click', (e) => {
+        const target = e.target.closest('[data-index]');
+        if (!target) return;
+
+        const index = parseInt(target.dataset.index);
+
+        if (target.classList.contains('edit')) {
+            openModal(index);
+        } else if (target.classList.contains('delete')) {
+            const addresses = getAddresses();
+            addresses.splice(index, 1);
+            setAddresses(addresses);
+            showToast('{% trans "Адрес удален" %}', 'success');
+        }
+    });
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const label = labelInput.value.trim();
+        const address = addressInput.value.trim();
+        const lat = addressInput.dataset.lat || latInput.value || '';
+        const lon = addressInput.dataset.lon || lonInput.value || '';
+        const index = indexInput.value;
+
+        if (!label || !address) {
+            showToast('{% trans "Заполните все поля" %}', 'error');
+            return;
+        }
+
+        const addresses = getAddresses();
+        const newItem = { label, address, lat, lon };
+
+        if (index !== '') {
+            addresses[parseInt(index)] = newItem;
+            showToast('{% trans "Адрес обновлен" %}', 'success');
+        } else {
+            addresses.push(newItem);
+            showToast('{% trans "Адрес добавлен" %}', 'success');
+        }
+
+        setAddresses(addresses);
+        closeModal();
+    });
+
+    // Закрытие по клику вне модального окна
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+
+    // Первоначальный рендеринг
+    renderAddresses();
+});
+</script>
+{% endblock content %}
+
+{% block footertop %}
+<!-- Дополнительные скрипты не требуются -->
+{% endblock footertop %}

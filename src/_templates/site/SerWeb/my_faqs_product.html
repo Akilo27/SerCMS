@@ -1,0 +1,749 @@
+{% extends 'site/SerWeb/base.html' %}
+{% load static generals_tag i18n %}
+
+{% block title %}{{ seo_title|default:"Мои вопросы | SerWeb" }}{% endblock title %}
+{% block description %}{{ seo_description|default:"Все ваши вопросы о проектах в веб-студии SerWeb" }}{% endblock description %}
+
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }}{% else %}{% static 'site/serweb/img/faq-og.jpg' %}{% endif %}{% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle|default:"Мои вопросы SerWeb" }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription|default:"Вопросы пользователя" }}{% endblock propertyimage %}
+
+{% block head %}
+<style>
+    /* Стили для страницы вопросов SerWeb */
+    .faq-wrapper {
+        padding: 40px 0;
+    }
+
+    .faq-grid {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 30px;
+    }
+
+    @media (max-width: 992px) {
+        .faq-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Сайдбар профиля */
+    .profile-sidebar {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        padding: 25px;
+        height: fit-content;
+    }
+
+    .profile-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--sw-gray-dark);
+        margin-bottom: 20px;
+    }
+
+    .profile-avatar {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 3px solid var(--sw-primary);
+        flex-shrink: 0;
+    }
+
+    .profile-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .profile-info h5 {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--sw-white);
+        margin-bottom: 5px;
+    }
+
+    .profile-info .profile-username {
+        font-size: 14px;
+        color: var(--sw-gray);
+        margin-bottom: 0;
+    }
+
+    .profile-menu {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .profile-menu-item {
+        margin-bottom: 5px;
+    }
+
+    .profile-menu-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 15px;
+        color: var(--sw-gray);
+        border-radius: 12px;
+        transition: var(--sw-transition);
+        font-weight: 500;
+    }
+
+    .profile-menu-link i {
+        width: 20px;
+        color: var(--sw-primary);
+        transition: var(--sw-transition);
+    }
+
+    .profile-menu-link:hover,
+    .profile-menu-link.active {
+        background: rgba(108, 60, 233, 0.1);
+        color: var(--sw-white);
+    }
+
+    .profile-menu-link:hover i,
+    .profile-menu-link.active i {
+        color: var(--sw-primary-light);
+    }
+
+    /* Основной контент */
+    .faq-content {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        padding: 30px;
+    }
+
+    .faq-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--sw-white);
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid var(--sw-gray-dark);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .faq-title i {
+        color: var(--sw-primary);
+    }
+
+    /* Карточка вопроса */
+    .faq-card {
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 16px;
+        overflow: hidden;
+        margin-bottom: 20px;
+        transition: var(--sw-transition);
+    }
+
+    .faq-card:hover {
+        border-color: var(--sw-primary);
+        box-shadow: 0 10px 30px rgba(108, 60, 233, 0.1);
+    }
+
+    .faq-header {
+        padding: 20px;
+        background: linear-gradient(135deg, var(--sw-primary-dark), var(--sw-black-light));
+        border-bottom: 1px solid var(--sw-gray-dark);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .faq-product-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .faq-product-image {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        overflow: hidden;
+        background: var(--sw-black);
+    }
+
+    .faq-product-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .faq-product-name {
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .faq-product-name a {
+        color: var(--sw-white);
+        transition: var(--sw-transition);
+    }
+
+    .faq-product-name a:hover {
+        color: var(--sw-primary);
+    }
+
+    .faq-date {
+        font-size: 13px;
+        color: var(--sw-gray);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .faq-date i {
+        color: var(--sw-primary);
+    }
+
+    .faq-body {
+        padding: 20px;
+    }
+
+    .faq-question {
+        color: var(--sw-white);
+        font-size: 16px;
+        line-height: 1.6;
+        margin-bottom: 15px;
+        padding-left: 20px;
+        border-left: 3px solid var(--sw-primary);
+    }
+
+    .faq-answer {
+        background: rgba(108, 60, 233, 0.1);
+        border: 1px solid var(--sw-primary);
+        border-radius: 12px;
+        padding: 15px 20px;
+        margin-top: 15px;
+        position: relative;
+    }
+
+    .faq-answer::before {
+        content: '';
+        position: absolute;
+        top: -8px;
+        left: 20px;
+        width: 15px;
+        height: 15px;
+        background: inherit;
+        border-left: 1px solid var(--sw-primary);
+        border-top: 1px solid var(--sw-primary);
+        transform: rotate(45deg);
+    }
+
+    .faq-answer-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--sw-primary);
+        font-weight: 600;
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+
+    .faq-answer-label i {
+        font-size: 16px;
+    }
+
+    .faq-answer-text {
+        color: var(--sw-white);
+        line-height: 1.6;
+        font-size: 15px;
+    }
+
+    .faq-no-answer {
+        color: var(--sw-gray);
+        font-style: italic;
+        padding: 10px 0;
+    }
+
+    /* Действия с вопросом */
+    .faq-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid var(--sw-gray-dark);
+    }
+
+    .faq-action-btn {
+        background: transparent;
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 25px;
+        padding: 8px 20px;
+        color: var(--sw-white);
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--sw-transition);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .faq-action-btn:hover {
+        border-color: var(--sw-primary);
+        color: var(--sw-primary);
+        background: rgba(108, 60, 233, 0.1);
+    }
+
+    .faq-action-btn.delete:hover {
+        border-color: #dc3545;
+        color: #dc3545;
+    }
+
+    /* Пустое состояние */
+    .faq-empty {
+        text-align: center;
+        padding: 60px 20px;
+        background: var(--sw-black);
+        border: 1px dashed var(--sw-gray-dark);
+        border-radius: 15px;
+    }
+
+    .faq-empty-icon {
+        font-size: 64px;
+        color: var(--sw-gray-dark);
+        margin-bottom: 20px;
+    }
+
+    .faq-empty h3 {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--sw-white);
+        margin-bottom: 10px;
+    }
+
+    .faq-empty p {
+        color: var(--sw-gray);
+        margin-bottom: 25px;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .faq-empty-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 28px;
+        background: var(--sw-primary);
+        color: white;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: var(--sw-transition);
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .faq-empty-btn:hover {
+        background: var(--sw-primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(108, 60, 233, 0.3);
+    }
+
+    /* Пагинация */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 30px;
+    }
+
+    .page-item {
+        display: inline-block;
+    }
+
+    .page-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 40px;
+        height: 40px;
+        padding: 0 8px;
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 10px;
+        color: var(--sw-white);
+        font-size: 14px;
+        font-weight: 500;
+        transition: var(--sw-transition);
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .page-link:hover {
+        background: var(--sw-primary);
+        border-color: var(--sw-primary);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .page-item.active .page-link {
+        background: var(--sw-primary);
+        border-color: var(--sw-primary);
+        color: white;
+    }
+
+    .page-item.disabled .page-link {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    /* Хлебные крошки */
+    .faq-breadcrumbs {
+        margin-bottom: 30px;
+    }
+
+    .breadcrumb-list {
+        display: flex;
+        list-style: none;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .breadcrumb-item {
+        font-size: 14px;
+        color: var(--sw-gray);
+    }
+
+    .breadcrumb-item:not(:last-child)::after {
+        content: '/';
+        margin-left: 10px;
+        color: var(--sw-gray);
+    }
+
+    .breadcrumb-item a {
+        color: var(--sw-gray);
+        transition: var(--sw-transition);
+    }
+
+    .breadcrumb-item a:hover {
+        color: var(--sw-primary);
+    }
+
+    .breadcrumb-item.active {
+        color: var(--sw-white);
+    }
+
+    /* Уведомления */
+    .faq-toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-left: 4px solid var(--sw-primary);
+        border-radius: 12px;
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        animation: slideIn 0.3s ease;
+    }
+
+    .faq-toast.success {
+        border-left-color: #4CAF50;
+    }
+
+    .faq-toast.success i {
+        color: #4CAF50;
+    }
+
+    .faq-toast.error {
+        border-left-color: #dc3545;
+    }
+
+    .faq-toast.error i {
+        color: #dc3545;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    .toast-close {
+        margin-left: auto;
+        cursor: pointer;
+        opacity: 0.7;
+    }
+
+    .toast-close:hover {
+        opacity: 1;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .faq-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .faq-product-info {
+            width: 100%;
+        }
+
+        .faq-actions {
+            flex-wrap: wrap;
+        }
+
+        .faq-action-btn {
+            flex: 1;
+            justify-content: center;
+        }
+    }
+
+    /* Скрываем старые стили */
+    .card, .panel, .media-block, .thumbnail {
+        all: unset;
+    }
+
+    #reiting {
+        display: none !important;
+    }
+
+    .alert.alert-success {
+        background: rgba(108, 60, 233, 0.1) !important;
+        border: 1px solid var(--sw-primary) !important;
+        color: var(--sw-white) !important;
+    }
+
+    .alert.alert-info {
+        background: rgba(108, 60, 233, 0.1) !important;
+        border: 1px solid var(--sw-primary) !important;
+        color: var(--sw-white) !important;
+    }
+</style>
+{% endblock head %}
+
+{% block breadcrumbs %}
+<div class="faq-breadcrumbs">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb-list">
+                <li class="breadcrumb-item"><a href="{% url 'webmain:home' %}"><i class="fa fa-home me-1"></i>{% trans 'Главная' %}</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'useraccount:profile' %}">{% trans 'Личный кабинет' %}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{% trans 'Мои вопросы' %}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+{% endblock breadcrumbs %}
+
+{% block content %}
+<div class="faq-wrapper">
+    <div class="container">
+        <div class="faq-grid">
+            <!-- Сайдбар профиля -->
+            <aside class="profile-sidebar">
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        {% if user.profile.avatar %}
+                            <img src="{{ user.profile.avatar.url }}" alt="{{ user.get_full_name|default:user.username }}">
+                        {% elif user.avatar %}
+                            <img src="{{ user.avatar.url }}" alt="{{ user.get_full_name|default:user.username }}">
+                        {% elif user.image %}
+                            <img src="{{ user.image.url }}" alt="{{ user.get_full_name|default:user.username }}">
+                        {% else %}
+                            <img src="{% static 'site/serweb/img/default-avatar.svg' %}" alt="avatar" onerror="this.src='https://placehold.co/70x70/6C3CE9/FFFFFF?text={{ user.username|first|upper }}'">
+                        {% endif %}
+                    </div>
+                    <div class="profile-info">
+                        <h5>{% if user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.username }}{% endif %}</h5>
+                        <p class="profile-username">@{{ user.username }}</p>
+                    </div>
+                </div>
+
+                {% include 'site/SerWeb/include/profile_menu.html' %}
+            </aside>
+
+            <!-- Основной контент -->
+            <div class="faq-content">
+                <h1 class="faq-title">
+                    <i class="fa fa-circle-question"></i>
+                    {% trans "Мои вопросы" %}
+                </h1>
+
+                {% if my_faqs and my_faqs.object_list %}
+                <div class="faq-list">
+                    {% for faq in my_faqs %}
+                    <div class="faq-card" data-faq-id="{{ faq.id }}">
+                        <div class="faq-header">
+                            <div class="faq-product-info">
+                                {% if faq.product and faq.product.image %}
+                                <div class="faq-product-image">
+                                    <img src="{{ faq.product.image.url }}" alt="{{ faq.product.name }}">
+                                </div>
+                                {% endif %}
+                                <div class="faq-product-name">
+                                    {% if faq.product %}
+                                    <a href="{% url 'shop:products' faq.product.slug %}">
+                                        {{ faq.product.name }}
+                                    </a>
+                                    {% else %}
+                                    <span class="text-gray">{% trans "Товар удален" %}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="faq-date">
+                                <i class="fa fa-calendar"></i>
+                                {{ faq.create|date:"d.m.Y H:i" }}
+                            </div>
+                        </div>
+
+                        <div class="faq-body">
+                            <!-- Вопрос -->
+                            <div class="faq-question">
+                                {{ faq.question }}
+                            </div>
+
+                            <!-- Ответ -->
+                            {% if faq.answer %}
+                            <div class="faq-answer">
+                                <div class="faq-answer-label">
+                                    <i class="fa fa-check-circle"></i>
+                                    {% trans "Ответ администрации" %}
+                                </div>
+                                <div class="faq-answer-text">
+                                    {{ faq.answer }}
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="faq-no-answer">
+                                <i class="fa fa-clock me-2"></i>
+                                {% trans "Ожидает ответа" %}
+                            </div>
+                            {% endif %}
+
+                            <!-- Действия с вопросом -->
+                            <div class="faq-actions">
+
+
+                                {% if faq.product %}
+                                <a href="{% url 'shop:products' faq.product.slug %}" class="faq-action-btn">
+                                    <i class="fa fa-eye"></i>
+                                    {% trans "Перейти к товару" %}
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Пагинация -->
+                {% if my_faqs.has_other_pages %}
+                <nav>
+                    <ul class="pagination">
+                        {% if my_faqs.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ my_faqs.previous_page_number }}">
+                                <i class="fa fa-chevron-left"></i>
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link"><i class="fa fa-chevron-left"></i></span>
+                        </li>
+                        {% endif %}
+
+                        {% for num in my_faqs.paginator.page_range %}
+                            {% if my_faqs.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                            {% elif num > my_faqs.number|add:'-3' and num < my_faqs.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if my_faqs.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ my_faqs.next_page_number }}">
+                                <i class="fa fa-chevron-right"></i>
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link"><i class="fa fa-chevron-right"></i></span>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+
+                {% else %}
+                <!-- Пустое состояние -->
+                <div class="faq-empty">
+                    <div class="faq-empty-icon">
+                        <i class="fa fa-circle-question"></i>
+                    </div>
+                    <h3>{% trans "У вас пока нет вопросов" %}</h3>
+                    <p>{% trans "Задавайте вопросы о проектах — администрация обязательно ответит" %}</p>
+                    <a href="{% url 'shop:catalogs' %}" class="faq-empty-btn">
+                        <i class="fa fa-compass"></i>
+                        {% trans 'Перейти к проектам' %}
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Контейнер для уведомлений -->
+<div id="toast-container"></div>
+
+<script>
+// Функция для показа уведомлений
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `faq-toast ${type}`;
+    toast.innerHTML = `
+        <i class="fa fa-${type === 'success' ? 'circle-check' : 'circle-exclamation'}"></i>
+        <span>${message}</span>
+        <span class="toast-close" onclick="this.parentElement.remove()">
+            <i class="fa fa-times"></i>
+        </span>
+    `;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.remove();
+        }
+    }, 3000);
+}
+
+</script>
+{% endblock content %}
+
+{% block footertop %}
+<!-- Дополнительные скрипты не требуются -->
+{% endblock footertop %}

@@ -232,14 +232,13 @@ class SettingsModeration(models.Model):
         ("personal", "Личные"),
     )
 
-    types = MultiSelectField(
-        choices=TYPE_OPTIONS,
-        blank=True,
-        verbose_name="Доступ",
+    types = models.JSONField(
         default=list,
+        blank=True,
         null=True,
-        max_length=255,
+        verbose_name="Доступ"
     )
+
     def clean(self):
         if SettingsModeration.objects.exists() and not self.pk:
             raise ValidationError('Можно создать только один объект настроек сайта.')

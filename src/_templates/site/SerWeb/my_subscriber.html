@@ -1,0 +1,807 @@
+{% extends 'site/SerWeb/base.html' %}
+{% load static generals_tag i18n %}
+
+{% block title %}{{ seo_title|default:"Мои подписки | SerWeb" }}{% endblock title %}
+{% block description %}{{ seo_description|default:"Управление подписками на производителей и поставщиков" }}{% endblock description %}
+
+{% block propertytitle %}{% if seo_propertytitle %}{{ seo_propertytitle }}{% else %}Подписки на производителей SerWeb{% endif %}{% endblock propertytitle %}
+{% block propertydescription %}{% if seo_propertydescription %}{{ seo_propertydescription }}{% else %}Список производителей, на которых вы подписаны{% endif %}{% endblock propertydescription %}
+{% block propertyimage %}{% if seo_previev %}{{ seo_previev.url }}{% else %}{% static 'site/serweb/img/subscriptions-og.jpg' %}{% endif %}{% endblock propertyimage %}
+
+{% block head %}
+<style>
+    /* Стили для страницы подписок SerWeb */
+    .subscriptions-wrapper {
+        padding: 40px 0;
+    }
+
+    .subscriptions-grid {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 30px;
+    }
+
+    @media (max-width: 992px) {
+        .subscriptions-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Сайдбар профиля */
+    .profile-sidebar {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        padding: 25px;
+        height: fit-content;
+    }
+
+    .profile-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--sw-gray-dark);
+        margin-bottom: 20px;
+    }
+
+    .profile-avatar {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 3px solid var(--sw-primary);
+        flex-shrink: 0;
+    }
+
+    .profile-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .profile-info h5 {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--sw-white);
+        margin-bottom: 5px;
+    }
+
+    .profile-info .profile-username {
+        font-size: 14px;
+        color: var(--sw-gray);
+        margin-bottom: 0;
+    }
+
+    .profile-menu {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .profile-menu-item {
+        margin-bottom: 5px;
+    }
+
+    .profile-menu-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 15px;
+        color: var(--sw-gray);
+        border-radius: 12px;
+        transition: var(--sw-transition);
+        font-weight: 500;
+    }
+
+    .profile-menu-link i {
+        width: 20px;
+        color: var(--sw-primary);
+        transition: var(--sw-transition);
+    }
+
+    .profile-menu-link:hover,
+    .profile-menu-link.active {
+        background: rgba(108, 60, 233, 0.1);
+        color: var(--sw-white);
+    }
+
+    .profile-menu-link:hover i,
+    .profile-menu-link.active i {
+        color: var(--sw-primary-light);
+    }
+
+    /* Основной контент */
+    .subscriptions-content {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        padding: 30px;
+    }
+
+    .subscriptions-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--sw-white);
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid var(--sw-gray-dark);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .subscriptions-title i {
+        color: var(--sw-primary);
+    }
+
+    /* Сетка производителей */
+    .manufacturers-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 25px;
+        margin-bottom: 30px;
+    }
+
+    /* Карточка производителя */
+    .manufacturer-card {
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        overflow: hidden;
+        transition: var(--sw-transition);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .manufacturer-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--sw-primary);
+        box-shadow: 0 10px 30px rgba(108, 60, 233, 0.2);
+    }
+
+    .manufacturer-image {
+        height: 200px;
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(45deg, var(--sw-black), var(--sw-primary-dark));
+    }
+
+    .manufacturer-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .manufacturer-card:hover .manufacturer-image img {
+        transform: scale(1.05);
+    }
+
+    .manufacturer-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.7) 100%);
+        z-index: 1;
+    }
+
+    .manufacturer-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: var(--sw-primary);
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        z-index: 2;
+    }
+
+    .manufacturer-content {
+        padding: 20px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .manufacturer-name {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 10px;
+        line-height: 1.4;
+    }
+
+    .manufacturer-name a {
+        color: var(--sw-white);
+        transition: var(--sw-transition);
+    }
+
+    .manufacturer-name a:hover {
+        color: var(--sw-primary);
+    }
+
+    .manufacturer-category {
+        font-size: 13px;
+        color: var(--sw-primary);
+        margin-bottom: 15px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .manufacturer-stats {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+        padding: 10px 0;
+        border-top: 1px solid var(--sw-gray-dark);
+        border-bottom: 1px solid var(--sw-gray-dark);
+    }
+
+    .manufacturer-stat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
+    }
+
+    .manufacturer-stat-value {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--sw-white);
+    }
+
+    .manufacturer-stat-label {
+        font-size: 11px;
+        color: var(--sw-gray);
+        text-transform: uppercase;
+    }
+
+    .manufacturer-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: auto;
+    }
+
+    /* Кнопки */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px 20px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 14px;
+        transition: var(--sw-transition);
+        cursor: pointer;
+        border: 1px solid transparent;
+        flex: 1;
+    }
+
+    .btn-primary {
+        background: var(--sw-primary);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: var(--sw-primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(108, 60, 233, 0.3);
+    }
+
+    .btn-outline {
+        background: transparent;
+        border: 1px solid var(--sw-gray-dark);
+        color: var(--sw-white);
+    }
+
+    .btn-outline:hover {
+        border-color: var(--sw-primary);
+        color: var(--sw-primary);
+        background: rgba(108, 60, 233, 0.1);
+    }
+
+    .btn-danger {
+        background: rgba(220, 53, 69, 0.1);
+        border: 1px solid #dc3545;
+        color: #dc3545;
+    }
+
+    .btn-danger:hover {
+        background: #dc3545;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+    }
+
+    /* Пустое состояние */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: var(--sw-black);
+        border: 1px dashed var(--sw-gray-dark);
+        border-radius: 15px;
+    }
+
+    .empty-state-icon {
+        font-size: 64px;
+        color: var(--sw-gray-dark);
+        margin-bottom: 20px;
+    }
+
+    .empty-state h3 {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--sw-white);
+        margin-bottom: 10px;
+    }
+
+    .empty-state p {
+        color: var(--sw-gray);
+        margin-bottom: 25px;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .empty-state-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 28px;
+        background: var(--sw-primary);
+        color: white;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: var(--sw-transition);
+        border: none;
+        cursor: pointer;
+    }
+
+    .empty-state-btn:hover {
+        background: var(--sw-primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(108, 60, 233, 0.3);
+    }
+
+    /* Пагинация */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        list-style: none;
+        padding: 0;
+        margin: 30px 0 0;
+    }
+
+    .page-item {
+        display: inline-block;
+    }
+
+    .page-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 40px;
+        height: 40px;
+        padding: 0 8px;
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 10px;
+        color: var(--sw-white);
+        font-size: 14px;
+        font-weight: 500;
+        transition: var(--sw-transition);
+    }
+
+    .page-link:hover {
+        background: var(--sw-primary);
+        border-color: var(--sw-primary);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .page-item.active .page-link {
+        background: var(--sw-primary);
+        border-color: var(--sw-primary);
+        color: white;
+    }
+
+    .page-item.disabled .page-link {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    /* Уведомления */
+    .subscription-toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-left: 4px solid var(--sw-primary);
+        border-radius: 12px;
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        animation: slideIn 0.3s ease;
+    }
+
+    .subscription-toast.success {
+        border-left-color: #4CAF50;
+    }
+
+    .subscription-toast.success i {
+        color: #4CAF50;
+    }
+
+    .subscription-toast.error {
+        border-left-color: #f44336;
+    }
+
+    .subscription-toast.error i {
+        color: #f44336;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    .toast-close {
+        margin-left: auto;
+        cursor: pointer;
+        opacity: 0.7;
+        transition: var(--sw-transition);
+    }
+
+    .toast-close:hover {
+        opacity: 1;
+    }
+
+    /* Хлебные крошки */
+    .subscriptions-breadcrumbs {
+        margin-bottom: 30px;
+    }
+
+    .breadcrumb-list {
+        display: flex;
+        list-style: none;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .breadcrumb-item {
+        font-size: 14px;
+        color: var(--sw-gray);
+    }
+
+    .breadcrumb-item:not(:last-child)::after {
+        content: '/';
+        margin-left: 10px;
+        color: var(--sw-gray);
+    }
+
+    .breadcrumb-item a {
+        color: var(--sw-gray);
+        transition: var(--sw-transition);
+    }
+
+    .breadcrumb-item a:hover {
+        color: var(--sw-primary);
+    }
+
+    .breadcrumb-item.active {
+        color: var(--sw-white);
+    }
+
+    /* Переопределяем старые стили */
+    .btn.btn-hero {
+        /* Сбрасываем старые стили */
+        all: unset;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 13px;
+        transition: var(--sw-transition);
+        cursor: pointer;
+        background: rgba(108, 60, 233, 0.1);
+        border: 1px solid var(--sw-primary);
+        color: var(--sw-primary);
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .btn.btn-hero:hover {
+        background: var(--sw-primary);
+        color: white;
+    }
+
+    .th-team.team-card {
+        /* Переопределяем старые стили карточек */
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        overflow: hidden;
+        transition: var(--sw-transition);
+    }
+</style>
+{% endblock head %}
+
+{% block breadcrumbs %}
+<div class="subscriptions-breadcrumbs">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb-list">
+                <li class="breadcrumb-item"><a href="{% url 'webmain:home' %}"><i class="fa fa-home me-1"></i>{% trans 'Главная' %}</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'useraccount:profile' %}">{% trans 'Личный кабинет' %}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{% trans 'Мои подписки' %}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+{% endblock breadcrumbs %}
+
+{% block content %}
+<div class="subscriptions-wrapper">
+    <div class="container">
+        <div class="subscriptions-grid">
+            <!-- Сайдбар профиля -->
+            <aside class="profile-sidebar">
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        {% if user.profile.avatar %}
+                            <img src="{{ user.profile.avatar.url }}" alt="{{ user.get_full_name|default:user.username }}">
+                        {% elif user.avatar %}
+                            <img src="{{ user.avatar.url }}" alt="{{ user.get_full_name|default:user.username }}">
+                        {% elif user.image %}
+                            <img src="{{ user.image.url }}" alt="{{ user.get_full_name|default:user.username }}">
+                        {% else %}
+                            <img src="{% static 'site/serweb/img/default-avatar.svg' %}" alt="avatar" onerror="this.src='https://placehold.co/70x70/6C3CE9/FFFFFF?text={{ user.username|first|upper }}'">
+                        {% endif %}
+                    </div>
+                    <div class="profile-info">
+                        <h5>{% if user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.username }}{% endif %}</h5>
+                        <p class="profile-username">@{{ user.username }}</p>
+                    </div>
+                </div>
+
+                {% include 'site/SerWeb/include/profile_menu.html' %}
+            </aside>
+
+            <!-- Основной контент -->
+            <div class="subscriptions-content">
+                <h1 class="subscriptions-title">
+                    <i class="fa fa-bell"></i>
+                    {% trans "Мои подписки" %}
+                </h1>
+
+                <div class="manufacturers-grid">
+                    {% for m in manufacturers_subscriber %}
+                    <div class="manufacturer-card" data-id="{{ m.id }}">
+                        <div class="manufacturer-image">
+                            {% if m.logo %}
+                                <img src="{{ m.logo.url }}" alt="{{ m.name|default:'Производитель' }}">
+                            {% elif m.image %}
+                                <img src="{{ m.image.url }}" alt="{{ m.name|default:'Производитель' }}">
+                            {% else %}
+                                <img src="https://placehold.co/300x200/6C3CE9/FFFFFF?text={{ m.name|default:'Manufacturer'|urlencode }}" alt="{{ m.name }}">
+                            {% endif %}
+                            <div class="manufacturer-overlay"></div>
+                            <span class="manufacturer-badge">
+                                <i class="fa fa-check-circle"></i>
+                                {% trans 'Подписка' %}
+                            </span>
+                        </div>
+
+                        <div class="manufacturer-content">
+                            <div class="manufacturer-category">
+                                {% if m.category %}{{ m.category.name }}{% else %}{% trans 'Производитель' %}{% endif %}
+                            </div>
+
+                            <h3 class="manufacturer-name">
+                                {% if m.slug %}
+                                    <a href="{% url 'shop:manufacturers' m.slug %}">{{ m.name }}</a>
+                                {% else %}
+                                    <a href="#">{{ m.name }}</a>
+                                {% endif %}
+                            </h3>
+
+                            <div class="manufacturer-stats">
+                                <div class="manufacturer-stat">
+                                    <span class="manufacturer-stat-value">{{ m.products_count|default:'0' }}</span>
+                                    <span class="manufacturer-stat-label">{% trans 'товаров' %}</span>
+                                </div>
+                                <div class="manufacturer-stat">
+                                    <span class="manufacturer-stat-value">{{ m.subscribers_count|default:'0' }}</span>
+                                    <span class="manufacturer-stat-label">{% trans 'подписчиков' %}</span>
+                                </div>
+                                <div class="manufacturer-stat">
+                                    <span class="manufacturer-stat-value">{{ m.reviews_count|default:'0' }}</span>
+                                    <span class="manufacturer-stat-label">{% trans 'отзывов' %}</span>
+                                </div>
+                            </div>
+
+                            <div class="manufacturer-actions">
+                                <a href="{% if m.slug %}{% url 'shop:manufacturers' m.slug %}{% else %}#{% endif %}" class="btn btn-outline">
+                                    <i class="fa fa-eye"></i>
+                                    {% trans 'Просмотр' %}
+                                </a>
+                                <button class="btn btn-danger toggle-subscription" data-id="{{ m.id }}">
+                                    <i class="fa fa-bell-slash"></i>
+                                    {% trans 'Отписаться' %}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <i class="fa fa-bell-slash"></i>
+                        </div>
+                        <h3>{% trans "Нет подписок" %}</h3>
+                        <p>{% trans "Вы пока не подписаны ни на одного производителя. Подпишитесь, чтобы получать уведомления о новых товарах и акциях." %}</p>
+                        <a href="{% url 'shop:catalogs' %}" class="empty-state-btn">
+                            <i class="fa fa-compass me-2"></i>
+                            {% trans 'Найти производителей' %}
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Пагинация -->
+                {% if manufacturers_subscriber.paginator.num_pages > 1 %}
+                <nav>
+                    <ul class="pagination">
+                        {% if manufacturers_subscriber.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ manufacturers_subscriber.previous_page_number }}" aria-label="{% trans 'Предыдущая' %}">
+                                <i class="fa fa-chevron-left"></i>
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link"><i class="fa fa-chevron-left"></i></span>
+                        </li>
+                        {% endif %}
+
+                        {% for p in manufacturers_subscriber.paginator.page_range %}
+                            {% if p == manufacturers_subscriber.number %}
+                            <li class="page-item active"><span class="page-link">{{ p }}</span></li>
+                            {% elif p >= manufacturers_subscriber.number|add:-2 and p <= manufacturers_subscriber.number|add:2 %}
+                            <li class="page-item"><a class="page-link" href="?page={{ p }}">{{ p }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if manufacturers_subscriber.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ manufacturers_subscriber.next_page_number }}" aria-label="{% trans 'Следующая' %}">
+                                <i class="fa fa-chevron-right"></i>
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link"><i class="fa fa-chevron-right"></i></span>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Контейнер для уведомлений -->
+<div id="toastContainer"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    'use strict';
+
+    const buttons = document.querySelectorAll('.toggle-subscription');
+    const toastContainer = document.getElementById('toastContainer');
+
+    // Функция показа уведомления
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `subscription-toast ${type}`;
+        toast.innerHTML = `
+            <i class="fa fa-${type === 'success' ? 'circle-check' : 'circle-exclamation'}"></i>
+            <span>${message}</span>
+            <span class="toast-close" onclick="this.parentElement.remove()">
+                <i class="fa fa-times"></i>
+            </span>
+        `;
+
+        toastContainer.appendChild(toast);
+
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.remove();
+            }
+        }, 5000);
+    }
+
+    buttons.forEach(button => {
+        button.addEventListener('click', async function() {
+            const manufacturerId = this.dataset.id;
+            const card = this.closest('.manufacturer-card');
+            const originalText = this.innerHTML;
+
+            // Показываем состояние загрузки
+            this.disabled = true;
+            this.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+
+            try {
+                const response = await fetch("{% url 'shop:profile-subscribe' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    body: JSON.stringify({
+                        'manufacturer_id': manufacturerId,
+                        'action': 'unsubscribe'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    if (data.status === 'unsubscribed') {
+                        // Удаляем карточку с анимацией
+                        card.style.transition = 'all 0.3s ease';
+                        card.style.opacity = '0';
+                        card.style.transform = 'scale(0.8)';
+
+                        setTimeout(() => {
+                            card.remove();
+                            showToast('{% trans "Вы отписались от производителя" %}', 'success');
+
+                            // Проверяем, остались ли карточки
+                            const remainingCards = document.querySelectorAll('.manufacturer-card');
+                            if (remainingCards.length === 0) {
+                                location.reload(); // Перезагружаем для показа пустого состояния
+                            }
+                        }, 300);
+                    }
+                } else {
+                    showToast(data.message || '{% trans "Ошибка при отписке" %}', 'error');
+                    this.disabled = false;
+                    this.innerHTML = originalText;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('{% trans "Ошибка сети. Попробуйте позже." %}', 'error');
+                this.disabled = false;
+                this.innerHTML = originalText;
+            }
+        });
+    });
+});
+</script>
+{% endblock content %}
+
+{% block footertop %}
+<!-- Дополнительные скрипты не требуются -->
+{% endblock footertop %}

@@ -1,0 +1,944 @@
+{% extends 'site/SerWeb/base.html' %}
+{% load static generals_tag i18n %}
+
+{% block title %}{{ seo_title|default:"Регистрация | SerWeb" }}{% endblock title %}
+{% block description %}{{ seo_description|default:"Создайте аккаунт в веб-студии SerWeb, чтобы заказывать проекты, оставлять отзывы и получать персональные предложения." }}{% endblock description %}
+
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }}{% else %}{% static 'site/serweb/img/register-og.jpg' %}{% endif %}{% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle|default:"Регистрация SerWeb" }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription|default:"Создание аккаунта" }}{% endblock propertyimage %}
+
+{% block head %}
+<style>
+    /* Стили для страницы регистрации SerWeb */
+    .register-page {
+        background: linear-gradient(135deg, var(--sw-black) 0%, var(--sw-primary-dark) 100%);
+        position: relative;
+        overflow: hidden;
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 0;
+    }
+
+    .register-page::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100%;
+        height: 100%;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239B7EFF' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        opacity: 0.3;
+        pointer-events: none;
+    }
+
+    .register-container {
+        max-width: 680px;
+        width: 100%;
+        margin: 0 auto;
+        position: relative;
+        z-index: 2;
+    }
+
+    .register-card {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 24px;
+        padding: 40px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(10px);
+    }
+
+    .register-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .register-icon {
+        width: 80px;
+        height: 80px;
+        background: rgba(108, 60, 233, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        border: 2px solid var(--sw-primary);
+    }
+
+    .register-icon i {
+        font-size: 36px;
+        color: var(--sw-primary);
+    }
+
+    .register-title {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--sw-white);
+        margin-bottom: 8px;
+    }
+
+    .register-subtitle {
+        font-size: 14px;
+        color: var(--sw-gray);
+    }
+
+    /* Табы */
+    .register-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 30px;
+        background: var(--sw-black);
+        border-radius: 50px;
+        padding: 4px;
+    }
+
+    .register-tab {
+        flex: 1;
+        text-align: center;
+        padding: 12px 20px;
+        background: transparent;
+        border: none;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 16px;
+        color: var(--sw-gray);
+        cursor: pointer;
+        transition: var(--sw-transition);
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .register-tab:hover {
+        color: var(--sw-white);
+        background: rgba(108, 60, 233, 0.1);
+    }
+
+    .register-tab.active {
+        background: var(--sw-primary);
+        color: white;
+        box-shadow: 0 5px 15px rgba(108, 60, 233, 0.3);
+    }
+
+    /* Форма */
+    .register-form {
+        margin-top: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+        position: relative;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--sw-white);
+        font-weight: 500;
+        font-size: 14px;
+    }
+
+    .form-label i {
+        color: var(--sw-primary);
+        margin-right: 8px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 14px 18px;
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 12px;
+        color: var(--sw-white);
+        font-size: 15px;
+        transition: var(--sw-transition);
+        font-family: var(--sw-font-main);
+    }
+
+    .form-control:focus {
+        border-color: var(--sw-primary);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(108, 60, 233, 0.2);
+    }
+
+    .form-control::placeholder {
+        color: var(--sw-gray);
+        opacity: 0.7;
+    }
+
+    .form-control.is-invalid {
+        border-color: #f44336;
+    }
+
+    .invalid-feedback {
+        color: #f44336;
+        font-size: 12px;
+        margin-top: 5px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    /* Поле пароля с кнопкой */
+    .password-input-group {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .password-input-group .form-control {
+        flex: 1;
+        border-radius: 12px 0 0 12px;
+    }
+
+    .password-toggle-btn {
+        width: 50px;
+        height: 52px;
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-left: none;
+        border-radius: 0 12px 12px 0;
+        color: var(--sw-gray);
+        cursor: pointer;
+        transition: var(--sw-transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .password-toggle-btn:hover {
+        border-color: var(--sw-primary);
+        color: var(--sw-primary);
+    }
+
+    .password-toggle-btn.active {
+        color: var(--sw-primary);
+    }
+
+    .password-toggle-btn i {
+        font-size: 18px;
+        transition: transform 0.2s;
+    }
+
+    .password-toggle-btn:hover i {
+        transform: scale(1.1);
+    }
+
+    /* Чекбокс поставщика */
+    .supplier-checkbox {
+        margin: 20px 0;
+        padding: 15px;
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: var(--sw-transition);
+    }
+
+    .supplier-checkbox:hover {
+        border-color: var(--sw-primary);
+        background: rgba(108, 60, 233, 0.05);
+    }
+
+    .supplier-checkbox .form-check {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0;
+        cursor: pointer;
+    }
+
+    .supplier-checkbox input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        accent-color: var(--sw-primary);
+        cursor: pointer;
+    }
+
+    .supplier-checkbox label {
+        color: var(--sw-white);
+        font-weight: 500;
+        cursor: pointer;
+        margin: 0;
+    }
+
+    .supplier-checkbox small {
+        color: var(--sw-gray);
+        font-size: 12px;
+        margin-top: 5px;
+        display: block;
+    }
+
+    /* Поля поставщика */
+    .supplier-fields {
+        margin-top: 20px;
+        padding: 20px;
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 16px;
+        display: none;
+    }
+
+    .supplier-fields.show {
+        display: block;
+        animation: fadeInUp 0.3s ease;
+    }
+
+    .supplier-fields h6 {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--sw-white);
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--sw-gray-dark);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .supplier-fields h6 i {
+        color: var(--sw-primary);
+    }
+
+    /* Соглашения */
+    .agreements {
+        margin: 25px 0;
+    }
+
+    .agreement-item {
+        margin-bottom: 15px;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .agreement-item input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        margin-top: 2px;
+        accent-color: var(--sw-primary);
+        cursor: pointer;
+    }
+
+    .agreement-item label {
+        color: var(--sw-gray);
+        font-size: 14px;
+        line-height: 1.5;
+        cursor: pointer;
+    }
+
+    .agreement-item label a {
+        color: var(--sw-primary);
+        text-decoration: none;
+        border-bottom: 1px dashed var(--sw-primary);
+        transition: var(--sw-transition);
+    }
+
+    .agreement-item label a:hover {
+        color: var(--sw-primary-light);
+        border-bottom-color: var(--sw-primary-light);
+    }
+
+    .agreement-item .invalid-feedback {
+        margin-top: 5px;
+        font-size: 12px;
+    }
+
+    /* Кнопка регистрации */
+    .btn-register {
+        width: 100%;
+        padding: 14px 28px;
+        background: var(--sw-primary);
+        border: none;
+        border-radius: 12px;
+        color: white;
+        font-weight: 600;
+        font-size: 16px;
+        cursor: pointer;
+        transition: var(--sw-transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .btn-register:hover:not(:disabled) {
+        background: var(--sw-primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(108, 60, 233, 0.3);
+    }
+
+    .btn-register:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    /* Ссылка забыли пароль */
+    .forgot-link {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .forgot-link a {
+        color: var(--sw-gray);
+        font-size: 14px;
+        transition: var(--sw-transition);
+    }
+
+    .forgot-link a:hover {
+        color: var(--sw-primary);
+    }
+
+    /* Модальные окна */
+    .modal-content {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+    }
+
+    .modal-header {
+        border-bottom: 1px solid var(--sw-gray-dark);
+        padding: 20px 25px;
+    }
+
+    .modal-title {
+        color: var(--sw-white);
+        font-weight: 700;
+    }
+
+    .modal-body {
+        padding: 25px;
+        color: var(--sw-gray);
+        max-height: 60vh;
+        overflow-y: auto;
+    }
+
+    .modal-footer {
+        border-top: 1px solid var(--sw-gray-dark);
+        padding: 20px 25px;
+    }
+
+    .modal-footer .btn-secondary {
+        background: var(--sw-gray-dark);
+        color: var(--sw-white);
+        border: none;
+        padding: 10px 24px;
+        border-radius: 10px;
+        transition: var(--sw-transition);
+    }
+
+    .modal-footer .btn-secondary:hover {
+        background: var(--sw-primary);
+    }
+
+    .btn-close {
+        filter: invert(1) grayscale(100%) brightness(200%);
+    }
+
+    /* Разделитель */
+    .register-divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        margin: 30px 0 20px;
+        color: var(--sw-gray);
+        font-size: 14px;
+    }
+
+    .register-divider::before,
+    .register-divider::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid var(--sw-gray-dark);
+    }
+
+    .register-divider::before {
+        margin-right: 15px;
+    }
+
+    .register-divider::after {
+        margin-left: 15px;
+    }
+
+    /* Социальный вход */
+    .social-login {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+
+    .social-btn {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px;
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 12px;
+        color: var(--sw-white);
+        font-weight: 500;
+        font-size: 14px;
+        transition: var(--sw-transition);
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .social-btn:hover {
+        border-color: var(--sw-primary);
+        color: var(--sw-primary);
+        transform: translateY(-2px);
+    }
+
+    .social-btn i {
+        font-size: 18px;
+    }
+
+    /* Анимации */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .register-card {
+        animation: fadeInUp 0.6s ease;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 576px) {
+        .register-card {
+            padding: 30px 20px;
+        }
+
+        .register-title {
+            font-size: 24px;
+        }
+
+        .register-tab {
+            padding: 10px 15px;
+            font-size: 14px;
+        }
+
+        .social-login {
+            flex-direction: column;
+        }
+
+        .supplier-fields {
+            padding: 15px;
+        }
+    }
+</style>
+{% endblock head %}
+
+{% block content %}
+<div class="register-page">
+    <div class="register-container">
+        <div class="register-card">
+            <div class="register-header">
+                <div class="register-icon">
+                    <i class="fa fa-user-plus"></i>
+                </div>
+                <h1 class="register-title">{% trans 'Создать аккаунт' %}</h1>
+                <p class="register-subtitle">{% trans 'Присоединяйтесь к сообществу SerWeb' %}</p>
+            </div>
+
+            <!-- Табы переключения -->
+            <div class="register-tabs">
+                <a href="{% url 'webmain:login' %}" class="register-tab">{% trans 'Вход' %}</a>
+                <a href="{% url 'webmain:signup' %}" class="register-tab active">{% trans 'Регистрация' %}</a>
+            </div>
+
+            <!-- Форма регистрации -->
+            <form method="POST" class="register-form" id="register-form">
+                {% csrf_token %}
+
+                <!-- Общие ошибки формы -->
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    <i class="fa fa-circle-exclamation"></i>
+                    {{ form.non_field_errors|join:", " }}
+                </div>
+                {% endif %}
+
+                <!-- Логин -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fa fa-user"></i>
+                        {% trans 'Логин' %} <span style="color: var(--sw-primary);">*</span>
+                    </label>
+                    <input type="text"
+                           class="form-control {% if form.username.errors %}is-invalid{% endif %}"
+                           id="username"
+                           name="username"
+                           placeholder="{% trans 'Введите логин' %}"
+                           value="{{ form.username.value|default:'' }}"
+                           required>
+                    {% if form.username.errors %}
+                    <div class="invalid-feedback">
+                        {% for error in form.username.errors %}
+                            <i class="fa fa-circle-exclamation"></i> {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fa fa-envelope"></i>
+                        Email <span style="color: var(--sw-primary);">*</span>
+                    </label>
+                    <input type="email"
+                           class="form-control {% if form.email.errors %}is-invalid{% endif %}"
+                           id="email"
+                           name="email"
+                           placeholder="{% trans 'example@mail.com' %}"
+                           value="{{ form.email.value|default:'' }}"
+                           required>
+                    {% if form.email.errors %}
+                    <div class="invalid-feedback">
+                        {% for error in form.email.errors %}
+                            <i class="fa fa-circle-exclamation"></i> {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Пароль -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fa fa-lock"></i>
+                        {% trans 'Пароль' %} <span style="color: var(--sw-primary);">*</span>
+                    </label>
+                    <div class="password-input-group">
+                        <input type="password"
+                               class="form-control {% if form.password1.errors %}is-invalid{% endif %}"
+                               id="password1"
+                               name="password1"
+                               placeholder="{% trans 'Введите пароль' %}"
+                               required>
+                        <button type="button" class="password-toggle-btn" id="togglePassword1" title="{% trans 'Показать пароль' %}">
+                            <i class="fa fa-eye"></i>
+                        </button>
+                    </div>
+                    {% if form.password1.errors %}
+                    <div class="invalid-feedback">
+                        {% for error in form.password1.errors %}
+                            <i class="fa fa-circle-exclamation"></i> {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Подтверждение пароля -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fa fa-lock"></i>
+                        {% trans 'Подтвердите пароль' %} <span style="color: var(--sw-primary);">*</span>
+                    </label>
+                    <div class="password-input-group">
+                        <input type="password"
+                               class="form-control {% if form.password2.errors %}is-invalid{% endif %}"
+                               id="password2"
+                               name="password2"
+                               placeholder="{% trans 'Повторите пароль' %}"
+                               required>
+                        <button type="button" class="password-toggle-btn" id="togglePassword2" title="{% trans 'Показать пароль' %}">
+                            <i class="fa fa-eye"></i>
+                        </button>
+                    </div>
+                    {% if form.password2.errors %}
+                    <div class="invalid-feedback">
+                        {% for error in form.password2.errors %}
+                            <i class="fa fa-circle-exclamation"></i> {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Реферальный код (скрыт) -->
+                <input type="hidden" name="referrale_code" id="referrale_code" value="{{ form.referrale_code.value|default:'' }}">
+
+                <!-- Чекбокс "Зарегистрироваться как поставщик" -->
+                <div class="supplier-checkbox">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="is_supplier" name="is_supplier" {% if form.is_supplier.value %}checked{% endif %}>
+                        <label class="form-check-label" for="is_supplier">
+                            <i class="fa fa-building"></i>
+                            {% trans 'Зарегистрироваться как поставщик' %}
+                        </label>
+                    </div>
+                    <small>{% trans 'Открыть доступ к управлению товарами и заказами' %}</small>
+                </div>
+
+                <!-- Поля для поставщика -->
+                <div id="supplier-fields" class="supplier-fields">
+                    <h6>
+                        <i class="fa fa-building"></i>
+                        {% trans 'Информация о компании' %}
+                    </h6>
+
+                    <div class="form-group">
+                        <label class="form-label">{% trans 'Название организации' %}</label>
+                        <input type="text" class="form-control" id="company_name" name="company_name" value="{{ form.company_name.value|default:'' }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">{% trans 'Руководитель' %}</label>
+                        <input type="text" class="form-control" id="company_director" name="company_director" value="{{ form.company_director.value|default:'' }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">{% trans 'Юридический адрес' %}</label>
+                        <input type="text" class="form-control" id="company_address" name="company_address" value="{{ form.company_address.value|default:'' }}">
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">{% trans 'ИНН' %}</label>
+                                <input type="text" class="form-control" id="company_inn" name="company_inn" value="{{ form.company_inn.value|default:'' }}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">{% trans 'ОГРН' %}</label>
+                                <input type="text" class="form-control" id="company_ogrn" name="company_ogrn" value="{{ form.company_ogrn.value|default:'' }}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">{% trans 'КПП' %}</label>
+                                <input type="text" class="form-control" id="company_kpp" name="company_kpp" value="{{ form.company_kpp.value|default:'' }}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">{% trans 'Дата регистрации' %}</label>
+                                <input type="date" class="form-control" id="company_data_registration" name="company_data_registration" value="{{ form.company_data_registration.value|default:'' }}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">{% trans 'Основной вид деятельности' %}</label>
+                        <textarea class="form-control" id="company_type_activity" name="company_type_activity" rows="3">{{ form.company_type_activity.value|default:'' }}</textarea>
+                    </div>
+                </div>
+
+                <!-- Соглашения -->
+                <div class="agreements">
+                    <div class="agreement-item">
+                        <input type="checkbox" id="agreement_membership" name="agreement_membership" required>
+                        <label for="agreement_membership">
+                            {% trans 'Я принимаю' %}
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#membershipModal">
+                                {% trans 'Соглашение о членстве' %}
+                            </a>
+                        </label>
+                    </div>
+                    <div class="agreement-item">
+                        <input type="checkbox" id="agreement_privacy" name="agreement_privacy" required>
+                        <label for="agreement_privacy">
+                            {% trans 'Я принимаю' %}
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#privacyModal">
+                                {% trans 'Политику конфиденциальности' %}
+                            </a>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Кнопка регистрации -->
+                <button type="submit" name="signup" id="signup" class="btn-register" disabled>
+                    <i class="fa fa-user-plus"></i>
+                    {% trans 'Зарегистрироваться' %}
+                </button>
+
+                <!-- Ссылка восстановления пароля -->
+                <div class="forgot-link">
+                    <a href="{% url 'webmain:password_reset' %}">
+                        <i class="fa fa-key"></i>
+                        {% trans 'Забыли пароль?' %}
+                    </a>
+                </div>
+            </form>
+
+            <!-- Разделитель -->
+            <div class="register-divider">
+                <span>{% trans 'или' %}</span>
+            </div>
+
+            <!-- Социальный вход -->
+
+
+            <!-- Ссылка на вход -->
+            <div class="text-center mt-3">
+                <p class="text-gray" style="font-size: 14px;">
+                    {% trans 'Уже есть аккаунт?' %}
+                    <a href="{% url 'webmain:login' %}" class="text-primary" style="color: var(--sw-primary);">
+                        {% trans 'Войти' %}
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно Соглашения о членстве -->
+<div class="modal fade" id="membershipModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    {% get_pages as pages %}
+                    {% for page in pages %}
+                        {% if page.pagetype == 5 %}
+                            {{ page.name }}
+                        {% endif %}
+                    {% endfor %}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {% for page in pages %}
+                    {% if page.pagetype == 5 %}
+                        {{ page.description|safe }}
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans 'Закрыть' %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно Политики конфиденциальности -->
+<div class="modal fade" id="privacyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    {% for page in pages %}
+                        {% if page.pagetype == 2 %}
+                            {{ page.name }}
+                        {% endif %}
+                    {% endfor %}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {% for page in pages %}
+                    {% if page.pagetype == 2 %}
+                        {{ page.description|safe }}
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans 'Закрыть' %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    'use strict';
+
+    // === Переключение пароля ===
+    function initPasswordToggle(passwordId, toggleId) {
+        const passwordInput = document.getElementById(passwordId);
+        const toggleBtn = document.getElementById(toggleId);
+
+        if (!passwordInput || !toggleBtn) return;
+
+        toggleBtn.addEventListener('click', function() {
+            const type = passwordInput.type === 'password' ? 'text' : 'password';
+            passwordInput.type = type;
+
+            const icon = this.querySelector('i');
+            if (type === 'text') {
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+                this.classList.add('active');
+            } else {
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+                this.classList.remove('active');
+            }
+        });
+    }
+
+    initPasswordToggle('password1', 'togglePassword1');
+    initPasswordToggle('password2', 'togglePassword2');
+
+    // === Поля поставщика ===
+    const supplierCheckbox = document.getElementById('is_supplier');
+    const supplierFields = document.getElementById('supplier-fields');
+
+    if (supplierCheckbox && supplierFields) {
+        function toggleSupplierFields() {
+            if (supplierCheckbox.checked) {
+                supplierFields.classList.add('show');
+            } else {
+                supplierFields.classList.remove('show');
+            }
+        }
+
+        supplierCheckbox.addEventListener('change', toggleSupplierFields);
+        toggleSupplierFields();
+    }
+
+    // === Соглашения и кнопка ===
+    const agreementMembership = document.getElementById('agreement_membership');
+    const agreementPrivacy = document.getElementById('agreement_privacy');
+    const registerBtn = document.getElementById('signup');
+
+    function updateRegisterButton() {
+        if (registerBtn) {
+            registerBtn.disabled = !(agreementMembership?.checked && agreementPrivacy?.checked);
+        }
+    }
+
+    if (agreementMembership && agreementPrivacy) {
+        agreementMembership.addEventListener('change', updateRegisterButton);
+        agreementPrivacy.addEventListener('change', updateRegisterButton);
+        updateRegisterButton();
+    }
+
+    // === Реферальный код из URL ===
+    const hash = window.location.hash.substring(1);
+    const referralField = document.getElementById('referrale_code');
+    if (hash && referralField) {
+        referralField.value = hash;
+    }
+
+    // === Валидация формы ===
+    const form = document.getElementById('register-form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            if (!agreementMembership?.checked || !agreementPrivacy?.checked) {
+                e.preventDefault();
+
+                if (!agreementMembership?.checked) {
+                    agreementMembership?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock content %}

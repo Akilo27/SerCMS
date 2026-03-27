@@ -1,0 +1,891 @@
+{% extends 'site/SerWeb/base.html' %}
+{% load static generals_tag i18n %}
+
+{% block title %}{{ seo_title|default:"Блог веб-студии SerWeb" }}{% endblock title %}
+{% block description %}{{ seo_description|default:"Полезные статьи о веб-разработке, создании сайтов, Telegram ботов, SEO оптимизации и digital-маркетинге. Советы и инсайты от экспертов SerWeb." }}{% endblock description %}
+
+{% block propertytitle %}{% if seo_propertytitle %}{{ seo_propertytitle }}{% else %}Блог о веб-разработке | SerWeb{% endif %}{% endblock propertytitle %}
+{% block propertydescription %}{% if seo_propertydescription %}{{ seo_propertydescription }}{% else %}Полезные материалы и новости мира веб-технологий{% endif %}{% endblock propertydescription %}
+{% block propertyimage %}{% if seo_previev %}{{ seo_previev.url }}{% else %}{% static 'site/serweb/img/blog-og.jpg' %}{% endif %}{% endblock propertyimage %}
+
+{% block head %}
+<style>
+    /* Дополнительные стили для страницы блога SerWeb */
+    .blog-hero {
+        background: linear-gradient(135deg, var(--sw-black) 0%, var(--sw-primary-dark) 100%);
+        padding: 60px 0 40px;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 40px;
+        border-radius: 0 0 30px 30px;
+    }
+
+    .blog-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100%;
+        height: 100%;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239B7EFF' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        opacity: 0.3;
+        pointer-events: none;
+    }
+
+    .blog-hero-title {
+        font-size: 48px;
+        font-weight: 800;
+        color: var(--sw-white);
+        margin-bottom: 15px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .blog-hero-title span {
+        color: var(--sw-primary-light);
+    }
+
+    .blog-hero-text {
+        font-size: 18px;
+        color: rgba(255, 255, 255, 0.8);
+        max-width: 600px;
+        position: relative;
+        z-index: 2;
+    }
+
+    /* Фильтры и сортировка */
+    .blog-toolbar {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 30px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+    }
+
+    .blog-categories {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        flex: 1;
+    }
+
+    .blog-category-btn {
+        padding: 8px 20px;
+        background: transparent;
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 30px;
+        color: var(--sw-white);
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--sw-transition);
+    }
+
+    .blog-category-btn:hover,
+    .blog-category-btn.active {
+        background: var(--sw-primary);
+        border-color: var(--sw-primary);
+        color: white;
+    }
+
+    .blog-sort {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .blog-sort-label {
+        color: var(--sw-gray);
+        font-size: 14px;
+    }
+
+    .blog-sort-select {
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 30px;
+        padding: 8px 25px 8px 15px;
+        color: var(--sw-white);
+        font-size: 14px;
+        cursor: pointer;
+        outline: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236C3CE9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+    }
+
+    /* Сетка блога */
+    .blog-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 30px;
+        margin: 40px 0;
+    }
+
+    .blog-card {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        overflow: hidden;
+        transition: var(--sw-transition);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .blog-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--sw-primary);
+        box-shadow: 0 10px 30px rgba(108, 60, 233, 0.2);
+    }
+
+    .blog-card-image {
+        height: 220px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .blog-card-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .blog-card:hover .blog-card-image img {
+        transform: scale(1.05);
+    }
+
+    .blog-card-category {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        background: var(--sw-primary);
+        color: white;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        z-index: 2;
+    }
+
+    .blog-card-content {
+        padding: 25px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .blog-card-meta {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 15px;
+        color: var(--sw-gray);
+        font-size: 13px;
+    }
+
+    .blog-card-meta i {
+        color: var(--sw-primary);
+        margin-right: 5px;
+    }
+
+    .blog-card-title {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 15px;
+        line-height: 1.4;
+    }
+
+    .blog-card-title a {
+        color: var(--sw-white);
+        transition: var(--sw-transition);
+    }
+
+    .blog-card-title a:hover {
+        color: var(--sw-primary);
+    }
+
+    .blog-card-excerpt {
+        color: var(--sw-gray);
+        margin-bottom: 20px;
+        line-height: 1.6;
+        flex: 1;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .blog-card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: auto;
+        padding-top: 15px;
+        border-top: 1px solid var(--sw-gray-dark);
+    }
+
+    .blog-card-author {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .blog-card-author-avatar {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: var(--sw-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .blog-card-author-name {
+        font-size: 13px;
+        color: var(--sw-gray);
+    }
+
+    .blog-card-read-more {
+        color: var(--sw-primary);
+        font-weight: 600;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        transition: var(--sw-transition);
+    }
+
+    .blog-card-read-more:hover {
+        color: var(--sw-white);
+        gap: 10px;
+    }
+
+    /* Альтернативный вид (список) */
+    .blog-list-view .blog-card {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .blog-list-view .blog-card-image {
+        width: 300px;
+        height: 200px;
+        flex-shrink: 0;
+    }
+
+    .blog-list-view .blog-card-content {
+        flex: 1;
+    }
+
+    @media (max-width: 768px) {
+        .blog-list-view .blog-card {
+            flex-direction: column;
+        }
+        .blog-list-view .blog-card-image {
+            width: 100%;
+        }
+    }
+
+    /* Пагинация и загрузка */
+    .blog-load-more {
+        text-align: center;
+        margin: 50px 0;
+    }
+
+    .blog-loader {
+        display: inline-block;
+        width: 40px;
+        height: 40px;
+        border: 3px solid var(--sw-gray-dark);
+        border-top-color: var(--sw-primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .blog-empty {
+        text-align: center;
+        padding: 80px 20px;
+        color: var(--sw-gray);
+        font-size: 18px;
+        grid-column: 1 / -1;
+    }
+
+    .blog-empty i {
+        font-size: 60px;
+        color: var(--sw-primary);
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+
+    /* Скелетон загрузки */
+    .blog-skeleton {
+        background: var(--sw-black-light);
+        border-radius: 20px;
+        overflow: hidden;
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    .blog-skeleton-image {
+        height: 220px;
+        background: var(--sw-gray-dark);
+    }
+
+    .blog-skeleton-content {
+        padding: 25px;
+    }
+
+    .blog-skeleton-line {
+        height: 20px;
+        background: var(--sw-gray-dark);
+        border-radius: 10px;
+        margin-bottom: 10px;
+    }
+
+    .blog-skeleton-line.short {
+        width: 60%;
+    }
+
+    .blog-skeleton-line.small {
+        width: 40%;
+        height: 15px;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    /* Переключатель вида */
+    .blog-view-toggle {
+        display: flex;
+        gap: 8px;
+        margin-left: 15px;
+    }
+
+    .blog-view-btn {
+        width: 40px;
+        height: 40px;
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 8px;
+        color: var(--sw-gray);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: var(--sw-transition);
+    }
+
+    .blog-view-btn:hover,
+    .blog-view-btn.active {
+        background: var(--sw-primary);
+        border-color: var(--sw-primary);
+        color: white;
+    }
+
+    /* Поиск */
+    .blog-search {
+        display: flex;
+        align-items: center;
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 30px;
+        padding: 5px;
+        width: 250px;
+    }
+
+    .blog-search-input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        padding: 8px 15px;
+        color: var(--sw-white);
+        font-size: 14px;
+        outline: none;
+    }
+
+    .blog-search-btn {
+        width: 36px;
+        height: 36px;
+        background: var(--sw-primary);
+        border: none;
+        border-radius: 50%;
+        color: white;
+        cursor: pointer;
+        transition: var(--sw-transition);
+    }
+
+    .blog-search-btn:hover {
+        background: var(--sw-primary-dark);
+    }
+</style>
+{% endblock head %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb-list">
+                <li class="breadcrumb-item"><a href="{% url 'webmain:home' %}"><i class="fa fa-home me-1"></i>{% trans 'Главная' %}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{% trans 'Блог' %}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<style>
+    .breadcrumbs {
+        background: var(--sw-black-light);
+        padding: 15px 0;
+        border-bottom: 1px solid var(--sw-gray-dark);
+    }
+
+    .breadcrumb-list {
+        display: flex;
+        list-style: none;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .breadcrumb-item {
+        font-size: 14px;
+    }
+
+    .breadcrumb-item:not(:last-child)::after {
+        content: '/';
+        margin-left: 10px;
+        color: var(--sw-gray);
+    }
+
+    .breadcrumb-item a {
+        color: var(--sw-gray);
+        transition: var(--sw-transition);
+    }
+
+    .breadcrumb-item a:hover {
+        color: var(--sw-primary);
+    }
+
+    .breadcrumb-item.active {
+        color: var(--sw-white);
+    }
+</style>
+{% endblock breadcrumbs %}
+
+{% block content %}
+<!-- Hero секция -->
+<section class="blog-hero wow fadeIn">
+    <div class="container">
+        <h1 class="blog-hero-title wow fadeInUp" data-wow-delay="0.2s">
+            {% trans "Блог" %} <span>{% trans "SerWeb" %}</span>
+        </h1>
+        <p class="blog-hero-text wow fadeInUp" data-wow-delay="0.3s">
+            {% trans "Полезные статьи о веб-разработке, digital-маркетинге и технологиях. Делимся опытом и инсайтами." %}
+        </p>
+    </div>
+</section>
+
+<div class="container">
+    <!-- Инструменты фильтрации и поиска -->
+    <div class="blog-toolbar wow fadeInUp" data-wow-delay="0.2s">
+        <div class="blog-categories">
+            <button class="blog-category-btn active" data-category="all">{% trans 'Все' %}</button>
+            {% for category in categorysblogs %}
+            <button class="blog-category-btn" data-category="{{ category.id }}">{{ category.name }}</button>
+            {% endfor %}
+        </div>
+
+        <div class="d-flex align-items-center flex-wrap gap-3">
+            <!-- Поиск -->
+            <div class="blog-search">
+                <input type="text" class="blog-search-input" id="blogSearch" placeholder="{% trans 'Поиск...' %}" value="{{ search_query }}">
+                <button class="blog-search-btn" id="searchBtn">
+                    <i class="fa-solid fa-search"></i>
+                </button>
+            </div>
+
+            <!-- Сортировка (соответствует фильтрам из BlogView) -->
+            <div class="blog-sort">
+                <span class="blog-sort-label">{% trans 'Сортировка:' %}</span>
+                <select class="blog-sort-select" id="sortSelect">
+                    <option value="2" {% if request.GET.filter == '2' %}selected{% endif %}>{% trans 'Сначала новые' %}</option>
+                    <option value="3" {% if request.GET.filter == '3' %}selected{% endif %}>{% trans 'Сначала старые' %}</option>
+                    <option value="1" {% if request.GET.filter == '1' %}selected{% endif %}>{% trans 'По алфавиту' %}</option>
+                </select>
+            </div>
+
+            <!-- Переключатель вида -->
+            <div class="blog-view-toggle">
+                <button class="blog-view-btn active" id="gridView" title="{% trans 'Сетка' %}">
+                    <i class="fa-solid fa-grid-2"></i>
+                </button>
+                <button class="blog-view-btn" id="listView" title="{% trans 'Список' %}">
+                    <i class="fa-solid fa-list"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Контейнер для блогов -->
+    <div class="blog-grid" id="blog-grid">
+        {% for blog in blogs %}
+            <div class="blog-card wow fadeInUp" data-wow-delay="0.1s">
+                <div class="blog-card-image">
+                    <img src="{% if blog.image %}{{ blog.image.url }}{% else %}https://placehold.co/600x400/6C3CE9/FFFFFF?text={{ blog.name|urlencode }}{% endif %}"
+                         alt="{{ blog.name }}"
+                         loading="lazy"
+                         onerror="this.src='https://placehold.co/600x400/6C3CE9/FFFFFF?text=SerWeb'">
+                    <span class="blog-card-category">{{ blog.category.name|default:'Новости' }}</span>
+                </div>
+                <div class="blog-card-content">
+                    <div class="blog-card-meta">
+                        <span><i class="fa fa-calendar"></i> {{ blog.create|date:"d F Y" }}</span>
+                        <span><i class="fa fa-eye"></i> {{ blog.views|default:0 }}</span>
+                    </div>
+                    <h3 class="blog-card-title">
+                        <a href="{{ blog.get_absolute_url }}">{{ blog.name }}</a>
+                    </h3>
+                    <p class="blog-card-excerpt">{{ blog.description|striptags|truncatechars:150 }}</p>
+                    <div class="blog-card-footer">
+                        <div class="blog-card-author">
+                            <div class="blog-card-author-avatar">
+                                {% if blog.author %}
+                                    {{ blog.author.username|first|upper }}
+                                {% else %}
+                                    A
+                                {% endif %}
+                            </div>
+                            <span class="blog-card-author-name">{{ blog.author.username|default:'Администрация' }}</span>
+                        </div>
+                        <a href="{{ blog.get_absolute_url }}" class="blog-card-read-more">
+                            {% trans 'Читать' %} <i class="fa fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="blog-empty">
+                <i class="fa fa-face-frown"></i>
+                <p>{% trans "По вашему запросу ничего не найдено" %}</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Пагинация -->
+    {% if blogs.has_next %}
+    <div class="blog-load-more" id="loadMoreContainer">
+        <button class="sw-btn sw-btn-outline" id="loadMoreBtn" data-next-page="{{ blogs.next_page_number }}">
+            <i class="fa fa-rotate-right me-2"></i>
+            {% trans 'Загрузить еще' %}
+        </button>
+    </div>
+    {% endif %}
+
+    <!-- Индикатор загрузки -->
+    <div class="blog-loader" id="blogLoader" style="display: none;"></div>
+</div>
+
+<!-- Подписка на новости -->
+<section class="container mt-5 mb-5">
+    <div class="services-cta wow fadeInUp">
+        <div class="services-cta-content">
+            <h2>{% trans "Подпишитесь на рассылку" %}</h2>
+            <p>{% trans "Получайте свежие статьи и новости веб-разработки первыми" %}</p>
+            <div class="services-cta-buttons">
+                <form class="sw-subscribe-form" style="max-width: 400px; margin: 0 auto;" method="post" action="{% url 'moderation:subscribe' %}">
+                    {% csrf_token %}
+                    <div style="display: flex; gap: 10px;">
+                        <input type="email" name="email" class="sw-subscribe-input" placeholder="{% trans 'Ваш email' %}" required>
+                        <button type="submit" class="sw-btn sw-btn-primary">{% trans 'Подписаться' %}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
+
+{% block footerbottom %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    'use strict';
+
+    // Состояние
+    let currentPage = {{ blogs.number|default:1 }};
+    let isLoading = false;
+    let hasMore = {{ blogs.has_next|yesno:"true,false" }};
+
+    // DOM элементы
+    const grid = document.getElementById('blog-grid');
+    const loader = document.getElementById('blogLoader');
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+    const loadMoreContainer = document.getElementById('loadMoreContainer');
+    const categoryBtns = document.querySelectorAll('.blog-category-btn');
+    const sortSelect = document.getElementById('sortSelect');
+    const searchInput = document.getElementById('blogSearch');
+    const searchBtn = document.getElementById('searchBtn');
+    const gridViewBtn = document.getElementById('gridView');
+    const listViewBtn = document.getElementById('listView');
+
+    // CSRF токен
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+
+    // Утилиты
+    const showLoader = () => {
+        if (loader) loader.style.display = 'inline-block';
+        if (loadMoreBtn) loadMoreBtn.disabled = true;
+    };
+
+    const hideLoader = () => {
+        if (loader) loader.style.display = 'none';
+        if (loadMoreBtn) loadMoreBtn.disabled = false;
+    };
+
+    // Форматирование даты
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('ru-RU', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+    };
+
+    // Создание карточки блога
+    const createBlogCard = (blog, view = 'grid') => {
+        const imageUrl = blog.image || 'https://placehold.co/600x400/6C3CE9/FFFFFF?text=' + encodeURIComponent(blog.name);
+        const categoryName = blog.category_name || blog.category || 'Новости';
+        const authorName = blog.author || 'Администрация';
+        const views = blog.views || 0;
+        const excerpt = blog.description || '';
+        const url = blog.url || `/blog/${blog.slug}/`;
+
+        if (view === 'grid') {
+            return `
+                <div class="blog-card wow fadeInUp" data-wow-delay="0.1s">
+                    <div class="blog-card-image">
+                        <img src="${imageUrl}"
+                             alt="${blog.name}"
+                             loading="lazy"
+                             onerror="this.src='https://placehold.co/600x400/6C3CE9/FFFFFF?text=SerWeb'">
+                        <span class="blog-card-category">${categoryName}</span>
+                    </div>
+                    <div class="blog-card-content">
+                        <div class="blog-card-meta">
+                            <span><i class="fa fa-calendar"></i> ${formatDate(blog.create)}</span>
+                            <span><i class="fa fa-eye"></i> ${views}</span>
+                        </div>
+                        <h3 class="blog-card-title">
+                            <a href="${url}">${blog.name}</a>
+                        </h3>
+                        <p class="blog-card-excerpt">${excerpt}</p>
+                        <div class="blog-card-footer">
+                            <div class="blog-card-author">
+                                <div class="blog-card-author-avatar">${authorName.charAt(0).toUpperCase()}</div>
+                                <span class="blog-card-author-name">${authorName}</span>
+                            </div>
+                            <a href="${url}" class="blog-card-read-more">
+                                {% trans 'Читать' %} <i class="fa fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            return `
+                <div class="blog-card list-view wow fadeInUp" data-wow-delay="0.1s">
+                    <div class="blog-card-image">
+                        <img src="${imageUrl}"
+                             alt="${blog.name}"
+                             loading="lazy"
+                             onerror="this.src='https://placehold.co/600x400/6C3CE9/FFFFFF?text=SerWeb'">
+                        <span class="blog-card-category">${categoryName}</span>
+                    </div>
+                    <div class="blog-card-content">
+                        <div class="blog-card-meta">
+                            <span><i class="fa fa-calendar"></i> ${formatDate(blog.create)}</span>
+                            <span><i class="fa fa-eye"></i> ${views}</span>
+                            <span><i class="fa fa-user"></i> ${authorName}</span>
+                        </div>
+                        <h3 class="blog-card-title">
+                            <a href="${url}">${blog.name}</a>
+                        </h3>
+                        <p class="blog-card-excerpt">${excerpt}</p>
+                        <div class="blog-card-footer">
+                            <a href="${url}" class="blog-card-read-more">
+                                {% trans 'Читать' %} <i class="fa fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    };
+
+    // Загрузка следующих страниц
+    const loadMoreBlogs = async () => {
+        if (isLoading || !hasMore) return;
+
+        isLoading = true;
+        showLoader();
+
+        try {
+            const params = new URLSearchParams(window.location.search);
+            params.set('page', currentPage + 1);
+
+            // Добавляем filter из select если он есть
+            if (sortSelect && sortSelect.value) {
+                params.set('filter', sortSelect.value);
+            }
+
+            const url = `${window.location.pathname}?${params.toString()}`;
+
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrftoken
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Ошибка загрузки данных');
+            }
+
+            const data = await response.json();
+
+            // Добавляем новые блоги в сетку
+            data.blogs.forEach(blog => {
+                grid.insertAdjacentHTML('beforeend', createBlogCard(blog, grid.classList.contains('blog-list-view') ? 'list' : 'grid'));
+            });
+
+            hasMore = data.has_next;
+            currentPage++;
+
+            // Прячем кнопку загрузки если больше нет страниц
+            if (!hasMore && loadMoreContainer) {
+                loadMoreContainer.style.display = 'none';
+            }
+
+        } catch (error) {
+            console.error('Error loading more blogs:', error);
+        } finally {
+            isLoading = false;
+            hideLoader();
+        }
+    };
+
+    // Обработчики событий
+    if (categoryBtns.length > 0) {
+        categoryBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const category = this.dataset.category;
+                const url = new URL(window.location);
+
+                if (category === 'all') {
+                    url.searchParams.delete('category');
+                } else {
+                    url.searchParams.set('category', category);
+                }
+                url.searchParams.delete('page');
+
+                window.location.href = url.toString();
+            });
+        });
+    }
+
+    if (sortSelect) {
+        sortSelect.addEventListener('change', function() {
+            const url = new URL(window.location);
+            url.searchParams.set('filter', this.value);
+            url.searchParams.delete('page');
+            window.location.href = url.toString();
+        });
+    }
+
+    if (searchBtn && searchInput) {
+        const performSearch = () => {
+            const search = searchInput.value.trim();
+            const url = new URL(window.location);
+
+            if (search) {
+                url.searchParams.set('search', search);
+            } else {
+                url.searchParams.delete('search');
+            }
+            url.searchParams.delete('page');
+
+            window.location.href = url.toString();
+        };
+
+        searchBtn.addEventListener('click', performSearch);
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') performSearch();
+        });
+    }
+
+    if (gridViewBtn) {
+        gridViewBtn.addEventListener('click', function() {
+            gridViewBtn.classList.add('active');
+            listViewBtn.classList.remove('active');
+            grid.className = 'blog-grid';
+
+            // Сохраняем предпочтение в localStorage
+            localStorage.setItem('blogView', 'grid');
+        });
+    }
+
+    if (listViewBtn) {
+        listViewBtn.addEventListener('click', function() {
+            listViewBtn.classList.add('active');
+            gridViewBtn.classList.remove('active');
+            grid.className = 'blog-list-view';
+
+            // Сохраняем предпочтение в localStorage
+            localStorage.setItem('blogView', 'list');
+        });
+    }
+
+    if (loadMoreBtn) {
+        loadMoreBtn.addEventListener('click', loadMoreBlogs);
+    }
+
+    // Бесконечный скролл
+    let scrollTimeout;
+    window.addEventListener('scroll', () => {
+        if (scrollTimeout) clearTimeout(scrollTimeout);
+
+        scrollTimeout = setTimeout(() => {
+            if (!hasMore || isLoading) return;
+
+            const scrollPosition = window.innerHeight + window.scrollY;
+            const threshold = document.documentElement.scrollHeight - 1000;
+
+            if (scrollPosition >= threshold) {
+                loadMoreBlogs();
+            }
+        }, 100);
+    });
+
+    // Восстанавливаем предпочтение вида из localStorage
+    const savedView = localStorage.getItem('blogView');
+    if (savedView === 'list' && listViewBtn) {
+        listViewBtn.click();
+    }
+});
+</script>
+{% endblock footerbottom %}

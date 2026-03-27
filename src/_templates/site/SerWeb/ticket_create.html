@@ -1,0 +1,655 @@
+{% extends 'site/SerWeb/base.html' %}
+{% load static generals_tag i18n %}
+
+{% block title %}{{ seo_title|default:"Новое обращение | SerWeb" }}{% endblock title %}
+{% block description %}{{ seo_description|default:"Создание нового обращения в службу поддержки SerWeb" }}{% endblock description %}
+
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }}{% else %}{% static 'site/serweb/img/ticket-create-og.jpg' %}{% endif %}{% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle|default:"Новое обращение" }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription|default:"Создание обращения в поддержку" }}{% endblock propertyimage %}
+
+{% block head %}
+<style>
+    /* Стили для страницы создания обращения SerWeb */
+    .ticket-wrapper {
+        padding: 40px 0;
+    }
+
+    .ticket-grid {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 30px;
+    }
+
+    @media (max-width: 992px) {
+        .ticket-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Сайдбар профиля */
+    .profile-sidebar {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        padding: 25px;
+        height: fit-content;
+    }
+
+    .profile-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--sw-gray-dark);
+        margin-bottom: 20px;
+    }
+
+    .profile-avatar {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 3px solid var(--sw-primary);
+        flex-shrink: 0;
+    }
+
+    .profile-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .profile-info h5 {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--sw-white);
+        margin-bottom: 5px;
+    }
+
+    .profile-info .profile-username {
+        font-size: 14px;
+        color: var(--sw-gray);
+        margin-bottom: 0;
+    }
+
+    .profile-menu {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .profile-menu-item {
+        margin-bottom: 5px;
+    }
+
+    .profile-menu-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 15px;
+        color: var(--sw-gray);
+        border-radius: 12px;
+        transition: var(--sw-transition);
+        font-weight: 500;
+    }
+
+    .profile-menu-link i {
+        width: 20px;
+        color: var(--sw-primary);
+        transition: var(--sw-transition);
+    }
+
+    .profile-menu-link:hover,
+    .profile-menu-link.active {
+        background: rgba(108, 60, 233, 0.1);
+        color: var(--sw-white);
+    }
+
+    .profile-menu-link:hover i,
+    .profile-menu-link.active i {
+        color: var(--sw-primary-light);
+    }
+
+    /* Основной контент */
+    .ticket-content {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        padding: 30px;
+    }
+
+    .ticket-header {
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--sw-gray-dark);
+    }
+
+    .ticket-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--sw-white);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .ticket-title i {
+        color: var(--sw-primary);
+    }
+
+    .ticket-description {
+        color: var(--sw-gray);
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    /* Форма создания обращения */
+    .ticket-form {
+        max-width: 800px;
+    }
+
+    .form-group {
+        margin-bottom: 25px;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 10px;
+        color: var(--sw-white);
+        font-weight: 600;
+        font-size: 15px;
+    }
+
+    .form-label i {
+        color: var(--sw-primary);
+        margin-right: 8px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 14px 18px;
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 12px;
+        color: var(--sw-white);
+        font-size: 15px;
+        transition: var(--sw-transition);
+        font-family: var(--sw-font-main);
+    }
+
+    .form-control:focus {
+        border-color: var(--sw-primary);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(108, 60, 233, 0.2);
+    }
+
+    .form-control::placeholder {
+        color: var(--sw-gray);
+        opacity: 0.7;
+    }
+
+    select.form-control {
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236C3CE9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 15px center;
+        padding-right: 45px;
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 200px;
+        line-height: 1.7;
+    }
+
+    /* Хлебные крошки */
+    .ticket-breadcrumbs {
+        margin-bottom: 30px;
+    }
+
+    .breadcrumb-list {
+        display: flex;
+        list-style: none;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .breadcrumb-item {
+        font-size: 14px;
+        color: var(--sw-gray);
+    }
+
+    .breadcrumb-item:not(:last-child)::after {
+        content: '/';
+        margin-left: 10px;
+        color: var(--sw-gray);
+    }
+
+    .breadcrumb-item a {
+        color: var(--sw-gray);
+        transition: var(--sw-transition);
+    }
+
+    .breadcrumb-item a:hover {
+        color: var(--sw-primary);
+    }
+
+    .breadcrumb-item.active {
+        color: var(--sw-white);
+    }
+
+    /* Кнопки */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 14px 32px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 16px;
+        transition: var(--sw-transition);
+        cursor: pointer;
+        border: 1px solid transparent;
+        text-decoration: none;
+    }
+
+    .btn-primary {
+        background: var(--sw-primary);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: var(--sw-primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(108, 60, 233, 0.3);
+    }
+
+    .btn-outline {
+        background: transparent;
+        border: 1px solid var(--sw-gray-dark);
+        color: var(--sw-white);
+    }
+
+    .btn-outline:hover {
+        border-color: var(--sw-primary);
+        color: var(--sw-primary);
+    }
+
+    .btn-group {
+        display: flex;
+        gap: 15px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+    }
+
+    /* Информационный блок */
+    .info-card {
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 16px;
+        padding: 20px;
+        margin-top: 30px;
+    }
+
+    .info-card-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--sw-white);
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .info-card-title i {
+        color: var(--sw-primary);
+    }
+
+    .info-card-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .info-card-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 0;
+        color: var(--sw-gray);
+        font-size: 14px;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .info-card-item:last-child {
+        border-bottom: none;
+    }
+
+    .info-card-item i {
+        color: var(--sw-primary);
+        font-size: 14px;
+        width: 20px;
+    }
+
+    /* Уведомления */
+    .ticket-toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-left: 4px solid var(--sw-primary);
+        border-radius: 12px;
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        animation: slideIn 0.3s ease;
+    }
+
+    .ticket-toast.success {
+        border-left-color: #4CAF50;
+    }
+
+    .ticket-toast.success i {
+        color: #4CAF50;
+    }
+
+    .ticket-toast.error {
+        border-left-color: #dc3545;
+    }
+
+    .ticket-toast.error i {
+        color: #dc3545;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    .toast-close {
+        margin-left: auto;
+        cursor: pointer;
+        opacity: 0.7;
+    }
+
+    .toast-close:hover {
+        opacity: 1;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .ticket-content {
+            padding: 20px;
+        }
+
+        .btn-group {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+        }
+    }
+
+    /* Скрываем старые стили */
+    .reviews-content {
+        all: unset;
+        display: block;
+        width: 100%;
+    }
+
+    .single-form {
+        margin-bottom: 20px;
+    }
+
+    label {
+        color: var(--sw-white) !important;
+        font-weight: 600 !important;
+        margin-bottom: 8px !important;
+        display: block !important;
+    }
+
+    input, textarea, select {
+        background: var(--sw-black) !important;
+        border: 1px solid var(--sw-gray-dark) !important;
+        border-radius: 12px !important;
+        padding: 14px 18px !important;
+        color: var(--sw-white) !important;
+        width: 100% !important;
+        font-family: var(--sw-font-main) !important;
+    }
+
+    input:focus, textarea:focus, select:focus {
+        border-color: var(--sw-primary) !important;
+        outline: none !important;
+        box-shadow: 0 0 0 3px rgba(108, 60, 233, 0.2) !important;
+    }
+
+    .th-btn {
+        background: var(--sw-primary) !important;
+        color: white !important;
+        border: none !important;
+        padding: 14px 32px !important;
+        border-radius: 12px !important;
+        font-weight: 600 !important;
+        cursor: pointer !important;
+        transition: var(--sw-transition) !important;
+    }
+
+    .th-btn:hover {
+        background: var(--sw-primary-dark) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 5px 15px rgba(108, 60, 233, 0.3) !important;
+    }
+</style>
+{% endblock head %}
+
+{% block breadcrumbs %}
+<div class="ticket-breadcrumbs">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb-list">
+                <li class="breadcrumb-item"><a href="{% url 'webmain:home' %}"><i class="fa fa-home me-1"></i>{% trans 'Главная' %}</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'useraccount:profile' %}">{% trans 'Личный кабинет' %}</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'useraccount:tickets' %}">{% trans 'Поддержка' %}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{% trans 'Новое обращение' %}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+{% endblock breadcrumbs %}
+
+{% block content %}
+<div class="ticket-wrapper">
+    <div class="container">
+        <div class="ticket-grid">
+            <!-- Сайдбар профиля -->
+            <aside class="profile-sidebar">
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        {% if user.profile.avatar %}
+                            <img src="{{ user.profile.avatar.url }}" alt="{{ user.get_full_name|default:user.username }}">
+                        {% elif user.avatar %}
+                            <img src="{{ user.avatar.url }}" alt="{{ user.get_full_name|default:user.username }}">
+                        {% elif user.image %}
+                            <img src="{{ user.image.url }}" alt="{{ user.get_full_name|default:user.username }}">
+                        {% else %}
+                            <img src="{% static 'site/serweb/img/default-avatar.svg' %}" alt="avatar" onerror="this.src='https://placehold.co/70x70/6C3CE9/FFFFFF?text={{ user.username|first|upper }}'">
+                        {% endif %}
+                    </div>
+                    <div class="profile-info">
+                        <h5>{% if user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.username }}{% endif %}</h5>
+                        <p class="profile-username">@{{ user.username }}</p>
+                    </div>
+                </div>
+
+                {% include 'site/SerWeb/include/profile_menu.html' %}
+            </aside>
+
+            <!-- Основной контент -->
+            <div class="ticket-content">
+                <div class="ticket-header">
+                    <h1 class="ticket-title">
+                        <i class="fa fa-pen-to-square"></i>
+                        {% trans "Новое обращение" %}
+                    </h1>
+                    <p class="ticket-description">
+                        {% trans "Опишите вашу проблему или вопрос. Мы постараемся ответить как можно быстрее (обычно в течение 24 часов)." %}
+                    </p>
+                </div>
+
+                <form method="post" class="ticket-form" id="ticketForm">
+                    {% csrf_token %}
+
+                    <div class="form-group">
+                        <label for="id_themas" class="form-label">
+                            <i class="fa fa-tag"></i>
+                            {% trans "Тема обращения" %} <span style="color: var(--sw-primary);">*</span>
+                        </label>
+                        <select name="themas" id="id_themas" class="form-control" required>
+                            <option value="" disabled selected>{% trans "Выберите тему обращения" %}</option>
+                            <option value="technical">{% trans "Техническая проблема" %}</option>
+                            <option value="payment">{% trans "Вопрос по оплате" %}</option>
+                            <option value="project">{% trans "Вопрос по проекту" %}</option>
+                            <option value="cooperation">{% trans "Сотрудничество" %}</option>
+                            <option value="other">{% trans "Другое" %}</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_content" class="form-label">
+                            <i class="fa fa-message"></i>
+                            {% trans "Обращение" %} <span style="color: var(--sw-primary);">*</span>
+                        </label>
+                        <textarea name="content" id="id_content" class="form-control" rows="10" required
+                            placeholder="{% trans 'Опишите вашу проблему максимально подробно...' %}"></textarea>
+                        <div style="margin-top: 8px; font-size: 13px; color: var(--sw-gray);">
+                            <i class="fa fa-circle-info"></i>
+                            {% trans "Чем подробнее вы опишете проблему, тем быстрее мы сможем вам помочь." %}
+                        </div>
+                    </div>
+
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa fa-paper-plane"></i>
+                            {% trans "Отправить обращение" %}
+                        </button>
+                        <a href="{% url 'useraccount:tickets' %}" class="btn btn-outline">
+                            <i class="fa fa-arrow-left"></i>
+                            {% trans "Вернуться к списку" %}
+                        </a>
+                    </div>
+                </form>
+
+                <!-- Информационный блок -->
+                <div class="info-card">
+                    <h3 class="info-card-title">
+                        <i class="fa fa-lightbulb"></i>
+                        {% trans "Перед отправкой" %}
+                    </h3>
+                    <ul class="info-card-list">
+                        <li class="info-card-item">
+                            <i class="fa fa-circle-check"></i>
+                            {% trans "Проверьте, нет ли уже ответа на ваш вопрос в разделе FAQ" %}
+                        </li>
+                        <li class="info-card-item">
+                            <i class="fa fa-circle-check"></i>
+                            {% trans "Укажите тему обращения — это поможет быстрее обработать запрос" %}
+                        </li>
+                        <li class="info-card-item">
+                            <i class="fa fa-circle-check"></i>
+                            {% trans "Опишите проблему подробно, укажите шаги для воспроизведения" %}
+                        </li>
+                        <li class="info-card-item">
+                            <i class="fa fa-circle-check"></i>
+                            {% trans "Если вопрос касается конкретного проекта, укажите его название" %}
+                        </li>
+                        <li class="info-card-item">
+                            <i class="fa fa-clock"></i>
+                            {% trans "Среднее время ответа: 2-4 часа в рабочее время" %}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Контейнер для уведомлений -->
+<div id="toast-container"></div>
+
+<script>
+// Функция для показа уведомлений
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `ticket-toast ${type}`;
+    toast.innerHTML = `
+        <i class="fa fa-${type === 'success' ? 'circle-check' : 'circle-exclamation'}"></i>
+        <span>${message}</span>
+        <span class="toast-close" onclick="this.parentElement.remove()">
+            <i class="fa fa-times"></i>
+        </span>
+    `;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.remove();
+        }
+    }, 3000);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('ticketForm');
+
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const themas = document.getElementById('id_themas').value;
+            const content = document.getElementById('id_content').value.trim();
+
+            if (!themas) {
+                e.preventDefault();
+                showToast('{% trans "Пожалуйста, выберите тему обращения" %}', 'error');
+                return;
+            }
+
+            if (!content) {
+                e.preventDefault();
+                showToast('{% trans "Пожалуйста, напишите текст обращения" %}', 'error');
+                return;
+            }
+
+            if (content.length < 10) {
+                e.preveКntDefault();
+                showToast('{% trans "Текст обращения должен содержать не менее 10 символов" %}', 'error');
+                return;
+            }
+
+            // Показываем уведомление об отправке
+            showToast('{% trans "Обращение отправляется..." %}', 'info');
+        });
+    }
+});
+</script>
+{% endblock content %}
+
+{% block bottomfooter %}
+<!-- Дополнительные скрипты не требуются -->
+{% endblock bottomfooter %}

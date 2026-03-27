@@ -1,0 +1,937 @@
+{% extends 'site/SerWeb/base.html' %}
+{% load static shop_tags generals_tag i18n %}
+
+{% block title %}{{ seo_title|default:"Мои заказы | SerWeb" }}{% endblock title %}
+{% block description %}{{ seo_description|default:"История ваших заказов в веб-студии SerWeb" }}{% endblock description %}
+
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }}{% else %}{% static 'site/serweb/img/orders-og.jpg' %}{% endif %}{% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle|default:"История заказов SerWeb" }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription|default:"Мои заказы" }}{% endblock propertyimage %}
+
+{% block head %}
+<style>
+    /* Стили для страницы заказов SerWeb */
+    .orders-wrapper {
+        padding: 40px 0;
+    }
+
+    .orders-grid {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 30px;
+    }
+
+    @media (max-width: 992px) {
+        .orders-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Сайдбар профиля */
+    .profile-sidebar {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        padding: 25px;
+        height: fit-content;
+    }
+
+    .profile-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--sw-gray-dark);
+        margin-bottom: 20px;
+    }
+
+    .profile-avatar {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 3px solid var(--sw-primary);
+        flex-shrink: 0;
+    }
+
+    .profile-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .profile-info h5 {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--sw-white);
+        margin-bottom: 5px;
+    }
+
+    .profile-info .profile-username {
+        font-size: 14px;
+        color: var(--sw-gray);
+        margin-bottom: 0;
+    }
+
+    .profile-menu {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .profile-menu-item {
+        margin-bottom: 5px;
+    }
+
+    .profile-menu-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 15px;
+        color: var(--sw-gray);
+        border-radius: 12px;
+        transition: var(--sw-transition);
+        font-weight: 500;
+    }
+
+    .profile-menu-link i {
+        width: 20px;
+        color: var(--sw-primary);
+        transition: var(--sw-transition);
+    }
+
+    .profile-menu-link:hover,
+    .profile-menu-link.active {
+        background: rgba(108, 60, 233, 0.1);
+        color: var(--sw-white);
+    }
+
+    .profile-menu-link:hover i,
+    .profile-menu-link.active i {
+        color: var(--sw-primary-light);
+    }
+
+    /* Основной контент */
+    .orders-content {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        padding: 30px;
+    }
+
+    .orders-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--sw-white);
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid var(--sw-gray-dark);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .orders-title i {
+        color: var(--sw-primary);
+    }
+
+    /* Карточка заказа */
+    .order-card {
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 16px;
+        overflow: hidden;
+        margin-bottom: 20px;
+        transition: var(--sw-transition);
+    }
+
+    .order-card:hover {
+        border-color: var(--sw-primary);
+        box-shadow: 0 10px 30px rgba(108, 60, 233, 0.1);
+    }
+
+    .order-header {
+        background: linear-gradient(135deg, var(--sw-primary-dark), var(--sw-black-light));
+        padding: 20px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        align-items: center;
+        border-bottom: 1px solid var(--sw-gray-dark);
+    }
+
+    .order-header-item {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .order-header-label {
+        font-size: 12px;
+        color: var(--sw-gray);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .order-header-value {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--sw-white);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .order-header-value i {
+        color: var(--sw-primary);
+        font-size: 14px;
+    }
+
+    .order-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        width: fit-content;
+    }
+
+    .order-status.completed {
+        background: rgba(76, 175, 80, 0.1);
+        border: 1px solid #4CAF50;
+        color: #4CAF50;
+    }
+
+    .order-status.processing {
+        background: rgba(255, 152, 0, 0.1);
+        border: 1px solid #FF9800;
+        color: #FF9800;
+    }
+
+    .order-status.pending {
+        background: rgba(108, 60, 233, 0.1);
+        border: 1px solid var(--sw-primary);
+        color: var(--sw-primary);
+    }
+
+    .order-status.cancelled {
+        background: rgba(244, 67, 54, 0.1);
+        border: 1px solid #f44336;
+        color: #f44336;
+    }
+
+    .order-body {
+        padding: 0;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out, padding 0.3s ease;
+        background: var(--sw-black);
+    }
+
+    .order-body.expanded {
+        max-height: 1000px;
+        padding: 20px;
+        border-top: 1px solid var(--sw-gray-dark);
+    }
+
+    .order-products {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .order-products th {
+        text-align: left;
+        padding: 12px;
+        color: var(--sw-gray);
+        font-weight: 600;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid var(--sw-gray-dark);
+    }
+
+    .order-products td {
+        padding: 15px 12px;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .order-products tr:last-child td {
+        border-bottom: none;
+    }
+
+    .order-products tr:hover td {
+        background: rgba(108, 60, 233, 0.05);
+    }
+
+    .product-image-cell {
+        width: 80px;
+    }
+
+    .product-image {
+        width: 60px;
+        height: 60px;
+        border-radius: 10px;
+        overflow: hidden;
+        background: var(--sw-black-light);
+    }
+
+    .product-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .product-name-cell {
+        font-weight: 600;
+        color: var(--sw-white);
+    }
+
+    .product-name-cell a {
+        color: inherit;
+        transition: var(--sw-transition);
+    }
+
+    .product-name-cell a:hover {
+        color: var(--sw-primary);
+    }
+
+    .product-price-cell {
+        color: var(--sw-primary);
+        font-weight: 700;
+    }
+
+    .product-total-cell {
+        color: var(--sw-white);
+        font-weight: 700;
+    }
+
+    .order-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        background: rgba(0, 0, 0, 0.2);
+        border-top: 1px solid var(--sw-gray-dark);
+    }
+
+    .order-total {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .order-total-label {
+        color: var(--sw-gray);
+        font-size: 14px;
+    }
+
+    .order-total-value {
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--sw-primary);
+    }
+
+    .order-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .order-toggle-btn {
+        background: transparent;
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 25px;
+        padding: 10px 25px;
+        color: var(--sw-white);
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--sw-transition);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .order-toggle-btn:hover {
+        border-color: var(--sw-primary);
+        color: var(--sw-primary);
+        background: rgba(108, 60, 233, 0.1);
+    }
+
+    .order-toggle-btn i {
+        transition: transform 0.3s;
+    }
+
+    .order-toggle-btn.expanded i {
+        transform: rotate(180deg);
+    }
+
+    .order-repeat-btn {
+        background: var(--sw-primary);
+        border: none;
+        border-radius: 25px;
+        padding: 10px 25px;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--sw-transition);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .order-repeat-btn:hover {
+        background: var(--sw-primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(108, 60, 233, 0.3);
+    }
+
+    /* Пустое состояние */
+    .orders-empty {
+        text-align: center;
+        padding: 60px 20px;
+        background: var(--sw-black);
+        border: 1px dashed var(--sw-gray-dark);
+        border-radius: 15px;
+    }
+
+    .orders-empty-icon {
+        font-size: 64px;
+        color: var(--sw-gray-dark);
+        margin-bottom: 20px;
+    }
+
+    .orders-empty h3 {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--sw-white);
+        margin-bottom: 10px;
+    }
+
+    .orders-empty p {
+        color: var(--sw-gray);
+        margin-bottom: 25px;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .orders-empty-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 28px;
+        background: var(--sw-primary);
+        color: white;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: var(--sw-transition);
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .orders-empty-btn:hover {
+        background: var(--sw-primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(108, 60, 233, 0.3);
+    }
+
+    /* Пагинация */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 30px;
+    }
+
+    .page-item {
+        display: inline-block;
+    }
+
+    .page-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 40px;
+        height: 40px;
+        padding: 0 8px;
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 10px;
+        color: var(--sw-white);
+        font-size: 14px;
+        font-weight: 500;
+        transition: var(--sw-transition);
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .page-link:hover {
+        background: var(--sw-primary);
+        border-color: var(--sw-primary);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .page-item.active .page-link {
+        background: var(--sw-primary);
+        border-color: var(--sw-primary);
+        color: white;
+    }
+
+    .page-item.disabled .page-link {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    /* Хлебные крошки */
+    .orders-breadcrumbs {
+        margin-bottom: 30px;
+    }
+
+    .breadcrumb-list {
+        display: flex;
+        list-style: none;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .breadcrumb-item {
+        font-size: 14px;
+        color: var(--sw-gray);
+    }
+
+    .breadcrumb-item:not(:last-child)::after {
+        content: '/';
+        margin-left: 10px;
+        color: var(--sw-gray);
+    }
+
+    .breadcrumb-item a {
+        color: var(--sw-gray);
+        transition: var(--sw-transition);
+    }
+
+    .breadcrumb-item a:hover {
+        color: var(--sw-primary);
+    }
+
+    .breadcrumb-item.active {
+        color: var(--sw-white);
+    }
+
+    /* Уведомления */
+    .order-toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-left: 4px solid var(--sw-primary);
+        border-radius: 12px;
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        animation: slideIn 0.3s ease;
+    }
+
+    .order-toast.success {
+        border-left-color: #4CAF50;
+    }
+
+    .order-toast.success i {
+        color: #4CAF50;
+    }
+
+    .order-toast.error {
+        border-left-color: #f44336;
+    }
+
+    .order-toast.error i {
+        color: #f44336;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    .toast-close {
+        margin-left: auto;
+        cursor: pointer;
+        opacity: 0.7;
+    }
+
+    .toast-close:hover {
+        opacity: 1;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .order-header {
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .order-products {
+            font-size: 14px;
+        }
+
+        .product-image-cell {
+            width: 50px;
+        }
+
+        .product-image {
+            width: 40px;
+            height: 40px;
+        }
+
+        .order-footer {
+            flex-direction: column;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .order-actions {
+            width: 100%;
+        }
+
+        .order-toggle-btn,
+        .order-repeat-btn {
+            flex: 1;
+            justify-content: center;
+        }
+    }
+
+    /* Скрываем старые стили */
+    .card {
+        all: unset;
+    }
+</style>
+<link href="https://cdn.jsdelivr.net/npm/suggestions-jquery@latest/dist/css/suggestions.min.css" rel="stylesheet">
+{% endblock head %}
+
+{% block breadcrumbs %}
+<div class="orders-breadcrumbs">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb-list">
+                <li class="breadcrumb-item"><a href="{% url 'webmain:home' %}"><i class="fa fa-home me-1"></i>{% trans 'Главная' %}</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'useraccount:profile' %}">{% trans 'Личный кабинет' %}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{% trans 'Мои заказы' %}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+{% endblock breadcrumbs %}
+
+{% block content %}
+<div class="orders-wrapper">
+    <div class="container">
+        <div class="orders-grid">
+            <!-- Сайдбар профиля -->
+            <aside class="profile-sidebar">
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        {% if user.profile.avatar %}
+                            <img src="{{ user.profile.avatar.url }}" alt="{{ user.get_full_name|default:user.username }}">
+                        {% elif user.avatar %}
+                            <img src="{{ user.avatar.url }}" alt="{{ user.get_full_name|default:user.username }}">
+                        {% elif user.image %}
+                            <img src="{{ user.image.url }}" alt="{{ user.get_full_name|default:user.username }}">
+                        {% else %}
+                            <img src="{% static 'site/serweb/img/default-avatar.svg' %}" alt="avatar" onerror="this.src='https://placehold.co/70x70/6C3CE9/FFFFFF?text={{ user.username|first|upper }}'">
+                        {% endif %}
+                    </div>
+                    <div class="profile-info">
+                        <h5>{% if user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.username }}{% endif %}</h5>
+                        <p class="profile-username">@{{ user.username }}</p>
+                    </div>
+                </div>
+
+                {% include 'site/SerWeb/include/profile_menu.html' %}
+            </aside>
+
+            <!-- Основной контент -->
+            <div class="orders-content">
+                <h1 class="orders-title">
+                    <i class="fa fa-box"></i>
+                    {% trans "Мои заказы" %}
+                </h1>
+
+                {% if orders %}
+                    {% for order in orders %}
+                    <div class="order-card" data-order-id="{{ order.id }}">
+                        <div class="order-header">
+                            <div class="order-header-item">
+                                <span class="order-header-label">{% trans "Номер заказа" %}</span>
+                                <span class="order-header-value">
+                                    <i class="fa fa-hashtag"></i>
+                                    #{{ order.id }}
+                                </span>
+                            </div>
+
+                            <div class="order-header-item">
+                                <span class="order-header-label">{% trans "Дата" %}</span>
+                                <span class="order-header-value">
+                                    <i class="fa fa-calendar"></i>
+                                    {{ order.created_timestamp|date:"d.m.Y" }}
+                                </span>
+                            </div>
+
+                            <div class="order-header-item">
+                                <span class="order-header-label">{% trans "Сумма" %}</span>
+                                <span class="order-header-value">
+                                    <i class="fa fa-ruble-sign"></i>
+                                    {{ order.all_amount }}
+                                </span>
+                            </div>
+
+                            <div class="order-header-item">
+                                <span class="order-header-label">{% trans "Статус" %}</span>
+                                <span class="order-status
+                                    {% if order.status == 'completed' %}completed
+                                    {% elif order.status == 'processing' %}processing
+                                    {% elif order.status == 'pending' %}pending
+                                    {% elif order.status == 'cancelled' %}cancelled
+                                    {% endif %}">
+                                    <i class="fa
+                                        {% if order.status == 'completed' %}fa-circle-check
+                                        {% elif order.status == 'processing' %}fa-clock
+                                        {% elif order.status == 'pending' %}fa-hourglass-half
+                                        {% elif order.status == 'cancelled' %}fa-circle-xmark
+                                        {% else %}fa-circle-info{% endif %}">
+                                    </i>
+                                    {{ order.get_status_display }}
+                                </span>
+                            </div>
+
+                            <div class="order-header-item">
+                                <span class="order-header-label">{% trans "Тип" %}</span>
+                                <span class="order-header-value">
+                                    <i class="fa fa-tag"></i>
+                                    {{ order.get_type_display }}
+                                </span>
+                            </div>
+
+                            <div class="order-header-item">
+                                <span class="order-header-label">{% trans "Адрес" %}</span>
+                                <span class="order-header-value">
+                                    <i class="fa fa-location-dot"></i>
+                                    {{ order.delivery_address|truncatechars:30 }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="order-body" id="order-body-{{ order.id }}">
+                            <table class="order-products">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>{% trans "Товар" %}</th>
+                                        <th>{% trans "Цена" %}</th>
+                                        <th>{% trans "Количество" %}</th>
+                                        <th>{% trans "Сумма" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for selected in order.selectedproduct.all %}
+                                    <tr onclick="window.location.href='{% url 'shop:products' selected.product.slug %}'" style="cursor: pointer;">
+                                        <td class="product-image-cell">
+                                            <div class="product-image">
+                                                {% if selected.product.image %}
+                                                    <img src="{{ selected.product.image.url }}" alt="{{ selected.product.name }}">
+                                                {% else %}
+                                                    <img src="{% static 'site/serweb/img/product-placeholder.svg' %}" alt="{{ selected.product.name }}">
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                        <td class="product-name-cell">
+                                            <a href="{% url 'shop:products' selected.product.slug %}">
+                                                {{ selected.product.name }}
+                                            </a>
+                                        </td>
+                                        <td class="product-price-cell">
+                                            {% if valute != selected.product.valute %}
+                                                {% currency_conversion_for_products request selected.product.price selected.product.valute.id %} {{ valute.icon_code }}
+                                            {% else %}
+                                                {{ selected.product.price }} {{ valute.icon_code }}
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ selected.amount }}</td>
+                                        <td class="product-total-cell">
+                                            {% currency_conversion_for_products request selected.product.price selected.product.valute.id %} {{ valute.icon_code }}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="order-footer">
+                            <div class="order-total">
+                                <span class="order-total-label">{% trans "Итого" %}:</span>
+                                <span class="order-total-value">{{ order.all_amount }} {{ valute.icon_code }}</span>
+                            </div>
+                            <div class="order-actions">
+                                <button class="order-toggle-btn" onclick="toggleOrderDetails(this, {{ order.id }})">
+                                    <span>{% trans "Детали заказа" %}</span>
+                                    <i class="fa fa-chevron-down"></i>
+                                </button>
+                                <button class="order-repeat-btn" onclick="repeatOrder({{ order.id }})">
+                                    <i class="fa fa-rotate-right"></i>
+                                    <span>{% trans "Повторить" %}</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    <!-- Пагинация -->
+                    {% if orders.has_other_pages %}
+                    <nav>
+                        <ul class="pagination">
+                            {% if orders.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ orders.previous_page_number }}">
+                                    <i class="fa fa-chevron-left"></i>
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link"><i class="fa fa-chevron-left"></i></span>
+                            </li>
+                            {% endif %}
+
+                            {% for num in orders.paginator.page_range %}
+                                {% if orders.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                                {% elif num > orders.number|add:'-3' and num < orders.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if orders.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ orders.next_page_number }}">
+                                    <i class="fa fa-chevron-right"></i>
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link"><i class="fa fa-chevron-right"></i></span>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+
+                {% else %}
+                    <!-- Пустое состояние -->
+                    <div class="orders-empty">
+                        <div class="orders-empty-icon">
+                            <i class="fa fa-box-open"></i>
+                        </div>
+                        <h3>{% trans "У вас пока нет заказов" %}</h3>
+                        <p>{% trans "Перейдите в каталог и выберите понравившиеся проекты" %}</p>
+                        <a href="{% url 'shop:catalogs' %}" class="orders-empty-btn">
+                            <i class="fa fa-compass"></i>
+                            {% trans 'Перейти в каталог' %}
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Контейнер для уведомлений -->
+<div id="toast-container"></div>
+
+<script>
+// Функция для уведомлений
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `order-toast ${type}`;
+    toast.innerHTML = `
+        <i class="fa fa-${type === 'success' ? 'circle-check' : 'circle-exclamation'}"></i>
+        <span>${message}</span>
+        <span class="toast-close" onclick="this.parentElement.remove()">
+            <i class="fa fa-times"></i>
+        </span>
+    `;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.remove();
+        }
+    }, 3000);
+}
+
+// Функция для переключения деталей заказа
+function toggleOrderDetails(btn, orderId) {
+    const body = document.getElementById(`order-body-${orderId}`);
+    const icon = btn.querySelector('i');
+    const text = btn.querySelector('span');
+
+    if (body.classList.contains('expanded')) {
+        body.classList.remove('expanded');
+        btn.classList.remove('expanded');
+        text.textContent = '{% trans "Детали заказа" %}';
+        icon.className = 'fa fa-chevron-down';
+    } else {
+        body.classList.add('expanded');
+        btn.classList.add('expanded');
+        text.textContent = '{% trans "Скрыть детали" %}';
+        icon.className = 'fa fa-chevron-up';
+    }
+}
+
+// Функция для повтора заказа
+function repeatOrder(orderId) {
+    // Здесь должен быть AJAX запрос для повтора заказа
+    showToast('{% trans "Заказ повторен. Товары добавлены в корзину" %}', 'success');
+}
+
+// Инициализация при загрузке
+document.addEventListener('DOMContentLoaded', function() {
+    // Поиск заказов по клику на строку товара
+    document.querySelectorAll('.order-products tbody tr').forEach(row => {
+        row.addEventListener('click', function(e) {
+            // Не переходим по ссылке, если клик был по кнопке или ссылке
+            if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') {
+                return;
+            }
+            const link = this.getAttribute('data-href') || this.dataset.href;
+            if (link) {
+                window.location.href = link;
+            }
+        });
+    });
+});
+</script>
+{% endblock content %}
+
+{% block footertop %}
+<!-- Дополнительные скрипты -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/suggestions-jquery@latest/dist/js/jquery.suggestions.min.js"></script>
+{% endblock footertop %}

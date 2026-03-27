@@ -1,9 +1,0 @@
-<form method="post" action="{% url 'shop:add_to_cart' %}" data-info="{{ product.id }}" data-price="{{ product.price }}" data-product-id="{{ product.id }}" class="add-to-cart-form">
-    {% csrf_token %}
-    <input type="hidden" name="quantity" value="1">
-    <input type="hidden" name="product_id" value="{{ product.id }}">
-    <input type="hidden" name="variation_slug" value="{{ product.productsvariable_set.all.first.slug }}">
-    <button class="btn-product-icon  w-icon-cart" id="addcarts" data-product="{{ product.id }}" type="submit">
-        <i class="pe-7s-shopbag"></i>
-    </button>
-</form>

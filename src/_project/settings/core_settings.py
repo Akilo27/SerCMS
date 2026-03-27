@@ -18,7 +18,7 @@ env = Env()
 env.read_env()
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10000
 # Application definition

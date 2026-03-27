@@ -1,0 +1,196 @@
+{% extends 'site/SerWeb/base.html' %}
+{% load static generals_tag %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+
+{% block content %}
+<!-- Start of Main -->
+<main class="main">
+    <!-- Start of Page Header -->
+    <div class="page-header">
+        <div class="container">
+            <h1 class="page-title mb-0" style="margin-top: 20px">{% trans "Проекты" %}</h1>
+        </div>
+    </div>
+
+    <!-- Start of Page Content -->
+    <div class="page-content">
+        <div class="container">
+            <div class="row gutter-lg mb-10">
+                <div class="main-content" id="sponsorship-list">
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End of Page Content -->
+</main>
+{% endblock content %}
+
+{% block bootomfooter %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const sponsorshipList = document.getElementById('sponsorship-list');
+        let currentPage = 1;
+        let isLoading = false; // Флаг для предотвращения множественных запросов
+
+        const loadSponsorships = (page) => {
+            if (isLoading) return; // Если уже загружаем данные, выходим
+            isLoading = true; // Устанавливаем флаг загрузки
+
+            const searchQuery = document.querySelector('input[name="search"]')?.value || '';
+            // Формируем URL без категорий и тегов
+            const url = `/sponsorships/?page=${page}${searchQuery ? `&search=${searchQuery}` : ''}`;
+
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error('Ошибка загрузки данных');
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    // Добавляем новые записи
+                    data.sponsorships.forEach((sponsorship) => {
+                        // Основной контейнер для спонсорства
+                        const sponsorshipItem = document.createElement('div');
+                        sponsorshipItem.className = 'sponsorship-item';
+                        sponsorshipItem.style.display = 'flex'; // Flexbox для расположения элементов
+                        sponsorshipItem.style.marginBottom = '20px'; // Отступ между элементами
+
+                        // Контейнер для текста
+                        const textContainer = document.createElement('div');
+                        textContainer.style.flex = '1 1 100%'; // По умолчанию занимает всю ширину
+                        textContainer.style.display = 'flex'; // Flexbox для внутреннего расположения
+                        textContainer.style.flexDirection = 'column'; // Вертикальное расположение
+
+                        // Заголовок
+                        const titleLink = document.createElement('a');
+                        titleLink.href = sponsorship.url;
+                        const title = document.createElement('h3');
+                        title.textContent = sponsorship.name;
+                        title.style.marginTop = '0'; // Убираем отступ сверху
+                        titleLink.appendChild(title);
+                        textContainer.appendChild(titleLink);
+
+                        // Описание
+                        const descriptionDiv = document.createElement('div');
+                        descriptionDiv.className = 'news-item-descr big-news';
+                        descriptionDiv.style.display = '-webkit-box';
+                        descriptionDiv.style.webkitBoxOrient = 'vertical';
+                        descriptionDiv.style.webkitLineClamp = '3'; // Ограничение на 3 строки
+                        descriptionDiv.style.overflow = 'hidden'; // Скрываем лишний текст
+                        descriptionDiv.style.textOverflow = 'ellipsis'; // Добавляем многоточие
+
+                        const description = document.createElement('p');
+                        description.textContent = sponsorship.description;
+                        descriptionDiv.appendChild(description);
+                        textContainer.appendChild(descriptionDiv);
+
+                        // Блок с датой, автором и кнопкой "Прочитать"
+                        const metaDiv = document.createElement('div');
+                        metaDiv.style.display = 'flex';
+                        metaDiv.style.justifyContent = 'space-between'; // Распределяем элементы по ширине
+                        metaDiv.style.marginTop = 'auto'; // Прижимаем блок к низу
+                        metaDiv.style.paddingTop = '10px'; // Отступ сверху
+
+                        const datesDiv = document.createElement('div');
+                        datesDiv.className = 'dates';
+
+                        const dateSpan = document.createElement('span');
+                        dateSpan.className = 'date';
+                        dateSpan.textContent = new Date(sponsorship.create).toLocaleDateString('en-GB');
+
+                        const authorSpan = document.createElement('span');
+                        authorSpan.className = 'author';
+                        authorSpan.textContent = sponsorship.author || 'Администрация';
+
+                        datesDiv.appendChild(dateSpan);
+                        datesDiv.appendChild(document.createTextNode(' ')); // Пробел между датой и автором
+                        datesDiv.appendChild(authorSpan);
+                        metaDiv.appendChild(datesDiv);
+
+                        const readMoreLink = document.createElement('a');
+                        readMoreLink.href = sponsorship.url;
+                        readMoreLink.className = 'btn btn-primary';
+                        readMoreLink.textContent = 'Прочитать...';
+                        metaDiv.appendChild(readMoreLink);
+
+                        textContainer.appendChild(metaDiv);
+
+                        // Добавление текстового блока в контейнер
+                        sponsorshipItem.appendChild(textContainer);
+
+                        // Если есть изображение, добавляем его
+                        if (sponsorship.image) {
+                            const imageContainer = document.createElement('div');
+                            imageContainer.style.flex = '0 0 30%'; // 30% ширины
+                            imageContainer.style.marginRight = '20px'; // Отступ между изображением и текстом
+
+                            const imgLink = document.createElement('a');
+                            imgLink.href = sponsorship.url;
+
+                            const img = document.createElement('img');
+                            img.src = sponsorship.image;
+                            img.alt = 'sponsorship image';
+                            img.style.width = '100%'; // Изображение занимает всю ширину контейнера
+                            img.style.height = 'auto'; // Сохраняем пропорции
+
+                            // Обработчик успешной загрузки изображения
+                            img.onload = () => {
+                                sponsorshipItem.insertBefore(imageContainer, textContainer);
+                                textContainer.style.flex = '1';
+                            };
+
+                            imgLink.appendChild(img);
+                            imageContainer.appendChild(imgLink);
+                        }
+
+                        sponsorshipList.appendChild(sponsorshipItem);
+
+                        // Добавление разделителя
+                        const divider = document.createElement('hr');
+                        divider.style.margin = '20px 0';
+                        divider.style.border = '0';
+                        divider.style.borderTop = '2px solid #000';
+                        divider.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+                        sponsorshipList.appendChild(divider);
+                    });
+
+                    // Проверяем наличие следующей страницы
+                    if (!data.has_next) {
+                        window.removeEventListener('scroll', handleScroll);
+                    } else {
+                        currentPage++;
+                    }
+
+                    isLoading = false;
+                })
+                .catch((error) => {
+                    console.error('Ошибка загрузки данных:', error);
+                    alert('Не удалось загрузить данные. Пожалуйста, попробуйте позже.');
+                    isLoading = false;
+                });
+        };
+
+        const handleScroll = () => {
+            const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+            if (scrollTop + clientHeight >= scrollHeight - 100) {
+                loadSponsorships(currentPage);
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        loadSponsorships(currentPage);
+    });
+</script>
+{% endblock bootomfooter %}

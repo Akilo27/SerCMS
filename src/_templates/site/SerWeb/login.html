@@ -1,0 +1,541 @@
+Вот полностью переработанная страница входа (логин) для SerWeb в фиолетово-черной стилистике:
+
+```html
+{% extends 'site/SerWeb/base.html' %}
+{% load static generals_tag i18n %}
+
+{% block title %}{{ seo_title|default:"Вход в личный кабинет | SerWeb" }}{% endblock title %}
+{% block description %}{{ seo_description|default:"Войдите в личный кабинет SerWeb, чтобы управлять проектами, отслеживать заказы и получать персональные предложения." }}{% endblock description %}
+
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }}{% else %}{% static 'site/serweb/img/login-og.jpg' %}{% endif %}{% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle|default:"Вход в SerWeb" }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription|default:"Авторизация" }}{% endblock propertyimage %}
+
+{% block head %}
+<style>
+    /* Стили для страницы входа SerWeb */
+    .login-page {
+        background: linear-gradient(135deg, var(--sw-black) 0%, var(--sw-primary-dark) 100%);
+        position: relative;
+        overflow: hidden;
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 0;
+    }
+
+    .login-page::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100%;
+        height: 100%;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239B7EFF' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        opacity: 0.3;
+        pointer-events: none;
+    }
+
+    .login-container {
+        max-width: 480px;
+        width: 100%;
+        margin: 0 auto;
+        position: relative;
+        z-index: 2;
+    }
+
+    .login-card {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 24px;
+        padding: 40px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(10px);
+    }
+
+    .login-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .login-icon {
+        width: 80px;
+        height: 80px;
+        background: rgba(108, 60, 233, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        border: 2px solid var(--sw-primary);
+    }
+
+    .login-icon i {
+        font-size: 36px;
+        color: var(--sw-primary);
+    }
+
+    .login-title {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--sw-white);
+        margin-bottom: 8px;
+    }
+
+    .login-subtitle {
+        font-size: 14px;
+        color: var(--sw-gray);
+    }
+
+    /* Табы */
+    .login-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 30px;
+        background: var(--sw-black);
+        border-radius: 50px;
+        padding: 4px;
+    }
+
+    .login-tab {
+        flex: 1;
+        text-align: center;
+        padding: 12px 20px;
+        background: transparent;
+        border: none;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 16px;
+        color: var(--sw-gray);
+        cursor: pointer;
+        transition: var(--sw-transition);
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .login-tab:hover {
+        color: var(--sw-white);
+        background: rgba(108, 60, 233, 0.1);
+    }
+
+    .login-tab.active {
+        background: var(--sw-primary);
+        color: white;
+        box-shadow: 0 5px 15px rgba(108, 60, 233, 0.3);
+    }
+
+    /* Форма */
+    .login-form {
+        margin-top: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 24px;
+        position: relative;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--sw-white);
+        font-weight: 500;
+        font-size: 14px;
+    }
+
+    .form-label i {
+        color: var(--sw-primary);
+        margin-right: 8px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 14px 18px;
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 12px;
+        color: var(--sw-white);
+        font-size: 15px;
+        transition: var(--sw-transition);
+        font-family: var(--sw-font-main);
+    }
+
+    .form-control:focus {
+        border-color: var(--sw-primary);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(108, 60, 233, 0.2);
+    }
+
+    .form-control::placeholder {
+        color: var(--sw-gray);
+        opacity: 0.7;
+    }
+
+    /* Ошибки */
+    .error-message {
+        color: #f44336;
+        font-size: 12px;
+        margin-top: 5px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .alert {
+        padding: 12px 16px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 14px;
+    }
+
+    .alert-danger {
+        background: rgba(244, 67, 54, 0.1);
+        border: 1px solid #f44336;
+        color: #f44336;
+    }
+
+    .alert-success {
+        background: rgba(76, 175, 80, 0.1);
+        border: 1px solid #4CAF50;
+        color: #4CAF50;
+    }
+
+    /* Дополнительные ссылки */
+    .form-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .form-footer a {
+        color: var(--sw-gray);
+        font-size: 14px;
+        transition: var(--sw-transition);
+    }
+
+    .form-footer a:hover {
+        color: var(--sw-primary);
+    }
+
+    .checkbox-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+    }
+
+    .checkbox-wrapper input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--sw-primary);
+        cursor: pointer;
+    }
+
+    .checkbox-wrapper span {
+        color: var(--sw-gray);
+        font-size: 14px;
+    }
+
+    /* Кнопка */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        padding: 14px 28px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 16px;
+        transition: var(--sw-transition);
+        cursor: pointer;
+        border: none;
+        background: var(--sw-primary);
+        color: white;
+    }
+
+    .btn:hover {
+        background: var(--sw-primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(108, 60, 233, 0.3);
+    }
+
+    /* Разделитель */
+    .login-divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        margin: 30px 0;
+        color: var(--sw-gray);
+        font-size: 14px;
+    }
+
+    .login-divider::before,
+    .login-divider::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid var(--sw-gray-dark);
+    }
+
+    .login-divider::before {
+        margin-right: 15px;
+    }
+
+    .login-divider::after {
+        margin-left: 15px;
+    }
+
+    /* Социальные кнопки */
+    .social-login {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+    }
+
+    .social-btn {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px;
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 12px;
+        color: var(--sw-white);
+        font-weight: 500;
+        font-size: 14px;
+        transition: var(--sw-transition);
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .social-btn:hover {
+        border-color: var(--sw-primary);
+        color: var(--sw-primary);
+        transform: translateY(-2px);
+    }
+
+    .social-btn i {
+        font-size: 18px;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 576px) {
+        .login-card {
+            padding: 30px 20px;
+        }
+
+        .login-title {
+            font-size: 24px;
+        }
+
+        .login-tab {
+            padding: 10px 15px;
+            font-size: 14px;
+        }
+
+        .form-footer {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+
+    /* Анимации */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .login-card {
+        animation: fadeInUp 0.6s ease;
+    }
+</style>
+{% endblock head %}
+
+{% block content %}
+<div class="login-page">
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="login-icon">
+                    <i class="fa fa-user-astronaut"></i>
+                </div>
+                <h1 class="login-title">{% trans 'Добро пожаловать' %}</h1>
+                <p class="login-subtitle">{% trans 'Войдите в свой аккаунт SerWeb' %}</p>
+            </div>
+
+            <!-- Табы переключения -->
+            <div class="login-tabs">
+                <a href="{% url 'webmain:login' %}" class="login-tab active">{% trans 'Вход' %}</a>
+                <a href="{% url 'webmain:signup' %}" class="login-tab">{% trans 'Регистрация' %}</a>
+            </div>
+
+            <!-- Форма входа -->
+            <form method="post" id="login-form" class="login-form">
+                {% csrf_token %}
+
+                <!-- Вывод общих ошибок -->
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    <i class="fa fa-circle-exclamation"></i>
+                    {{ form.non_field_errors|join:", " }}
+                </div>
+                {% endif %}
+
+                <!-- Поле логин/email -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fa fa-envelope"></i>
+                        {% trans 'Логин или Email' %}
+                    </label>
+                    <input type="text" 
+                           class="form-control" 
+                           name="identifier" 
+                           placeholder="{% trans 'Введите логин или email' %}"
+                           value="{{ form.identifier.value|default:'' }}"
+                           autocomplete="username"
+                           required>
+                    {% if form.identifier.errors %}
+                    <div class="error-message">
+                        <i class="fa fa-circle-exclamation"></i>
+                        {{ form.identifier.errors|join:", " }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Поле пароль -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fa fa-lock"></i>
+                        {% trans 'Пароль' %}
+                    </label>
+                    <input type="password" 
+                           class="form-control" 
+                           name="password" 
+                           placeholder="{% trans 'Введите пароль' %}"
+                           autocomplete="current-password"
+                           required>
+                    {% if form.password.errors %}
+                    <div class="error-message">
+                        <i class="fa fa-circle-exclamation"></i>
+                        {{ form.password.errors|join:", " }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Дополнительные опции -->
+                <div class="form-footer">
+                    <label class="checkbox-wrapper">
+                        <input type="checkbox" name="remember_me" id="remember_me">
+                        <span>{% trans 'Запомнить меня' %}</span>
+                    </label>
+                    <a href="{% url 'webmain:password_reset' %}" class="forgot-link">
+                        <i class="fa fa-key"></i>
+                        {% trans 'Забыли пароль?' %}
+                    </a>
+                </div>
+
+                <!-- Кнопка входа -->
+                <button type="submit" class="btn" id="login-btn">
+                    <i class="fa fa-arrow-right-to-bracket"></i>
+                    {% trans 'Войти' %}
+                </button>
+            </form>
+
+            <!-- Разделитель -->
+            <div class="login-divider">
+                <span>{% trans 'или' %}</span>
+            </div>
+
+
+
+            <!-- Регистрация (альтернатива) -->
+            <div class="text-center mt-4">
+                <p class="text-gray" style="font-size: 14px;">
+                    {% trans 'Нет аккаунта?' %}
+                    <a href="{% url 'webmain:signup' %}" class="text-primary" style="color: var(--sw-primary);">
+                        {% trans 'Зарегистрироваться' %}
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('login-form');
+    
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const identifier = document.querySelector('input[name="identifier"]').value.trim();
+            const password = document.querySelector('input[name="password"]').value.trim();
+            
+            if (!identifier) {
+                e.preventDefault();
+                showError('{% trans "Пожалуйста, введите логин или email" %}');
+                return;
+            }
+            
+            if (!password) {
+                e.preventDefault();
+                showError('{% trans "Пожалуйста, введите пароль" %}');
+                return;
+            }
+        });
+    }
+    
+    function showError(message) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'alert alert-danger';
+        errorDiv.innerHTML = `<i class="fa fa-circle-exclamation"></i> ${message}`;
+        
+        const form = document.getElementById('login-form');
+        const firstField = form.querySelector('.form-group');
+        
+        form.insertBefore(errorDiv, firstField);
+        
+        setTimeout(() => {
+            errorDiv.remove();
+        }, 5000);
+    }
+    
+    // Анимация при фокусе
+    document.querySelectorAll('.form-control').forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.classList.add('focused');
+        });
+        
+        input.addEventListener('blur', function() {
+            this.parentElement.classList.remove('founded');
+        });
+    });
+    
+    // Визуальный эффект при наведении на кнопку
+    const loginBtn = document.getElementById('login-btn');
+    if (loginBtn) {
+        loginBtn.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+        });
+        
+        loginBtn.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    }
+});
+</script>
+{% endblock content %}
+```

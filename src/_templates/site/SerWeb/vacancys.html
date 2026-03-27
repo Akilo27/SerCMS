@@ -1,0 +1,1022 @@
+{% extends 'site/SerWeb/base.html' %}
+{% load static generals_tag i18n %}
+
+{% block title %}{{ seo_title|default:"Вакансии | SerWeb" }}{% endblock title %}
+{% block description %}{{ seo_description|default:"Работа в веб-студии SerWeb. Открытые вакансии для разработчиков, дизайнеров и менеджеров. Присоединяйтесь к команде профессионалов." }}{% endblock description %}
+
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }}{% else %}{% static 'site/serweb/img/careers-og.jpg' %}{% endif %}{% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle|default:"Карьера в SerWeb" }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription|default:"Работа в IT-компании" }}{% endblock propertyimage %}
+
+{% block head %}
+<style>
+    /* Стили для страницы вакансий SerWeb */
+    .careers-wrapper {
+        padding: 40px 0;
+    }
+
+    .careers-hero {
+        background: linear-gradient(135deg, var(--sw-black) 0%, var(--sw-primary-dark) 100%);
+        padding: 60px 0;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 40px;
+        border-radius: 0 0 30px 30px;
+    }
+
+    .careers-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100%;
+        height: 100%;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239B7EFF' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        opacity: 0.3;
+        pointer-events: none;
+    }
+
+    .careers-hero-title {
+        font-size: 48px;
+        font-weight: 800;
+        color: var(--sw-white);
+        margin-bottom: 20px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .careers-hero-title span {
+        color: var(--sw-primary-light);
+    }
+
+    .careers-hero-text {
+        font-size: 18px;
+        color: rgba(255, 255, 255, 0.8);
+        max-width: 600px;
+        position: relative;
+        z-index: 2;
+        line-height: 1.7;
+    }
+
+    .careers-grid {
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 30px;
+    }
+
+    @media (max-width: 992px) {
+        .careers-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Сайдбар фильтров */
+    .filters-sidebar {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        padding: 25px;
+        height: fit-content;
+        position: sticky;
+        top: 100px;
+    }
+
+    .filters-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--sw-white);
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid var(--sw-gray-dark);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .filters-title i {
+        color: var(--sw-primary);
+    }
+
+    .filter-group {
+        margin-bottom: 25px;
+    }
+
+    .filter-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--sw-white);
+        font-weight: 500;
+        font-size: 14px;
+    }
+
+    .filter-input {
+        width: 100%;
+        padding: 12px 15px;
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 12px;
+        color: var(--sw-white);
+        font-size: 14px;
+        transition: var(--sw-transition);
+    }
+
+    .filter-input:focus {
+        border-color: var(--sw-primary);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(108, 60, 233, 0.2);
+    }
+
+    .filter-input::placeholder {
+        color: var(--sw-gray);
+        opacity: 0.7;
+    }
+
+    .salary-range {
+        display: flex;
+        gap: 10px;
+    }
+
+    .salary-range .filter-input {
+        width: 50%;
+    }
+
+    .filter-select {
+        width: 100%;
+        padding: 12px 35px 12px 15px;
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 12px;
+        color: var(--sw-white);
+        font-size: 14px;
+        cursor: pointer;
+        outline: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236C3CE9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+    }
+
+    .filter-select option {
+        background: var(--sw-black-light);
+        color: var(--sw-white);
+    }
+
+    .filter-btn {
+        width: 100%;
+        padding: 14px;
+        background: var(--sw-primary);
+        border: none;
+        border-radius: 12px;
+        color: white;
+        font-weight: 600;
+        font-size: 16px;
+        cursor: pointer;
+        transition: var(--sw-transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .filter-btn:hover {
+        background: var(--sw-primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(108, 60, 233, 0.3);
+    }
+
+    /* Основной контент */
+    .vacancies-content {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        padding: 30px;
+    }
+
+    .vacancies-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid var(--sw-gray-dark);
+    }
+
+    .vacancies-count {
+        color: var(--sw-gray);
+        font-size: 16px;
+    }
+
+    .vacancies-count strong {
+        color: var(--sw-white);
+        font-size: 18px;
+    }
+
+    .vacancies-sort {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .sort-select {
+        padding: 8px 30px 8px 12px;
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        color: var(--sw-white);
+        font-size: 14px;
+        cursor: pointer;
+        outline: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236C3CE9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 8px center;
+    }
+
+    /* Карточка вакансии */
+    .vacancy-card {
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 16px;
+        overflow: hidden;
+        transition: var(--sw-transition);
+        margin-bottom: 20px;
+        display: flex;
+    }
+
+    .vacancy-card:hover {
+        transform: translateY(-3px);
+        border-color: var(--sw-primary);
+        box-shadow: 0 10px 30px rgba(108, 60, 233, 0.15);
+    }
+
+    .vacancy-image {
+        width: 200px;
+        flex-shrink: 0;
+        background: linear-gradient(135deg, var(--sw-primary-dark), var(--sw-black));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .vacancy-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .vacancy-image-placeholder {
+        width: 80px;
+        height: 80px;
+        background: rgba(108, 60, 233, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        color: var(--sw-primary);
+    }
+
+    .vacancy-content {
+        flex: 1;
+        padding: 25px;
+    }
+
+    .vacancy-title {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .vacancy-title a {
+        color: var(--sw-white);
+        transition: var(--sw-transition);
+    }
+
+    .vacancy-title a:hover {
+        color: var(--sw-primary);
+    }
+
+    .vacancy-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+
+    .vacancy-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 14px;
+        color: var(--sw-gray);
+    }
+
+    .vacancy-meta-item i {
+        color: var(--sw-primary);
+    }
+
+    .vacancy-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 15px;
+    }
+
+    .vacancy-badge {
+        padding: 4px 12px;
+        background: rgba(108, 60, 233, 0.1);
+        border: 1px solid var(--sw-primary);
+        border-radius: 20px;
+        font-size: 12px;
+        color: var(--sw-white);
+    }
+
+    .vacancy-badge.salary {
+        background: var(--sw-primary);
+        color: white;
+        border-color: var(--sw-primary);
+    }
+
+    .vacancy-description {
+        color: var(--sw-gray);
+        line-height: 1.6;
+        margin-bottom: 20px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .vacancy-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: auto;
+    }
+
+    .vacancy-date {
+        font-size: 13px;
+        color: var(--sw-gray-dark);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .vacancy-date i {
+        color: var(--sw-primary);
+    }
+
+    .vacancy-btn {
+        padding: 8px 20px;
+        background: transparent;
+        border: 1px solid var(--sw-primary);
+        border-radius: 25px;
+        color: var(--sw-white);
+        font-size: 14px;
+        font-weight: 500;
+        transition: var(--sw-transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+
+    .vacancy-btn:hover {
+        background: var(--sw-primary);
+        color: white;
+        transform: translateX(5px);
+    }
+
+    /* Пустое состояние */
+    .vacancies-empty {
+        text-align: center;
+        padding: 60px 20px;
+        background: var(--sw-black);
+        border: 1px dashed var(--sw-gray-dark);
+        border-radius: 15px;
+    }
+
+    .vacancies-empty-icon {
+        font-size: 64px;
+        color: var(--sw-gray-dark);
+        margin-bottom: 20px;
+    }
+
+    .vacancies-empty h3 {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--sw-white);
+        margin-bottom: 10px;
+    }
+
+    .vacancies-empty p {
+        color: var(--sw-gray);
+        margin-bottom: 25px;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .vacancies-empty-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 28px;
+        background: var(--sw-primary);
+        color: white;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: var(--sw-transition);
+        border: none;
+        cursor: pointer;
+    }
+
+    .vacancies-empty-btn:hover {
+        background: var(--sw-primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(108, 60, 233, 0.3);
+    }
+
+    /* Пагинация */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 30px;
+    }
+
+    .page-item {
+        display: inline-block;
+    }
+
+    .page-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 40px;
+        height: 40px;
+        padding: 0 8px;
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 10px;
+        color: var(--sw-white);
+        font-size: 14px;
+        font-weight: 500;
+        transition: var(--sw-transition);
+        cursor: pointer;
+    }
+
+    .page-link:hover {
+        background: var(--sw-primary);
+        border-color: var(--sw-primary);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .page-item.active .page-link {
+        background: var(--sw-primary);
+        border-color: var(--sw-primary);
+        color: white;
+    }
+
+    .page-item.disabled .page-link {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    /* Индикатор загрузки */
+    .vacancies-loader {
+        text-align: center;
+        padding: 40px;
+    }
+
+    .spinner {
+        display: inline-block;
+        width: 40px;
+        height: 40px;
+        border: 3px solid var(--sw-gray-dark);
+        border-top-color: var(--sw-primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Уведомления */
+    .vacancy-toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-left: 4px solid var(--sw-primary);
+        border-radius: 12px;
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        animation: slideIn 0.3s ease;
+    }
+
+    .vacancy-toast i {
+        font-size: 20px;
+    }
+
+    .vacancy-toast.success {
+        border-left-color: #4CAF50;
+    }
+
+    .vacancy-toast.success i {
+        color: #4CAF50;
+    }
+
+    .vacancy-toast.error {
+        border-left-color: #f44336;
+    }
+
+    .vacancy-toast.error i {
+        color: #f44336;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    .toast-close {
+        margin-left: auto;
+        cursor: pointer;
+        opacity: 0.7;
+        transition: var(--sw-transition);
+    }
+
+    .toast-close:hover {
+        opacity: 1;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .vacancy-card {
+            flex-direction: column;
+        }
+
+        .vacancy-image {
+            width: 100%;
+            height: 150px;
+        }
+
+        .vacancy-meta {
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .vacancy-footer {
+            flex-direction: column;
+            gap: 15px;
+            align-items: flex-start;
+        }
+    }
+</style>
+{% endblock head %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb-list">
+                <li class="breadcrumb-item"><a href="{% url 'webmain:home' %}"><i class="fa fa-home me-1"></i>{% trans 'Главная' %}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{% trans 'Вакансии' %}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<style>
+    .breadcrumbs {
+        background: var(--sw-black-light);
+        padding: 15px 0;
+        border-bottom: 1px solid var(--sw-gray-dark);
+    }
+
+    .breadcrumb-list {
+        display: flex;
+        list-style: none;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .breadcrumb-item {
+        font-size: 14px;
+    }
+
+    .breadcrumb-item:not(:last-child)::after {
+        content: '/';
+        margin-left: 10px;
+        color: var(--sw-gray);
+    }
+
+    .breadcrumb-item a {
+        color: var(--sw-gray);
+        transition: var(--sw-transition);
+    }
+
+    .breadcrumb-item a:hover {
+        color: var(--sw-primary);
+    }
+
+    .breadcrumb-item.active {
+        color: var(--sw-white);
+    }
+</style>
+{% endblock breadcrumbs %}
+
+{% block content %}
+<!-- Hero секция -->
+<section class="careers-hero">
+    <div class="container">
+        <h1 class="careers-hero-title">
+            {% trans "Работа в" %} <span>{% trans "SerWeb" %}</span>
+        </h1>
+        <p class="careers-hero-text">
+            {% trans "Присоединяйтесь к команде профессионалов. Мы ищем талантливых разработчиков, дизайнеров и менеджеров, готовых создавать крутые цифровые продукты." %}
+        </p>
+    </div>
+</section>
+
+<div class="careers-wrapper">
+    <div class="container">
+        <div class="careers-grid">
+            <!-- Сайдбар с фильтрами -->
+            <aside class="filters-sidebar">
+                <h2 class="filters-title">
+                    <i class="fa fa-sliders"></i>
+                    {% trans 'Фильтры' %}
+                </h2>
+
+                <form id="filter-form" method="GET">
+                    <!-- Поиск -->
+                    <div class="filter-group">
+                        <label for="search">{% trans 'Поиск по названию' %}</label>
+                        <input type="text"
+                               name="search"
+                               id="search"
+                               class="filter-input"
+                               placeholder="{% trans 'Например: Python разработчик' %}"
+                               value="{{ request.GET.search|default:'' }}">
+                    </div>
+
+                    <!-- Зарплатный диапазон -->
+                    <div class="filter-group">
+                        <label>{% trans 'Зарплата' %}</label>
+                        <div class="salary-range">
+                            <input type="number"
+                                   name="salary_min"
+                                   class="filter-input"
+                                   placeholder="{% trans 'от' %}"
+                                   value="{{ request.GET.salary_min|default:'' }}">
+                            <input type="number"
+                                   name="salary_max"
+                                   class="filter-input"
+                                   placeholder="{% trans 'до' %}"
+                                   value="{{ request.GET.salary_max|default:'' }}">
+                        </div>
+                    </div>
+
+                    <!-- График работы -->
+                    <div class="filter-group">
+                        <label for="work_schedule">{% trans 'График работы' %}</label>
+                        <select name="work_schedule" id="work_schedule" class="filter-select">
+                            <option value="">{% trans 'Все' %}</option>
+                            <option value="1" {% if request.GET.work_schedule == '1' %}selected{% endif %}>{% trans 'Полный рабочий день' %}</option>
+                            <option value="2" {% if request.GET.work_schedule == '2' %}selected{% endif %}>{% trans 'Неполный рабочий день' %}</option>
+                            <option value="3" {% if request.GET.work_schedule == '3' %}selected{% endif %}>{% trans 'Удаленная работа' %}</option>
+                            <option value="4" {% if request.GET.work_schedule == '4' %}selected{% endif %}>{% trans 'Сменный график' %}</option>
+                        </select>
+                    </div>
+
+                    <!-- Тип занятости -->
+                    <div class="filter-group">
+                        <label for="employment_type">{% trans 'Тип занятости' %}</label>
+                        <select name="employment_type" id="employment_type" class="filter-select">
+                            <option value="">{% trans 'Все' %}</option>
+                            <option value="full" {% if request.GET.employment_type == 'full' %}selected{% endif %}>{% trans 'Полная занятость' %}</option>
+                            <option value="part" {% if request.GET.employment_type == 'part' %}selected{% endif %}>{% trans 'Частичная занятость' %}</option>
+                            <option value="internship" {% if request.GET.employment_type == 'internship' %}selected{% endif %}>{% trans 'Стажировка' %}</option>
+                            <option value="project" {% if request.GET.employment_type == 'project' %}selected{% endif %}>{% trans 'Проектная работа' %}</option>
+                        </select>
+                    </div>
+
+                    <!-- Опыт работы -->
+                    <div class="filter-group">
+                        <label for="experience">{% trans 'Опыт работы' %}</label>
+                        <select name="experience" id="experience" class="filter-select">
+                            <option value="">{% trans 'Любой' %}</option>
+                            <option value="no" {% if request.GET.experience == 'no' %}selected{% endif %}>{% trans 'Без опыта' %}</option>
+                            <option value="1-3" {% if request.GET.experience == '1-3' %}selected{% endif %}>{% trans '1-3 года' %}</option>
+                            <option value="3-5" {% if request.GET.experience == '3-5' %}selected{% endif %}>{% trans '3-5 лет' %}</option>
+                            <option value="5+" {% if request.GET.experience == '5+' %}selected{% endif %}>{% trans 'Более 5 лет' %}</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="filter-btn">
+                        <i class="fa fa-magnifying-glass"></i>
+                        {% trans 'Применить фильтры' %}
+                    </button>
+                </form>
+            </aside>
+
+            <!-- Основной контент с вакансиями -->
+            <div class="vacancies-content">
+                <div class="vacancies-header">
+                    <div class="vacancies-count">
+                        {% trans 'Найдено' %} <strong id="vacancies-total">0</strong> {% trans 'вакансий' %}
+                    </div>
+                    <div class="vacancies-sort">
+                        <span class="text-gray">{% trans 'Сортировка:' %}</span>
+                        <select class="sort-select" id="sort-select">
+                            <option value="newest" {% if request.GET.sort == 'newest' %}selected{% endif %}>{% trans 'Сначала новые' %}</option>
+                            <option value="salary_desc" {% if request.GET.sort == 'salary_desc' %}selected{% endif %}>{% trans 'По убыванию зарплаты' %}</option>
+                            <option value="salary_asc" {% if request.GET.sort == 'salary_asc' %}selected{% endif %}>{% trans 'По возрастанию зарплаты' %}</option>
+                            <option value="popular" {% if request.GET.sort == 'popular' %}selected{% endif %}>{% trans 'Популярные' %}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Список вакансий -->
+                <div id="vacancy-list"></div>
+
+                <!-- Индикатор загрузки -->
+                <div class="vacancies-loader" id="vacancies-loader" style="display: none;">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Контейнер для уведомлений -->
+<div id="toast-container"></div>
+{% endblock content %}
+
+{% block footertop %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    'use strict';
+
+    // Состояние
+    let state = {
+        currentPage: 1,
+        isLoading: false,
+        hasMore: true,
+        total: 0
+    };
+
+    // DOM элементы
+    const form = document.getElementById('filter-form');
+    const vacancyList = document.getElementById('vacancy-list');
+    const loader = document.getElementById('vacancies-loader');
+    const totalSpan = document.getElementById('vacancies-total');
+    const sortSelect = document.getElementById('sort-select');
+
+    // Функция для получения параметров фильтрации
+    const getFilterParams = () => {
+        const params = new URLSearchParams(window.location.search);
+        if (sortSelect) {
+            params.set('sort', sortSelect.value);
+        }
+        return params.toString();
+    };
+
+    // Функция для обновления URL без перезагрузки
+    const updateURL = (params) => {
+        const newUrl = window.location.pathname + (params ? '?' + params : '');
+        window.history.replaceState({}, '', newUrl);
+    };
+
+    // Функция показа уведомления
+    const showToast = (message, type = 'success') => {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `vacancy-toast ${type}`;
+        toast.innerHTML = `
+            <i class="fa fa-${type === 'success' ? 'circle-check' : 'circle-exclamation'}"></i>
+            <span>${message}</span>
+            <span class="toast-close" onclick="this.parentElement.remove()">
+                <i class="fa fa-times"></i>
+            </span>
+        `;
+
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.remove();
+            }
+        }, 5000);
+    };
+
+    // Форматирование даты
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('ru-RU', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+    };
+
+    // Создание карточки вакансии
+    const createVacancyCard = (vacancy) => {
+        const card = document.createElement('div');
+        card.className = 'vacancy-card';
+
+        const salary = vacancy.salary ? `${vacancy.salary} ₽` : '{% trans "По договоренности" %}';
+
+        card.innerHTML = `
+            <div class="vacancy-image">
+                ${vacancy.image ?
+                    `<img src="${vacancy.image}" alt="${vacancy.title}">` :
+                    `<div class="vacancy-image-placeholder"><i class="fa fa-briefcase"></i></div>`
+                }
+            </div>
+            <div class="vacancy-content">
+                <h3 class="vacancy-title">
+                    <a href="${vacancy.url || '#'}">${vacancy.title}</a>
+                </h3>
+
+                <div class="vacancy-meta">
+                    <span class="vacancy-meta-item">
+                        <i class="fa fa-location-dot"></i>
+                        ${vacancy.location || '{% trans "Москва" %}'}
+                    </span>
+                    <span class="vacancy-meta-item">
+                        <i class="fa fa-clock"></i>
+                        ${vacancy.schedule || '{% trans "Полный день" %}'}
+                    </span>
+                    <span class="vacancy-meta-item">
+                        <i class="fa fa-briefcase"></i>
+                        ${vacancy.experience || '{% trans "Опыт от 1 года" %}'}
+                    </span>
+                </div>
+
+                <div class="vacancy-badges">
+                    <span class="vacancy-badge salary">${salary}</span>
+                    ${vacancy.tags ? vacancy.tags.map(tag =>
+                        `<span class="vacancy-badge">${tag}</span>`
+                    ).join('') : ''}
+                </div>
+
+                <p class="vacancy-description">${vacancy.description}</p>
+
+                <div class="vacancy-footer">
+                    <span class="vacancy-date">
+                        <i class="fa fa-calendar"></i>
+                        ${formatDate(vacancy.created_at)}
+                    </span>
+                    <a href="${vacancy.url || '#'}" class="vacancy-btn">
+                        ${vacancy.button_text || '{% trans "Подробнее" %}'}
+                        <i class="fa fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        `;
+
+        return card;
+    };
+
+    // Загрузка вакансий
+    const loadVacancies = async (page = 1, replace = false) => {
+        if (state.isLoading || !state.hasMore) return;
+
+        state.isLoading = true;
+        if (loader) loader.style.display = 'block';
+
+        try {
+            const params = getFilterParams();
+            const url = `${window.location.pathname}?page=${page}&${params}`;
+
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('{% trans "Ошибка загрузки данных" %}');
+            }
+
+            const data = await response.json();
+
+            if (replace) {
+                vacancyList.innerHTML = '';
+            }
+
+            if (data.vacancies && data.vacancies.length > 0) {
+                data.vacancies.forEach(vacancy => {
+                    vacancyList.appendChild(createVacancyCard(vacancy));
+                });
+            } else if (replace && data.vacancies.length === 0) {
+                vacancyList.innerHTML = `
+                    <div class="vacancies-empty">
+                        <div class="vacancies-empty-icon">
+                            <i class="fa fa-face-frown"></i>
+                        </div>
+                        <h3>{% trans "Вакансии не найдены" %}</h3>
+                        <p>{% trans "Попробуйте изменить параметры фильтрации" %}</p>
+                        <button onclick="window.location.href='${window.location.pathname}'" class="vacancies-empty-btn">
+                            <i class="fa fa-rotate-right"></i>
+                            {% trans "Сбросить фильтры" %}
+                        </button>
+                    </div>
+                `;
+            }
+
+            state.hasMore = data.has_next;
+            state.total = data.total || 0;
+
+            if (totalSpan) {
+                totalSpan.textContent = state.total;
+            }
+
+            if (!state.hasMore) {
+                window.removeEventListener('scroll', handleScroll);
+            } else {
+                state.currentPage = page + 1;
+            }
+
+        } catch (error) {
+            console.error('Error loading vacancies:', error);
+            showToast(error.message || '{% trans "Ошибка загрузки" %}', 'error');
+        } finally {
+            state.isLoading = false;
+            if (loader) loader.style.display = 'none';
+        }
+    };
+
+    // Обработка скролла для бесконечной загрузки
+    const handleScroll = () => {
+        const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+        if (scrollTop + clientHeight >= scrollHeight - 200) {
+            loadVacancies(state.currentPage);
+        }
+    };
+
+    // Обработка отправки формы
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+        const params = new URLSearchParams(formData).toString();
+
+        updateURL(params);
+
+        state.currentPage = 1;
+        state.hasMore = true;
+
+        await loadVacancies(1, true);
+        window.addEventListener('scroll', handleScroll);
+    });
+
+    // Обработка изменения сортировки
+    if (sortSelect) {
+        sortSelect.addEventListener('change', () => {
+            const params = new URLSearchParams(window.location.search);
+            params.set('sort', sortSelect.value);
+            updateURL(params.toString());
+
+            state.currentPage = 1;
+            state.hasMore = true;
+            loadVacancies(1, true);
+        });
+    }
+
+    // Инициализация из URL параметров
+    const urlParams = new URLSearchParams(window.location.search);
+
+    // Заполняем форму из URL
+    for (let [key, value] of urlParams.entries()) {
+        const input = form.querySelector(`[name="${key}"]`);
+        if (input) {
+            input.value = value;
+        }
+    }
+
+    // Первая загрузка
+    loadVacancies(1, true);
+    window.addEventListener('scroll', handleScroll);
+});
+</script>
+{% endblock footertop %}

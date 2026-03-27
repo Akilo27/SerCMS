@@ -1,0 +1,806 @@
+{% extends 'site/SerWeb/base.html' %}
+{% load static generals_tag i18n %}
+
+{% block title %}{{ seo_title|default:"Мои отзывы | SerWeb" }}{% endblock title %}
+{% block description %}{{ seo_description|default:"Все ваши отзывы о проектах в веб-студии SerWeb" }}{% endblock description %}
+
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }}{% else %}{% static 'site/serweb/img/reviews-og.jpg' %}{% endif %}{% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle|default:"Мои отзывы SerWeb" }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription|default:"Отзывы пользователя" }}{% endblock propertyimage %}
+
+{% block head %}
+<style>
+    /* Стили для страницы отзывов SerWeb */
+    .reviews-wrapper {
+        padding: 40px 0;
+    }
+
+    .reviews-grid {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 30px;
+    }
+
+    @media (max-width: 992px) {
+        .reviews-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Сайдбар профиля */
+    .profile-sidebar {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        padding: 25px;
+        height: fit-content;
+    }
+
+    .profile-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--sw-gray-dark);
+        margin-bottom: 20px;
+    }
+
+    .profile-avatar {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 3px solid var(--sw-primary);
+        flex-shrink: 0;
+    }
+
+    .profile-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .profile-info h5 {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--sw-white);
+        margin-bottom: 5px;
+    }
+
+    .profile-info .profile-username {
+        font-size: 14px;
+        color: var(--sw-gray);
+        margin-bottom: 0;
+    }
+
+    .profile-menu {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .profile-menu-item {
+        margin-bottom: 5px;
+    }
+
+    .profile-menu-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 15px;
+        color: var(--sw-gray);
+        border-radius: 12px;
+        transition: var(--sw-transition);
+        font-weight: 500;
+    }
+
+    .profile-menu-link i {
+        width: 20px;
+        color: var(--sw-primary);
+        transition: var(--sw-transition);
+    }
+
+    .profile-menu-link:hover,
+    .profile-menu-link.active {
+        background: rgba(108, 60, 233, 0.1);
+        color: var(--sw-white);
+    }
+
+    .profile-menu-link:hover i,
+    .profile-menu-link.active i {
+        color: var(--sw-primary-light);
+    }
+
+    /* Основной контент */
+    .reviews-content {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        padding: 30px;
+    }
+
+    .reviews-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--sw-white);
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid var(--sw-gray-dark);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .reviews-title i {
+        color: var(--sw-primary);
+    }
+
+    /* Карточка отзыва */
+    .review-card {
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 16px;
+        overflow: hidden;
+        margin-bottom: 20px;
+        transition: var(--sw-transition);
+    }
+
+    .review-card:hover {
+        border-color: var(--sw-primary);
+        box-shadow: 0 10px 30px rgba(108, 60, 233, 0.1);
+    }
+
+    .review-header {
+        padding: 20px;
+        background: linear-gradient(135deg, var(--sw-primary-dark), var(--sw-black-light));
+        border-bottom: 1px solid var(--sw-gray-dark);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .review-product-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .review-product-image {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        overflow: hidden;
+        background: var(--sw-black);
+    }
+
+    .review-product-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .review-product-name {
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .review-product-name a {
+        color: var(--sw-white);
+        transition: var(--sw-transition);
+    }
+
+    .review-product-name a:hover {
+        color: var(--sw-primary);
+    }
+
+    .review-date {
+        font-size: 13px;
+        color: var(--sw-gray);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .review-date i {
+        color: var(--sw-primary);
+    }
+
+    .review-body {
+        padding: 20px;
+    }
+
+    /* Звезды рейтинга */
+    .review-rating {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        margin-bottom: 15px;
+    }
+
+    .review-rating i {
+        font-size: 16px;
+    }
+
+    .star-filled {
+        color: #ffbb00;
+    }
+
+    .star-empty {
+        color: var(--sw-gray-dark);
+    }
+
+    .star-half {
+        color: #ffbb00;
+        position: relative;
+    }
+
+    .review-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+
+    .review-status.published {
+        background: rgba(76, 175, 80, 0.1);
+        border: 1px solid #4CAF50;
+        color: #4CAF50;
+    }
+
+    .review-status.pending {
+        background: rgba(255, 152, 0, 0.1);
+        border: 1px solid #FF9800;
+        color: #FF9800;
+    }
+
+    .review-status i {
+        font-size: 12px;
+    }
+
+    .review-text {
+        color: var(--sw-gray);
+        line-height: 1.7;
+        margin-bottom: 20px;
+        font-size: 15px;
+        white-space: pre-line;
+    }
+
+    /* Галерея изображений */
+    .review-images {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    .review-image {
+        width: 100px;
+        height: 100px;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid var(--sw-gray-dark);
+        transition: var(--sw-transition);
+        cursor: pointer;
+    }
+
+    .review-image:hover {
+        border-color: var(--sw-primary);
+        transform: scale(1.02);
+    }
+
+    .review-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Действия с отзывом */
+    .review-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 1px solid var(--sw-gray-dark);
+    }
+
+    .review-action-btn {
+        background: transparent;
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 25px;
+        padding: 8px 20px;
+        color: var(--sw-white);
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--sw-transition);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .review-action-btn:hover {
+        border-color: var(--sw-primary);
+        color: var(--sw-primary);
+        background: rgba(108, 60, 233, 0.1);
+    }
+
+    .review-action-btn.delete:hover {
+        border-color: #dc3545;
+        color: #dc3545;
+    }
+
+    /* Пустое состояние */
+    .reviews-empty {
+        text-align: center;
+        padding: 60px 20px;
+        background: var(--sw-black);
+        border: 1px dashed var(--sw-gray-dark);
+        border-radius: 15px;
+    }
+
+    .reviews-empty-icon {
+        font-size: 64px;
+        color: var(--sw-gray-dark);
+        margin-bottom: 20px;
+    }
+
+    .reviews-empty h3 {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--sw-white);
+        margin-bottom: 10px;
+    }
+
+    .reviews-empty p {
+        color: var(--sw-gray);
+        margin-bottom: 25px;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .reviews-empty-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 28px;
+        background: var(--sw-primary);
+        color: white;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: var(--sw-transition);
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .reviews-empty-btn:hover {
+        background: var(--sw-primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(108, 60, 233, 0.3);
+    }
+
+    /* Пагинация */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 30px;
+    }
+
+    .page-item {
+        display: inline-block;
+    }
+
+    .page-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 40px;
+        height: 40px;
+        padding: 0 8px;
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 10px;
+        color: var(--sw-white);
+        font-size: 14px;
+        font-weight: 500;
+        transition: var(--sw-transition);
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .page-link:hover {
+        background: var(--sw-primary);
+        border-color: var(--sw-primary);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .page-item.active .page-link {
+        background: var(--sw-primary);
+        border-color: var(--sw-primary);
+        color: white;
+    }
+
+    .page-item.disabled .page-link {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    /* Хлебные крошки */
+    .reviews-breadcrumbs {
+        margin-bottom: 30px;
+    }
+
+    .breadcrumb-list {
+        display: flex;
+        list-style: none;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .breadcrumb-item {
+        font-size: 14px;
+        color: var(--sw-gray);
+    }
+
+    .breadcrumb-item:not(:last-child)::after {
+        content: '/';
+        margin-left: 10px;
+        color: var(--sw-gray);
+    }
+
+    .breadcrumb-item a {
+        color: var(--sw-gray);
+        transition: var(--sw-transition);
+    }
+
+    .breadcrumb-item a:hover {
+        color: var(--sw-primary);
+    }
+
+    .breadcrumb-item.active {
+        color: var(--sw-white);
+    }
+
+    /* Уведомления */
+    .review-toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-left: 4px solid var(--sw-primary);
+        border-radius: 12px;
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        animation: slideIn 0.3s ease;
+    }
+
+    .review-toast.success {
+        border-left-color: #4CAF50;
+    }
+
+    .review-toast.success i {
+        color: #4CAF50;
+    }
+
+    .review-toast.error {
+        border-left-color: #dc3545;
+    }
+
+    .review-toast.error i {
+        color: #dc3545;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    .toast-close {
+        margin-left: auto;
+        cursor: pointer;
+        opacity: 0.7;
+    }
+
+    .toast-close:hover {
+        opacity: 1;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .review-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .review-product-info {
+            width: 100%;
+        }
+
+        .review-images {
+            justify-content: center;
+        }
+
+        .review-image {
+            width: 80px;
+            height: 80px;
+        }
+
+        .review-actions {
+            flex-wrap: wrap;
+        }
+
+        .review-action-btn {
+            flex: 1;
+            justify-content: center;
+        }
+    }
+
+    /* Скрываем старые стили */
+    .card, .panel, .media-block, .thumbnail {
+        all: unset;
+    }
+
+    #reiting {
+        display: none !important;
+    }
+</style>
+{% endblock head %}
+
+{% block breadcrumbs %}
+<div class="reviews-breadcrumbs">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb-list">
+                <li class="breadcrumb-item"><a href="{% url 'webmain:home' %}"><i class="fa fa-home me-1"></i>{% trans 'Главная' %}</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'useraccount:profile' %}">{% trans 'Личный кабинет' %}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{% trans 'Мои отзывы' %}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+{% endblock breadcrumbs %}
+
+{% block content %}
+<div class="reviews-wrapper">
+    <div class="container">
+        <div class="reviews-grid">
+            <!-- Сайдбар профиля -->
+            <aside class="profile-sidebar">
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        {% if user.profile.avatar %}
+                            <img src="{{ user.profile.avatar.url }}" alt="{{ user.get_full_name|default:user.username }}">
+                        {% elif user.avatar %}
+                            <img src="{{ user.avatar.url }}" alt="{{ user.get_full_name|default:user.username }}">
+                        {% elif user.image %}
+                            <img src="{{ user.image.url }}" alt="{{ user.get_full_name|default:user.username }}">
+                        {% else %}
+                            <img src="{% static 'site/serweb/img/default-avatar.svg' %}" alt="avatar" onerror="this.src='https://placehold.co/70x70/6C3CE9/FFFFFF?text={{ user.username|first|upper }}'">
+                        {% endif %}
+                    </div>
+                    <div class="profile-info">
+                        <h5>{% if user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.username }}{% endif %}</h5>
+                        <p class="profile-username">@{{ user.username }}</p>
+                    </div>
+                </div>
+
+                {% include 'site/SerWeb/include/profile_menu.html' %}
+            </aside>
+
+            <!-- Основной контент -->
+            <div class="reviews-content">
+                <h1 class="reviews-title">
+                    <i class="fa fa-star"></i>
+                    {% trans "Мои отзывы" %}
+                </h1>
+
+                {% if my_reviews and my_revs %}
+                <div class="reviews-list">
+                    {% for review in my_reviews %}
+                    <div class="review-card" data-review-id="{{ review.id }}">
+                        <div class="review-header">
+                            <div class="review-product-info">
+                                {% if review.product and review.product.image %}
+                                <div class="review-product-image">
+                                    <img src="{{ review.product.image.url }}" alt="{{ review.product.name }}">
+                                </div>
+                                {% endif %}
+                                <div class="review-product-name">
+                                    {% if review.product %}
+                                    <a href="{% url 'shop:products' review.product.slug %}">
+                                        {{ review.product.name }}
+                                    </a>
+                                    {% else %}
+                                    <span class="text-gray">{% trans "Товар удален" %}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="review-date">
+                                <i class="fa fa-calendar"></i>
+                                {{ review.create|date:"d.m.Y H:i" }}
+                            </div>
+                        </div>
+
+                        <div class="review-body">
+                            <!-- Рейтинг звездами -->
+                            <div class="review-rating">
+                                {% for i in "12345"|make_list %}
+                                    {% if forloop.counter <= review.starvalue|default:0 %}
+                                    <i class="fa-solid fa-star star-filled"></i>
+                                    {% elif forloop.counter <= review.starvalue|default:0|add:0.5 %}
+                                    <i class="fa-solid fa-star-half-alt star-half"></i>
+                                    {% else %}
+                                    <i class="fa fa-star star-empty"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+
+                            <!-- Статус отзыва -->
+                            <div class="review-status {% if review.publishet %}published{% else %}pending{% endif %}">
+                                <i class="fa {% if review.publishet %}fa-circle-check{% else %}fa-clock{% endif %}"></i>
+                                {% if review.publishet %}
+                                    {% trans "Опубликован" %}
+                                {% else %}
+                                    {% trans "Ожидает модерации" %}
+                                {% endif %}
+                            </div>
+
+                            <!-- Текст отзыва -->
+                            <div class="review-text">
+                                {{ review.text|linebreaksbr }}
+                            </div>
+
+                            <!-- Изображения -->
+                            {% if review.images.all %}
+                            <div class="review-images">
+                                {% for img in review.images.all %}
+                                <a href="{{ img.image.url }}" target="_blank" class="review-image">
+                                    <img src="{{ img.image.url }}" alt="{% trans 'Фото к отзыву' %}">
+                                </a>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+
+                            <!-- Действия с отзывом -->
+                            <div class="review-actions">
+                                {% if review.product %}
+                                <a href="{% url 'shop:products' review.product.slug %}" class="review-action-btn">
+                                    <i class="fa fa-eye"></i>
+                                    {% trans "Перейти к товару" %}
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Пагинация -->
+                {% if my_reviews.has_other_pages %}
+                <nav>
+                    <ul class="pagination">
+                        {% if my_reviews.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ my_reviews.previous_page_number }}">
+                                <i class="fa fa-chevron-left"></i>
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link"><i class="fa fa-chevron-left"></i></span>
+                        </li>
+                        {% endif %}
+
+                        {% for num in my_reviews.paginator.page_range %}
+                            {% if my_reviews.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                            {% elif num > my_reviews.number|add:'-3' and num < my_reviews.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if my_reviews.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ my_reviews.next_page_number }}">
+                                <i class="fa fa-chevron-right"></i>
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link"><i class="fa fa-chevron-right"></i></span>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+
+                {% else %}
+                <!-- Пустое состояние -->
+                <div class="reviews-empty">
+                    <div class="reviews-empty-icon">
+                        <i class="fa fa-star"></i>
+                    </div>
+                    <h3>{% trans "У вас пока нет отзывов" %}</h3>
+                    <p>{% trans "Поделитесь своим мнением о проектах — это помогает другим пользователям делать выбор" %}</p>
+                    <a href="{% url 'shop:catalogs' %}" class="reviews-empty-btn">
+                        <i class="fa fa-compass"></i>
+                        {% trans 'Перейти к проектам' %}
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Контейнер для уведомлений -->
+<div id="toast-container"></div>
+
+<script>
+// Функция для показа уведомлений
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `review-toast ${type}`;
+    toast.innerHTML = `
+        <i class="fa fa-${type === 'success' ? 'circle-check' : 'circle-exclamation'}"></i>
+        <span>${message}</span>
+        <span class="toast-close" onclick="this.parentElement.remove()">
+            <i class="fa fa-times"></i>
+        </span>
+    `;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.remove();
+        }
+    }, 3000);
+}
+
+
+
+
+// Инициализация галереи изображений
+document.addEventListener('DOMContentLoaded', function() {
+    // Можно добавить лайтбокс для изображений
+    document.querySelectorAll('.review-image').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            // Здесь можно инициализировать лайтбокс
+            window.open(this.href, '_blank');
+        });
+    });
+});
+</script>
+{% endblock content %}
+
+{% block footertop %}
+<!-- Дополнительные скрипты не требуются -->
+{% endblock footertop %}

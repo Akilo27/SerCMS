@@ -1,4 +1,4 @@
-{% extends 'site/useraccount/base.html' %}
+{% extends 'moderations/base.html' %}
 {% load i18n %}
 {% load static  %}
 {% block title %}{{ seo_title }}{% endblock title %}
@@ -47,7 +47,7 @@
     <h4> {% trans 'Уведомлений нет' %}. </h4>
     {% endfor %}
     <div class="col-lg-12">
-        {% include 'site/website/include/paginations.html' %}
+        {% include 'moderations/include/paginations.html' %}
     </div>
 </div> <!-- end row -->
 {% endblock content %}

@@ -1,0 +1,1364 @@
+{% extends 'site/SerWeb/base.html' %}
+{% load static generals_tag shop_tags i18n %}
+
+{% block title %}{{ homepage.title }}{% endblock title %}
+{% block description %}{{ homepage.metadescription }}{% endblock description %}
+{% block propertytitle %}{{ homepage.propertytitle }}{% endblock propertytitle %}
+{% block propertydescription %}{{ homepage.propertydescription }}{% endblock propertydescription %}
+{% block propertyimage %}{% if homepage.previev %}{{ homepage.previev.url }}{% endif %}{% endblock propertyimage %}
+
+{% block head %}
+<style>
+    /* SerWeb Custom Styles */
+    :root {
+        --sw-primary: #6C3CE9;
+        --sw-primary-dark: #4B2AA3;
+        --sw-primary-light: #9B7EFF;
+        --sw-black: #0A0A0A;
+        --sw-black-light: #1A1A1A;
+        --sw-gray-dark: #2D2D2D;
+        --sw-gray: #6B6B6B;
+        --sw-gray-light: #F5F5F5;
+        --sw-white: #FFFFFF;
+    }
+
+    /* Hero Section */
+    .sw-hero {
+        position: relative;
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        background: linear-gradient(135deg, var(--sw-black) 0%, var(--sw-primary-dark) 100%);
+        overflow: hidden;
+        margin-bottom: 40px;
+    }
+
+    .sw-hero::before {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239B7EFF' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        opacity: 0.3;
+        pointer-events: none;
+    }
+
+    .sw-hero-content {
+        position: relative;
+        z-index: 2;
+        max-width: 700px;
+    }
+
+    .sw-hero-subtitle {
+        display: inline-block;
+        font-size: 16px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: var(--sw-primary-light);
+        margin-bottom: 20px;
+        padding: 8px 16px;
+        background: rgba(108, 60, 233, 0.1);
+        border-radius: 30px;
+        border: 1px solid rgba(108, 60, 233, 0.3);
+    }
+
+    .sw-hero-title {
+        font-size: 64px;
+        font-weight: 800;
+        line-height: 1.1;
+        margin-bottom: 25px;
+        color: var(--sw-white);
+    }
+
+    .sw-hero-title span {
+        color: var(--sw-primary-light);
+        display: block;
+        font-size: 72px;
+    }
+
+    .sw-hero-text {
+        font-size: 18px;
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 35px;
+        max-width: 600px;
+    }
+
+    .sw-hero-image {
+        position: relative;
+        z-index: 2;
+    }
+
+    .sw-hero-image img {
+        max-width: 100%;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-20px); }
+    }
+
+    /* Features Section */
+    .sw-features {
+        padding: 60px 0;
+        background: var(--sw-black-light);
+        border-radius: 30px;
+        margin: 40px 0;
+    }
+
+    .sw-feature-item {
+        text-align: center;
+        padding: 30px;
+    }
+
+    .sw-feature-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 25px;
+        background: linear-gradient(135deg, var(--sw-primary) 0%, var(--sw-primary-light) 100%);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        color: white;
+        transform: rotate(45deg);
+        transition: var(--sw-transition);
+    }
+
+    .sw-feature-icon i {
+        transform: rotate(-45deg);
+    }
+
+    .sw-feature-item:hover .sw-feature-icon {
+        transform: rotate(0deg);
+        border-radius: 50%;
+    }
+
+    .sw-feature-title {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 10px;
+        color: var(--sw-white);
+    }
+
+    .sw-feature-text {
+        color: var(--sw-gray);
+        font-size: 14px;
+    }
+
+    /* Section Titles */
+    .sw-section-title {
+        text-align: center;
+        margin-bottom: 50px;
+    }
+
+    .sw-section-subtitle {
+        display: inline-block;
+        font-size: 14px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: var(--sw-primary);
+        margin-bottom: 10px;
+    }
+
+    .sw-section-main-title {
+        font-size: 42px;
+        font-weight: 800;
+        color: var(--sw-white);
+        margin-bottom: 15px;
+    }
+
+    .sw-section-main-title span {
+        color: var(--sw-primary-light);
+    }
+
+    /* Portfolio/Category Cards */
+    .sw-category-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 25px;
+        margin: 50px 0;
+    }
+
+    .sw-category-card {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        padding: 30px 20px;
+        text-align: center;
+        transition: var(--sw-transition);
+        cursor: pointer;
+    }
+
+    .sw-category-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--sw-primary);
+        box-shadow: 0 10px 30px rgba(108, 60, 233, 0.2);
+    }
+
+    .sw-category-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 20px;
+        background: rgba(108, 60, 233, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        color: var(--sw-primary);
+        transition: var(--sw-transition);
+    }
+
+    .sw-category-card:hover .sw-category-icon {
+        background: var(--sw-primary);
+        color: white;
+    }
+
+    .sw-category-name {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--sw-white);
+        margin-bottom: 5px;
+    }
+
+    .sw-category-count {
+        color: var(--sw-gray);
+        font-size: 14px;
+    }
+
+    /* Product/Project Cards */
+    .sw-product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 30px;
+        margin: 40px 0;
+    }
+
+    .sw-product-card {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        overflow: hidden;
+        transition: var(--sw-transition);
+    }
+
+    .sw-product-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--sw-primary);
+        box-shadow: 0 10px 30px rgba(108, 60, 233, 0.2);
+    }
+
+    .sw-product-image {
+        position: relative;
+        height: 250px;
+        overflow: hidden;
+        background: linear-gradient(45deg, var(--sw-black), var(--sw-primary-dark));
+    }
+
+    .sw-product-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: var(--sw-transition);
+    }
+
+    .sw-product-card:hover .sw-product-image img {
+        transform: scale(1.05);
+    }
+
+    .sw-product-tag {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        background: var(--sw-primary);
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        z-index: 2;
+    }
+
+    .sw-product-actions {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        display: flex;
+        gap: 8px;
+        opacity: 0;
+        transform: translateX(10px);
+        transition: var(--sw-transition);
+        z-index: 2;
+    }
+
+    .sw-product-card:hover .sw-product-actions {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .sw-product-action-btn {
+        width: 40px;
+        height: 40px;
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--sw-white);
+        font-size: 16px;
+        transition: var(--sw-transition);
+        cursor: pointer;
+    }
+
+    .sw-product-action-btn:hover {
+        background: var(--sw-primary);
+        border-color: var(--sw-primary);
+        color: white;
+    }
+
+    .sw-product-content {
+        padding: 25px;
+    }
+
+    .sw-product-category {
+        font-size: 13px;
+        color: var(--sw-primary);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 5px;
+        display: inline-block;
+    }
+
+    .sw-product-title {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .sw-product-title a {
+        color: var(--sw-white);
+        transition: var(--sw-transition);
+    }
+
+    .sw-product-title a:hover {
+        color: var(--sw-primary-light);
+    }
+
+    .sw-product-price {
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--sw-primary);
+        margin-bottom: 15px;
+    }
+
+    .sw-product-rating {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #FFB800;
+        font-size: 14px;
+    }
+
+    .sw-product-rating span {
+        color: var(--sw-gray);
+    }
+
+    /* Banner Blocks */
+    .sw-banner-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 30px;
+        margin: 60px 0;
+    }
+
+    .sw-banner-card {
+        position: relative;
+        background: linear-gradient(135deg, var(--sw-primary-dark), var(--sw-black));
+        border-radius: 30px;
+        padding: 60px 40px;
+        overflow: hidden;
+        min-height: 400px;
+        display: flex;
+        align-items: center;
+    }
+
+    .sw-banner-content {
+        position: relative;
+        z-index: 2;
+        max-width: 60%;
+    }
+
+    .sw-banner-subtitle {
+        font-size: 14px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: var(--sw-primary-light);
+        margin-bottom: 10px;
+    }
+
+    .sw-banner-title {
+        font-size: 36px;
+        font-weight: 800;
+        color: var(--sw-white);
+        margin-bottom: 20px;
+    }
+
+    .sw-banner-text {
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 30px;
+        font-size: 16px;
+    }
+
+    .sw-banner-image {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        max-width: 50%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Testimonials */
+    .sw-testimonials {
+        background: linear-gradient(135deg, var(--sw-black-light), var(--sw-black));
+        border-radius: 30px;
+        padding: 60px;
+        margin: 60px 0;
+    }
+
+    .sw-testimonial-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        padding: 40px;
+        backdrop-filter: blur(10px);
+    }
+
+    .sw-testimonial-text {
+        font-size: 18px;
+        line-height: 1.7;
+        color: var(--sw-white);
+        margin-bottom: 30px;
+        position: relative;
+    }
+
+    .sw-testimonial-text::before {
+        content: '"';
+        font-size: 80px;
+        color: var(--sw-primary);
+        opacity: 0.3;
+        position: absolute;
+        top: -20px;
+        left: -20px;
+        font-family: serif;
+    }
+
+    .sw-testimonial-author {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .sw-testimonial-author img {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        border: 2px solid var(--sw-primary);
+    }
+
+    .sw-testimonial-author-info h4 {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--sw-white);
+        margin-bottom: 5px;
+    }
+
+    .sw-testimonial-author-info p {
+        color: var(--sw-gray);
+        font-size: 14px;
+    }
+
+    /* Blog Section */
+    .sw-blog-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 30px;
+        margin: 40px 0;
+    }
+
+    .sw-blog-card {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        overflow: hidden;
+        transition: var(--sw-transition);
+    }
+
+    .sw-blog-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--sw-primary);
+    }
+
+    .sw-blog-image {
+        height: 250px;
+        overflow: hidden;
+    }
+
+    .sw-blog-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: var(--sw-transition);
+    }
+
+    .sw-blog-card:hover .sw-blog-image img {
+        transform: scale(1.05);
+    }
+
+    .sw-blog-content {
+        padding: 25px;
+    }
+
+    .sw-blog-meta {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 15px;
+        color: var(--sw-gray);
+        font-size: 14px;
+    }
+
+    .sw-blog-meta i {
+        color: var(--sw-primary);
+        margin-right: 5px;
+    }
+
+    .sw-blog-title {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 15px;
+        line-height: 1.4;
+    }
+
+    .sw-blog-title a {
+        color: var(--sw-white);
+    }
+
+    .sw-blog-title a:hover {
+        color: var(--sw-primary);
+    }
+
+    /* CTA Section */
+    .sw-cta {
+        background: linear-gradient(135deg, var(--sw-primary), var(--sw-primary-dark));
+        border-radius: 30px;
+        padding: 80px 60px;
+        text-align: center;
+        margin: 60px 0;
+    }
+
+    .sw-cta-title {
+        font-size: 48px;
+        font-weight: 800;
+        color: white;
+        margin-bottom: 20px;
+    }
+
+    .sw-cta-text {
+        font-size: 18px;
+        color: rgba(255, 255, 255, 0.9);
+        max-width: 600px;
+        margin: 0 auto 30px;
+    }
+
+    /* Quantity Input */
+    .sw-quantity {
+        display: flex;
+        align-items: center;
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 30px;
+        overflow: hidden;
+        width: fit-content;
+    }
+
+    .sw-quantity-btn {
+        width: 40px;
+        height: 40px;
+        background: transparent;
+        border: none;
+        color: var(--sw-white);
+        font-size: 14px;
+        cursor: pointer;
+        transition: var(--sw-transition);
+    }
+
+    .sw-quantity-btn:hover {
+        background: var(--sw-primary);
+        color: white;
+    }
+
+    .sw-quantity input {
+        width: 60px;
+        height: 40px;
+        background: transparent;
+        border: none;
+        text-align: center;
+        color: var(--sw-white);
+        font-weight: 600;
+    }
+
+    .sw-quantity input::-webkit-outer-spin-button,
+    .sw-quantity input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    .sw-quantity input[type=number] {
+        -moz-appearance: textfield;
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+        .sw-hero-title {
+            font-size: 48px;
+        }
+        .sw-hero-title span {
+            font-size: 56px;
+        }
+        .sw-banner-grid {
+            grid-template-columns: 1fr;
+        }
+        .sw-banner-content {
+            max-width: 100%;
+        }
+        .sw-banner-image {
+            opacity: 0.3;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .sw-hero {
+            text-align: center;
+            min-height: 60vh;
+        }
+        .sw-hero-title {
+            font-size: 36px;
+        }
+        .sw-hero-title span {
+            font-size: 42px;
+        }
+        .sw-hero-text {
+            font-size: 16px;
+        }
+        .sw-features {
+            padding: 30px 0;
+        }
+        .sw-section-main-title {
+            font-size: 32px;
+        }
+        .sw-testimonials {
+            padding: 30px;
+        }
+        .sw-cta {
+            padding: 40px 20px;
+        }
+        .sw-cta-title {
+            font-size: 32px;
+        }
+    }
+
+    .sw-slider-arrow {
+        width: 50px;
+        height: 50px;
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 50%;
+        color: var(--sw-white);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: var(--sw-transition);
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 10;
+    }
+
+    .sw-slider-arrow:hover {
+        background: var(--sw-primary);
+        border-color: var(--sw-primary);
+        color: white;
+    }
+
+    .sw-slider-prev {
+        left: -25px;
+    }
+
+    .sw-slider-next {
+        right: -25px;
+    }
+
+    @media (max-width: 768px) {
+        .sw-slider-arrow {
+            display: none;
+        }
+    }
+
+    /* Анимации */
+    [data-ani] {
+        opacity: 0;
+        animation-duration: 1s;
+        animation-fill-mode: forwards;
+    }
+
+    [data-ani="slideinup"] {
+        animation-name: slideInUp;
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translate3d(0, 40px, 0);
+        }
+        to {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+        }
+    }
+</style>
+{% endblock head %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="sw-hero">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <div class="sw-hero-content">
+                    <span class="sw-hero-subtitle" data-ani="slideinup" data-ani-delay="0.2s">
+                        {{ json_fields.slide_1_title_small.field|default:"ВЕБ-РАЗРАБОТКА" }}
+                    </span>
+                    <h1 class="sw-hero-title" data-ani="slideinup" data-ani-delay="0.4s">
+                        {{ json_fields.slide_1_title.field|default:"Создаем цифровые" }}
+                        <span>{{ json_fields.slide_1_title_bottom.field|default:"шедевры" }}</span>
+                    </h1>
+                    <p class="sw-hero-text" data-ani="slideinup" data-ani-delay="0.6s">
+                        {{ json_fields.slide_1_description.field|default:"Разрабатываем современные сайты, веб-приложения и телеграм-ботов с уникальным дизайном и высокой производительностью." }}
+                    </p>
+                    <div data-ani="slideinup" data-ani-delay="0.8s">
+                        <a href="{% url 'webmain:services' %}" class="sw-btn sw-btn-primary">
+                            {{ json_fields.slide_1_button.field|default:"Наши работы" }}
+                            <i class="fas fa-chevrons-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 d-none d-lg-block">
+                <div class="sw-hero-image">
+                    <img src="{% static 'site/serweb/img/hero-illustration.svg' %}" alt="Hero Illustration" onerror="this.src='https://via.placeholder.com/600x400/6C3CE9/FFFFFF?text=SerWeb'">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="container">
+    <div class="sw-features">
+        <div class="row">
+            <div class="col-md-3 col-sm-6">
+                <div class="sw-feature-item">
+                    <div class="sw-feature-icon">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <h3 class="sw-feature-title">{{ json_fields.top_information_1_title.field|default:"Быстрая разработка" }}</h3>
+                    <p class="sw-feature-text">{{ json_fields.top_information_1_description.field|default:"Сроки от 2 недель" }}</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="sw-feature-item">
+                    <div class="sw-feature-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3 class="sw-feature-title">{{ json_fields.top_information_2_title.field|default:"Адаптивный дизайн" }}</h3>
+                    <p class="sw-feature-text">{{ json_fields.top_information_2_description.field|default:"Идеально на всех устройствах" }}</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="sw-feature-item">
+                    <div class="sw-feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3 class="sw-feature-title">{{ json_fields.top_information_3_title.field|default:"Безопасность" }}</h3>
+                    <p class="sw-feature-text">{{ json_fields.top_information_3_description.field|default:"Защита от взломов" }}</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="sw-feature-item">
+                    <div class="sw-feature-icon">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <h3 class="sw-feature-title">{{ json_fields.top_information_4_title.field|default:"Поддержка 24/7" }}</h3>
+                    <p class="sw-feature-text">{{ json_fields.top_information_4_description.field|default:"Всегда на связи" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Portfolio/Categories Section -->
+<section class="container" id="category-sec">
+    <div class="sw-section-title">
+        <span class="sw-section-subtitle">{{ json_fields.category_title.field|default:"НАШИ РАБОТЫ" }}</span>
+        <h2 class="sw-section-main-title">{{ json_fields.category_title_2.field|default:"Портфолио <span>проектов</span>" }}</h2>
+    </div>
+
+    <div class="sw-category-grid">
+        {% for category in categorys %}
+        <div class="sw-category-card" onclick="window.location.href='{% url 'shop:categories' category.slug %}'">
+            <div class="sw-category-icon">
+                {% if category.image %}
+                    <img src="{{ category.image.url }}" alt="{{ category.name }}" style="width: 40px; height: 40px; object-fit: contain; filter: brightness(0) invert(1);">
+                {% else %}
+                    <i class="fas fa-folder"></i>
+                {% endif %}
+            </div>
+            <h3 class="sw-category-name">{{ category.name }}</h3>
+            <p class="sw-category-count">{{ category.product_count }} проектов</p>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Top Projects Section -->
+<section class="container">
+    <div class="sw-section-title">
+        <span class="sw-section-subtitle">{{ json_fields.top_product_title.field|default:"ПОПУЛЯРНОЕ" }}</span>
+        <h2 class="sw-section-main-title">{{ json_fields.top_product_title_2.field|default:"Лучшие <span>проекты</span>" }}</h2>
+    </div>
+
+    <div class="sw-product-grid" id="for-top_product" data-product-id="{% for product in top_product %}{{ product.id }}{% if not forloop.last %},{% endif %}{% endfor %}"></div>
+</section>
+
+<!-- Banner Section 1 -->
+<section class="container">
+    <div class="sw-banner-grid">
+        <div class="sw-banner-card">
+            <div class="sw-banner-content">
+                <span class="sw-banner-subtitle">{{ json_fields.two_banner_1_title_1.field|default:"СПЕЦПРЕДЛОЖЕНИЕ" }}</span>
+                <h3 class="sw-banner-title">{{ json_fields.two_banner_3_title_1.field|default:"Сайт под ключ" }}</h3>
+                <p class="sw-banner-text">{{ json_fields.two_banner_4_title_1.field|default:"Разработаем сайт любой сложности с уникальным дизайном" }}</p>
+                <a href="{% url 'shop:my_order' %}" class="sw-btn sw-btn-primary">
+                    {{ json_fields.two_banner_bottom_title_1.field|default:"Заказать" }}
+                    <i class="fas fa-chevrons-right ms-2"></i>
+                </a>
+            </div>
+            <img src="{{ json_fields.two_banner_image_1.info|default:'https://via.placeholder.com/300x400/6C3CE9/FFFFFF?text=SerWeb' }}" alt="Banner" class="sw-banner-image">
+        </div>
+        <div class="sw-banner-card">
+            <div class="sw-banner-content">
+                <span class="sw-banner-subtitle">{{ json_fields.two_banner_1_title_2.field|default:"АКЦИЯ" }}</span>
+                <h3 class="sw-banner-title">{{ json_fields.two_banner_3_title_2.field|default:"Telegram бот" }}</h3>
+                <p class="sw-banner-text">{{ json_fields.two_banner_4_title_2.field|default:"Автоматизируйте бизнес с помощью умных ботов" }}</p>
+                <a href="{% url 'shop:my_order' %}" class="sw-btn sw-btn-primary">
+                    {{ json_fields.two_banner_bottom_title_2.field|default:"Узнать" }}
+                    <i class="fas fa-chevrons-right ms-2"></i>
+                </a>
+            </div>
+            <img src="{{ json_fields.two_banner_image_2.info|default:'https://via.placeholder.com/300x400/4B2AA3/FFFFFF?text=Bots' }}" alt="Banner" class="sw-banner-image">
+        </div>
+    </div>
+</section>
+
+<!-- Trending Projects -->
+<section class="container">
+    <div class="row align-items-center mb-40">
+        <div class="col-md-8">
+            <div class="sw-section-title text-start mb-0">
+                <span class="sw-section-subtitle">{{ json_fields.trends_product_title.field|default:"НОВИНКИ" }}</span>
+                <h2 class="sw-section-main-title">{{ json_fields.trends_product_banner_title.field|default:"Трендовые <span>решения</span>" }}</h2>
+            </div>
+        </div>
+        <div class="col-md-4 text-end">
+            <div class="icon-box">
+                <button data-slider-prev="#productSlider7" class="sw-slider-arrow sw-slider-prev default">
+                    <i class="far fa-arrow-left"></i>
+                </button>
+                <button data-slider-next="#productSlider7" class="sw-slider-arrow sw-slider-next default">
+                    <i class="far fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="swiper th-slider" id="productSlider7" data-slider-options='{"breakpoints":{"0":{"slidesPerView":1},"768":{"slidesPerView":2},"992":{"slidesPerView":3}}}'>
+        <div class="swiper-wrapper" id="for-trends-product" data-product-id="{% for product in trends_products %}{{ product.id }}{% if not forloop.last %},{% endif %}{% endfor %}"></div>
+    </div>
+</section>
+
+<!-- Bottom Products Section -->
+<section class="container">
+    <div class="row">
+        <div class="col-lg-3 col-md-6 mb-40 mb-lg-0">
+            <div class="sw-banner-card" style="min-height: 300px; padding: 40px 20px; text-align: center; display: flex; flex-direction: column; justify-content: center;">
+                <span class="sw-banner-subtitle">{{ json_fields.bottom_product_banner_title_small.field|default:"СКИДКА" }}</span>
+                <h3 class="sw-banner-title" style="font-size: 28px;">{{ json_fields.bottom_product_banner_title.field|default:"-20% на первый заказ" }}</h3>
+                <a href="{% url 'shop:my_order' %}" class="sw-btn sw-btn-primary" style="margin-top: 20px;">
+                    {{ json_fields.bottom_product_banner_bottom_title.field|default:"Заказать" }}
+                    <i class="fas fa-chevrons-right ms-2"></i>
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-9">
+            <div class="row">
+                <div class="col-md-4">
+                    <h3 class="sw-feature-title mb-20">{{ json_fields.bottom_product_title_1.field|default:"Веб-сайты" }}</h3>
+                    {% for product in bottom_products_1 %}
+                    <div class="sw-product-card mb-20" style="display: flex; flex-direction: row; align-items: center; padding: 15px;">
+                        <div class="sw-product-image" style="width: 80px; height: 80px; border-radius: 10px; margin-right: 15px;">
+                            <img src="{% if product.image %}{{ product.image.url }}{% else %}https://via.placeholder.com/80x80/6C3CE9/FFFFFF?text=Site{% endif %}" alt="{{ product.name }}">
+                        </div>
+                        <div class="sw-product-content" style="padding: 0;">
+                            <h4 class="sw-product-title" style="font-size: 16px; margin-bottom: 5px;">
+                                <a href="{% url 'shop:products' product.slug %}">{{ product.name|truncatechars:20 }}</a>
+                            </h4>
+                            <div class="sw-product-price" style="font-size: 16px;">{{ product.price }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="col-md-4">
+                    <h3 class="sw-feature-title mb-20">{{ json_fields.bottom_product_title_2.field|default:"Telegram боты" }}</h3>
+                    {% for product in bottom_products_2 %}
+                    <div class="sw-product-card mb-20" style="display: flex; flex-direction: row; align-items: center; padding: 15px;">
+                        <div class="sw-product-image" style="width: 80px; height: 80px; border-radius: 10px; margin-right: 15px;">
+                            <img src="{% if product.image %}{{ product.image.url }}{% else %}https://via.placeholder.com/80x80/4B2AA3/FFFFFF?text=Bot{% endif %}" alt="{{ product.name }}">
+                        </div>
+                        <div class="sw-product-content" style="padding: 0;">
+                            <h4 class="sw-product-title" style="font-size: 16px; margin-bottom: 5px;">
+                                <a href="{% url 'shop:products' product.slug %}">{{ product.name|truncatechars:20 }}</a>
+                            </h4>
+                            <div class="sw-product-price" style="font-size: 16px;">{{ product.price }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="col-md-4 mob-prod">
+                    <h3 class="sw-feature-title mb-20">{{ json_fields.bottom_product_title_3.field|default:"Мобильные приложения" }}</h3>
+                    {% for product in bottom_products_3 %}
+                    <div class="sw-product-card mb-20" style="display: flex; flex-direction: row; align-items: center; padding: 15px;">
+                        <div class="sw-product-image" style="width: 80px; height: 80px; border-radius: 10px; margin-right: 15px;">
+                            <img src="{% if product.image %}{{ product.image.url }}{% else %}https://via.placeholder.com/80x80/9B7EFF/FFFFFF?text=App{% endif %}" alt="{{ product.name }}">
+                        </div>
+                        <div class="sw-product-content" style="padding: 0;">
+                            <h4 class="sw-product-title" style="font-size: 16px; margin-bottom: 5px;">
+                                <a href="{% url 'shop:products' product.slug %}">{{ product.name|truncatechars:20 }}</a>
+                            </h4>
+                            <div class="sw-product-price" style="font-size: 16px;">{{ product.price }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="container">
+    <div class="sw-cta" data-bg-src="{{ json_fields.one_banner_image_1.info }}">
+        <span class="sw-banner-subtitle">{{ json_fields.one_banner_1_title_1.field|default:"ГОТОВЫ НАЧАТЬ?" }}</span>
+        <h2 class="sw-cta-title">{{ json_fields.one_banner_2_title_1.field|default:"Создадим проект вашей мечты" }}</h2>
+        <p class="sw-cta-text">{{ json_fields.one_banner_3_title_1.field|default:"От идеи до реализации — мы поможем воплотить любую задумку в жизнь" }}</p>
+        <a href="{% url 'shop:my_order' %}" class="sw-btn sw-btn-primary" style="background: white; color: var(--sw-primary); border-color: white;">
+            {% trans "Связаться с нами" %}
+            <i class="fas fa-chevrons-right ms-2"></i>
+        </a>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="container">
+    <div class="sw-testimonials">
+        <div class="sw-section-title">
+            <span class="sw-section-subtitle">{{ json_fields.reviews_title_1.field|default:"ОТЗЫВЫ" }}</span>
+            <h2 class="sw-section-main-title">{{ json_fields.reviews_title_2.field|default:"Что говорят <span>клиенты</span>" }}</h2>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="sw-testimonial-card">
+                    <p class="sw-testimonial-text">{{ json_fields.reviews_description_1.field|default:"Отличная команда профессионалов! Сделали сайт быстрее срока, всё работает идеально. Отдельное спасибо за дизайн — выглядит современно и стильно." }}</p>
+                    <div class="sw-testimonial-author">
+                        <img src="{{ json_fields.reviews_image_1.info|default:'https://via.placeholder.com/60x60/6C3CE9/FFFFFF?text=User' }}" alt="Author">
+                        <div class="sw-testimonial-author-info">
+                            <h4>{{ json_fields.reviews_name_1.field|default:"Алексей Петров" }}</h4>
+                            <p>{{ json_fields.reviews_status_1.field|default:"CEO, TechStart" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="sw-testimonial-card">
+                    <p class="sw-testimonial-text">{{ json_fields.reviews_description_2.field|default:"Заказывали разработку интернет-магазина. Результат превзошёл ожидания! Отличный функционал, удобная админка, высокая скорость работы." }}</p>
+                    <div class="sw-testimonial-author">
+                        <img src="{{ json_fields.reviews_image_2.info|default:'https://via.placeholder.com/60x60/4B2AA3/FFFFFF?text=User' }}" alt="Author">
+                        <div class="sw-testimonial-author-info">
+                            <h4>{{ json_fields.reviews_name_2.field|default:"Екатерина Смирнова" }}</h4>
+                            <p>{{ json_fields.reviews_status_2.field|default:"Владелец бизнеса" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="sw-testimonial-card">
+                    <p class="sw-testimonial-text">{{ json_fields.reviews_description_3.field|default:"Спасибо за отличного Telegram-бота! Автоматизировали поддержку клиентов, теперь экономим кучу времени. Рекомендую!" }}</p>
+                    <div class="sw-testimonial-author">
+                        <img src="{{ json_fields.reviews_image_3.info|default:'https://via.placeholder.com/60x60/9B7EFF/FFFFFF?text=User' }}" alt="Author">
+                        <div class="sw-testimonial-author-info">
+                            <h4>{{ json_fields.reviews_name_3.field|default:"Дмитрий Иванов" }}</h4>
+                            <p>{{ json_fields.reviews_status_3.field|default:"Маркетолог" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Blog Section -->
+<section class="container" id="blog-sec">
+    <div class="row align-items-center mb-40">
+        <div class="col-md-8">
+            <div class="sw-section-title text-start mb-0">
+                <span class="sw-section-subtitle">{{ json_fields.blog_title.field|default:"БЛОГ" }}</span>
+                <h2 class="sw-section-main-title">{{ json_fields.blog_bottom_title.field|default:"Полезные <span>статьи</span>" }}</h2>
+            </div>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'webmain:blogs' %}" class="sw-btn sw-btn-outline">
+                {% trans "Все статьи" %}
+                <i class="fas fa-chevrons-right ms-2"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="sw-blog-grid">
+        {% for blog in blogs %}
+        <div class="sw-blog-card">
+            <div class="sw-blog-image">
+                <img src="{{ blog.image.url }}" alt="{{ blog.name }}">
+            </div>
+            <div class="sw-blog-content">
+                <div class="sw-blog-meta">
+                    <span><i class="far fa-calendar"></i> {{ blog.create|date:"d.m.Y" }}</span>
+                </div>
+                <h3 class="sw-blog-title">
+                    <a href="{% url 'webmain:blogdetail' blog.slug %}">{{ blog.name }}</a>
+                </h3>
+                <a href="{% url 'webmain:blogdetail' blog.slug %}" class="sw-btn sw-btn-outline" style="padding: 8px 20px; font-size: 14px;">
+                    {% trans 'Читать' %}
+                    <i class="fas fa-chevrons-right ms-2"></i>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- JavaScript -->
+<script>
+window.urls = {
+    bookmarkAdd: "{% url 'shop:bookmark-add' %}",
+    bookmarkDelete: "{% url 'shop:bookmark-delete' %}",
+    deleteSelectedProductCart: "{% url 'shop:delete_selected_product' %}",
+    compareAdd: "{% url 'shop:compare_add' '00000000-0000-0000-0000-000000000000' %}"
+};
+
+document.addEventListener("DOMContentLoaded", function() {
+    // CSRF Token
+    function getCSRFToken() {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, 9) === 'csrftoken') {
+                    cookieValue = decodeURIComponent(cookie.substring(10));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Stars rating
+    function buildStarsHTML(rating) {
+        const r = Math.max(0, Math.min(5, Number(rating) || 0));
+        const full = Math.floor(r);
+        const half = (r - full) >= 0.5 ? 1 : 0;
+        const empty = 5 - full - half;
+        let html = '<div class="sw-product-rating">';
+        for (let i = 0; i < full; i++) html += '<i class="fas fa-star"></i>';
+        if (half) html += '<i class="fas fa-star-half-alt"></i>';
+        for (let i = 0; i < empty; i++) html += '<i class="far fa-star"></i>';
+        html += '</div>';
+        return html;
+    }
+
+    // Load products by IDs
+    function loadProductsByIds(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        const rawIds = container.dataset.productId || "";
+        const ids = rawIds.split(",").map(id => id.trim()).filter(id => id);
+
+        if (ids.length === 0) {
+            container.innerHTML = "<p class='text-center text-gray'>Нет проектов для отображения</p>";
+            return;
+        }
+
+        const prefix = window.location.pathname.startsWith("/ru/") ? "/ru" : "";
+        fetch(`${prefix}/products/by-ids/?ids=${encodeURIComponent(ids.join(','))}`, {
+            method: "GET",
+            headers: { "X-Requested-With": "XMLHttpRequest" }
+        })
+        .then(res => res.json())
+        .then(data => {
+            const currency = data.currency || "₽";
+            container.innerHTML = "";
+
+            data.products.forEach(product => {
+                const card = document.createElement("div");
+                card.className = containerId === "for-trends-product" ? "swiper-slide" : "sw-product-card";
+
+                const csrf = getCSRFToken();
+                const bookmarkType = product.is_bookmarked ? "bookmarkDelete" : "bookmarkAdd";
+                const bookmarkIcon = product.is_bookmarked ? "fas fa-heart" : "far fa-heart";
+
+                card.innerHTML = `
+                    <div class="sw-product-card" style="height: 100%;">
+                        <div class="sw-product-image">
+                            <img src="${product.images?.[0] || product.image || 'https://via.placeholder.com/300x250/6C3CE9/FFFFFF?text=SerWeb'}" alt="${product.name}">
+                            ${product.reklama ? '<span class="sw-product-tag">Реклама</span>' : ''}
+                            <div class="sw-product-actions">
+                                <a class="sw-product-action-btn add-to-compare" data-id="${product.id}" title="Сравнить">
+                                    <i class="fa fa-balance-scale"></i>
+                                </a>
+                                <span class="sw-product-action-btn bookmark" data-type="${bookmarkType}" data-product="${product.id}" title="Избранное">
+                                    <i class="${bookmarkIcon}"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="sw-product-content">
+                            <span class="sw-product-category">${product.category_name || 'Проект'}</span>
+                            <h3 class="sw-product-title">
+                                <a href="${product.url || '#'}">${product.name}</a>
+                            </h3>
+                            <div class="sw-product-price">${product.price ? product.price + ' ' + currency : 'Цена по запросу'}</div>
+                            ${buildStarsHTML(product.rating || 5)}
+                            <form method="post" action="{% url 'shop:add_to_cart' %}" data-product-id="${product.id}" class="add-to-cart-form mt-3">
+                                <input type="hidden" name="csrfmiddlewaretoken" value="${csrf}">
+                                <input type="hidden" name="product_id" value="${product.id}">
+                                <input type="hidden" name="variation_slug" value="${product.variation_slug || ''}">
+                                <div class="row g-2">
+                                    <div class="col-5">
+                                        <div class="sw-quantity">
+                                            <button type="button" class="sw-quantity-btn quantity-minus"><i class="fas fa-minus"></i></button>
+                                            <input type="number" name="quantity" value="1" min="1" max="51" class="quantity">
+                                            <button type="button" class="sw-quantity-btn quantity-plus"><i class="fas fa-plus"></i></button>
+                                        </div>
+                                    </div>
+                                    <div class="col-7">
+                                        <button type="submit" class="sw-btn sw-btn-primary" style="padding: 8px 12px; font-size: 14px; width: 100%;">
+                                            <i class="fas fa-shopping-cart me-1"></i> В корзину
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            // Rebind event handlers
+            bindBookmarkButton();
+            bindAddToCartForms();
+            bindCompareButtons();
+        })
+        .catch(err => {
+            console.error("Ошибка загрузки продуктов:", err);
+            container.innerHTML = "<p class='text-center text-danger'>Ошибка загрузки</p>";
+        });
+    }
+
+    // Event handlers
+    function bindBookmarkButton() {
+        document.querySelectorAll(".bookmark").forEach(button => {
+            button.removeEventListener("click", handleBookmark);
+            button.addEventListener("click", handleBookmark);
+        });
+    }
+
+    function handleBookmark(event) {
+        event.preventDefault();
+        const button = event.currentTarget;
+        const product_id = button.dataset.product;
+        const aType = button.dataset.type;
+        const csrfToken = getCSRFToken();
+
+        fetch(window.urls[aType], {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-CSRFToken": csrfToken
+            },
+            body: new URLSearchParams({ product_id }).toString()
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === "success") {
+                if (aType === "bookmarkAdd") {
+                    button.dataset.type = "bookmarkDelete";
+                    button.innerHTML = '<i class="fas fa-heart"></i>';
+                } else {
+                    button.dataset.type = "bookmarkAdd";
+                    button.innerHTML = '<i class="far fa-heart"></i>';
+                }
+            }
+        })
+        .catch(err => console.error("Ошибка:", err));
+    }
+
+    function bindAddToCartForms() {
+        document.querySelectorAll("form.add-to-cart-form").forEach(form => {
+            form.removeEventListener("submit", handleAddToCart);
+            form.addEventListener("submit", handleAddToCart);
+        });
+    }
+
+    function handleAddToCart(event) {
+        event.preventDefault();
+        const form = event.currentTarget;
+        const formData = new FormData(form);
+
+        fetch(form.action, {
+            method: "POST",
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                showCustomAlert("✓ Товар добавлен в корзину");
+                // Update cart counter
+                const cartCount = document.querySelector(".sw-badge");
+                if (cartCount && data.cart_count) {
+                    cartCount.textContent = data.cart_count;
+                }
+            } else {
+                alert(data.message || "Ошибка добавления");
+            }
+        })
+        .catch(err => console.error("Ошибка:", err));
+    }
+
+    function bindCompareButtons() {
+        document.querySelectorAll(".add-to-compare").forEach(button => {
+            button.removeEventListener("click", handleCompare);
+            button.addEventListener("click", handleCompare);
+        });
+    }
+
+    function handleCompare(event) {
+        event.preventDefault();
+        const button = event.currentTarget;
+        const product_id = button.dataset.id;
+        const csrfToken = getCSRFToken();
+        const url = window.urls.compareAdd.replace('00000000-0000-0000-0000-000000000000', product_id);
+
+        fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-CSRFToken": csrfToken
+            },
+            body: new URLSearchParams({ product_id }).toString()
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                showCustomAlert("✓ Добавлено в сравнение");
+            } else {
+                alert(data.message || "Ошибка");
+            }
+        })
+        .catch(err => console.error("Ошибка:", err));
+    }
+
+    function showCustomAlert(message) {
+        let alertBox = document.getElementById("custom-alert");
+        if (!alertBox) {
+            alertBox = document.createElement("div");
+            alertBox.id = "custom-alert";
+            alertBox.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #28a745;
+                color: white;
+                padding: 12px 24px;
+                border-radius: 8px;
+                z-index: 9999;
+                opacity: 0;
+                transition: opacity 0.3s;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            `;
+            document.body.appendChild(alertBox);
+        }
+        alertBox.textContent = message;
+        alertBox.style.display = "block";
+        setTimeout(() => alertBox.style.opacity = "1", 10);
+        setTimeout(() => {
+            alertBox.style.opacity = "0";
+            setTimeout(() => alertBox.style.display = "none", 300);
+        }, 2000);
+    }
+
+    // Quantity buttons
+    document.addEventListener("click", (e) => {
+        const plusBtn = e.target.closest(".quantity-plus");
+        const minusBtn = e.target.closest(".quantity-minus");
+        if (!plusBtn && !minusBtn) return;
+
+        const container = (plusBtn || minusBtn).closest(".sw-quantity");
+        if (!container) return;
+
+        const input = container.querySelector("input.quantity");
+        if (!input) return;
+
+        const min = parseInt(input.min) || 1;
+        const max = parseInt(input.max) || 51;
+        let val = parseInt(input.value) || min;
+
+        if (plusBtn) val = Math.min(max, val + 1);
+        if (minusBtn) val = Math.max(min, val - 1);
+
+        input.value = val;
+    });
+
+    // Load products
+    loadProductsByIds("for-top_product");
+    loadProductsByIds("for-trends-product");
+});
+</script>
+{% endblock content %}

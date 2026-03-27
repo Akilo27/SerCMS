@@ -1,0 +1,942 @@
+{% extends 'site/SerWeb/base.html' %}
+{% load static generals_tag shop_tags i18n %}
+
+{% block title %}{{ seo_title|default:"Оформление заказа | SerWeb" }}{% endblock title %}
+{% block description %}{{ seo_description|default:"Оформление заказа в веб-студии SerWeb" }}{% endblock description %}
+
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }}{% else %}{% static 'site/serweb/img/checkout-og.jpg' %}{% endif %}{% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle|default:"Оформление заказа" }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription|default:"Оформление заказа SerWeb" }}{% endblock propertyimage %}
+
+{% block head %}
+<!-- Подключаем необходимые библиотеки -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- DaData для подсказок адресов -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/suggestions-jquery@21.12.0/dist/css/suggestions.min.css">
+<script src="https://cdn.jsdelivr.net/npm/suggestions-jquery@21.12.0/dist/js/jquery.suggestions.min.js"></script>
+
+<!-- Яндекс Карты -->
+<script src="https://api-maps.yandex.ru/2.1/?apikey=78851096-f5ca-4b77-b7db-3a200b45f233&lang=ru_RU" type="text/javascript"></script>
+
+<!-- Leaflet (как запасной вариант) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- IMask для маски телефона -->
+<script src="https://unpkg.com/imask@7.6.1/dist/imask.js"></script>
+
+<style>
+    /* Стили для страницы оформления заказа SerWeb */
+    .checkout-wrapper {
+        padding: 40px 0;
+    }
+
+    .checkout-grid {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 30px;
+    }
+
+    @media (max-width: 992px) {
+        .checkout-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Основной блок с формой */
+    .checkout-form-container {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        padding: 30px;
+    }
+
+    .form-section {
+        margin-bottom: 30px;
+    }
+
+    .form-section-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--sw-white);
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--sw-gray-dark);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .form-section-title i {
+        color: var(--sw-primary);
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+
+    @media (max-width: 576px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--sw-white);
+        font-weight: 500;
+        font-size: 14px;
+    }
+
+    .form-label i {
+        color: var(--sw-primary);
+        margin-right: 5px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 12px;
+        color: var(--sw-white);
+        font-size: 15px;
+        transition: var(--sw-transition);
+    }
+
+    .form-control:focus {
+        border-color: var(--sw-primary);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(108, 60, 233, 0.2);
+    }
+
+    .form-control::placeholder {
+        color: var(--sw-gray);
+        opacity: 0.7;
+    }
+
+    /* Способы доставки */
+    .delivery-options {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .delivery-option {
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 12px;
+        padding: 16px;
+        cursor: pointer;
+        transition: var(--sw-transition);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .delivery-option:hover {
+        border-color: var(--sw-primary);
+    }
+
+    .delivery-option.active {
+        border-color: var(--sw-primary);
+        background: rgba(108, 60, 233, 0.1);
+    }
+
+    .delivery-option input[type="radio"] {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--sw-primary);
+        margin: 0;
+    }
+
+    .delivery-option-content {
+        flex: 1;
+    }
+
+    .delivery-option-title {
+        font-weight: 600;
+        color: var(--sw-white);
+        margin-bottom: 4px;
+    }
+
+    .delivery-option-description {
+        font-size: 13px;
+        color: var(--sw-gray);
+    }
+
+    .delivery-info-block {
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+
+    .delivery-info-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--sw-white);
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .delivery-info-title i {
+        color: var(--sw-primary);
+    }
+
+    .delivery-address {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 12px;
+        padding: 15px;
+        margin-top: 15px;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .delivery-address i {
+        color: var(--sw-primary);
+        font-size: 20px;
+    }
+
+    .delivery-address p {
+        color: var(--sw-gray);
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    /* Способы оплаты */
+    .payment-options {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .payment-option {
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 12px;
+        padding: 16px;
+        cursor: pointer;
+        transition: var(--sw-transition);
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .payment-option:hover {
+        border-color: var(--sw-primary);
+    }
+
+    .payment-option.active {
+        border-color: var(--sw-primary);
+        background: rgba(108, 60, 233, 0.1);
+    }
+
+    .payment-option input[type="radio"] {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--sw-primary);
+        margin: 0;
+    }
+
+    .payment-option img {
+        width: 50px;
+        height: 50px;
+        object-fit: contain;
+        border-radius: 8px;
+    }
+
+    .payment-option-content {
+        flex: 1;
+    }
+
+    .payment-option-title {
+        font-weight: 600;
+        color: var(--sw-white);
+        margin-bottom: 4px;
+    }
+
+    .payment-option-description {
+        font-size: 13px;
+        color: var(--sw-gray);
+    }
+
+    /* Сайдбар с заказом */
+    .order-summary {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        padding: 25px;
+        position: sticky;
+        top: 100px;
+    }
+
+    .summary-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--sw-white);
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid var(--sw-gray-dark);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .summary-title i {
+        color: var(--sw-primary);
+    }
+
+    .order-items {
+        max-height: 300px;
+        overflow-y: auto;
+        margin-bottom: 20px;
+    }
+
+    .order-item {
+        display: flex;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .order-item-image {
+        width: 60px;
+        height: 60px;
+        border-radius: 10px;
+        overflow: hidden;
+        background: var(--sw-black);
+        flex-shrink: 0;
+    }
+
+    .order-item-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .order-item-info {
+        flex: 1;
+    }
+
+    .order-item-name {
+        font-weight: 600;
+        color: var(--sw-white);
+        margin-bottom: 4px;
+        font-size: 14px;
+    }
+
+    .order-item-meta {
+        font-size: 12px;
+        color: var(--sw-gray);
+        display: flex;
+        gap: 10px;
+    }
+
+    .order-item-price {
+        font-weight: 600;
+        color: var(--sw-primary);
+        font-size: 14px;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .summary-row.total {
+        border-bottom: none;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 2px solid var(--sw-gray-dark);
+    }
+
+    .summary-label {
+        color: var(--sw-gray);
+        font-size: 15px;
+    }
+
+    .summary-value {
+        color: var(--sw-white);
+        font-weight: 600;
+    }
+
+    .total .summary-label {
+        color: var(--sw-white);
+        font-weight: 600;
+        font-size: 18px;
+    }
+
+    .total .summary-value {
+        color: var(--sw-primary);
+        font-size: 24px;
+        font-weight: 800;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 14px 24px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 16px;
+        transition: var(--sw-transition);
+        cursor: pointer;
+        border: 1px solid transparent;
+        width: 100%;
+        text-decoration: none;
+    }
+
+    .btn-primary {
+        background: var(--sw-primary);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: var(--sw-primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(108, 60, 233, 0.3);
+    }
+
+    .btn-outline {
+        background: transparent;
+        border: 1px solid var(--sw-gray-dark);
+        color: var(--sw-white);
+    }
+
+    .btn-outline:hover {
+        border-color: var(--sw-primary);
+        color: var(--sw-primary);
+    }
+
+    /* Хлебные крошки */
+    .checkout-breadcrumbs {
+        margin-bottom: 30px;
+    }
+
+    .breadcrumb-list {
+        display: flex;
+        list-style: none;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .breadcrumb-item {
+        font-size: 14px;
+        color: var(--sw-gray);
+    }
+
+    .breadcrumb-item:not(:last-child)::after {
+        content: '/';
+        margin-left: 10px;
+        color: var(--sw-gray);
+    }
+
+    .breadcrumb-item a {
+        color: var(--sw-gray);
+        transition: var(--sw-transition);
+    }
+
+    .breadcrumb-item a:hover {
+        color: var(--sw-primary);
+    }
+
+    .breadcrumb-item.active {
+        color: var(--sw-white);
+    }
+
+    /* Уведомления */
+    .checkout-toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-left: 4px solid var(--sw-primary);
+        border-radius: 12px;
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        animation: slideIn 0.3s ease;
+    }
+
+    .checkout-toast.success {
+        border-left-color: #4CAF50;
+    }
+
+    .checkout-toast.success i {
+        color: #4CAF50;
+    }
+
+    .checkout-toast.error {
+        border-left-color: #dc3545;
+    }
+
+    .checkout-toast.error i {
+        color: #dc3545;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    /* Скрытые элементы */
+    .hidden {
+        display: none !important;
+    }
+
+    .manufacturers-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
+        margin: 20px 0;
+    }
+
+    .manufacturer-item {
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 12px;
+        padding: 15px;
+        cursor: pointer;
+        transition: var(--sw-transition);
+    }
+
+    .manufacturer-item:hover {
+        border-color: var(--sw-primary);
+    }
+
+    .manufacturer-item.selected {
+        border-color: var(--sw-primary);
+        background: rgba(108, 60, 233, 0.1);
+    }
+
+    .manufacturer-item input[type="radio"] {
+        display: none;
+    }
+</style>
+{% endblock head %}
+
+{% block breadcrumbs %}
+<div class="checkout-breadcrumbs">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb-list">
+                <li class="breadcrumb-item"><a href="{% url 'webmain:home' %}"><i class="fa fa-home me-1"></i>{% trans 'Главная' %}</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'shop:catalogs' %}">{% trans 'Каталог' %}</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'shop:my_cart' %}">{% trans 'Корзина' %}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{% trans 'Оформление заказа' %}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+{% endblock breadcrumbs %}
+
+{% block content %}
+<div class="checkout-wrapper">
+    <div class="container">
+        <div class="checkout-grid">
+            <!-- Левая колонка - форма оформления -->
+            <div class="checkout-form-container">
+                <form method="post" action="{% url 'payment:purchase' %}" id="info_form">
+                    {% csrf_token %}
+
+                    <!-- Данные получателя -->
+                    <div class="form-section">
+                        <h2 class="form-section-title">
+                            <i class="fa fa-user"></i>
+                            {% trans "Данные получателя" %}
+                        </h2>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fa fa-user"></i>
+                                    {% trans "Имя" %} <span style="color: var(--sw-primary);">*</span>
+                                </label>
+                                <input type="text" name="customer_name" class="form-control" required placeholder="{% trans 'Введите имя' %}">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fa fa-user"></i>
+                                    {% trans "Фамилия" %} <span style="color: var(--sw-primary);">*</span>
+                                </label>
+                                <input type="text" name="customer_surname" class="form-control" required placeholder="{% trans 'Введите фамилию' %}">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fa fa-phone"></i>
+                                    {% trans "Телефон" %} <span style="color: var(--sw-primary);">*</span>
+                                </label>
+                                <input type="text" name="customer_phone" class="form-control" id="id_phone" required placeholder="+7 (999) 999-99-99">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fa fa-envelope"></i>
+                                    {% trans "Email" %} <span style="color: var(--sw-primary);">*</span>
+                                </label>
+                                <input type="email" name="customer_email" class="form-control" required placeholder="example@mail.com">
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="delivery-price" id="delivery_price_input" value="">
+                    </div>
+
+                    <!-- Способ доставки -->
+                    <div class="form-section">
+                        <h2 class="form-section-title">
+                            <i class="fa fa-truck"></i>
+                            {% trans "Способ доставки" %}
+                        </h2>
+
+                        <div class="delivery-options" id="delivery-radio">
+                            <label class="delivery-option active" id="pickup-option">
+                                <input type="radio" name="delivery_method" value="pickup" checked>
+                                <div class="delivery-option-content">
+                                    <div class="delivery-option-title">{% trans "Самовывоз" %}</div>
+                                    <div class="delivery-option-description">{% trans "Бесплатно, от 1 рабочего дня" %}</div>
+                                </div>
+                            </label>
+
+                            <label class="delivery-option" id="courier-option">
+                                <input type="radio" name="delivery_method" value="courier">
+                                <div class="delivery-option-content">
+                                    <div class="delivery-option-title">{% trans "Доставка СДЭК" %}</div>
+                                    <div class="delivery-option-description">{% trans "Стоимость рассчитывается при оформлении" %}</div>
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- Информация о самовывозе -->
+                        <div class="delivery-info-block" id="pickup-info">
+                            <h3 class="delivery-info-title">
+                                <i class="fa fa-shop"></i>
+                                {% trans "Пункт самовывоза" %}
+                            </h3>
+
+                            <div class="delivery-address">
+                                <i class="fa fa-location-dot"></i>
+                                <div>
+                                    <p><strong>г. Москва, 19 км. МКАД, вл. 20, стр. 1</strong></p>
+                                    <p>ТК Южные Ворота, вход А, линия А1, павильон 98</p>
+                                    <p style="margin-top: 8px;">
+                                        <i class="fa fa-phone"></i> +7 (495) 095-88-88<br>
+                                        <i class="fa fa-envelope"></i> info@serweb.ru
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div style="margin-top: 15px;">
+                                <p class="text-gray small">
+                                    <i class="fa fa-clock"></i>
+                                    {% trans "Режим работы: Пн-Пт 10:00-20:00, Сб-Вс 11:00-18:00" %}
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Информация о доставке СДЭК -->
+                        <div class="delivery-info-block" id="courier-info" style="display: none;">
+                            <h3 class="delivery-info-title">
+                                <i class="fa fa-truck-fast"></i>
+                                {% trans "Доставка СДЭК" %}
+                            </h3>
+
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fa fa-location-dot"></i>
+                                    {% trans "Город доставки" %}
+                                </label>
+                                <input type="text" name="city" class="form-control" id="id_city" placeholder="{% trans 'Введите город' %}">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fa fa-map-pin"></i>
+                                    {% trans "Адрес доставки" %}
+                                </label>
+                                <input type="text" name="address" class="form-control" id="id_address" placeholder="{% trans 'Введите улицу и дом' %}">
+                            </div>
+
+                            <input type="hidden" name="latitude" id="id_latitude">
+                            <input type="hidden" name="longitude" id="id_longitude">
+                            <input type="hidden" name="selected_pvz" id="selected_pvz" value="">
+
+                            <button type="button" class="btn btn-outline" id="calculate-shipping" style="margin-top: 10px;">
+                                <i class="fa fa-calculator"></i>
+                                {% trans "Рассчитать доставку" %}
+                            </button>
+
+                            <div id="delivery_price_error" class="text-danger small mt-2"></div>
+                        </div>
+                    </div>
+
+                    <!-- Способ оплаты -->
+                    <div class="form-section">
+                        <h2 class="form-section-title">
+                            <i class="fa fa-credit-card"></i>
+                            {% trans "Способ оплаты" %}
+                        </h2>
+
+                        {% if enabled_payment_types %}
+                        <div class="payment-options" id="payment-options-list">
+                            {% for payment_type in enabled_payment_types %}
+                            <label class="payment-option {% if forloop.first %}active{% endif %}">
+                                <input type="radio" name="payment_type" value="{{ payment_type.type }}" {% if forloop.first %}checked{% endif %}>
+                                {% if payment_type.image %}
+                                <img src="{{ payment_type.image.url }}" alt="{{ payment_type.name }}">
+                                {% endif %}
+                                <div class="payment-option-content">
+                                    <div class="payment-option-title">{{ payment_type.name }}</div>
+                                    <div class="payment-option-description">{{ payment_type.content }}</div>
+                                </div>
+                            </label>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p class="text-gray">{% trans 'Нет доступных способов оплаты' %}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Кнопка оформления -->
+                    {% if checkout.all_amount != 0 %}
+                    <button type="submit" class="btn btn-primary" style="margin-top: 20px;" id="submit-order">
+                        <i class="fa fa-check-circle"></i>
+                        {% trans "Оформить заказ" %}
+                    </button>
+                    {% endif %}
+                </form>
+            </div>
+
+            <!-- Правая колонка - итоги заказа -->
+            <div class="order-summary">
+                <h2 class="summary-title">
+                    <i class="fa fa-receipt"></i>
+                    {% trans "Ваш заказ" %}
+                </h2>
+
+                <div class="order-items">
+                    {% for selected in checkout.selectedproduct.all %}
+                    <div class="order-item">
+                        <div class="order-item-image">
+                            <img src="{% if selected.product.image %}{{ selected.product.image.url }}{% else %}{% static 'site/serweb/img/product-placeholder.svg' %}{% endif %}"
+                                 alt="{{ selected.product.name }}"
+                                 onerror="this.src='https://placehold.co/60x60/6C3CE9/FFFFFF?text=Product'">
+                        </div>
+                        <div class="order-item-info">
+                            <div class="order-item-name">{{ selected.product.name|truncatechars:30 }}</div>
+                            <div class="order-item-meta">
+                                <span>{% trans "Кол-во" %}: {{ selected.amount }}</span>
+                            </div>
+                            <div class="order-item-price">
+                                {% currency_conversion_for_products request selected.amount selected.product.valute.id %} {{ valute.icon_code }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="summary-row">
+                    <span class="summary-label">{% trans "Товаров" %}</span>
+                    <span class="summary-value">{{ checkout.selectedproduct.count }}</span>
+                </div>
+
+                <div class="summary-row">
+                    <span class="summary-label">{% trans "Подытог" %}</span>
+                    <span class="summary-value" id="subtotal">
+                        {% currency_conversion request checkout.amount %} {{ valute.icon_code }}
+                    </span>
+                </div>
+
+                <div class="summary-row" id="delivery-row" style="display: none;">
+                    <span class="summary-label">{% trans "Доставка" %}</span>
+                    <span class="summary-value" id="delivery-price">0 {{ valute.icon_code }}</span>
+                </div>
+
+                <div class="summary-row total">
+                    <span class="summary-label">{% trans "Итого" %}</span>
+                    <span class="summary-value" id="total-amount">
+                        {% currency_conversion request checkout.amount %} {{ valute.icon_code }}
+                    </span>
+                </div>
+
+                <input type="hidden" id="base-amount" value="{{ checkout.amount }}">
+
+                <p class="text-gray small" style="text-align: center; margin-top: 20px;">
+                    <i class="fa fa-shield"></i>
+                    {% trans "Безопасная оплата. Ваши данные защищены." %}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Контейнер для уведомлений -->
+<div id="toast-container"></div>
+
+<script>
+// Функция для показа уведомлений
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `checkout-toast ${type}`;
+    toast.innerHTML = `
+        <i class="fa fa-${type === 'success' ? 'circle-check' : 'circle-exclamation'}"></i>
+        <span>${message}</span>
+        <span class="toast-close" onclick="this.parentElement.remove()">
+            <i class="fa fa-times"></i>
+        </span>
+    `;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.remove();
+        }
+    }, 3000);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    'use strict';
+
+    // Маска для телефона
+    const phoneInput = document.getElementById('id_phone');
+    if (phoneInput) {
+        IMask(phoneInput, {
+            mask: '+{7} (000) 000-00-00',
+            lazy: false
+        });
+    }
+
+    // Переключение способов доставки
+    const pickupOption = document.getElementById('pickup-option');
+    const courierOption = document.getElementById('courier-option');
+    const pickupInfo = document.getElementById('pickup-info');
+    const courierInfo = document.getElementById('courier-info');
+    const deliveryRow = document.getElementById('delivery-row');
+    const deliveryPriceSpan = document.getElementById('delivery-price');
+    const totalAmountSpan = document.getElementById('total-amount');
+    const baseAmount = parseFloat(document.getElementById('base-amount').value) || 0;
+
+    function updateDeliveryDisplay() {
+        if (pickupOption.querySelector('input').checked) {
+            pickupInfo.style.display = 'block';
+            courierInfo.style.display = 'none';
+            deliveryRow.style.display = 'none';
+            updateTotal(0);
+        } else {
+            pickupInfo.style.display = 'none';
+            courierInfo.style.display = 'block';
+            deliveryRow.style.display = 'flex';
+        }
+    }
+
+    pickupOption.addEventListener('click', updateDeliveryDisplay);
+    courierOption.addEventListener('click', updateDeliveryDisplay);
+
+    function updateTotal(deliveryPrice = 0) {
+        const total = baseAmount + deliveryPrice;
+        totalAmountSpan.textContent = total.toFixed(2) + ' {{ valute.icon_code }}';
+        deliveryPriceSpan.textContent = deliveryPrice.toFixed(2) + ' {{ valute.icon_code }}';
+    }
+
+    // Активные состояния для опций оплаты
+    document.querySelectorAll('.payment-option').forEach(option => {
+        option.addEventListener('click', function() {
+            document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('active'));
+            this.classList.add('active');
+            this.querySelector('input[type="radio"]').checked = true;
+        });
+    });
+
+    // Активные состояния для опций доставки
+    document.querySelectorAll('.delivery-option').forEach(option => {
+        option.addEventListener('click', function() {
+            document.querySelectorAll('.delivery-option').forEach(opt => opt.classList.remove('active'));
+            this.classList.add('active');
+            this.querySelector('input[type="radio"]').checked = true;
+        });
+    });
+
+    // Инициализация DaData для адреса
+    const token = "7db09bb0395c841302f179d85a8dc4f5d32090f2";
+    const addressInput = document.getElementById('id_address');
+
+    if (addressInput && window.jQuery && jQuery.fn.suggestions) {
+        $("#id_address").suggestions({
+            token: token,
+            type: "ADDRESS",
+            bounds: "street-house",
+            restrict_value: true,
+            formatResult: function(value, currentValue, suggestion) {
+                return suggestion.value;
+            },
+            formatSelected: function(suggestion) {
+                return suggestion.value;
+            },
+            onSelect: function(suggestion) {
+                // Геокодирование через Яндекс
+                if (typeof ymaps !== 'undefined') {
+                    ymaps.geocode(suggestion.value).then(function(res) {
+                        const firstGeoObject = res.geoObjects.get(0);
+                        const coordinates = firstGeoObject.geometry.getCoordinates();
+                        document.getElementById('id_latitude').value = coordinates[0];
+                        document.getElementById('id_longitude').value = coordinates[1];
+                    });
+                }
+            }
+        });
+    }
+
+    // Расчет доставки
+    const calculateBtn = document.getElementById('calculate-shipping');
+    if (calculateBtn) {
+        calculateBtn.addEventListener('click', function() {
+            // Здесь будет AJAX запрос для расчета доставки
+            // Пока имитация
+            setTimeout(() => {
+                const deliveryPrice = 350; // Пример
+                document.getElementById('delivery_price_input').value = deliveryPrice;
+                updateTotal(deliveryPrice);
+                showToast('{% trans "Стоимость доставки рассчитана" %}', 'success');
+            }, 500);
+        });
+    }
+});
+</script>
+{% endblock content %}

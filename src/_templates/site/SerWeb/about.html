@@ -1,0 +1,1105 @@
+{% extends 'site/SerWeb/base.html' %}
+{% load static generals_tag i18n %}
+
+{% block title %}{{ aboutpage.title|default:"О компании SerWeb - Веб-студия полного цикла" }}{% endblock title %}
+{% block description %}{{ aboutpage.metadescription|default:"SerWeb - профессиональная веб-студия с 2019 года. Разрабатываем сайты, веб-приложения и Telegram ботов. Более 100 успешных проектов. Узнайте о нас больше." }}{% endblock description %}
+
+{% block propertytitle %}{{ aboutpage.propertytitle|default:"О веб-студии SerWeb" }}{% endblock propertytitle %}
+{% block propertydescription %}{{ aboutpage.propertydescription|default:"Профессиональная команда разработчиков и дизайнеров" }}{% endblock propertydescription %}
+{% block propertyimage %}{% if aboutpage.previev %}{{ aboutpage.previev.url }}{% else %}{% static 'site/serweb/img/about-og.jpg' %}{% endif %}{% endblock propertyimage %}
+
+{% block head %}
+<style>
+    /* Дополнительные стили для страницы "О компании" SerWeb */
+    .about-hero {
+        background: linear-gradient(135deg, var(--sw-black) 0%, var(--sw-primary-dark) 100%);
+        padding: 80px 0 60px;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 40px;
+        border-radius: 0 0 30px 30px;
+    }
+
+    .about-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100%;
+        height: 100%;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239B7EFF' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        opacity: 0.3;
+        pointer-events: none;
+    }
+
+    .about-hero-title {
+        font-size: 56px;
+        font-weight: 800;
+        color: var(--sw-white);
+        margin-bottom: 20px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .about-hero-title span {
+        color: var(--sw-primary-light);
+    }
+
+    .about-hero-text {
+        font-size: 18px;
+        color: rgba(255, 255, 255, 0.8);
+        max-width: 700px;
+        position: relative;
+        z-index: 2;
+        line-height: 1.7;
+    }
+
+    /* Секция "О нас" */
+    .about-section {
+        padding: 80px 0;
+    }
+
+    .about-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 60px;
+        align-items: center;
+    }
+
+    @media (max-width: 992px) {
+        .about-grid {
+            grid-template-columns: 1fr;
+            gap: 40px;
+        }
+    }
+
+    .about-images {
+        position: relative;
+    }
+
+    .about-image-main {
+        border-radius: 30px;
+        overflow: hidden;
+        position: relative;
+        z-index: 2;
+    }
+
+    .about-image-main img {
+        width: 100%;
+        height: auto;
+        display: block;
+        transition: transform 0.5s ease;
+    }
+
+    .about-image-main:hover img {
+        transform: scale(1.02);
+    }
+
+    .about-image-secondary {
+        position: absolute;
+        bottom: -30px;
+        right: -30px;
+        width: 250px;
+        height: 250px;
+        border-radius: 30px;
+        overflow: hidden;
+        border: 4px solid var(--sw-primary);
+        z-index: 3;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .about-image-secondary img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .about-years {
+        position: absolute;
+        top: 30px;
+        left: -30px;
+        background: var(--sw-primary);
+        border-radius: 30px;
+        padding: 25px;
+        text-align: center;
+        z-index: 4;
+        box-shadow: 0 10px 30px rgba(108, 60, 233, 0.3);
+        min-width: 150px;
+    }
+
+    .about-years-number {
+        font-size: 48px;
+        font-weight: 800;
+        color: white;
+        line-height: 1;
+        margin-bottom: 5px;
+    }
+
+    .about-years-text {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.9);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .about-content {
+        padding-left: 20px;
+    }
+
+    .about-subtitle {
+        display: inline-block;
+        font-size: 14px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: var(--sw-primary);
+        margin-bottom: 15px;
+        background: rgba(108, 60, 233, 0.1);
+        padding: 5px 15px;
+        border-radius: 30px;
+        border: 1px solid rgba(108, 60, 233, 0.3);
+    }
+
+    .about-title {
+        font-size: 42px;
+        font-weight: 800;
+        color: var(--sw-white);
+        margin-bottom: 25px;
+        line-height: 1.2;
+    }
+
+    .about-title span {
+        color: var(--sw-primary-light);
+    }
+
+    .about-description {
+        color: var(--sw-gray);
+        margin-bottom: 30px;
+        line-height: 1.8;
+        font-size: 16px;
+    }
+
+    .about-features {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 35px;
+    }
+
+    .about-feature-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        background: var(--sw-black-light);
+        padding: 15px 20px;
+        border-radius: 15px;
+        border: 1px solid var(--sw-gray-dark);
+        transition: var(--sw-transition);
+    }
+
+    .about-feature-item:hover {
+        border-color: var(--sw-primary);
+        transform: translateX(5px);
+    }
+
+    .about-feature-icon {
+        width: 50px;
+        height: 50px;
+        background: rgba(108, 60, 233, 0.1);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: var(--sw-primary);
+        flex-shrink: 0;
+    }
+
+    .about-feature-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--sw-white);
+        margin: 0;
+    }
+
+    /* Процесс работы */
+    .process-section {
+        background: var(--sw-black-light);
+        padding: 80px 0;
+        margin: 40px 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .process-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(45deg, transparent 48%, var(--sw-gray-dark) 49%, var(--sw-gray-dark) 51%, transparent 52%);
+        background-size: 30px 30px;
+        opacity: 0.05;
+        pointer-events: none;
+    }
+
+    .process-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 30px;
+        margin-top: 50px;
+    }
+
+    @media (max-width: 992px) {
+        .process-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 576px) {
+        .process-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .process-card {
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        padding: 40px 30px;
+        position: relative;
+        transition: var(--sw-transition);
+        text-align: center;
+    }
+
+    .process-card:hover {
+        transform: translateY(-10px);
+        border-color: var(--sw-primary);
+        box-shadow: 0 15px 40px rgba(108, 60, 233, 0.2);
+    }
+
+    .process-number {
+        position: absolute;
+        top: 20px;
+        right: 30px;
+        font-size: 60px;
+        font-weight: 800;
+        color: rgba(108, 60, 233, 0.1);
+        line-height: 1;
+    }
+
+    .process-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 25px;
+        background: rgba(108, 60, 233, 0.1);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 36px;
+        color: var(--sw-primary);
+        transition: var(--sw-transition);
+    }
+
+    .process-card:hover .process-icon {
+        background: var(--sw-primary);
+        color: white;
+        transform: rotate(10deg) scale(1.1);
+    }
+
+    .process-step {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--sw-primary);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 10px;
+    }
+
+    .process-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--sw-white);
+        margin-bottom: 15px;
+    }
+
+    .process-text {
+        color: var(--sw-gray);
+        font-size: 14px;
+        line-height: 1.7;
+        margin: 0;
+    }
+
+    /* Преимущества */
+    .benefits-section {
+        padding: 80px 0;
+    }
+
+    .benefits-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 50px;
+        align-items: center;
+    }
+
+    @media (max-width: 992px) {
+        .benefits-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .benefits-list {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 25px;
+    }
+
+    .benefit-card {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        padding: 30px 25px;
+        transition: var(--sw-transition);
+    }
+
+    .benefit-card:hover {
+        border-color: var(--sw-primary);
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(108, 60, 233, 0.15);
+    }
+
+    .benefit-icon {
+        width: 60px;
+        height: 60px;
+        background: rgba(108, 60, 233, 0.1);
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        color: var(--sw-primary);
+        margin-bottom: 20px;
+        transition: var(--sw-transition);
+    }
+
+    .benefit-card:hover .benefit-icon {
+        background: var(--sw-primary);
+        color: white;
+        transform: rotate(5deg);
+    }
+
+    .benefit-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--sw-white);
+        margin-bottom: 10px;
+    }
+
+    .benefit-text {
+        color: var(--sw-gray);
+        font-size: 14px;
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    .benefits-image {
+        border-radius: 30px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .benefits-image::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, var(--sw-primary) 0%, transparent 100%);
+        opacity: 0.3;
+        z-index: 1;
+    }
+
+    .benefits-image img {
+        width: 100%;
+        height: auto;
+        display: block;
+        transition: transform 0.5s ease;
+    }
+
+    .benefits-image:hover img {
+        transform: scale(1.03);
+    }
+
+    /* Команда */
+    .team-section {
+        background: var(--sw-black-light);
+        padding: 80px 0;
+        margin: 40px 0;
+    }
+
+    .team-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 25px;
+        margin-top: 50px;
+    }
+
+    @media (max-width: 992px) {
+        .team-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 576px) {
+        .team-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .team-card {
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        overflow: hidden;
+        transition: var(--sw-transition);
+    }
+
+    .team-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--sw-primary);
+        box-shadow: 0 15px 40px rgba(108, 60, 233, 0.2);
+    }
+
+    .team-image {
+        height: 280px;
+        overflow: hidden;
+    }
+
+    .team-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .team-card:hover .team-image img {
+        transform: scale(1.05);
+    }
+
+    .team-content {
+        padding: 25px;
+        text-align: center;
+    }
+
+    .team-name {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--sw-white);
+        margin-bottom: 5px;
+    }
+
+    .team-position {
+        font-size: 14px;
+        color: var(--sw-primary);
+        margin-bottom: 15px;
+    }
+
+    .team-social {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+    }
+
+    .team-social-link {
+        width: 36px;
+        height: 36px;
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--sw-white);
+        font-size: 14px;
+        transition: var(--sw-transition);
+    }
+
+    .team-social-link:hover {
+        background: var(--sw-primary);
+        border-color: var(--sw-primary);
+        color: white;
+        transform: translateY(-3px);
+    }
+
+    /* Счетчики */
+    .counters-section {
+        background: linear-gradient(135deg, var(--sw-primary-dark), var(--sw-black));
+        padding: 60px 0;
+        border-radius: 30px;
+        margin: 40px 0;
+    }
+
+    .counters-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 30px;
+        text-align: center;
+    }
+
+    @media (max-width: 768px) {
+        .counters-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    .counter-item {
+        padding: 20px;
+    }
+
+    .counter-number {
+        font-size: 48px;
+        font-weight: 800;
+        color: white;
+        line-height: 1;
+        margin-bottom: 10px;
+    }
+
+    .counter-label {
+        font-size: 16px;
+        color: rgba(255, 255, 255, 0.8);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .counter-icon {
+        font-size: 32px;
+        color: rgba(255, 255, 255, 0.3);
+        margin-bottom: 15px;
+    }
+
+    /* Отзывы */
+    .testimonials-section {
+        padding: 80px 0;
+    }
+
+    .testimonials-slider {
+        position: relative;
+        margin-top: 50px;
+    }
+
+    .testimonial-card {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        padding: 40px;
+        margin: 20px;
+    }
+
+    .testimonial-text {
+        font-size: 18px;
+        line-height: 1.8;
+        color: var(--sw-white);
+        margin-bottom: 30px;
+        position: relative;
+        padding-left: 30px;
+    }
+
+    .testimonial-text::before {
+        content: '"';
+        font-size: 80px;
+        color: var(--sw-primary);
+        opacity: 0.3;
+        position: absolute;
+        top: -30px;
+        left: -10px;
+        font-family: serif;
+    }
+
+    .testimonial-author {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .testimonial-author-image {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 3px solid var(--sw-primary);
+    }
+
+    .testimonial-author-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .testimonial-author-info h4 {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--sw-white);
+        margin-bottom: 5px;
+    }
+
+    .testimonial-author-info p {
+        font-size: 14px;
+        color: var(--sw-gray);
+    }
+
+    .slider-arrows {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 30px;
+    }
+
+    .slider-arrow {
+        width: 50px;
+        height: 50px;
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 50%;
+        color: var(--sw-white);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: var(--sw-transition);
+    }
+
+    .slider-arrow:hover {
+        background: var(--sw-primary);
+        border-color: var(--sw-primary);
+        color: white;
+    }
+</style>
+{% endblock head %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb-list">
+                <li class="breadcrumb-item"><a href="{% url 'webmain:home' %}"><i class="fa fa-home me-1"></i>{% trans 'Главная' %}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ json_fields.about_title_small.field|default:'О компании' }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<style>
+    .breadcrumbs {
+        background: var(--sw-black-light);
+        padding: 15px 0;
+        border-bottom: 1px solid var(--sw-gray-dark);
+    }
+
+    .breadcrumb-list {
+        display: flex;
+        list-style: none;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .breadcrumb-item {
+        font-size: 14px;
+    }
+
+    .breadcrumb-item:not(:last-child)::after {
+        content: '/';
+        margin-left: 10px;
+        color: var(--sw-gray);
+    }
+
+    .breadcrumb-item a {
+        color: var(--sw-gray);
+        transition: var(--sw-transition);
+    }
+
+    .breadcrumb-item a:hover {
+        color: var(--sw-primary);
+    }
+
+    .breadcrumb-item.active {
+        color: var(--sw-white);
+    }
+</style>
+{% endblock breadcrumbs %}
+
+{% block content %}
+<!-- Hero секция -->
+<section class="about-hero wow fadeIn">
+    <div class="container">
+        <h1 class="about-hero-title wow fadeInUp" data-wow-delay="0.2s">
+            {% trans "О компании" %} <span>{% trans "SerWeb" %}</span>
+        </h1>
+        <p class="about-hero-text wow fadeInUp" data-wow-delay="0.3s">
+            {% trans "Мы создаем современные цифровые продукты, которые помогают бизнесу расти и развиваться. Команда профессионалов с passion к веб-разработке." %}
+        </p>
+    </div>
+</section>
+
+<!-- О нас -->
+<section class="about-section">
+    <div class="container">
+        <div class="about-grid">
+            <div class="about-images wow fadeInLeft" data-wow-delay="0.2s">
+                <div class="about-image-main">
+                    <img src="{{ json_fields.about_1_image.info|default:'https://placehold.co/600x500/6C3CE9/FFFFFF?text=SerWeb+Team' }}" alt="Офис SerWeb">
+                </div>
+                <div class="about-image-secondary">
+                    <img src="{{ json_fields.about_2_image.info|default:'https://placehold.co/250x250/4B2AA3/FFFFFF?text=Work' }}" alt="Рабочий процесс">
+                </div>
+                <div class="about-years">
+                    <div class="about-years-number">{{ json_fields.about_years.field|default:'5' }}</div>
+                    <div class="about-years-text">{{ json_fields.about_years_title.field|default:'лет опыта' }}</div>
+                </div>
+            </div>
+            
+            <div class="about-content wow fadeInRight" data-wow-delay="0.3s">
+                <span class="about-subtitle">{{ json_fields.about_title_small.field|default:'О НАС' }}</span>
+                <h2 class="about-title">{{ json_fields.about_title.field|default:'Создаем цифровые <span>решения</span>'|safe }}</h2>
+                <p class="about-description">{{ json_fields.about_description.field|default:'SerWeb — это команда увлеченных профессионалов, которые любят свое дело. Мы разрабатываем современные веб-сайты, сложные веб-приложения и умных Telegram ботов. Наш подход — индивидуально к каждому проекту, внимание к деталям и использование передовых технологий.' }}</p>
+                
+                <div class="about-features">
+                    <div class="about-feature-item">
+                        <div class="about-feature-icon">
+                            <i class="fa fa-rocket"></i>
+                        </div>
+                        <h3 class="about-feature-title">{{ json_fields.about_small_title_1.field|default:'Быстрая разработка' }}</h3>
+                    </div>
+                    <div class="about-feature-item">
+                        <div class="about-feature-icon">
+                            <i class="fa fa-shield"></i>
+                        </div>
+                        <h3 class="about-feature-title">{{ json_fields.about_small_title_2.field|default:'Надежность' }}</h3>
+                    </div>
+                </div>
+                
+                <a href="{{ json_fields.about_button_link.field|default:'#process-sec' }}" class="sw-btn sw-btn-primary">
+                    {{ json_fields.about_button_title.field|default:'Наш процесс' }} <i class="fa fa-arrow-right ms-2"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Процесс работы -->
+<section class="process-section" id="process-sec">
+    <div class="container">
+        <div class="title-area text-center wow fadeInUp">
+            <span class="sw-section-subtitle">{{ json_fields.step_title_small.field|default:'КАК МЫ РАБОТАЕМ' }}</span>
+            <h2 class="sw-section-main-title">{{ json_fields.step_title.field|default:'Наш <span>процесс</span>'|safe }}</h2>
+        </div>
+        
+        <div class="process-grid">
+            <div class="process-card wow fadeInUp" data-wow-delay="0.1s">
+                <div class="process-number">01</div>
+                <div class="process-icon">
+                    <i class="fa fa-message"></i>
+                </div>
+                <div class="process-step">{{ json_fields.step_title_small_1.field|default:'ШАГ 1' }}</div>
+                <h3 class="process-title">{{ json_fields.step_title_1.field|default:'Обсуждение' }}</h3>
+                <p class="process-text">{{ json_fields.step_description_1.field|default:'Знакомимся с проектом, проводим брифинг, анализируем задачи и цели.' }}</p>
+            </div>
+            
+            <div class="process-card wow fadeInUp" data-wow-delay="0.2s">
+                <div class="process-number">02</div>
+                <div class="process-icon">
+                    <i class="fa fa-pen-ruler"></i>
+                </div>
+                <div class="process-step">{{ json_fields.step_title_small_2.field|default:'ШАГ 2' }}</div>
+                <h3 class="process-title">{{ json_fields.step_title_2.field|default:'Прототип и дизайн' }}</h3>
+                <p class="process-text">{{ json_fields.step_description_2.field|default:'Создаем прототип, разрабатываем уникальный дизайн, согласовываем с вами.' }}</p>
+            </div>
+            
+            <div class="process-card wow fadeInUp" data-wow-delay="0.3s">
+                <div class="process-number">03</div>
+                <div class="process-icon">
+                    <i class="fa fa-code"></i>
+                </div>
+                <div class="process-step">{{ json_fields.step_title_small_3.field|default:'ШАГ 3' }}</div>
+                <h3 class="process-title">{{ json_fields.step_title_3.field|default:'Разработка' }}</h3>
+                <p class="process-text">{{ json_fields.step_description_3.field|default:'Пишем чистый код, интегрируем функционал, проводим внутреннее тестирование.' }}</p>
+            </div>
+            
+            <div class="process-card wow fadeInUp" data-wow-delay="0.4s">
+                <div class="process-number">04</div>
+                <div class="process-icon">
+                    <i class="fa fa-rocket"></i>
+                </div>
+                <div class="process-step">{{ json_fields.step_title_small_4.field|default:'ШАГ 4' }}</div>
+                <h3 class="process-title">{{ json_fields.step_title_4.field|default:'Запуск и поддержка' }}</h3>
+                <p class="process-text">{{ json_fields.step_description_4.field|default:'Запускаем проект, обучаем работе, обеспечиваем техническую поддержку.' }}</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Счетчики -->
+<section class="counters-section wow fadeIn">
+    <div class="container">
+        <div class="counters-grid">
+            <div class="counter-item">
+                <div class="counter-icon"><i class="fa fa-briefcase"></i></div>
+                <div class="counter-number">{{ json_fields.counter_1.field|default:'100' }}+</div>
+                <div class="counter-label">{{ json_fields.counter_title_1.field|default:'Проектов' }}</div>
+            </div>
+            <div class="counter-item">
+                <div class="counter-icon"><i class="fa fa-users"></i></div>
+                <div class="counter-number">{{ json_fields.counter_2.field|default:'15' }}+</div>
+                <div class="counter-label">{{ json_fields.counter_title_2.field|default:'Специалистов' }}</div>
+            </div>
+            <div class="counter-item">
+                <div class="counter-icon"><i class="fa fa-clock"></i></div>
+                <div class="counter-number">{{ json_fields.counter_3.field|default:'5' }}+</div>
+                <div class="counter-label">{{ json_fields.counter_title_3.field|default:'Лет на рынке' }}</div>
+            </div>
+            <div class="counter-item">
+                <div class="counter-icon"><i class="fa fa-face-smile"></i></div>
+                <div class="counter-number">{{ json_fields.counter_4.field|default:'98' }}%</div>
+                <div class="counter-label">{{ json_fields.counter_title_4.field|default:'Довольных клиентов' }}</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Преимущества -->
+<section class="benefits-section">
+    <div class="container">
+        <div class="title-area text-center wow fadeInUp">
+            <span class="sw-section-subtitle">{{ json_fields.benefit_title_small.field|default:'ПОЧЕМУ МЫ' }}</span>
+            <h2 class="sw-section-main-title">{{ json_fields.benefit_title.field|default:'Наши <span>преимущества</span>'|safe }}</h2>
+        </div>
+        
+        <div class="benefits-grid">
+            <div class="benefits-list">
+                <div class="benefit-card wow fadeInLeft" data-wow-delay="0.1s">
+                    <div class="benefit-icon">
+                        <i class="fa fa-gem"></i>
+                    </div>
+                    <h3 class="benefit-title">{{ json_fields.benefit_step_1_title.field|default:'Индивидуальный подход' }}</h3>
+                    <p class="benefit-text">{{ json_fields.benefit_step_1_description.field|default:'Каждый проект уникален. Мы не используем шаблоны, а создаем решение под ваши задачи.' }}</p>
+                </div>
+                
+                <div class="benefit-card wow fadeInLeft" data-wow-delay="0.2s">
+                    <div class="benefit-icon">
+                        <i class="fa fa-clock"></i>
+                    </div>
+                    <h3 class="benefit-title">{{ json_fields.benefit_step_2_title.field|default:'Соблюдение сроков' }}</h3>
+                    <p class="benefit-text">{{ json_fields.benefit_step_2_description.field|default:'Мы ценим ваше время и всегда сдаем проекты вовремя или раньше срока.' }}</p>
+                </div>
+                
+                <div class="benefit-card wow fadeInLeft" data-wow-delay="0.3s">
+                    <div class="benefit-icon">
+                        <i class="fa fa-shield-halved"></i>
+                    </div>
+                    <h3 class="benefit-title">{{ json_fields.benefit_step_3_title.field|default:'Современные технологии' }}</h3>
+                    <p class="benefit-text">{{ json_fields.benefit_step_3_description.field|default:'Используем актуальный стек: Django, React, Vue, Python, PostgreSQL и другие.' }}</p>
+                </div>
+                
+                <div class="benefit-card wow fadeInLeft" data-wow-delay="0.4s">
+                    <div class="benefit-icon">
+                        <i class="fa fa-headset"></i>
+                    </div>
+                    <h3 class="benefit-title">{{ json_fields.benefit_step_4_title.field|default:'Поддержка 24/7' }}</h3>
+                    <p class="benefit-text">{{ json_fields.benefit_step_4_description.field|default:'Мы на связи всегда. Поможем с любым вопросом после запуска проекта.' }}</p>
+                </div>
+            </div>
+            
+            <div class="benefits-image wow fadeInRight" data-wow-delay="0.3s">
+                <img src="{{ json_fields.benefit_image.info|default:'https://placehold.co/600x500/4B2AA3/FFFFFF?text=Our+Team' }}" alt="Наша команда">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Команда (если есть данные) -->
+{% if team_members %}
+<section class="team-section">
+    <div class="container">
+        <div class="title-area text-center wow fadeInUp">
+            <span class="sw-section-subtitle">{% trans 'КОМАНДА' %}</span>
+            <h2 class="sw-section-main-title">{% trans 'Наши <span>специалисты</span>'|safe %}</h2>
+        </div>
+        
+        <div class="team-grid">
+            {% for member in team_members %}
+            <div class="team-card wow fadeInUp" data-wow-delay="0.{{ forloop.counter }}s">
+                <div class="team-image">
+                    <img src="{% if member.image %}{{ member.image.url }}{% else %}https://placehold.co/300x280/6C3CE9/FFFFFF?text={{ member.name|first }}{% endif %}" alt="{{ member.name }}">
+                </div>
+                <div class="team-content">
+                    <h3 class="team-name">{{ member.name }}</h3>
+                    <p class="team-position">{{ member.position }}</p>
+                    <div class="team-social">
+                        {% if member.telegram %}<a href="{{ member.telegram }}" class="team-social-link"><i class="fa-brands fa-telegram"></i></a>{% endif %}
+                        {% if member.github %}<a href="{{ member.github }}" class="team-social-link"><i class="fa-brands fa-github"></i></a>{% endif %}
+                        {% if member.linkedin %}<a href="{{ member.linkedin }}" class="team-social-link"><i class="fa-brands fa-linkedin"></i></a>{% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Отзывы -->
+<section class="testimonials-section" id="testi-sec">
+    <div class="container">
+        <div class="title-area text-center wow fadeInUp">
+            <span class="sw-section-subtitle">{{ json_fields.reviews_banner_title_1.field|default:'ОТЗЫВЫ' }}</span>
+            <h2 class="sw-section-main-title">{{ json_fields.reviews_banner_title_2.field|default:'Что говорят <span>клиенты</span>'|safe }}</h2>
+        </div>
+        
+        <div class="testimonials-slider">
+            <div class="swiper th-slider" id="testimonialsSlider">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide">
+                        <div class="testimonial-card">
+                            <p class="testimonial-text">{{ json_fields.reviews_title_1.field|default:'Отличная команда профессионалов! Сделали сайт быстро и качественно. Отдельное спасибо за дизайн — выглядит современно и стильно. Обязательно обратимся еще!' }}</p>
+                            <div class="testimonial-author">
+                                <div class="testimonial-author-image">
+                                    <img src="{{ json_fields.reviews_image_1.info|default:'https://placehold.co/70x70/6C3CE9/FFFFFF?text=Client' }}" alt="Client">
+                                </div>
+                                <div class="testimonial-author-info">
+                                    <h4>{{ json_fields.reviews_name_1.field|default:'Алексей Петров' }}</h4>
+                                    <p>{{ json_fields.reviews_description_1.field|default:'CEO, TechStart' }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="swiper-slide">
+                        <div class="testimonial-card">
+                            <p class="testimonial-text">{{ json_fields.reviews_title_2.field|default:'Заказывали разработку интернет-магазина. Результат превзошел ожидания! Удобная админка, высокая скорость работы, отличная поддержка. Рекомендую!' }}</p>
+                            <div class="testimonial-author">
+                                <div class="testimonial-author-image">
+                                    <img src="{{ json_fields.reviews_image_2.info|default:'https://placehold.co/70x70/4B2AA3/FFFFFF?text=Client' }}" alt="Client">
+                                </div>
+                                <div class="testimonial-author-info">
+                                    <h4>{{ json_fields.reviews_name_2.field|default:'Екатерина Смирнова' }}</h4>
+                                    <p>{{ json_fields.reviews_description_2.field|default:'Владелец бизнеса' }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="swiper-slide">
+                        <div class="testimonial-card">
+                            <p class="testimonial-text">{{ json_fields.reviews_title_3.field|default:'Спасибо за Telegram бота! Автоматизировали поддержку клиентов, теперь экономим кучу времени. Все работает идеально.' }}</p>
+                            <div class="testimonial-author">
+                                <div class="testimonial-author-image">
+                                    <img src="{{ json_fields.reviews_image_3.info|default:'https://placehold.co/70x70/9B7EFF/FFFFFF?text=Client' }}" alt="Client">
+                                </div>
+                                <div class="testimonial-author-info">
+                                    <h4>{{ json_fields.reviews_name_3.field|default:'Дмитрий Иванов' }}</h4>
+                                    <p>{{ json_fields.reviews_description_3.field|default:'Маркетолог' }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="slider-arrows">
+                <button class="slider-arrow" data-slider-prev="#testimonialsSlider"><i class="fa fa-arrow-left"></i></button>
+                <button class="slider-arrow" data-slider-next="#testimonialsSlider"><i class="fa fa-arrow-right"></i></button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA секция -->
+<section class="container mt-5 mb-5">
+    <div class="services-cta wow fadeInUp">
+        <div class="services-cta-content">
+            <h2>{% trans "Готовы начать проект?" %}</h2>
+            <p>{% trans "Расскажите нам о своей идее, и мы воплотим ее в жизнь" %}</p>
+            <div class="services-cta-buttons">
+                <a href="{% url 'webmain:contacts' %}" class="sw-btn sw-btn-primary">
+                    <i class="fa fa-pen-to-square me-2"></i>
+                    {% trans 'Связаться с нами' %}
+                </a>
+                <a href="{% url 'shop:catalogs' %}" class="sw-btn sw-btn-outline">
+                    <i class="fa fa-briefcase me-2"></i>
+                    {% trans 'Наше портфолио' %}
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Скрипт для мобильных устройств -->
+<script>
+    // Определение мобильных устройств
+    function isMobileDevice() {
+        return (
+            typeof window.orientation !== "undefined" ||
+            navigator.userAgent.indexOf('IEMobile') !== -1 ||
+            window.innerWidth <= 768 ||
+            screen.width <= 768 ||
+            /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+        );
+    }
+
+    // Применение стилей для мобильных устройств
+    function applyMobileStyles() {
+        if (isMobileDevice()) {
+            const style = document.createElement('style');
+            style.textContent = `
+                .about-image-secondary {
+                    width: 150px;
+                    height: 150px;
+                    bottom: -15px;
+                    right: -15px;
+                }
+                .about-years {
+                    padding: 15px;
+                    left: -15px;
+                }
+                .about-years-number {
+                    font-size: 36px;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', applyMobileStyles);
+</script>
+
+<!-- Инициализация Swiper для отзывов -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof Swiper !== 'undefined') {
+            new Swiper('#testimonialsSlider', {
+                slidesPerView: 1,
+                spaceBetween: 30,
+                loop: true,
+                autoplay: {
+                    delay: 5000,
+                    disableOnInteraction: false,
+                },
+                navigation: {
+                    prevEl: '[data-slider-prev="#testimonialsSlider"]',
+                    nextEl: '[data-slider-next="#testimonialsSlider"]',
+                },
+                breakpoints: {
+                    768: {
+                        slidesPerView: 2,
+                    },
+                    1200: {
+                        slidesPerView: 2,
+                    }
+                }
+            });
+        }
+    });
+</script>
+{% endblock content %}

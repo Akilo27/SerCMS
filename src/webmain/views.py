@@ -1503,7 +1503,7 @@ class CustomPasswordResetView(DomainTemplateMixin, PasswordResetView):
     email_template_name = "site/email/password_reset_email.html"
     subject_template_name = "site/email/password_reset_subject.txt"
     form_class = PasswordResetEmailForm
-    success_url = reverse_lazy("useraccount:password_reset_done")
+    success_url = reverse_lazy("webmain:password_reset_done")
 
     def get_object(self):
         current_domain = self.request.get_host()

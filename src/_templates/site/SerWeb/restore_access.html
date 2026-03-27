@@ -1,0 +1,512 @@
+{% extends 'site/SerWeb/base.html' %}
+{% load static generals_tag i18n %}
+
+{% block title %}{{ seo_title|default:"Восстановление пароля | SerWeb" }}{% endblock title %}
+{% block description %}{{ seo_description|default:"Восстановите доступ к своему аккаунту в веб-студии SerWeb. Введите email, и мы отправим инструкции по сбросу пароля." }}{% endblock description %}
+
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }}{% else %}{% static 'site/serweb/img/reset-password-og.jpg' %}{% endif %}{% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle|default:"Восстановление пароля SerWeb" }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription|default:"Сброс пароля" }}{% endblock propertyimage %}
+
+{% block head %}
+<style>
+    /* Стили для страницы восстановления пароля SerWeb */
+    .reset-page {
+        background: linear-gradient(135deg, var(--sw-black) 0%, var(--sw-primary-dark) 100%);
+        position: relative;
+        overflow: hidden;
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 0;
+    }
+
+    .reset-page::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100%;
+        height: 100%;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239B7EFF' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        opacity: 0.3;
+        pointer-events: none;
+    }
+
+    .reset-container {
+        max-width: 520px;
+        width: 100%;
+        margin: 0 auto;
+        position: relative;
+        z-index: 2;
+    }
+
+    .reset-card {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 24px;
+        padding: 48px 40px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .reset-icon {
+        width: 80px;
+        height: 80px;
+        background: rgba(108, 60, 233, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 24px;
+        border: 2px solid var(--sw-primary);
+    }
+
+    .reset-icon i {
+        font-size: 36px;
+        color: var(--sw-primary);
+    }
+
+    .reset-title {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--sw-white);
+        margin-bottom: 12px;
+    }
+
+    .reset-description {
+        font-size: 15px;
+        color: var(--sw-gray);
+        line-height: 1.6;
+        margin-bottom: 32px;
+    }
+
+    /* Форма */
+    .reset-form {
+        margin-top: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 24px;
+        text-align: left;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--sw-white);
+        font-weight: 500;
+        font-size: 14px;
+    }
+
+    .form-label i {
+        color: var(--sw-primary);
+        margin-right: 8px;
+    }
+
+    .input-wrapper {
+        position: relative;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 14px 18px;
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 12px;
+        color: var(--sw-white);
+        font-size: 15px;
+        transition: var(--sw-transition);
+        font-family: var(--sw-font-main);
+    }
+
+    .form-control:focus {
+        border-color: var(--sw-primary);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(108, 60, 233, 0.2);
+    }
+
+    .form-control::placeholder {
+        color: var(--sw-gray);
+        opacity: 0.7;
+    }
+
+    .form-control.is-invalid {
+        border-color: #f44336;
+    }
+
+    .invalid-feedback {
+        color: #f44336;
+        font-size: 12px;
+        margin-top: 5px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    /* Уведомления */
+    .alert {
+        padding: 14px 18px;
+        border-radius: 12px;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 14px;
+        text-align: left;
+        animation: fadeInUp 0.3s ease;
+    }
+
+    .alert-success {
+        background: rgba(76, 175, 80, 0.1);
+        border: 1px solid #4CAF50;
+        color: #4CAF50;
+    }
+
+    .alert-error {
+        background: rgba(244, 67, 54, 0.1);
+        border: 1px solid #f44336;
+        color: #f44336;
+    }
+
+    .alert-info {
+        background: rgba(108, 60, 233, 0.1);
+        border: 1px solid var(--sw-primary);
+        color: var(--sw-primary);
+    }
+
+    .alert i {
+        font-size: 18px;
+    }
+
+    /* Кнопка */
+    .btn-reset {
+        width: 100%;
+        padding: 14px 28px;
+        background: var(--sw-primary);
+        border: none;
+        border-radius: 12px;
+        color: white;
+        font-weight: 600;
+        font-size: 16px;
+        cursor: pointer;
+        transition: var(--sw-transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .btn-reset:hover {
+        background: var(--sw-primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(108, 60, 233, 0.3);
+    }
+
+    .btn-reset:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* Ссылки */
+    .reset-links {
+        margin-top: 32px;
+        padding-top: 24px;
+        border-top: 1px solid var(--sw-gray-dark);
+    }
+
+    .reset-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--sw-gray);
+        font-size: 14px;
+        transition: var(--sw-transition);
+        text-decoration: none;
+        margin: 0 8px;
+    }
+
+    .reset-link:hover {
+        color: var(--sw-primary);
+    }
+
+    .reset-link i {
+        font-size: 14px;
+    }
+
+    .reset-link-text {
+        margin-top: 16px;
+        color: var(--sw-gray);
+        font-size: 14px;
+    }
+
+    .reset-link-text a {
+        color: var(--sw-primary);
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--sw-transition);
+    }
+
+    .reset-link-text a:hover {
+        text-decoration: underline;
+    }
+
+    /* Анимации */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .reset-card {
+        animation: fadeInUp 0.6s ease;
+    }
+
+    /* Состояние успешной отправки */
+    .success-state {
+        text-align: center;
+    }
+
+    .success-icon {
+        width: 80px;
+        height: 80px;
+        background: rgba(76, 175, 80, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 24px;
+        border: 2px solid #4CAF50;
+    }
+
+    .success-icon i {
+        font-size: 36px;
+        color: #4CAF50;
+    }
+
+    .success-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--sw-white);
+        margin-bottom: 12px;
+    }
+
+    .success-text {
+        color: var(--sw-gray);
+        margin-bottom: 24px;
+        line-height: 1.6;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 576px) {
+        .reset-card {
+            padding: 32px 24px;
+        }
+
+        .reset-title {
+            font-size: 24px;
+        }
+
+        .reset-description {
+            font-size: 14px;
+        }
+
+        .reset-links {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .reset-link {
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock head %}
+
+{% block content %}
+<div class="reset-page">
+    <div class="reset-container">
+        <div class="reset-card">
+            {% if success %}
+            <!-- Состояние успешной отправки -->
+            <div class="success-state">
+                <div class="success-icon">
+                    <i class="fa-regular fa-circle-check"></i>
+                </div>
+                <h1 class="success-title">{% trans 'Письмо отправлено' %}</h1>
+                <p class="success-text">
+                    {% trans 'Мы отправили инструкции по восстановлению пароля на ваш email. Пожалуйста, проверьте почту (в том числе папку "Спам").' %}
+                </p>
+                <div class="reset-links">
+                    <a href="{% url 'webmain:login' %}" class="btn-reset" style="background: var(--sw-primary); margin-top: 8px;">
+                        <i class="fa-regular fa-arrow-left"></i>
+                        {% trans 'Вернуться ко входу' %}
+                    </a>
+                </div>
+            </div>
+            {% else %}
+            <!-- Форма восстановления -->
+            <div class="reset-icon">
+                <i class="fa-regular fa-key"></i>
+            </div>
+            <h1 class="reset-title">{% trans 'Восстановление пароля' %}</h1>
+            <p class="reset-description">
+                {% trans 'Введите email, указанный при регистрации, и мы отправим инструкции для сброса пароля.' %}
+            </p>
+
+            <!-- Сообщения об ошибках -->
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    <i class="fa-regular fa-{% if message.tags == 'success' %}circle-check{% elif message.tags == 'error' %}circle-exclamation{% else %}circle-info{% endif %}"></i>
+                    {{ message }}
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if form.non_field_errors %}
+            <div class="alert alert-error">
+                <i class="fa-regular fa-circle-exclamation"></i>
+                {{ form.non_field_errors|join:", " }}
+            </div>
+            {% endif %}
+
+            <form method="post" class="reset-form" id="reset-form">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fa-regular fa-envelope"></i>
+                        {% trans 'Email' %} <span style="color: var(--sw-primary);">*</span>
+                    </label>
+                    <div class="input-wrapper">
+                        <input type="email"
+                               name="email"
+                               class="form-control {% if form.email.errors %}is-invalid{% endif %}"
+                               id="email"
+                               placeholder="{% trans 'example@mail.com' %}"
+                               value="{{ form.email.value|default:'' }}"
+                               required>
+                        {% if form.email.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.email.errors %}
+                                <i class="fa-regular fa-circle-exclamation"></i> {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-reset" id="reset-btn">
+                    <i class="fa-regular fa-paper-plane"></i>
+                    {% trans 'Отправить инструкции' %}
+                </button>
+            </form>
+
+            <div class="reset-links">
+                <a href="{% url 'webmain:login' %}" class="reset-link">
+                    <i class="fa-regular fa-arrow-left"></i>
+                    {% trans 'Вернуться ко входу' %}
+                </a>
+                <a href="{% url 'webmain:signup' %}" class="reset-link">
+                    <i class="fa-regular fa-user-plus"></i>
+                    {% trans 'Зарегистрироваться' %}
+                </a>
+            </div>
+
+            <div class="reset-link-text">
+                <i class="fa-regular fa-circle-question"></i>
+                {% trans 'Проблемы со входом?' %}
+                <a href="{% url 'webmain:contacts' %}">{% trans 'Свяжитесь с поддержкой' %}</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('reset-form');
+    const emailInput = document.getElementById('email');
+    const resetBtn = document.getElementById('reset-btn');
+
+    if (form && emailInput && resetBtn) {
+        // Валидация email перед отправкой
+        form.addEventListener('submit', function(e) {
+            const email = emailInput.value.trim();
+            const emailPattern = /^[^\s@]+@([^\s@]+\.)+[^\s@]+$/;
+
+            if (!email) {
+                e.preventDefault();
+                showFieldError(emailInput, '{% trans "Пожалуйста, введите email" %}');
+                return;
+            }
+
+            if (!emailPattern.test(email)) {
+                e.preventDefault();
+                showFieldError(emailInput, '{% trans "Введите корректный email адрес" %}');
+                return;
+            }
+
+            // Показываем состояние загрузки
+            resetBtn.disabled = true;
+            resetBtn.innerHTML = '<i class="fa-regular fa-spinner fa-spin"></i> {% trans "Отправка..." %}';
+        });
+    }
+
+    function showFieldError(field, message) {
+        field.classList.add('is-invalid');
+
+        // Удаляем существующую ошибку
+        const existingError = field.parentElement.querySelector('.invalid-feedback');
+        if (existingError) {
+            existingError.remove();
+        }
+
+        // Добавляем новую ошибку
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'invalid-feedback';
+        errorDiv.innerHTML = `<i class="fa-regular fa-circle-exclamation"></i> ${message}`;
+        field.parentElement.appendChild(errorDiv);
+
+        // Убираем ошибку при вводе
+        field.addEventListener('input', function() {
+            this.classList.remove('is-invalid');
+            const error = this.parentElement.querySelector('.invalid-feedback');
+            if (error) error.remove();
+        });
+
+        field.focus();
+    }
+
+    // Убираем ошибку при фокусе
+    if (emailInput) {
+        emailInput.addEventListener('focus', function() {
+            this.classList.remove('is-invalid');
+            const error = this.parentElement.querySelector('.invalid-feedback');
+            if (error) error.remove();
+        });
+    }
+
+    // Анимация при наведении на кнопку
+    if (resetBtn && !resetBtn.disabled) {
+        resetBtn.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+        });
+
+        resetBtn.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    }
+});
+</script>
+{% endblock content %}

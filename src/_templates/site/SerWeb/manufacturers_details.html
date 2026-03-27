@@ -1,0 +1,1348 @@
+{% extends 'site/SerWeb/base.html' %}
+{% load static generals_tag shop_tags i18n %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+
+{% block content %}
+<script>
+    // полоска фильтра по цене
+    // For Filters
+    document.addEventListener("DOMContentLoaded", function() {
+        var filterAngle = document.getElementById('filter-angle');
+        // For Range Sliders
+        var inputLeft = document.getElementById("input-left1");
+        var inputRight = document.getElementById("input-right1");
+
+        var thumbLeft = document.querySelector(".slider > .thumb.left");
+        var thumbRight = document.querySelector(".slider > .thumb.right");
+        var range = document.querySelector(".slider > .range");
+
+        var amountLeft = document.getElementById('amount-left1')
+        var amountRight = document.getElementById('amount-right1')
+
+        function setLeftValue() {
+            var _this = inputLeft,
+                min = parseInt(_this.min),
+                max = parseInt(_this.max);
+
+            // Убедиться, что left не превышает right
+            _this.value = Math.min(parseInt(_this.value), parseInt(inputRight.value));
+
+            var percent = ((_this.value - min) / (max - min)) * 100;
+
+            thumbLeft.style.left = percent + "%";
+            range.style.left = percent + "%";
+            amountLeft.innerText = Math.round((_this.value));
+        }
+        setLeftValue();
+        function setRightValue() {
+            var _this = inputRight,
+                min = parseInt(_this.min),
+                max = parseInt(_this.max);
+
+            // Убедиться, что right не ниже left
+            _this.value = Math.max(parseInt(_this.value), parseInt(inputLeft.value));
+
+            var percent = ((_this.value - min) / (max - min)) * 100;
+
+            thumbRight.style.right = (100 - percent) + "%";
+            range.style.right = (100 - percent) + "%";
+            amountRight.innerText = Math.round((_this.value));
+        }
+        setRightValue();
+
+        inputLeft.addEventListener("input", setLeftValue);
+        inputRight.addEventListener("input", setRightValue);
+
+        inputLeft.addEventListener("mouseover", function () {
+            thumbLeft.classList.add("hover");
+        });
+        inputLeft.addEventListener("mouseout", function () {
+            thumbLeft.classList.remove("hover");
+        });
+        inputLeft.addEventListener("mousedown", function () {
+            thumbLeft.classList.add("active");
+        });
+        inputLeft.addEventListener("mouseup", function () {
+            thumbLeft.classList.remove("active");
+        });
+
+        inputRight.addEventListener("mouseover", function () {
+            thumbRight.classList.add("hover");
+        });
+        inputRight.addEventListener("mouseout", function () {
+            thumbRight.classList.remove("hover");
+        });
+        inputRight.addEventListener("mousedown", function () {
+            thumbRight.classList.add("active");
+        });
+        inputRight.addEventListener("mouseup", function () {
+            thumbRight.classList.remove("active");
+        });
+    });
+
+
+</script>
+<script>
+    document.querySelectorAll('[data-bs-target]').forEach(button => {
+        button.addEventListener('click', function() {
+            const targetModal = document.querySelector(this.getAttribute('data-bs-target'));
+            const productItem = this.closest('#no_order_' + this.getAttribute('data-product'));
+
+            if (targetModal && productItem) {
+                // Переносим содержимое модального окна в product-item
+                productItem.appendChild(targetModal);
+
+                // Показываем модальное окно
+                targetModal.classList.add('show');
+                targetModal.style.display = 'block';
+            }
+        });
+    });
+
+    // Обработчик для кнопки закрытия
+    document.querySelectorAll('.btn-close').forEach(button => {
+        button.addEventListener('click', function() {
+            const targetModal = this.closest('.modal');
+
+            if (targetModal) {
+                // Скрываем модальное окно
+                targetModal.classList.remove('show');
+                targetModal.style.display = 'none';
+
+                // Возвращаем модальное окно обратно в исходное состояние
+                const productItem = document.querySelector('#no_order_' + targetModal.dataset.product);
+                productItem.appendChild(targetModal);
+
+                // Сброс формы и восстановление содержимого
+                const form = targetModal.querySelector('form');
+                if (form) {
+                    form.reset(); // Сбрасываем поля формы
+                    const messageDiv = targetModal.querySelector('#application-message');
+                    if (messageDiv) {
+                        messageDiv.style.display = 'none'; // Скрываем сообщения
+                        messageDiv.innerHTML = ''; // Очищаем сообщения
+                    }
+
+                    // Восстанавливаем исходное содержимое формы
+                    const originalContent = form.dataset.originalContent;
+                    if (originalContent) {
+                        form.innerHTML = originalContent; // Восстанавливаем исходное содержимое
+                    }
+                }
+            }
+        });
+    });
+
+    // Сохраняем оригинальное содержимое формы при инициализации
+    document.querySelectorAll('.modal form').forEach(form => {
+        form.dataset.originalContent = form.innerHTML; // Сохраняем текущее содержимое формы
+    });
+
+</script>
+
+<main class="main">
+    <div class="page-content mb-8">
+        <div class="container">
+            <div class="store store-wcfm-banner store-hero mt-4">
+                <figure class="store-media">
+                    <img src="{% if manufacturer.cover %}{{ manufacturer.cover.url }}{% else %}{% static 'site/wolmart/assets/images/vendor/wcfm/1.jpg' %}{% endif %}"
+                         alt="{{ manufacturer.name }}" width="1240" height="460" />
+                </figure>
+
+                <div class="store-content">
+                    <div class="store-content-left mr-auto">
+                        <div class="personal-info">
+                            <figure class="seller-brand">
+                                <img src="{% if manufacturer.image %}{{ manufacturer.image.url }}{% else %}{% static 'site/wolmart/assets/images/vendor/brand/2-100x100.png' %}{% endif %}"
+                                     alt="{{ manufacturer.name }}" width="100" height="100" />
+                            </figure>
+
+                            <div class="ratings-container">
+                                <div class="ratings-full">
+                                    <span class="ratings" style="width: 10%;"></span>
+                                    <span class="tooltiptext tooltip-top"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="address-info">
+                            <h4 class="store-title mb-2">{{ manufacturer.name }}</h4>
+                            <ul class="seller-info-list list-style-none">
+                                {% if manufacturer.company_coordinates %}
+                                <li class="store-address">
+                                    <i class="w-icon-map-marker me-2"></i>{{ manufacturer.company_coordinates }}
+                                </li>
+                                {% endif %}
+
+                                {% if manufacturer.phone %}
+                                <li class="store-phone">
+                                    <a href="tel:{{ manufacturer.phone }}" class="text-reset text-decoration-none">
+                                        <i class="w-icon-phone me-2"></i>{{ manufacturer.phone }}
+                                    </a>
+                                </li>
+                                {% endif %}
+
+                                {% if manufacturer.email %}
+                                <li class="store-email">
+                                    <a href="mailto:{{ manufacturer.email }}" class="text-reset text-decoration-none">
+                                        <i class="far fa-envelope me-2"></i><span>{{ manufacturer.email }}</span>
+                                    </a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="store-content-right">
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button class="btn btn-hero toggle-subscription" data-id="{{ manufacturer.id }}">
+    {% if manufacturer in user.manufacturers_subscriber.all %}
+        {% trans "Отписаться" %}
+    {% else %}
+        {% trans "Подписаться" %}
+    {% endif %}
+</button>
+
+
+                            <a class="btn btn-ghost" href="{% url 'shop:manufacturers_blog' manufacturer.slug %}">
+                                {% trans "Блог" %}
+                            </a>
+                        </div>
+
+                        <div class="social-icons social-icons-colored border-thin d-none">
+                            <a href="#" class="social-icon social-facebook w-icon-facebook"></a>
+                            <a href="#" class="social-icon social-twitter w-icon-twitter"></a>
+                            <a href="#" class="social-icon social-linkedin fab fa-linkedin"></a>
+                            <a href="#" class="social-icon social-youtube w-icon-youtube"></a>
+                            <a href="#" class="social-icon social-instagram w-icon-instagram"></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* -------- Hero container -------- */
+        .store-hero{ position: relative; overflow: hidden; border-radius: 16px; }
+        .store-hero .store-media{ position: relative; height: 360px; margin: 0; }
+        .store-hero .store-media img{
+          width: 100%; height: 100%; object-fit: cover; display: block;
+          filter: saturate(1.05);
+        }
+        /* градиентная вуаль на обложке */
+        .store-hero .store-media::after{
+          content:""; position:absolute; inset:0;
+          background: linear-gradient(180deg, rgba(0,0,0,.15) 0%, rgba(0,0,0,.55) 100%);
+        }
+
+        /* -------- Content card over image -------- */
+        .store-hero .store-content{
+          position: absolute; left: 24px; right: 24px; bottom: 24px;
+          display: flex; gap: 24px; align-items: flex-end; justify-content: space-between;
+          background: rgba(255,255,255,.08);
+          border: 1px solid rgba(255,255,255,.18);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
+          padding: 20px;
+          border-radius: 16px;
+          color: #fff;
+        }
+
+        /* левый блок */
+        .store-hero .personal-info{ display:flex; align-items:center; gap:16px; margin-bottom: 8px; }
+        .store-hero .seller-brand{
+          margin:0; width: 88px; height: 88px; border-radius: 50%;
+          padding: 3px; background: linear-gradient(135deg,#ffffff,#d6d6d6);
+        }
+        .store-hero .seller-brand img{
+          width:100%; height:100%; object-fit: cover; border-radius: 50%;
+          display:block; background:#fff;
+          box-shadow: 0 6px 20px rgba(0,0,0,.25);
+        }
+
+        .store-hero .store-title{ color: #fff; font-weight: 700; }
+
+        /* список контактов */
+        .store-hero .seller-info-list{ margin: 0; padding: 0; display: grid; gap: 6px; }
+        .store-hero .seller-info-list li{ list-style: none; display:flex; align-items:center; opacity:.95; }
+        .store-hero .seller-info-list i{ font-size: 16px; }
+
+        /* рейтинг (если используется стандартный стиль темы — просто добавим капсулу) */
+        .store-hero .ratings-full{
+          position: relative; width: 110px; height: 10px; background: rgba(255,255,255,.25);
+          border-radius: 9999px; overflow: hidden;
+        }
+        .store-hero .ratings-full .ratings{
+          display:block; height:100%; background: #ffd166;
+        }
+
+        /* правый блок — кнопки */
+        .btn-hero{
+          background: #7E5539; color:#fff; border: 1px solid #7E5539;
+          border-radius: 9999px; padding: 10px 16px; font-weight: 600;
+        }
+        .btn-hero:hover{ background:#5f3f2a; border-color:#5f3f2a; color:#fff; }
+        .btn-ghost{
+          background: rgba(255,255,255,.15); color:#fff; border:1px solid rgba(255,255,255,.35);
+          border-radius: 9999px; padding: 10px 16px; font-weight:600; text-decoration:none;
+        }
+        .btn-ghost:hover{ background: rgba(255,255,255,.25); color:#fff; }
+
+        /* -------- Responsive -------- */
+        @media (max-width: 992px){
+          .store-hero .store-media{ height: 300px; }
+          .store-hero .store-content{ left:16px; right:16px; bottom:16px; padding:16px; gap:16px; }
+        }
+        @media (max-width: 768px){
+          .store-hero .store-media{ height: 260px; }
+          .store-hero .store-content{
+            position: static; margin-top: -40px; /* чуть наезжаем на баннер */
+            color: #1f2937; background: #fff; border: 1px solid #eee; backdrop-filter: none;
+          }
+          .store-hero .store-title{ color: #1f2937; }
+          .btn-ghost{ color:#1f2937; border-color:#e5e7eb; }
+        }
+    </style>
+
+    <!-- End of Store WCMP Banner -->
+    <!-- Start of Page Content -->
+    <div class="page-content">
+        <div class="container">
+
+            <div class="row">
+                <div class="col-3">
+                    <div class="shop-content row gutter-lg mb-10" style="margin-top: 40px;">
+                        <!-- Start of Sidebar, Shop Sidebar -->
+                        <aside class="sidebar shop-sidebar sticky-sidebar-wrapper sidebar-fixed">
+
+                            <!-- Start of Sticky Sidebar -->
+                            <form class="sticky-sidebar">
+                                <div class="widget-search-form" style="display: flex">
+                                    <input class="form-control" type="search" name="q" value="{{ query }}" placeholder="{% trans 'Поиск' %}...">
+                                    <button class="btn btn-search" type="submit"><i class="fa fa-search"></i></button>
+                                </div>
+                                <form method="GET" action="{% url 'shop:catalogs' %}">
+                                    <div class="filter-actions" style="margin-top: 20px">
+
+                                        <label><button type="submit"  class="btn btn-dark btn-link">{% trans 'Искать' %}</button></label>
+                                        <a href="{% url 'shop:catalogs' %}" class="btn btn-dark btn-link">{% trans 'Очистить' %}</a>
+                                    </div>
+                                    <!-- Start of Collapsible widget -->
+
+                                    <div class="shop-widget shop-sidebar-price-range" style=" background: #0000000a; border-radius: 5px;padding: 10px; margin-top: 40px; padding: 34px 30px 35px;">
+                                        <h4 class="sidebar-title">{% trans 'Сортировать по цене' %}</h4>
+                                        <div class="multi-range-slider" id="price1">
+                                            <div class="middle">
+                                                <input type="range" name="min_price" id="input-left1"
+                                                       min="{{ default_min_price }}"
+                                                       max="{{ default_max_price }}"
+                                                       value="{{ current_min_price }}">
+                                                <!-- Поле для максимальной цены -->
+                                                <input type="range" name="max_price" id="input-right1"
+                                                       min="{{ default_min_price }}"
+                                                       max="{{ default_max_price }}"
+                                                       value="{{ current_max_price }}">
+                                                <div class="slider">
+                                                    <div class="track"></div>
+                                                    <div class="range" style="left: 10%; right: 50%;"></div>
+                                                    <div class="thumb left" style="left: 10%;"></div>
+                                                    <div class="thumb right" style="right: 50%;"></div>
+                                                </div>
+                                                <div class="d-flex align-items-center justify-content-between mt-2">
+                                                    {% if valute.default == False %}
+                                                    <div><span id="amount-left1" class="font-weight-bold">{% currency_conversion request default_min_price%} {{valute.name}}</span>
+                                                    </div>
+                                                    <div><span id="amount-right1" class="font-weight-bold">{% currency_conversion request default_max_price%} {{valute.name}}</span>
+                                                    </div>
+                                                    {% else %}
+                                                    <div><span id="amount-left1"
+                                                               class="font-weight-bold">{{ default_min_price }}</span>
+                                                        {{valute.name}}
+                                                    </div>
+                                                    <div><span id="amount-right1"
+                                                               class="font-weight-bold">{{ default_max_price }}</span>
+                                                        {{valute.name}}
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="category-accordion" style="background: #f8f9fa; border-radius: 12px; padding: 20px; margin-top: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                                        <h5 class="category-title" style="font-weight: 600; color: #333; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee; font-size: 18px;">{% trans "Все категории" %}</h5>
+
+                                        <ul class="category-tree" style="list-style: none; padding-left: 0; margin: 0;">
+                                            {% for category in all_categories %}
+                                            {% if not category.parent %}
+                                            <li class="category-item" style="margin-bottom: 8px;">
+                                                <div class="category-main"
+                                                     style="display: flex; align-items: center; padding: 12px 16px; background: #fff; border-radius: 8px; border: 1px solid #e9ecef; cursor: pointer;"
+                                                     onclick="toggleSubcategories(this)">
+                                                    <!-- Унифицированная иконка гамбургер -->
+
+
+                                                    <input type="checkbox" class="form-check-input"
+                                                           id="category{{ category.id }}"
+                                                           name="category" value="{{ category.id }}"
+                                                           {% if category.id|stringformat:"s" in selected_categories %} checked {% endif %}
+                                                    style="margin-right: 10px; width: 16px; height: 16px; cursor: pointer;"
+                                                    onclick="event.stopPropagation()">
+
+                                                    <span class="category-name" style="font-size: 16px; color: #495057; flex-grow: 1;">
+                            {{ category.name }}
+                        </span>
+                                                    <span class="category-count" style="background: #e9ecef; color: #6c757d; padding: 4px 10px; border-radius: 12px; font-size: 14px; font-weight: 500;">
+                            {{ category.count_product }}
+                        </span>
+                                                </div>
+
+                                                {% if category.children.all %}
+                                                <div class="subcategories-level-1" style="display: none; margin-left: 20px; margin-top: 8px; padding-left: 15px; border-left: 2px solid #dee2e6;">
+                                                    {% for subcat in category.children.all %}
+                                                    <div class="subcategory-item" style="margin-bottom: 8px;">
+                                                        <div class="subcategory-header"
+                                                             style="display: flex; align-items: center; padding: 10px 14px; background: #f8f9fa; border-radius: 6px; cursor: pointer;"
+                                                             onclick="toggleSubcategories(this)">
+
+
+                                                            <input type="checkbox" class="form-check-input"
+                                                                   id="category{{ subcat.id }}"
+                                                                   name="category" value="{{ subcat.id }}"
+                                                                   {% if subcat.id|stringformat:"s" in selected_categories %} checked {% endif %}
+                                                            style="margin-right: 10px; width: 16px; height: 16px; cursor: pointer;"
+                                                            onclick="event.stopPropagation()">
+
+                                                            <span class="subcategory-name" style="font-size: 15px; color: #6c757d; flex-grow: 1;">
+                                            {{ subcat.name }}
+                                        </span>
+                                                            <span class="subcategory-count" style="color: #adb5bd; font-size: 13px; font-weight: 500;">
+                                            {{ subcat.count_product }}
+                                        </span>
+                                                        </div>
+
+                                                        {% if subcat.children.all %}
+                                                        <div class="subcategories-level-2" style="display: none; margin-left: 20px; margin-top: 6px; padding-left: 15px; border-left: 2px solid #e9ecef;">
+                                                            {% for subsubcat in subcat.children.all %}
+                                                            <div class="subsubcategory-item" style="padding: 8px 12px; margin-bottom: 6px; background: #f1f3f5; border-radius: 4px;">
+                                                                <input type="checkbox" class="form-check-input"
+                                                                       id="category{{ subsubcat.id }}"
+                                                                       name="category" value="{{ subsubcat.id }}"
+                                                                       {% if subsubcat.id|stringformat:"s" in selected_categories %} checked {% endif %}
+                                                                style="margin-right: 10px; width: 16px; height: 16px; cursor: pointer;">
+
+                                                                <label for="category{{ subsubcat.id }}" style="display: flex; align-items: center; text-decoration: none; color: #495057; cursor: pointer; flex-grow: 1;">
+                                                        <span class="subsubcategory-name" style="font-size: 14px; flex-grow: 1;">
+                                                            {{ subsubcat.name }}
+                                                        </span>
+                                                                    <span class="subsubcategory-count" style="color: #adb5bd; font-size: 12px;">
+                                                            {{ subsubcat.count_product }}
+                                                        </span>
+                                                                </label>
+                                                            </div>
+                                                            {% endfor %}
+                                                        </div>
+                                                        {% endif %}
+                                                    </div>
+                                                    {% endfor %}
+                                                </div>
+                                                {% endif %}
+                                            </li>
+                                            {% endif %}
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                    <div class="py-3" style="background: #0000000a; border-radius: 5px;padding: 10px; margin-top: 40px; padding: 34px 30px 35px;">
+                                        <h5 class="font-weight-bold">{% trans 'Рейтинг' %}</h5>
+                                        <div class="rating">
+                                            <div class="form-inline d-flex align-items-center py-2">
+                                                <label class="tick"><input type="checkbox" name="rating" value="5" {% if "5" in selected_ratings %} checked {% endif %}>
+                                                    <span class="fa fa-star"></span> <span class="fa fa-star"></span> <span class="fa fa-star"></span> <span class="fa fa-star"></span> <span class="fa fa-star"></span> </label> </div>
+                                            <div class="form-inline d-flex align-items-center py-2" style="margin-top: 15px"> <label class="tick"><input type="checkbox" name="rating" value="4"{% if "4" in selected_ratings %} checked {% endif %}> <span class="fa fa-star"></span> <span class="fa fa-star"></span> <span class="fa fa-star"></span> <span class="fa fa-star"></span> <span class="fa fa-star  text-muted"></span> </label> </div>
+                                            <div class="form-inline d-flex align-items-center py-2" style="margin-top: 15px"> <label class="tick"><input type="checkbox" name="rating" value="3"{% if "3" in selected_ratings %} checked {% endif %}> <span class="fa fa-star"></span> <span class="fa fa-star"></span> <span class="fa fa-star"></span> <span class="fa fa-star  text-muted"></span> <span class="fa fa-star  text-muted"></span> </label> </div>
+                                            <div class="form-inline d-flex align-items-center py-2" style="margin-top: 15px"> <label class="tick"><input type="checkbox" name="rating" value="2"{% if "2" in selected_ratings %} checked {% endif %}> <span class="fa fa-star"></span> <span class="fa fa-star"></span> <span class="fa fa-star  text-muted"></span> <span class="fa fa-star  text-muted"></span> <span class="fa fa-star  text-muted"></span> </label> </div>
+                                            <div class="form-inline d-flex align-items-center py-2" style="margin-top: 15px"> <label class="tick"><input type="checkbox" name="rating" value="1"{% if "1" in selected_ratings %} checked {% endif %}> <span class="fa fa-star"></span> <span class="fa fa-star  text-muted"></span> <span class="fa fa-star  text-muted"></span> <span class="fa fa-star  text-muted"></span> <span class="fa fa-star  text-muted"></span> </label> </div>
+                                        </div>
+                                    </div>
+                                    <div class="py-3">
+                                        {% for variable in variables_with_atributes %}
+                                        <h5 class="font-weight-bold">{{ variable.name }}</h5>
+
+                                        {% if variable.type == 1 %}
+                                        <div class="mt-2 mr-1">
+                                            {% for atribute in variable.atribute_set.all %}
+                                            <div class="form-check">
+                                                <input type="checkbox" id="atribute{{ atribute.id }}" name="atribute_{{variable.slug}}" value="{{ atribute.id }}"
+                                                       {% if atribute.id|stringformat:"s" in selected_attributes.values  %} checked {% endif %}>
+                                                <label for="atribute{{ atribute.id }}">
+                                                    {{ atribute.name }}
+                                                </label>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+
+                                        {% elif variable.type == 2 %}
+                                        <select class="form-select" name="atribute_{{variable.slug}}">  <!-- Используем name="atribute" для отправки в GET -->
+                                            <!-- Добавляем опцию "Без фильтров" -->
+                                            <option value="">{% trans 'Без фильтров' %}</option>
+                                            {% for atribute in variable.atribute_set.all %}
+                                            <option value="{{ atribute.id }}"
+                                                    {% if atribute.id|stringformat:"s" in selected_attributes.values %} selected {% endif %}>  <!-- Устанавливаем selected -->
+                                            {{ atribute.name }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+
+                                        {% endif %}
+                                        {% endfor %}
+
+
+                                    </div>
+                                    <!-- End of Collapsible Widget -->
+                                </form>
+                                <!-- End of Sidebar Content -->
+
+                                <!-- End of Sidebar Content -->
+                        </aside>
+                        <!-- End of Shop Sidebar -->
+
+                        <!-- Start of Shop Main Content -->
+                        <div class="main-content">
+                            <nav class="toolbox sticky-toolbox sticky-content fix-top">
+                                <div class="toolbox-left">
+                                    <div class="toolbox-item toolbox-sort select-box text-dark">
+                                        <select id="filterSelect" class="form-control" aria-label="Фильтр" style="height: 47px">
+                                            <option disabled {% if not selected_filter %} selected {% endif %}>{% trans 'Сортировать' %}</option>
+                                            <option value="1" {% if selected_filter == "1" %} selected {% endif %}>{% trans 'По алфавиту' %}</option>
+                                            <option value="2" {% if selected_filter == "2" %} selected {% endif %}>{% trans 'Новое' %}</option>
+                                            <option value="3" {% if selected_filter == "3" %} selected {% endif %}>{% trans 'Старое' %}</option>
+                                        </select>
+
+                                    </div>
+                                </div>
+                            </nav>
+                            <div class=" row cols-md-3 cols-sm-2 cols-2">
+
+                            </div>
+                            <div class="toolbox toolbox-pagination justify-content-between">
+
+                            </div>
+                        </div>
+                        <!-- End of Shop Main Content -->
+                    </div>
+                    <!-- End of Shop Content -->
+                </div>
+                <div class="col-9" style="margin-top: 40px; ">
+                    <!-- Start of Shop Main Content -->
+                    <div class="th-sort-bar">
+                        <div class="row justify-content-between align-items-center">
+                            <div class="col-md"><p class="woocommerce-result-count">{% trans 'Товаров' %}:{{products|length}}</p></div>
+                            <div class="col-md-auto">
+                                <div class="toolbox-item toolbox-sort select-box text-dark">
+                                    <select id="filterSelect" class="form-control" aria-label="Фильтр" style="height: 47px">
+                                        <option disabled {% if not selected_filter %} selected {% endif %}>Сортировать</option>
+                                        <option value="1" {% if selected_filter == "1" %} selected {% endif %}>По алфавиту</option>
+                                        <option value="2" {% if selected_filter == "2" %} selected {% endif %}>Новое</option>
+                                        <option value="3" {% if selected_filter == "3" %} selected {% endif %}>Старое</option>
+                                    </select>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="main-content">
+
+                        <div class="row gy-40" id="products-list"></div>
+                    </div>
+                    <!-- End of Shop Main Content -->
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <!-- End of Page Content -->
+</main>
+<style>
+    .active>.page-link, .page-link.active{
+        border: 1px solid #336699;
+        border-radius: 5px;
+        color: #d5d5d5;
+        text-align: center;
+        background-color: #336699;
+        border-color: #336699;
+        display: -webkit-inline-box;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-box-pack: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        min-width: 3rem;
+        height: 4rem;
+        -webkit-transition: background-color 0.4s, border 0.4s, color 0.4s;
+        transition: background-color 0.4s, border 0.4s, color 0.4s;
+        line-height: 1;
+        margin-bottom: 0 !important;
+    }
+    .product-wrap{
+        align-content: end;
+    }
+    .toolbox {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 25px;
+    }
+
+    .select-box select, .select-menu select{
+        height: auto;
+    }
+    .d-flex.justify-content-between.align-items-center.category.show {
+        background: #e6c47f;
+    }
+    #price {
+        height: 45px
+    }
+
+    .middle {
+        position: relative;
+        width: 100%;
+        margin-top: 25px
+    }
+
+    .slider {
+        position: relative;
+        z-index: 1;
+        height: 5px;
+        margin: 0 15px
+    }
+
+    .slider > .track {
+        position: absolute;
+        z-index: 1;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        border-radius: 5px;
+        background-color: #ddd
+    }
+
+    .slider > .range {
+        position: absolute;
+        z-index: 2;
+        left: 25%;
+        right: 25%;
+        top: 0;
+        bottom: 0;
+        border-radius: 5px;
+        background-color: #336699
+    }
+
+    .slider > .thumb {
+        position: absolute;
+        top: 2px;
+        z-index: 3;
+        width: 20px;
+        height: 20px;
+        background-color: #336699;
+        border-radius: 50%;
+        box-shadow: #E6C47FFF;
+        transition: box-shadow .3s ease-in-out
+    }
+
+    .slider > .thumb::after {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        left: 28%;
+        top: 30%;
+        border-radius: 50%;
+        content: '';
+        background-color: #fff
+    }
+
+    .slider > .thumb.left {
+        left: 25%;
+        transform: translate(-15px, -10px)
+    }
+
+    .slider > .thumb.right {
+        right: 25%;
+        transform: translate(15px, -10px)
+    }
+
+    .slider > .thumb.hover {
+        box-shadow: #E6C47FFF;
+    }
+
+    .slider > .thumb.active {
+        box-shadow: #E6C47FFF;
+    }
+
+    input[type=range] {
+        position: absolute;
+        pointer-events: none;
+        -webkit-appearance: none;
+        z-index: 2;
+        height: 10px;
+        width: 100%;
+        opacity: 0
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+        pointer-events: all;
+        width: 30px;
+        height: 30px;
+        border-radius: 0;
+        border: 0 none;
+        background-color: #336699;
+        -webkit-appearance: none
+    }
+
+    .del {
+        text-decoration: line-through;
+        color: #336699
+    }
+
+    .text-muted{
+        color: #6c757d !important;
+    }
+    .brand .tick{
+
+        padding-left: 25px;
+    }
+    .rating .check{
+        background-color: #fff;
+        border: 1px solid #666;
+        top: 0;
+    }
+    .form-check-input[type=checkbox] {
+    border-radius: .25em;
+    }
+    .rating .fa.fa-star{
+        color: #ffbb00;
+        padding: 0px 3px;
+    }
+    .brand .tick:hover input ~ .check,
+    .rating .tick:hover input ~ .check{
+        background-color: #f9f9f9;
+    }
+    .brand .tick input:checked ~ .check,
+    .rating .tick input:checked ~ .check{
+        background-color: #61b15a;
+    }
+    .brand .check{
+        background-color: #fff;
+        top: 3px;
+        border: 1px solid #666;
+    }
+    .brand .tick{
+        font-size: 1rem;
+        padding-left: 25px;
+    }
+    .category{
+        font-size: 0.9rem;
+        cursor: pointer;
+    }
+    .list-group-item{
+        border: none;
+        padding: 0.3rem 0.4rem 0.3rem 0rem;
+    }
+    input[type="checkbox"] {
+        accent-color: #336699;
+    }
+
+</style>
+{% endblock content %}
+
+{% block footer %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        console.log("DOM полностью загружен и разобран");
+
+        // Находим все кнопки увеличения и уменьшения количества
+        var minusButtons = document.querySelectorAll('.qtyminus');
+        var plusButtons = document.querySelectorAll('.qtyplus');
+
+        console.log("Найдено кнопок минус:", minusButtons.length);
+        console.log("Найдено кнопок плюс:", plusButtons.length);
+
+        // Добавляем обработчики событий для кнопок уменьшения
+        minusButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                console.log("Кнопка минус нажата");
+                var input = this.parentNode.querySelector('.qty');
+                var value = parseInt(input.value, 10);
+                if (value > 1) {
+                    input.value = value - 1;
+                }
+                console.log("Новое значение:", input.value);
+            });
+        });
+
+        // Добавляем обработчики событий для кнопок увеличения
+        plusButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                console.log("Кнопка плюс нажата");
+                var input = this.parentNode.querySelector('.qty');
+                var value = parseInt(input.value, 10);
+                var max = parseInt(input.getAttribute('maxlength'), 10);
+                if (value < max) {
+                    input.value = value + 1;
+                }
+                console.log("Новое значение:", input.value);
+            });
+        });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let timeout = null;
+
+        document.querySelectorAll('input[type="checkbox"]').forEach(function(checkbox) {
+            checkbox.addEventListener('change', function() {
+                if (timeout) {
+                    clearTimeout(timeout);
+                }
+
+                timeout = setTimeout(function() {
+                    checkbox.form.submit();
+                }, 2000);  // 2 секунды
+            });
+        });
+    });
+</script>
+<script>
+    let timer = null; // Переменная для хранения таймера
+    let changeCountLeft = 0; // Счётчик изменений для левого ползунка
+    let changeCountRight = 0; // Счётчик изменений для правого ползунка
+
+    // Получаем форму по id
+    const form = document.getElementById('price-filter-form');
+
+    // Получаем элементы .thumb, за которыми будем следить
+    const leftThumb = document.querySelector('.thumb.left');
+    const rightThumb = document.querySelector('.thumb.right');
+
+    // Функция для отправки формы через 2 секунды после последнего изменения
+    function handleThumbMove() {
+        // Если есть активный таймер, сбрасываем его
+        if (timer) {
+            clearTimeout(timer);
+        }
+
+        // Устанавливаем новый таймер на 2 секунды
+        timer = setTimeout(function() {
+            form.submit();  // Отправляем форму после 2 секунд тишины
+        }, 2000);
+    }
+
+    // Функция для отслеживания изменений стилей у элементов thumb
+    function observeThumb(thumb, isLeft = true) {
+        const observer = new MutationObserver(() => {
+            if (isLeft) {
+                changeCountLeft++;
+                if (changeCountLeft >= 2) {
+                    handleThumbMove(); // Только после второго изменения
+                }
+            } else {
+                changeCountRight++;
+                if (changeCountRight >= 2) {
+                    handleThumbMove(); // Только после второго изменения
+                }
+            }
+        });
+
+        // Настраиваем observer для отслеживания изменений атрибутов стиля
+        observer.observe(thumb, { attributes: true, attributeFilter: ['style'] });
+    }
+
+    // Запускаем наблюдателей для каждого ползунка
+    observeThumb(leftThumb, true);
+    observeThumb(rightThumb, false);
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const buttons = document.querySelectorAll('.btn.btn-hero');
+
+    buttons.forEach(button => {
+        button.addEventListener('click', function() {
+            const manufacturerId = this.getAttribute('data-id');
+            const action = this.innerText.trim() === 'Подписаться' ? 'subscribe' : 'unsubscribe';
+
+            // Отправляем AJAX запрос
+            fetch("{% url 'shop:profile-subscribe' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: JSON.stringify({
+                    'manufacturer_id': manufacturerId,
+                    'action': action
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'subscribed') {
+                    this.innerHTML = '{% trans "Отписаться" %}';
+                } else if (data.status === 'unsubscribed') {
+                    this.innerHTML = '{% trans "Подписаться" %}';
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+            });
+        });
+    });
+});
+</script>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const productList = document.getElementById("products-list");
+        let currentPage = 1;
+        let isLoading = false;
+        const filters = new URLSearchParams(window.location.search);
+
+        // === CSRF ===
+        function getCSRFToken(name = "csrftoken") {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== "") {
+                const cookies = document.cookie.split(";");
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // === Рисуем звездочки по среднему рейтингу ===
+        function buildStarsHTML(rating) {
+            const r = Math.max(0, Math.min(5, Number(rating) || 0));
+            const full = Math.floor(r);
+            const half = (r - full) >= 0.5 ? 1 : 0;
+            const empty = 5 - full - half;
+
+            let html = "";
+            for (let i = 0; i < full; i++) html += '<i class="fas fa-star"></i>';
+            if (half) html += '<i class="fas fa-star-half-alt"></i>';
+            for (let i = 0; i < empty; i++) html += '<i class="far fa-star"></i>';
+            return html;
+        }
+
+        // === Bookmark ===
+        function handleBookmark(event) {
+            event.preventDefault();
+            const button = event.currentTarget;
+            const product_id = button.dataset.product;
+            aType = button.dataset.type;
+            const csrfToken = getCSRFToken();
+
+            const url = (aType === "bookmarkAdd")
+              ? window.urls.bookmarkAdd
+              : window.urls.bookmarkDelete;
+
+            fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRFToken": csrfToken,
+                },
+                body: new URLSearchParams({ product_id }).toString(),
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    if (aType === "bookmarkAdd") {
+                        button.dataset.type = "bookmarkDelete";
+                        button.innerHTML = '<i class="fas fa-heart"></i>';
+                    } else {
+                        button.dataset.type = "bookmarkAdd";
+                        button.innerHTML = '<i class="far fa-heart"></i>';
+                    }
+                    const bookmarkCount = document.getElementById("bookmark-count");
+                    if (bookmarkCount) bookmarkCount.textContent = data.count;
+                }
+            })
+            .catch(err => console.error("Ошибка при обновлении закладки:", err));
+        }
+
+        function bindBookmarkButtonHandler() {
+            document.querySelectorAll(".bookmark").forEach(button => {
+                button.removeEventListener("click", handleBookmark);
+                button.addEventListener("click", handleBookmark);
+            });
+        }
+
+        // === Add to Cart ===
+        function handleAddToCartFormSubmit(event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const form = event.currentTarget;
+            const productId = form.dataset.productId;
+            const quantity = form.querySelector("input[name='quantity']").value;
+            const variation_slug = form.querySelector("input[name='variation_slug']").value;
+            const csrfToken = form.querySelector("input[name='csrfmiddlewaretoken']").value;
+
+            const data = new FormData();
+            data.append("product_id", productId);
+            data.append("quantity", quantity);
+            data.append("variation_slug", variation_slug);
+            data.append("csrfmiddlewaretoken", csrfToken);
+
+            fetch(form.action, { method: "POST", body: data })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showCustomAlert("{% trans 'Товар добавлен в корзину' %}!");
+                    updateAddCartContent();
+                } else {
+                    showCustomAlert(data.message || "Ошибка добавления в корзину");
+                }
+            })
+            .catch(error => console.error("Ошибка при добавлении товара в корзину:", error));
+        }
+
+        function bindAddToCartHandler() {
+            document.querySelectorAll("form.add-to-cart-form").forEach(form => {
+                form.removeEventListener("submit", handleAddToCartFormSubmit);
+                form.addEventListener("submit", handleAddToCartFormSubmit);
+            });
+        }
+
+        // === Кастомный alert ===
+        function showCustomAlert(message) {
+            let alertBox = document.getElementById("custom-alert");
+            if (!alertBox) {
+                alertBox = document.createElement("div");
+                alertBox.id = "custom-alert";
+                alertBox.style.position = "fixed";
+                alertBox.style.top = "20px";
+                alertBox.style.right = "20px";
+                alertBox.style.background = "#28a745";
+                alertBox.style.color = "#fff";
+                alertBox.style.padding = "10px 15px";
+                alertBox.style.borderRadius = "4px";
+                alertBox.style.opacity = "0";
+                alertBox.style.transition = "opacity .5s";
+                document.body.appendChild(alertBox);
+            }
+            alertBox.textContent = message;
+            alertBox.style.display = "block";
+            setTimeout(() => { alertBox.style.opacity = "1"; }, 10);
+            setTimeout(() => {
+                alertBox.style.opacity = "0";
+                setTimeout(() => { alertBox.style.display = "none"; }, 500);
+            }, 2000);
+        }
+
+        // === Обновление мини-корзины/счетчиков ===
+        function updateAddCartContent() {
+            fetch(location.href)
+                .then(r => r.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, "text/html");
+
+                    const newCartCount = doc.getElementById("cart-count");
+                    if (newCartCount) {
+                        const cartCount = document.getElementById("cart-count");
+                        if (cartCount) cartCount.textContent = newCartCount.textContent;
+                    }
+                    const newCartCountMobile = doc.getElementById("cart-count-mobile");
+                    if (newCartCountMobile) {
+                        const cartCountMobile = document.getElementById("cart-count-mobile");
+                        if (cartCountMobile) cartCountMobile.textContent = newCartCountMobile.textContent;
+                    }
+                    const newCartContent = doc.getElementById("cart_product_canvas");
+                    if (newCartContent) {
+                        const cartContent = document.getElementById("cart_product_canvas");
+                        if (cartContent) cartContent.innerHTML = newCartContent.innerHTML;
+                    }
+                })
+                .catch(err => console.error("Error updating cart content:", err));
+        }
+
+        // === + / - количества (делегировано) ===
+        document.addEventListener("click", (e) => {
+            const plusBtn = e.target.closest(".quantity-plus");
+            const minusBtn = e.target.closest(".quantity-minus");
+            if (!plusBtn && !minusBtn) return;
+
+            const group = (plusBtn || minusBtn).closest(".pro-qty");
+            if (!group) return;
+            const input = group.querySelector("input.quantity, input.qty-input");
+            if (!input) return;
+
+            const min = parseInt(input.getAttribute("min") || "1", 10);
+            const max = parseInt(input.getAttribute("max") || "51", 10);
+            let val = parseInt(input.value || "1", 10);
+            if (isNaN(val) || val < min) val = min;
+
+            if (plusBtn) val = Math.min(max, val + 1);
+            if (minusBtn) val = Math.max(min, val - 1);
+            input.value = val;
+        });
+
+        // === Загрузка карточек ===
+        const loadProducts = (page) => {
+            if (isLoading) return;
+            isLoading = true;
+            filters.set("page", page);
+            fetch(`/manufacturers/{{ manufacture.slug }}/?${filters.toString()}`, {
+                method: "GET",
+                headers: { "X-Requested-With": "XMLHttpRequest" },
+            })
+
+            .then(res => {
+                if (!res.ok) throw new Error("Ошибка загрузки данных");
+                return res.json();
+            })
+            .then(data => {
+                // валюту берём из ответа, fallback — window.cart.valute или 'сом'
+                const currency = data.currency || (window.cart && window.cart.valute) || "сом";
+
+                data.products.forEach(product => {
+                    const col = document.createElement("div");
+                    col.className = "col-xl-4 col-lg-4 col-sm-6";
+
+                    const card = document.createElement("div");
+                    card.className = "th-product product-grid";
+
+                    const imgWrapper = document.createElement("div");
+                    imgWrapper.className = "product-img";
+
+                    // Бейдж "Реклама"
+                    if (product.reklama) {
+                        imgWrapper.insertAdjacentHTML(
+                            "afterbegin",
+                            `<span class="product-tag">{% trans 'Реклама' %}</span>`
+                        );
+                    }
+
+                    // Слайдер с точками
+                    if (product.images && product.images.length > 0) {
+                        const slider = document.createElement("div");
+                        slider.className = "product-slider";
+
+                        const slidesWrapper = document.createElement("div");
+                        slidesWrapper.className = "slides-wrapper";
+
+                        const dotsWrapper = document.createElement("div");
+                        dotsWrapper.className = "slider-dots";
+
+                        product.images.forEach((imgUrl, index) => {
+                            const img = document.createElement("img");
+                            img.src = imgUrl;
+                            img.alt = product.name;
+                            img.className = "slide-img";
+                            slidesWrapper.appendChild(img);
+
+                            const dot = document.createElement("div");
+                            dot.className = "slider-dot" + (index === 0 ? " active" : "");
+                            dot.dataset.index = index;
+                            dotsWrapper.appendChild(dot);
+                        });
+
+                        slider.appendChild(slidesWrapper);
+                        slider.appendChild(dotsWrapper);
+                        imgWrapper.appendChild(slider);
+
+                        // управление слайдером
+                        let current = 0;
+                        const imgs = slidesWrapper.querySelectorAll(".slide-img");
+                        const dots = dotsWrapper.querySelectorAll(".slider-dot");
+
+                        function applyTransform() {
+                            slidesWrapper.style.display = "flex";
+                            slidesWrapper.style.transition = "transform 0.4s ease";
+                            imgs.forEach(img => img.style.minWidth = "100%");
+                            slidesWrapper.style.transform = `translateX(-${current * 100}%)`;
+                            dots.forEach((d, i) => d.classList.toggle("active", i === current));
+                        }
+                        applyTransform();
+
+                        dots.forEach(dot => {
+                            dot.addEventListener("click", () => {
+                                current = parseInt(dot.dataset.index);
+                                applyTransform();
+                            });
+                        });
+                    } else if (product.image) {
+                        const img = document.createElement("img");
+                        img.src = product.image;
+                        img.alt = product.name;
+                        imgWrapper.appendChild(img);
+                    }
+
+                    // Actions
+                    const actions = document.createElement("div");
+                    actions.className = "actions";
+                    const bookmarkType = product.is_bookmarked ? "bookmarkDelete" : "bookmarkAdd";
+                    const bookmarkIcon = product.is_bookmarked ? "fas fa-heart" : "far fa-heart";
+                    console.log(product);
+                    actions.innerHTML = `
+                        <a class="icon-btn add-to-compare" data-id="${product.id}" title="Compare">
+                            <i class="fa fa-balance-scale"></i>
+                        </a>
+                        <span id="bookmark_button_${product.id}"
+                              class="icon-btn bookmark btn-wishlist"
+                              data-type="${bookmarkType}"
+                              data-product="${product.id}">
+                              <i class="${bookmarkIcon}"></i>
+                        </span>
+                    `;
+                    imgWrapper.appendChild(actions);
+                    card.appendChild(imgWrapper);
+
+                    // Content
+                    const content = document.createElement("div");
+                    content.className = "product-content";
+
+                    // Форма "В корзину"
+                    const csrf = getCSRFToken();
+                    const variationSlug = product.variation_slug || "";
+                    content.insertAdjacentHTML("beforeend", `
+    <div class="product-form container">
+      <form method="post" action="/addcart/" data-product-id="${product.id}" class="add-to-cart-form">
+        <input type="hidden" name="csrfmiddlewaretoken" value="${csrf}">
+        <input type="hidden" name="product_id" value="${product.id}">
+        <div class="row">
+          <div class="col-xl-5">
+            <div class="product-qty-form product-quantity qty-wrap" data-product="${product.id}">
+              <div class="quantity input-group pro-qty">
+                <input name="quantity" class="qty-input quantity form-control"
+                       id="quantityvalue-${product.id}"
+                       data-product="${product.id}"
+                       value="1" min="1" max="51" type="number">
+                <button type="button" class="qtyplus inc qty-btn quantity-plus w-icon-plus qty">
+                  <i class="far fa-chevron-up"></i>
+                </button>
+                <button type="button" class="qtyminus dec qty-btn quantity-minus w-icon-minus qty">
+                  <i class="far fa-chevron-down"></i>
+                </button>
+              </div>
+            </div>
+            <input type="hidden" name="variation_slug" value="${variationSlug}">
+          </div>
+          <div class="col-xl-7 d-flex align-items-center justify-content-center">
+            <button class="btn btn-primary mobile-button" type="submit">
+              <span>{% trans "В корзину" %}</span>
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+                    `);
+
+                    // Заголовок
+                    const title = document.createElement("h3");
+                    title.className = "product-title";
+                    title.innerHTML = `<a href="${product.url || "#"}">${product.name}</a>`;
+
+                    // Цена + валюта из data.currency
+                    const price = document.createElement("span");
+                    price.className = "price";
+                    price.textContent = product.price != null ? `${product.price} ${currency}` : "{% trans 'Цена не указана' %}";
+
+                    content.appendChild(title);
+                    content.appendChild(price);
+
+                    // Рейтинг под ценой
+                    const ratingWrap = document.createElement("div");
+                    ratingWrap.className = "woocommerce-product-rating";
+
+                    const countSpan = document.createElement("span");
+                    countSpan.className = "count";
+                    countSpan.textContent = `(${product.review_count || 0})`;
+
+                    const starsSpan = document.createElement("span");
+                    starsSpan.className = "stars";
+                    starsSpan.innerHTML = buildStarsHTML(product.rating || 0);
+
+                    ratingWrap.appendChild(countSpan);
+                    ratingWrap.appendChild(starsSpan);
+                    content.appendChild(ratingWrap);
+
+                    card.appendChild(content);
+                    col.appendChild(card);
+                    productList.appendChild(col);
+                });
+
+                if (!data.has_next) {
+                    window.removeEventListener("scroll", handleScroll);
+                } else {
+                    currentPage++;
+                }
+
+                bindBookmarkButtonHandler();
+                bindAddToCartHandler();
+
+                isLoading = false;
+            })
+            .catch(err => {
+                console.error("Ошибка загрузки продуктов:", err);
+                isLoading = false;
+            });
+        };
+
+        // Infinite scroll
+        const handleScroll = () => {
+            const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+            if (scrollTop + clientHeight >= scrollHeight - 100) {
+                loadProducts(currentPage);
+            }
+        };
+
+        window.addEventListener("scroll", handleScroll);
+        loadProducts(currentPage);
+    });
+
+document.querySelectorAll('.subcategory-item').forEach(header => {
+    header.addEventListener('click', function(e) {
+        // Предотвращаем всплытие, чтобы не сработало дважды
+        e.stopPropagation();
+
+        const checkbox = header.querySelector('input[type="checkbox"]');
+        if (checkbox) {
+            checkbox.checked = !checkbox.checked; // Переключаем состояние
+            checkbox.dispatchEvent(new Event('change')); // Можно вызвать событие, чтобы сработали обработчики
+        }
+    });
+});
+
+document.querySelectorAll('.tick').forEach(header => {
+    header.addEventListener('click', function(e) {
+        // Предотвращаем всплытие, чтобы не сработало дважды
+        e.stopPropagation();
+
+        const checkbox = header.querySelector('input[type="checkbox"]');
+        if (checkbox) {
+            checkbox.checked = !checkbox.checked; // Переключаем состояние
+            checkbox.dispatchEvent(new Event('change')); // Можно вызвать событие, чтобы сработали обработчики
+        }
+    });
+});
+</script>
+<script>
+    window.urls = {
+        bookmarkAdd: "{% url 'shop:bookmark-add' %}",
+        bookmarkDelete: "{% url 'shop:bookmark-delete' %}",
+        deleteSelectedProductCart: "{% url 'shop:delete_selected_product' %}"
+    };
+</script>
+{% endblock footer %}

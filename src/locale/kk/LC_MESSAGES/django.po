@@ -284,7 +284,7 @@ msgstr "Мәртебе"
 #: _templates/moderations/variable_form.html:74
 #: _templates/moderations/variable_list.html:58
 #: _templates/site/publication/dopadvertisement.html:43
-#: _templates/site/shop2/cart.html:122 _templates/site/shop3/cart.html:122
+#: _templates/site/SerWeb/cart.html:122 _templates/site/shop3/cart.html:122
 #: _templates/site/shop4/bookmarks.html:72 _templates/site/shop4/cart.html:122
 #: _templates/site/shop4/product_detail.html:263
 msgid "Название"
@@ -675,7 +675,7 @@ msgstr "Санатты таңдаңыз"
 #: _templates/moderations/withdraw.html:137
 #: _templates/site/publication/advertisements.html:129
 #: _templates/site/publication/reviews.html:113
-#: _templates/site/shop22/base/cart.html:7
+#: _templates/site/SerWeb2/base/cart.html:7
 #: _templates/site/shop4/include/cart_product.html:61
 #: _templates/site/useraccount/bookmarks.html:131
 #: _templates/site/useraccount/complaint_list.html:110
@@ -762,7 +762,7 @@ msgstr "Санат бойынша іздеу"
 #: _templates/moderations/variable_list.html:196
 #: _templates/site/publication/advertisements.html:262
 #: _templates/site/publication/reviews.html:246
-#: _templates/site/shop2/tickets.html:84 _templates/site/shop3/tickets.html:84
+#: _templates/site/SerWeb/tickets.html:84 _templates/site/shop3/tickets.html:84
 #: _templates/site/shop4/tickets.html:84 _templates/site/shop5/tickets.html:84
 #: _templates/site/shop6/tickets.html:84
 #: _templates/site/useraccount/complaint_list.html:243
@@ -803,7 +803,7 @@ msgstr "Жою үшін кем дегенде бір элементті таңд
 #: _templates/moderations/variable_list.html:200
 #: _templates/site/publication/advertisements.html:266
 #: _templates/site/publication/reviews.html:250
-#: _templates/site/shop2/tickets.html:88 _templates/site/shop3/tickets.html:88
+#: _templates/site/SerWeb/tickets.html:88 _templates/site/shop3/tickets.html:88
 #: _templates/site/shop4/tickets.html:88 _templates/site/shop5/tickets.html:88
 #: _templates/site/shop6/tickets.html:88
 #: _templates/site/useraccount/complaint_list.html:247
@@ -876,8 +876,8 @@ msgstr "Таңдалған элементтерді алып тастағыңы�
 #: _templates/site/publication/advertisements.html:288
 #: _templates/site/publication/reviews.html:267
 #: _templates/site/publication/reviews.html:272
-#: _templates/site/shop2/tickets.html:105
-#: _templates/site/shop2/tickets.html:110
+#: _templates/site/SerWeb/tickets.html:105
+#: _templates/site/SerWeb/tickets.html:110
 #: _templates/site/shop3/tickets.html:105
 #: _templates/site/shop3/tickets.html:110
 #: _templates/site/shop4/tickets.html:105
@@ -926,7 +926,7 @@ msgstr "Элементтерді алу кезінде қате пайда бо�
 #: _templates/moderations/variable_list.html:228
 #: _templates/site/publication/advertisements.html:294
 #: _templates/site/publication/reviews.html:278
-#: _templates/site/shop2/tickets.html:116
+#: _templates/site/SerWeb/tickets.html:116
 #: _templates/site/shop3/tickets.html:116
 #: _templates/site/shop4/tickets.html:116
 #: _templates/site/shop5/tickets.html:116
@@ -1001,8 +1001,8 @@ msgstr "Бұл элементті алып тастағыңыз келе ме?"
 #: _templates/site/publication/advertisements.html:316
 #: _templates/site/publication/reviews.html:295
 #: _templates/site/publication/reviews.html:300
-#: _templates/site/shop2/tickets.html:133
-#: _templates/site/shop2/tickets.html:138
+#: _templates/site/SerWeb/tickets.html:133
+#: _templates/site/SerWeb/tickets.html:138
 #: _templates/site/shop3/tickets.html:133
 #: _templates/site/shop3/tickets.html:138
 #: _templates/site/shop4/tickets.html:133
@@ -1106,7 +1106,7 @@ msgstr "Тегтер бойынша іздеу"
 #: _templates/moderations/faqsproducts_form.html:17
 #: _templates/moderations/productcomments_form.html:17
 #: _templates/moderations/valute_form.html:17
-#: _templates/site/shop1/base.html:894 _templates/site/shop22/base.html:588
+#: _templates/site/shop1/base.html:894 _templates/site/SerWeb2/base.html:588
 #: _templates/site/shop3/base.html:259 _templates/site/shop4/base.html:202
 msgid "ЧаВо"
 msgstr "Javu"
@@ -1481,7 +1481,7 @@ msgstr "Хабарландырулар жоқ"
 #: _templates/moderations/sponsorship_form.html:57
 #: _templates/moderations/storages_form.html:207
 #: _templates/moderations/variable_form.html:57
-#: _templates/site/shop1/base.html:908 _templates/site/shop22/base.html:585
+#: _templates/site/shop1/base.html:908 _templates/site/SerWeb2/base.html:585
 #: _templates/site/shop4/base.html:319 _templates/site/shop4/base.html:511
 #: _templates/site/shop4/base.html:727 _templates/site/shop4/blogs.html:15
 #: _templates/site/shop6/base.html:239 _templates/site/shop6/base.html:434
@@ -1955,7 +1955,7 @@ msgstr "Карта күйі"
 #: _templates/moderations/iframe/withdraw_form.html:23
 #: _templates/moderations/statuspayment_list.html:40
 #: _templates/moderations/statuspayment_list.html:59
-#: _templates/moderations/withdraw.html:72 _templates/site/shop2/cart.html:188
+#: _templates/moderations/withdraw.html:72 _templates/site/SerWeb/cart.html:188
 #: _templates/site/shop3/cart.html:188 _templates/site/shop4/cart.html:188
 #: _templates/site/shop4/order.html:48
 #: _templates/site/useraccount/bookmarks.html:43
@@ -2085,7 +2085,7 @@ msgstr "Логин"
 msgid "Введите логин"
 msgstr "Кіруді енгізіңіз"
 
-#: _templates/moderations/login.html:32 _templates/site/shop2/login.html:67
+#: _templates/moderations/login.html:32 _templates/site/SerWeb/login.html:67
 #: _templates/site/shop3/login.html:47 _templates/site/shop4/login.html:47
 #: _templates/site/shop4/register.html:55
 #: _templates/site/shop4/register.html:56 _templates/site/shop5/login.html:67
@@ -2094,7 +2094,7 @@ msgstr "Кіруді енгізіңіз"
 msgid "Пароль"
 msgstr "Пароль"
 
-#: _templates/moderations/login.html:33 _templates/site/shop2/login.html:68
+#: _templates/moderations/login.html:33 _templates/site/SerWeb/login.html:68
 #: _templates/site/shop3/login.html:48 _templates/site/shop4/login.html:48
 #: _templates/site/shop5/login.html:68 _templates/site/shop6/login.html:68
 #: _templates/site/stroitel1/login.html:61
@@ -2102,8 +2102,8 @@ msgstr "Пароль"
 msgid "Введите пароль"
 msgstr "Құпия сөзді енгізіңіз"
 
-#: _templates/moderations/login.html:36 _templates/site/shop2/base.html:266
-#: _templates/site/shop2/login.html:86 _templates/site/shop22/base.html:101
+#: _templates/moderations/login.html:36 _templates/site/SerWeb/base.html:266
+#: _templates/site/SerWeb/login.html:86 _templates/site/SerWeb2/base.html:101
 #: _templates/site/shop3/base.html:318 _templates/site/shop3/login.html:66
 #: _templates/site/shop4/base.html:207 _templates/site/shop4/login.html:66
 #: _templates/site/shop4/restore_access.html:28
@@ -2170,7 +2170,7 @@ msgid "Уведомления"
 msgstr "Хабарландырулар"
 
 #: _templates/moderations/notification_list.html:19
-#: _templates/site/shop22/base.html:579 _templates/site/shop4/about.html:27
+#: _templates/site/SerWeb2/base.html:579 _templates/site/shop4/about.html:27
 #: _templates/site/shop4/base.html:310 _templates/site/shop4/base.html:510
 #: _templates/site/shop4/base.html:713
 #: _templates/site/shop4/blog_detail.html:23
@@ -2263,7 +2263,7 @@ msgstr "Бір кесектен іздеу"
 #: _templates/moderations/price_settings.html:56
 #: _templates/moderations/product_list.html:47
 #: _templates/site/publication/advertisements.html:48
-#: _templates/site/shop2/cart.html:124 _templates/site/shop3/cart.html:124
+#: _templates/site/SerWeb/cart.html:124 _templates/site/shop3/cart.html:124
 #: _templates/site/shop4/bookmarks.html:73 _templates/site/shop4/cart.html:124
 #: _templates/site/shop4/checkout.html:177 _templates/site/shop4/price.html:45
 msgid "Цена"
@@ -2285,7 +2285,7 @@ msgid "Тип выбора"
 msgstr "Таңдау түрі"
 
 #: _templates/moderations/product_list.html:43
-#: _templates/site/shop2/cart.html:125 _templates/site/shop3/cart.html:125
+#: _templates/site/SerWeb/cart.html:125 _templates/site/shop3/cart.html:125
 #: _templates/site/shop4/cart.html:125
 msgid "Количество"
 msgstr "Сан"
@@ -2846,8 +2846,8 @@ msgstr "Билет"
 #: _templates/moderations/vacances.html:19
 #: _templates/moderations/vacances_aplication.html:19
 #: _templates/moderations/vacancys_form.html:57
-#: _templates/site/shop1/base.html:473 _templates/site/shop2/base.html:260
-#: _templates/site/shop22/base.html:95 _templates/site/shop3/base.html:258
+#: _templates/site/shop1/base.html:473 _templates/site/SerWeb/base.html:260
+#: _templates/site/SerWeb2/base.html:95 _templates/site/shop3/base.html:258
 #: _templates/site/shop4/base.html:200 _templates/site/shop4/vacancys.html:22
 #: _templates/site/shop5/base.html:206 _templates/site/shop6/base.html:198
 msgid "Вакансии"
@@ -3039,8 +3039,8 @@ msgstr "Жарнамалар"
 msgid "Отзыв"
 msgstr "Рецензия"
 
-#: _templates/site/shop1/base.html:455 _templates/site/shop2/base.html:261
-#: _templates/site/shop22/base.html:96 _templates/site/shop4/base.html:201
+#: _templates/site/shop1/base.html:455 _templates/site/SerWeb/base.html:261
+#: _templates/site/SerWeb2/base.html:96 _templates/site/shop4/base.html:201
 #: _templates/site/shop5/base.html:207 _templates/site/shop6/base.html:199
 msgid "Компания"
 msgstr "Компания"
@@ -3051,8 +3051,8 @@ msgstr "Компания"
 msgid "Сотрудничество"
 msgstr "Ынтымақтастық"
 
-#: _templates/site/shop1/base.html:467 _templates/site/shop2/base.html:262
-#: _templates/site/shop22/base.html:97 _templates/site/shop3/base.html:260
+#: _templates/site/shop1/base.html:467 _templates/site/SerWeb/base.html:262
+#: _templates/site/SerWeb2/base.html:97 _templates/site/shop3/base.html:260
 #: _templates/site/shop4/base.html:203 _templates/site/shop4/base.html:322
 #: _templates/site/shop4/base.html:433 _templates/site/shop4/base.html:514
 #: _templates/site/shop4/base.html:730 _templates/site/shop4/contacts.html:217
@@ -3097,7 +3097,7 @@ msgstr "Қайырымдылық"
 msgid "Прайс"
 msgstr "Баға"
 
-#: _templates/site/shop1/base.html:936 _templates/site/shop22/base.html:582
+#: _templates/site/shop1/base.html:936 _templates/site/SerWeb2/base.html:582
 #: _templates/site/shop4/base.html:695
 #: _templates/site/shop4/include/category.html:77
 #: _templates/site/shop4/include/category_list_mobile.html:5
@@ -3120,8 +3120,8 @@ msgstr "Әзірге тіркелім жоқ па?"
 msgid "Создать учетную запись"
 msgstr "Аккаунты құру"
 
-#: _templates/site/shop2/base.html:269 _templates/site/shop2/login.html:90
-#: _templates/site/shop22/base.html:104 _templates/site/shop3/base.html:320
+#: _templates/site/SerWeb/base.html:269 _templates/site/SerWeb/login.html:90
+#: _templates/site/SerWeb2/base.html:104 _templates/site/shop3/base.html:320
 #: _templates/site/shop4/base.html:210 _templates/site/shop4/register.html:80
 #: _templates/site/shop4/restore_access.html:31
 #: _templates/site/shop4/restore_access_user.html:39
@@ -3134,7 +3134,7 @@ msgstr "Аккаунты құру"
 msgid "Зарегистрироваться"
 msgstr "Тіркеу"
 
-#: _templates/site/shop2/base.html:273 _templates/site/shop22/base.html:108
+#: _templates/site/SerWeb/base.html:273 _templates/site/SerWeb2/base.html:108
 #: _templates/site/shop4/base.html:214
 #: _templates/site/shop4/include/profile_menu.html:51
 #: _templates/site/shop4/profile_edit.html:49
@@ -3142,29 +3142,29 @@ msgstr "Тіркеу"
 msgid "Мой профиль"
 msgstr "Менің профилім"
 
-#: _templates/site/shop2/base.html:388 _templates/site/shop22/base.html:595
+#: _templates/site/SerWeb/base.html:388 _templates/site/SerWeb2/base.html:595
 #: _templates/site/shop5/base.html:333
 msgid "Доставка:"
 msgstr "Жеткізу:"
 
-#: _templates/site/shop2/base.html:388 _templates/site/shop22/base.html:595
+#: _templates/site/SerWeb/base.html:388 _templates/site/SerWeb2/base.html:595
 #: _templates/site/shop5/base.html:333 _templates/site/shop6/base.html:328
 msgid "Выберите способ получения"
 msgstr "Түбіртек әдісін таңдаңыз"
 
-#: _templates/site/shop2/base.html:389 _templates/site/shop22/base.html:596
+#: _templates/site/SerWeb/base.html:389 _templates/site/SerWeb2/base.html:596
 #: _templates/site/shop4/base.html:328 _templates/site/shop5/base.html:334
 #: _templates/site/shop6/base.html:329
 msgid "Акции"
 msgstr "Акциялар"
 
-#: _templates/site/shop2/cart.html:126 _templates/site/shop3/cart.html:126
+#: _templates/site/SerWeb/cart.html:126 _templates/site/shop3/cart.html:126
 #: _templates/site/shop4/cart.html:126
 #: _templates/site/shop4/include/cart_product.html:89
 msgid "Итого"
 msgstr "Жалпы"
 
-#: _templates/site/shop2/cart.html:174 _templates/site/shop3/cart.html:174
+#: _templates/site/SerWeb/cart.html:174 _templates/site/shop3/cart.html:174
 #: _templates/site/shop4/base.html:316 _templates/site/shop4/base.html:512
 #: _templates/site/shop4/base.html:716 _templates/site/shop4/cart.html:174
 #: _templates/site/shop6/base.html:236 _templates/site/shop6/base.html:435
@@ -3172,43 +3172,43 @@ msgstr "Жалпы"
 msgid "Магазин"
 msgstr "Қойма"
 
-#: _templates/site/shop2/cart.html:181 _templates/site/shop3/cart.html:181
+#: _templates/site/SerWeb/cart.html:181 _templates/site/shop3/cart.html:181
 #: _templates/site/shop4/cart.html:181
 msgid "Детали корзины"
 msgstr "Себет туралы мәліметтер"
 
-#: _templates/site/shop2/cart.html:183 _templates/site/shop3/cart.html:183
+#: _templates/site/SerWeb/cart.html:183 _templates/site/shop3/cart.html:183
 #: _templates/site/shop4/cart.html:183
 msgid "Кол-во товаров"
 msgstr "Тауарлар саны"
 
-#: _templates/site/shop2/cart.html:195 _templates/site/shop3/cart.html:195
+#: _templates/site/SerWeb/cart.html:195 _templates/site/shop3/cart.html:195
 #: _templates/site/shop4/cart.html:195 _templates/site/shop4/order.html:99
 msgid "Оплатить"
 msgstr "Төлеу"
 
-#: _templates/site/shop2/cart.html:206 _templates/site/shop3/cart.html:206
+#: _templates/site/SerWeb/cart.html:206 _templates/site/shop3/cart.html:206
 #: _templates/site/shop4/cart.html:206
 #: _templates/site/shop4/include/cart_product.html:76
 #: _templates/site/shop4/include/cart_product.html:93
 msgid "Корзина пуста"
 msgstr "Себет бос"
 
-#: _templates/site/shop2/login.html:58 _templates/site/shop3/login.html:38
+#: _templates/site/SerWeb/login.html:58 _templates/site/shop3/login.html:38
 #: _templates/site/shop4/login.html:38 _templates/site/shop5/login.html:58
 #: _templates/site/shop6/login.html:58 _templates/site/stroitel1/login.html:51
 #: _templates/site/useraccount/login.html:36
 msgid "Логин или Email"
 msgstr "Кіру немесе электрондық пошта"
 
-#: _templates/site/shop2/login.html:59 _templates/site/shop3/login.html:39
+#: _templates/site/SerWeb/login.html:59 _templates/site/shop3/login.html:39
 #: _templates/site/shop4/login.html:39 _templates/site/shop5/login.html:59
 #: _templates/site/shop6/login.html:59 _templates/site/stroitel1/login.html:52
 #: _templates/site/useraccount/login.html:37
 msgid "Введите логин или email"
 msgstr "Кіру немесе электрондық поштаны енгізіңіз"
 
-#: _templates/site/shop2/login.html:82 _templates/site/shop3/login.html:62
+#: _templates/site/SerWeb/login.html:82 _templates/site/shop3/login.html:62
 #: _templates/site/shop4/login.html:62
 #: _templates/site/shop4/restore_access.html:24
 #: _templates/site/shop5/login.html:82 _templates/site/shop6/login.html:82
@@ -3218,11 +3218,11 @@ msgstr "Кіру немесе электрондық поштаны енгізі
 msgid "Сбросить пароль"
 msgstr "Парольді тастаңыз"
 
-#: _templates/site/shop22/base.html:153
+#: _templates/site/SerWeb2/base.html:153
 msgid "Избранное"
 msgstr "Сүйікті"
 
-#: _templates/site/shop22/base.html:161 _templates/site/shop4/base.html:286
+#: _templates/site/SerWeb2/base.html:161 _templates/site/shop4/base.html:286
 #: _templates/site/shop4/base.html:724
 #: _templates/site/shop4/base_profile.html:179
 #: _templates/site/shop4/include/cart_product.html:60
@@ -3232,7 +3232,7 @@ msgstr "Сүйікті"
 msgid "Корзина"
 msgstr "Кәрзеңке"
 
-#: _templates/site/shop22/base/cart.html:6
+#: _templates/site/SerWeb2/base/cart.html:6
 msgid "Товары в корзине"
 msgstr "Себеттегі тауарлар"
 

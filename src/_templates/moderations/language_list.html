@@ -50,9 +50,11 @@
     .language-inline-form button {
         white-space: nowrap;
     }
-tr#en {
-    display: none;
-}
+
+    tr#en {
+        display: none;
+    }
+
     @media (max-width: 600px) {
         .language-inline-form {
             flex-direction: column;
@@ -95,32 +97,36 @@ tr#en {
         <th>{% trans "Название" %}</th>
         <th>{% trans "Редактировать" %}</th>
         <th>{% trans "Удалить" %}</th>
-      </tr>
-    </thead>
+      </thead>
     <tbody>
-      {% for code, name in languages %}
-        <tr id="{{ code }}">
-          <td>{{ code }}</td>
-          <td>{{ name }}</td>
-          <td>
-            <a href="{% url 'moderation:language_edit' code %}" class="btn btn-sm btn-outline-primary">{% trans "Редактировать" %}</a>
-          </td>
-          <td>
+
+      {% for language in languages %}
+        <tr id="{{ language.code }}">
+           <td>{{ language.code }}</td>
+           <td>{{ language.name }}</td>
+           <td>
+            <a href="{% url 'moderation:language_edit' language.code %}" class="btn btn-sm btn-outline-primary">
+              <i class="fa-regular fa-pen-to-square"></i> {% trans "Редактировать" %}
+            </a>
+           </td>
+           <td>
             <form method="post" style="display:inline;">
               {% csrf_token %}
               <input type="hidden" name="action" value="delete">
-              <input type="hidden" name="code" value="{{ code }}">
-              <button type="submit" class="btn btn-sm btn-outline-danger">{% trans "Удалить" %}</button>
+              <input type="hidden" name="code" value="{{ language.code }}">
+              <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('{% trans "Вы уверены, что хотите удалить этот язык?" %}')">
+                <i class="fa-regular fa-trash-can"></i> {% trans "Удалить" %}
+              </button>
             </form>
-          </td>
-        </tr>
+           </td>
+         </tr>
       {% empty %}
-        <tr>
-          <td colspan="4" class="text-muted">{% trans "Языки не найдены." %}</td>
-        </tr>
+         <tr>
+          <td colspan="4" class="text-muted text-center">{% trans "Языки не найдены." %}</td>
+         </tr>
       {% endfor %}
     </tbody>
-  </table>
+   </table>
 
 </div>
 {% endblock content %}

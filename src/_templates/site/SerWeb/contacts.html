@@ -1,0 +1,912 @@
+{% extends 'site/SerWeb/base.html' %}
+{% load static generals_tag i18n shop_tags cache %}
+
+{% block title %}{{ contact.title|default:"Контакты веб-студии SerWeb" }}{% endblock title %}
+{% block description %}{{ contact.metadescription|default:"Свяжитесь с нами для обсуждения вашего проекта. Телефон, email, адрес офиса в Москве, форма обратной связи. Отвечаем в течение 30 минут." }}{% endblock description %}
+{% block propertytitle %}{{ contact.propertytitle|default:"Контакты студии веб-разработки SerWeb" }}{% endblock propertytitle %}
+{% block propertydescription %}{{ contact.propertydescription|default:"Напишите нам или позвоните — мы всегда рады новым проектам и идеям!" }}{% endblock propertydescription %}
+{% block propertyimage %}{% if contact.previev %}{{ contact.previev.url }}{% else %}{% static 'site/serweb/img/contacts-og.jpg' %}{% endif %}{% endblock propertyimage %}
+
+{% block head %}
+<!-- Yandex Maps API (ключ нужно будет добавить) -->
+<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&amp;apikey=ваш-ключ" type="text/javascript"></script>
+
+<style>
+    /* Дополнительные стили для страницы контактов SerWeb */
+    .contacts-hero {
+        background: linear-gradient(135deg, var(--sw-black) 0%, var(--sw-primary-dark) 100%);
+        padding: 60px 0 40px;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 40px;
+        border-radius: 0 0 30px 30px;
+    }
+
+    .contacts-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100%;
+        height: 100%;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239B7EFF' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        opacity: 0.3;
+        pointer-events: none;
+    }
+
+    .contacts-hero-title {
+        font-size: 48px;
+        font-weight: 800;
+        color: var(--sw-white);
+        margin-bottom: 15px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .contacts-hero-title span {
+        color: var(--sw-primary-light);
+    }
+
+    .contacts-hero-text {
+        font-size: 18px;
+        color: rgba(255, 255, 255, 0.8);
+        max-width: 600px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .contacts-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.2fr;
+        gap: 30px;
+        margin: 40px 0;
+    }
+
+    @media (max-width: 992px) {
+        .contacts-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Карта */
+    .contacts-map-container {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        overflow: hidden;
+        height: 100%;
+        min-height: 450px;
+    }
+
+    #contacts-map {
+        width: 100%;
+        height: 450px;
+    }
+
+    /* Вкладки */
+    .contacts-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 25px;
+        border-bottom: 1px solid var(--sw-gray-dark);
+        padding-bottom: 15px;
+    }
+
+    .contacts-tab-btn {
+        padding: 12px 25px;
+        background: transparent;
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 30px;
+        color: var(--sw-white);
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--sw-transition);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .contacts-tab-btn i {
+        color: var(--sw-primary);
+        transition: var(--sw-transition);
+    }
+
+    .contacts-tab-btn:hover {
+        border-color: var(--sw-primary);
+        background: rgba(108, 60, 233, 0.1);
+    }
+
+    .contacts-tab-btn.active {
+        background: var(--sw-primary);
+        border-color: var(--sw-primary);
+        color: white;
+    }
+
+    .contacts-tab-btn.active i {
+        color: white;
+    }
+
+    .contacts-tab-content {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        padding: 30px;
+    }
+
+    /* Форма */
+    .contacts-form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+    @media (max-width: 576px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .form-group {
+        margin-bottom: 0;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--sw-white);
+        font-weight: 500;
+        font-size: 14px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 14px 18px;
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 12px;
+        color: var(--sw-white);
+        font-size: 15px;
+        transition: var(--sw-transition);
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--sw-primary);
+        box-shadow: 0 0 0 3px rgba(108, 60, 233, 0.2);
+    }
+
+    .form-control::placeholder {
+        color: var(--sw-gray);
+        opacity: 0.7;
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 120px;
+    }
+
+    .form-submit {
+        margin-top: 10px;
+    }
+
+    /* Контактная информация */
+    .contacts-info {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        padding: 30px;
+        height: fit-content;
+    }
+
+    .contacts-info-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--sw-white);
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid var(--sw-gray-dark);
+    }
+
+    .contacts-info-description {
+        color: var(--sw-gray);
+        margin-bottom: 30px;
+        line-height: 1.7;
+    }
+
+    .contacts-info-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .contacts-info-icon {
+        width: 50px;
+        height: 50px;
+        background: rgba(108, 60, 233, 0.1);
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--sw-primary);
+        font-size: 20px;
+        flex-shrink: 0;
+        transition: var(--sw-transition);
+    }
+
+    .contacts-info-item:hover .contacts-info-icon {
+        background: var(--sw-primary);
+        color: white;
+        transform: rotate(5deg);
+    }
+
+    .contacts-info-content {
+        flex: 1;
+    }
+
+    .contacts-info-content h4 {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--sw-white);
+        margin-bottom: 5px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .contacts-info-content p,
+    .contacts-info-content a {
+        color: var(--sw-gray);
+        transition: var(--sw-transition);
+        line-height: 1.6;
+        margin: 0;
+        display: block;
+    }
+
+    .contacts-info-content a:hover {
+        color: var(--sw-primary);
+    }
+
+    .contacts-social {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid var(--sw-gray-dark);
+    }
+
+    .contacts-social h4 {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--sw-white);
+        margin-bottom: 15px;
+    }
+
+    .contacts-social-links {
+        display: flex;
+        gap: 12px;
+    }
+
+    .contacts-social-link {
+        width: 44px;
+        height: 44px;
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--sw-white);
+        font-size: 20px;
+        transition: var(--sw-transition);
+    }
+
+    .contacts-social-link:hover {
+        background: var(--sw-primary);
+        border-color: var(--sw-primary);
+        color: white;
+        transform: translateY(-3px);
+    }
+
+    /* Филиалы */
+    .contacts-branches {
+        margin-top: 40px;
+    }
+
+    .contacts-branches-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--sw-white);
+        margin-bottom: 20px;
+    }
+
+    .contacts-branch-card {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 15px;
+        transition: var(--sw-transition);
+    }
+
+    .contacts-branch-card:hover {
+        border-color: var(--sw-primary);
+        transform: translateX(5px);
+    }
+
+    .contacts-branch-name {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--sw-white);
+        margin-bottom: 10px;
+    }
+
+    .contacts-branch-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+    }
+
+    .contacts-branch-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--sw-gray);
+        font-size: 14px;
+    }
+
+    .contacts-branch-item i {
+        color: var(--sw-primary);
+        width: 16px;
+    }
+
+    /* Уведомления */
+    .alert {
+        padding: 15px 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .alert-success {
+        background: rgba(76, 175, 80, 0.1);
+        border: 1px solid #4CAF50;
+        color: #4CAF50;
+    }
+
+    .alert-error {
+        background: rgba(244, 67, 54, 0.1);
+        border: 1px solid #f44336;
+        color: #f44336;
+    }
+
+    /* Анимации */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .fadeInUp {
+        animation: fadeInUp 0.6s ease forwards;
+    }
+</style>
+{% endblock head %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb-list">
+                <li class="breadcrumb-item"><a href="{% url 'webmain:home' %}"><i class="fa fa-home me-1"></i>{% trans 'Главная' %}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{% trans 'Контакты' %}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<style>
+    .breadcrumbs {
+        background: var(--sw-black-light);
+        padding: 15px 0;
+        border-bottom: 1px solid var(--sw-gray-dark);
+    }
+
+    .breadcrumb-list {
+        display: flex;
+        list-style: none;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .breadcrumb-item {
+        font-size: 14px;
+    }
+
+    .breadcrumb-item:not(:last-child)::after {
+        content: '/';
+        margin-left: 10px;
+        color: var(--sw-gray);
+    }
+
+    .breadcrumb-item a {
+        color: var(--sw-gray);
+        transition: var(--sw-transition);
+    }
+
+    .breadcrumb-item a:hover {
+        color: var(--sw-primary);
+    }
+
+    .breadcrumb-item.active {
+        color: var(--sw-white);
+    }
+</style>
+{% endblock breadcrumbs %}
+
+{% block content %}
+<!-- Hero секция -->
+<section class="contacts-hero wow fadeIn">
+    <div class="container">
+        <h1 class="contacts-hero-title wow fadeInUp" data-wow-delay="0.2s">
+            {% trans "Свяжитесь с" %} <span>{% trans "нами" %}</span>
+        </h1>
+        <p class="contacts-hero-text wow fadeInUp" data-wow-delay="0.3s">
+            {% trans "Мы всегда открыты для новых проектов и идей. Оставьте заявку, и мы свяжемся с вами в течение 30 минут для обсуждения деталей." %}
+        </p>
+    </div>
+</section>
+
+<div class="container">
+    <div class="contacts-grid">
+        <!-- Левая колонка: карта и вкладки -->
+        <div class="wow fadeInLeft" data-wow-delay="0.3s">
+            <!-- Вкладки -->
+            <div class="contacts-tabs" id="contactsTabs">
+                <button class="contacts-tab-btn active" data-tab="map">
+                    <i class="fa fa-map"></i>
+                    {% trans "На карте" %}
+                </button>
+                <button class="contacts-tab-btn" data-tab="form">
+                    <i class="fa fa-pen-to-square"></i>
+                    {% trans "Оставить заявку" %}
+                </button>
+            </div>
+
+            <!-- Содержимое вкладок -->
+            <div class="contacts-tab-content">
+                <!-- Вкладка с картой -->
+                <div class="tab-pane active" id="tab-map">
+                    <div class="contacts-map-container">
+                        <div id="contacts-map"></div>
+                    </div>
+
+                    <!-- Адрес под картой -->
+                    <div class="mt-3 text-center">
+                        <p class="text-gray">
+                            <i class="fa fa-location-dot text-primary me-1"></i>
+                            г. Москва, ул. Тверская, д. 15, офис 304
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Вкладка с формой -->
+                <div class="tab-pane" id="tab-form" style="display: none;">
+                    <h3 class="h4 mb-4 text-white">{% trans "Форма обратной связи" %}</h3>
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">
+                                <i class="fa fa-circle-check"></i>
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form class="contacts-form" method="post" action="" id="contactForm">
+                        {% csrf_token %}
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="name" class="form-label">{% trans "Ваше имя" %} *</label>
+                                <input type="text" class="form-control" id="name" name="name" required placeholder="{% trans 'Иван Иванов' %}">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="email" class="form-label">{% trans "Email" %} *</label>
+                                <input type="email" class="form-control" id="email" name="email" required placeholder="ivan@example.com">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="phone" class="form-label">{% trans "Телефон" %}</label>
+                                <input type="tel" class="form-control" id="phone" name="phone" placeholder="+7 (999) 123-45-67">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="subject" class="form-label">{% trans "Тема" %} *</label>
+                                <input type="text" class="form-control" id="subject" name="subject" required placeholder="{% trans 'Обсуждение проекта' %}">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="message" class="form-label">{% trans "Сообщение" %} *</label>
+                            <textarea class="form-control" id="message" name="message" required placeholder="{% trans 'Расскажите о вашем проекте...' %}"></textarea>
+                        </div>
+
+                        <div class="form-submit">
+                            <button type="submit" class="sw-btn sw-btn-primary w-100">
+                                <i class="fa fa-paper-plane me-2"></i>
+                                {% trans "Отправить сообщение" %}
+                            </button>
+                        </div>
+
+
+                    </form>
+                </div>
+            </div>
+
+            <!-- Блок с филиалами (если есть) -->
+            {% if branch_contacts %}
+            <div class="contacts-branches wow fadeInUp" data-wow-delay="0.4s">
+                <h3 class="contacts-branches-title">{% trans "Наши представительства" %}</h3>
+
+                {% for branch in branch_contacts %}
+                <div class="contacts-branch-card">
+                    <div class="contacts-branch-name">{{ branch.title_contact|default:"Главный офис" }}</div>
+                    <div class="contacts-branch-details">
+                        {% with children=branch.contactpageinformation_set.all %}
+                            {% for child in children %}
+                                {% if child.page_type == "address" %}
+                                <div class="contacts-branch-item">
+                                    <i class="fa fa-location-dot"></i>
+                                    <span>{{ child.title_contact }}</span>
+                                </div>
+                                {% endif %}
+
+                                {% if child.page_type == "phone" %}
+                                <div class="contacts-branch-item">
+                                    <i class="fa fa-phone"></i>
+                                    <a href="tel:{{ child.information_contact }}">{{ child.title_contact }}</a>
+                                </div>
+                                {% endif %}
+
+                                {% if child.page_type == "email" %}
+                                <div class="contacts-branch-item">
+                                    <i class="fa fa-envelope"></i>
+                                    <a href="mailto:{{ child.information_contact }}">{{ child.title_contact }}</a>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        {% endwith %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Правая колонка: контактная информация -->
+        <div class="wow fadeInRight" data-wow-delay="0.4s">
+            <div class="contacts-info">
+                <h2 class="contacts-info-title">{% trans "Контактная информация" %}</h2>
+
+                <div class="contacts-info-description">
+                    {{ contact.description|default:"Мы всегда на связи и готовы ответить на любые вопросы. Работаем с 2021 года, более 20 успешных проектов."|safe }}
+                </div>
+
+                {% cache 300 contact_info %}
+                <!-- Телефон -->
+                <div class="contacts-info-item">
+                    <div class="contacts-info-icon">
+                        <i class="fa fa-phone"></i>
+                    </div>
+                    <div class="contacts-info-content">
+                        <h4>{% trans "Телефон" %}</h4>
+                        {% with request|get_settings as setting %}
+                            {% if setting and setting.settings.phone_default %}
+                                <a href="tel:{{ setting.settings.phone_default.information_contact|cut:' ' }}">
+                                    {{ setting.settings.phone_default.title_contact|default:"+7 (993) 566-33-67" }}
+                                </a>
+                            {% else %}
+                                <a href="tel:+74951234567">+7 (993) 566-33-67</a>
+                                <small class="text-gray">{% trans "ежедневно с 10:00 до 20:00" %}</small>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="contacts-info-item">
+                    <div class="contacts-info-icon">
+                        <i class="fa fa-envelope"></i>
+                    </div>
+                    <div class="contacts-info-content">
+                        <h4>{% trans "Email" %}</h4>
+                        {% with request|get_settings as setting %}
+                            {% if setting and setting.settings.email_default %}
+                                <a href="mailto:{{ setting.settings.email_default.information_contact }}">
+                                    {{ setting.settings.email_default.title_contact|default:"serwebsupport@gmail.com" }}
+                                </a>
+                            {% else %}
+                                <a href="mailto:serwebsupport@gmail.com">serwebsupport@gmail.com</a>
+                                <small class="text-gray">{% trans "отвечаем в течение 2 часов" %}</small>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+                </div>
+
+                <!-- Адрес -->
+                <div class="contacts-info-item">
+                    <div class="contacts-info-icon">
+                        <i class="fa fa-location-dot"></i>
+                    </div>
+                    <div class="contacts-info-content">
+                        <h4>{% trans "Адрес" %}</h4>
+                        <p>г. Москва, ул. Тверская, д. 15, офис 304</p>
+                        <p class="text-gray small">{% trans "м. Пушкинская, 5 минут пешком" %}</p>
+                    </div>
+                </div>
+
+                <!-- Время работы -->
+                <div class="contacts-info-item">
+                    <div class="contacts-info-icon">
+                        <i class="fa fa-clock"></i>
+                    </div>
+                    <div class="contacts-info-content">
+                        <h4>{% trans "Время работы" %}</h4>
+                        <p>{% trans "Пн-Пт: 10:00 - 20:00" %}</p>
+                        <p>{% trans "Сб-Вс: по договоренности" %}</p>
+                    </div>
+                </div>
+                {% endcache %}
+
+                <!-- Социальные сети -->
+                <div class="contacts-social">
+                    <h4>{% trans "Мы в соцсетях" %}</h4>
+                    <div class="contacts-social-links">
+                        {% with request|get_settings as setting %}
+                            {% if setting and setting.social_default %}
+                                {% for item in setting.social_default %}
+                                    <a href="{{ item.information_contact }}" class="contacts-social-link" target="_blank" rel="noopener noreferrer" aria-label="{{ item.title_contact }}">
+                                        <i class="fa-brands fa-{{ item.title_contact|lower }}"></i>
+                                    </a>
+                                {% endfor %}
+                            {% else %}
+                                <a href="https://t.me/@SerWeb_site" class="contacts-social-link" aria-label="Telegram"><i class="fa-brands fa-telegram"></i></a>
+                                <a href="#" class="contacts-social-link" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+                                <a href="#" class="contacts-social-link" aria-label="VK"><i class="fa-brands fa-vk"></i></a>
+                                <a href="#" class="contacts-social-link" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+                </div>
+
+                <!-- Реквизиты (опционально) -->
+                <div class="mt-4 pt-3 border-top border-gray-dark">
+                    <p class="text-gray small mb-1">{% trans "ООО «SerWeb»" %}</p>
+                    <p class="text-gray small mb-1">ИНН 1234567890, КПП 123456789</p>
+                    <p class="text-gray small">{% trans "р/с 40702810123450123456 в АО «Т-Банк»" %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Блок с карточкой для быстрой связи -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="services-cta wow fadeInUp" data-wow-delay="0.5s">
+                <div class="services-cta-content">
+                    <h2>{% trans "Нужна консультация?" %}</h2>
+                    <p>{% trans "Оставьте заявку прямо сейчас, и мы свяжемся с вами в ближайшее время" %}</p>
+                    <div class="services-cta-buttons">
+                        <a href="#" class="sw-btn sw-btn-primary" onclick="document.querySelector('[data-tab=\"form\"]').click(); return false;">
+                            <i class="fa fa-pen-to-square me-2"></i>
+                            {% trans "Заказать звонок" %}
+                        </a>
+                        <a href="https://t.me/serweb_bot" class="sw-btn sw-btn-outline" target="_blank">
+                            <i class="fa-brands fa-telegram me-2"></i>
+                            {% trans "Telegram" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block footerbottom %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    'use strict';
+
+    // Переключение вкладок
+    const tabBtns = document.querySelectorAll('.contacts-tab-btn');
+    const tabPanes = {
+        'map': document.getElementById('tab-map'),
+        'form': document.getElementById('tab-form')
+    };
+
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tab = this.dataset.tab;
+
+            // Обновляем активные кнопки
+            tabBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+
+            // Показываем нужную вкладку
+            Object.entries(tabPanes).forEach(([key, pane]) => {
+                if (key === tab) {
+                    pane.style.display = 'block';
+                    // Если это карта, обновляем ее (яндекс карты требуют пересчета размера)
+                    if (key === 'map' && window.ymaps && window.myMap) {
+                        setTimeout(() => window.myMap.container.fitToViewport(), 100);
+                    }
+                } else {
+                    pane.style.display = 'none';
+                }
+            });
+        });
+    });
+
+    // Инициализация Яндекс Карты
+    if (typeof ymaps !== 'undefined') {
+        ymaps.ready(initMap);
+    }
+
+    function initMap() {
+        // Координаты офиса (Москва, Тверская)
+        const officeCoords = [55.765834, 37.605734];
+
+        // Создаем карту
+        const myMap = new ymaps.Map('contacts-map', {
+            center: officeCoords,
+            zoom: 16,
+            controls: ['zoomControl', 'fullscreenControl', 'geolocationControl']
+        });
+
+        // Сохраняем для обновления
+        window.myMap = myMap;
+
+        // Добавляем метку
+        const placemark = new ymaps.Placemark(officeCoords, {
+            hintContent: '{% trans "Офис SerWeb" %}',
+            balloonContent: `
+                <strong>{% trans "Веб-студия SerWeb" %}</strong><br>
+                {% trans "г. Москва, ул. Тверская, д. 15, офис 304" %}<br>
+                <a href="tel:+74951234567">+7 (495) 123-45-67</a><br>
+                <a href="mailto:info@serweb.ru">info@serweb.ru</a>
+            `
+        }, {
+            preset: 'islands#violetIcon',
+            iconColor: '#6C3CE9'
+        });
+
+        myMap.geoObjects.add(placemark);
+
+        // Добавляем метки для филиалов, если есть данные
+        {% if branch_contacts %}
+            {% for branch in branch_contacts %}
+                {% with children=branch.contactpageinformation_set.all %}
+                    {% for child in children %}
+                        {% if child.page_type == "map" and child.information_contact %}
+                            try {
+                                const coords = '{{ child.information_contact }}'.split(',').map(Number);
+                                if (coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
+                                    const branchPlacemark = new ymaps.Placemark(coords, {
+                                        hintContent: '{{ child.title_contact|default:"Филиал" }}',
+                                        balloonContent: '{{ child.description_contact|default:"Филиал компании" }}'
+                                    }, {
+                                        preset: 'islands#violetIcon',
+                                        iconColor: '#9B7EFF'
+                                    });
+                                    myMap.geoObjects.add(branchPlacemark);
+                                }
+                            } catch(e) {
+                                console.error('Error adding branch placemark:', e);
+                            }
+                        {% endif %}
+                    {% endfor %}
+                {% endwith %}
+            {% endfor %}
+        {% endif %}
+    }
+
+    // Обработка формы (AJAX)
+    const contactForm = document.getElementById('contactForm');
+    if (contactForm) {
+        contactForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+
+            try {
+                const response = await fetch(this.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Показываем уведомление
+                    showNotification('✓ Сообщение отправлено! Мы свяжемся с вами в ближайшее время.', 'success');
+                    this.reset();
+
+                    // Переключаем на карту
+                    document.querySelector('[data-tab="map"]').click();
+                } else {
+                    showNotification('❌ Ошибка: ' + (data.message || 'Попробуйте позже'), 'error');
+                }
+            } catch(error) {
+                console.error('Error:', error);
+                showNotification('❌ Ошибка отправки. Проверьте подключение к интернету.', 'error');
+            }
+        });
+    }
+
+    // Маска для телефона (опционально)
+    const phoneInput = document.getElementById('phone');
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function(e) {
+            let x = e.target.value.replace(/\D/g, '').match(/(\d{0,1})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
+            e.target.value = !x[2] ? x[1] : '+7 (' + x[2] + ') ' + x[3] + (x[4] ? '-' + x[4] : '') + (x[5] ? '-' + x[5] : '');
+        });
+    }
+
+    // Анимации при скролле (если нет WOW.js)
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.wow').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'all 0.6s ease';
+        observer.observe(el);
+    });
+});
+</script>
+
+<!-- Дополнительные стили для карты -->
+<style>
+    [class*="ymaps-2"][class*="-ground-pane"] {
+        filter: grayscale(100%) brightness(0.7) contrast(1.2);
+    }
+
+    .ymaps-2-1-79-map {
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    .text-gray {
+        color: var(--sw-gray);
+    }
+
+    .border-gray-dark {
+        border-color: var(--sw-gray-dark) !important;
+    }
+</style>
+{% endblock footerbottom %}

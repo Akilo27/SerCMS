@@ -1,0 +1,935 @@
+{% extends 'site/SerWeb/base.html' %}
+{% load static generals_tag i18n %}
+
+{% block title %}{{ seo_title|default:"Личный кабинет | SerWeb" }}{% endblock title %}
+{% block description %}{{ seo_description|default:"Управление профилем, настройки аккаунта и юридическая информация" }}{% endblock description %}
+
+{% block propertytitle %}{% if seo_propertytitle %}{{ seo_propertytitle }}{% else %}Личный кабинет SerWeb{% endif %}{% endblock propertytitle %}
+{% block propertydescription %}{% if seo_propertydescription %}{{ seo_propertydescription }}{% else %}Управление профилем пользователя{% endif %}{% endblock propertydescription %}
+{% block propertyimage %}{% if seo_previev %}{{ seo_previev.url }}{% else %}{% static 'site/serweb/img/profile-og.jpg' %}{% endif %}{% endblock propertyimage %}
+
+{% block head %}
+<!-- CSS для страницы профиля -->
+<style>
+    /* Основные стили профиля */
+    .profile-wrapper {
+        padding: 40px 0;
+    }
+
+    .profile-grid {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 30px;
+    }
+
+    @media (max-width: 992px) {
+        .profile-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Сайдбар профиля */
+    .profile-sidebar {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        padding: 25px;
+        height: fit-content;
+    }
+
+    .profile-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--sw-gray-dark);
+        margin-bottom: 20px;
+    }
+
+    .profile-avatar {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 3px solid var(--sw-primary);
+        flex-shrink: 0;
+    }
+
+    .profile-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .profile-info h5 {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--sw-white);
+        margin-bottom: 5px;
+    }
+
+    .profile-info .profile-username {
+        font-size: 14px;
+        color: var(--sw-gray);
+        margin-bottom: 0;
+    }
+
+    .profile-menu {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .profile-menu-item {
+        margin-bottom: 5px;
+    }
+
+    .profile-menu-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 15px;
+        color: var(--sw-gray);
+        border-radius: 12px;
+        transition: var(--sw-transition);
+        font-weight: 500;
+    }
+
+    .profile-menu-link i {
+        width: 20px;
+        color: var(--sw-primary);
+        transition: var(--sw-transition);
+    }
+
+    .profile-menu-link:hover,
+    .profile-menu-link.active {
+        background: rgba(108, 60, 233, 0.1);
+        color: var(--sw-white);
+    }
+
+    .profile-menu-link:hover i,
+    .profile-menu-link.active i {
+        color: var(--sw-primary-light);
+    }
+
+    /* Основной контент */
+    .profile-content {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+        padding: 30px;
+    }
+
+    .profile-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--sw-white);
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid var(--sw-gray-dark);
+    }
+
+    /* Формы */
+    .profile-form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        gap: 20px;
+        align-items: center;
+    }
+
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--sw-white);
+        margin: 0;
+    }
+
+    .form-control {
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 12px;
+        padding: 12px 15px;
+        color: var(--sw-white);
+        font-size: 15px;
+        transition: var(--sw-transition);
+        width: 100%;
+    }
+
+    .form-control:focus {
+        border-color: var(--sw-primary);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(108, 60, 233, 0.2);
+    }
+
+    .form-control::placeholder {
+        color: var(--sw-gray);
+        opacity: 0.7;
+    }
+
+    select.form-control {
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236C3CE9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 15px center;
+    }
+
+    /* Аватарка с загрузкой */
+    .avatar-upload {
+        position: relative;
+        display: inline-block;
+        cursor: pointer;
+    }
+
+    .avatar-upload img {
+        display: block;
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 3px solid var(--sw-primary);
+        transition: var(--sw-transition);
+    }
+
+    .avatar-upload:hover img {
+        filter: brightness(0.8);
+    }
+
+    .avatar-overlay {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+        border-radius: 50%;
+    }
+
+    .avatar-overlay .bg {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(2px);
+    }
+
+    .avatar-overlay svg {
+        width: 24px;
+        height: 24px;
+        stroke: white;
+    }
+
+    /* Разделители */
+    .profile-divider {
+        margin: 25px 0;
+        border: 0;
+        border-top: 1px solid var(--sw-gray-dark);
+    }
+
+    .profile-section-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--sw-white);
+        margin-bottom: 20px;
+    }
+
+    /* Карточка юридической информации */
+    .company-card {
+        background: var(--sw-black);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .company-info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    @media (max-width: 768px) {
+        .company-info-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .company-info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .company-info-label {
+        font-size: 13px;
+        color: var(--sw-gray);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .company-info-value {
+        font-size: 16px;
+        color: var(--sw-white);
+        font-weight: 500;
+    }
+
+    .alert-info {
+        background: rgba(108, 60, 233, 0.1);
+        border: 1px solid var(--sw-primary);
+        border-radius: 15px;
+        padding: 25px;
+        color: var(--sw-white);
+    }
+
+    .alert-info h6 {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 10px;
+        color: var(--sw-white);
+    }
+
+    .alert-info p {
+        color: var(--sw-gray);
+        margin-bottom: 20px;
+    }
+
+    /* Кнопки */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 28px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 15px;
+        transition: var(--sw-transition);
+        cursor: pointer;
+        border: 1px solid transparent;
+    }
+
+    .btn-primary {
+        background: var(--sw-primary);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: var(--sw-primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(108, 60, 233, 0.3);
+    }
+
+    .btn-outline {
+        background: transparent;
+        border: 1px solid var(--sw-gray-dark);
+        color: var(--sw-white);
+    }
+
+    .btn-outline:hover {
+        border-color: var(--sw-primary);
+        color: var(--sw-primary);
+    }
+
+    .btn-secondary {
+        background: var(--sw-gray-dark);
+        color: var(--sw-white);
+    }
+
+    .btn-secondary:hover {
+        background: var(--sw-gray);
+    }
+
+    /* Модальное окно */
+    .modal-content {
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 20px;
+    }
+
+    .modal-header {
+        border-bottom: 1px solid var(--sw-gray-dark);
+        padding: 20px 25px;
+    }
+
+    .modal-title {
+        color: var(--sw-white);
+        font-weight: 700;
+    }
+
+    .modal-body {
+        padding: 25px;
+    }
+
+    .modal-footer {
+        border-top: 1px solid var(--sw-gray-dark);
+        padding: 20px 25px;
+    }
+
+    .btn-close {
+        filter: invert(1) grayscale(100%) brightness(200%);
+    }
+
+    /* Уведомления */
+    .profile-alert {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+        background: var(--sw-black-light);
+        border: 1px solid var(--sw-gray-dark);
+        border-radius: 12px;
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    .profile-alert.success {
+        border-left: 4px solid #4CAF50;
+    }
+
+    .profile-alert.success i {
+        color: #4CAF50;
+    }
+
+    .profile-alert.error {
+        border-left: 4px solid #f44336;
+    }
+
+    .profile-alert.error i {
+        color: #f44336;
+    }
+
+    .profile-alert.info {
+        border-left: 4px solid var(--sw-primary);
+    }
+
+    .profile-alert.info i {
+        color: var(--sw-primary);
+    }
+
+    .alert-close {
+        margin-left: auto;
+        cursor: pointer;
+        opacity: 0.7;
+        transition: var(--sw-transition);
+    }
+
+    .alert-close:hover {
+        opacity: 1;
+    }
+
+    /* Хлебные крошки */
+    .profile-breadcrumbs {
+        margin-bottom: 30px;
+    }
+
+    .breadcrumb-list {
+        display: flex;
+        list-style: none;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .breadcrumb-item {
+        font-size: 14px;
+        color: var(--sw-gray);
+    }
+
+    .breadcrumb-item:not(:last-child)::after {
+        content: '/';
+        margin-left: 10px;
+        color: var(--sw-gray);
+    }
+
+    .breadcrumb-item a {
+        color: var(--sw-gray);
+        transition: var(--sw-transition);
+    }
+
+    .breadcrumb-item a:hover {
+        color: var(--sw-primary);
+    }
+
+    .breadcrumb-item.active {
+        color: var(--sw-white);
+    }
+</style>
+{% endblock head %}
+
+{% block breadcrumbs %}
+<div class="profile-breadcrumbs">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb-list">
+                <li class="breadcrumb-item"><a href="{% url 'webmain:home' %}"><i class="fa fa-home me-1"></i>{% trans 'Главная' %}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{% trans 'Личный кабинет' %}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+{% endblock breadcrumbs %}
+
+{% block content %}
+<div class="profile-wrapper">
+    <div class="container">
+        <div class="profile-grid">
+            <!-- Сайдбар профиля -->
+            <aside class="profile-sidebar">
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        {% if user.profile.avatar %}
+                            <img src="{{ user.profile.avatar.url }}" alt="{{ user.get_full_name|default:user.username }}">
+                        {% elif user.avatar %}
+                            <img src="{{ user.avatar.url }}" alt="{{ user.get_full_name|default:user.username }}">
+                        {% elif user.image %}
+                            <img src="{{ user.image.url }}" alt="{{ user.get_full_name|default:user.username }}">
+                        {% else %}
+                            <img src="{% static 'site/serweb/img/default-avatar.svg' %}" alt="avatar" onerror="this.src='https://placehold.co/70x70/6C3CE9/FFFFFF?text={{ user.username|first|upper }}'">
+                        {% endif %}
+                    </div>
+                    <div class="profile-info">
+                        <h5>{% if user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.username }}{% endif %}</h5>
+                        <p class="profile-username">@{{ user.username }}</p>
+                    </div>
+                </div>
+
+                {% include 'site/SerWeb/include/profile_menu.html' %}
+            </aside>
+
+            <!-- Основной контент -->
+            <div class="profile-content">
+                <h1 class="profile-title">{% trans 'Настройки профиля' %}</h1>
+
+                <form method="post" class="profile-form" enctype="multipart/form-data" id="profileForm">
+                    {% csrf_token %}
+
+                    <!-- Аватар -->
+                    <div class="form-row">
+                        <div class="form-label">{% trans 'Аватар' %}</div>
+                        <div>
+                            <div class="avatar-upload" id="avatarUpload">
+                                {% if user.avatar %}
+                                    <img src="{{ user.avatar.url }}" alt="Avatar" id="avatarPreview">
+                                {% else %}
+                                    <img src="{% static 'site/serweb/img/default-avatar.svg' %}" alt="Avatar" id="avatarPreview" onerror="this.src='https://placehold.co/150x150/6C3CE9/FFFFFF?text={{ user.username|first|upper }}'">
+                                {% endif %}
+                                <div class="avatar-overlay">
+                                    <span class="bg">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M20 16.5A4.5 4.5 0 0 0 18 8h-1.1A7 7 0 1 0 4 14.75"/>
+                                            <path d="M12 12v7"/>
+                                            <path d="m8.5 15.5 3.5-3.5 3.5 3.5"/>
+                                        </svg>
+                                    </span>
+                                </div>
+                            </div>
+                            <input type="file" name="avatar" id="id_avatar" class="d-none" accept="image/*">
+                            <small class="text-gray d-block mt-2">{% trans 'Нажмите на аватар для загрузки нового фото' %}</small>
+                        </div>
+                    </div>
+
+                    <hr class="profile-divider">
+
+                    <!-- Основная информация -->
+                    <div class="form-row">
+                        <div class="form-label">{% trans 'Логин' %}</div>
+                        <div>
+                            {{ form.username }}
+                            {% if form.username.errors %}
+                                <div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-label">Email</div>
+                        <div>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-label">{% trans 'Телефон' %}</div>
+                        <div>
+                            {{ form.phone }}
+                            {% if form.phone.errors %}
+                                <div class="text-danger small mt-1">{{ form.phone.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <hr class="profile-divider">
+
+                    <h3 class="profile-section-title">{% trans 'Публичная информация' %}</h3>
+
+                    <div class="form-row">
+                        <div class="form-label">{% trans 'Город' %}</div>
+                        <div>
+                            {{ form.city }}
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-label">{% trans 'Дата рождения' %}</div>
+                        <div>
+                            <input type="date" name="birthday" class="form-control" value="{{ form.birthday.value|date:'Y-m-d' }}">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-label">{% trans 'Пол' %}</div>
+                        <div>
+                            <select name="gender" class="form-control">
+                                <option value="" {% if not form.gender.value %}selected{% endif %}>{% trans 'Не указан' %}</option>
+                                <option value="M" {% if form.gender.value == 'M' %}selected{% endif %}>{% trans 'Мужской' %}</option>
+                                <option value="F" {% if form.gender.value == 'F' %}selected{% endif %}>{% trans 'Женский' %}</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <hr class="profile-divider">
+
+                    <div class="form-row">
+                        <div></div>
+                        <div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa fa-floppy-disk me-2"></i>
+                                {% trans 'Сохранить изменения' %}
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <hr class="profile-divider">
+
+                <!-- Юридическая информация -->
+                <h2 class="profile-title">{% trans 'Юридическая информация' %}</h2>
+
+                {% if user.company_name %}
+                    <!-- Карточка с юридической информацией -->
+                    <div class="company-card">
+                        <div class="company-info-grid">
+                            <div class="company-info-item">
+                                <span class="company-info-label">{% trans 'Название организации' %}</span>
+                                <span class="company-info-value">{{ user.company_name }}</span>
+                            </div>
+                            <div class="company-info-item">
+                                <span class="company-info-label">{% trans 'Руководитель' %}</span>
+                                <span class="company-info-value">{{ user.company_director|default:"—" }}</span>
+                            </div>
+                            <div class="company-info-item">
+                                <span class="company-info-label">{% trans 'Юридический адрес' %}</span>
+                                <span class="company-info-value">{{ user.company_address|default:"—" }}</span>
+                            </div>
+                            <div class="company-info-item">
+                                <span class="company-info-label">{% trans 'ИНН' %}</span>
+                                <span class="company-info-value">{{ user.company_inn|default:"—" }}</span>
+                            </div>
+                            <div class="company-info-item">
+                                <span class="company-info-label">{% trans 'ОГРН' %}</span>
+                                <span class="company-info-value">{{ user.company_ogrn|default:"—" }}</span>
+                            </div>
+                            <div class="company-info-item">
+                                <span class="company-info-label">{% trans 'КПП' %}</span>
+                                <span class="company-info-value">{{ user.company_kpp|default:"—" }}</span>
+                            </div>
+                            <div class="company-info-item">
+                                <span class="company-info-label">{% trans 'Дата регистрации' %}</span>
+                                <span class="company-info-value">{{ user.company_data_registration|date:"d.m.Y"|default:"—" }}</span>
+                            </div>
+                            <div class="company-info-item">
+                                <span class="company-info-label">{% trans 'Налоговый орган' %}</span>
+                                <span class="company-info-value">{{ user.company_nalogovaya|default:"—" }}</span>
+                            </div>
+                        </div>
+                        <div class="company-info-item" style="grid-column: span 2;">
+                            <span class="company-info-label">{% trans 'Основной вид деятельности' %}</span>
+                            <span class="company-info-value">{{ user.company_type_activity|default:"—" }}</span>
+                        </div>
+
+                        <button type="button" class="btn btn-outline mt-3" data-bs-toggle="modal" data-bs-target="#companyModal">
+                            <i class="fa fa-pen-to-square me-2"></i>
+                            {% trans 'Редактировать' %}
+                        </button>
+                    </div>
+                {% else %}
+                    <!-- Блок приглашения заполнить информацию -->
+                    <div class="alert-info">
+                        <h6><i class="fa fa-building me-2"></i>{% trans 'Юридическая информация не заполнена' %}</h6>
+                        <p>{% trans 'Заполните юридическую информацию для работы как поставщик и выставления счетов' %}</p>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#companyModal">
+                            <i class="fa fa-plus me-2"></i>
+                            {% trans 'Заполнить юридическую информацию' %}
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для юридической информации -->
+<div class="modal fade" id="companyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    {% if user.company_name %}
+                        <i class="fa fa-pen-to-square me-2"></i>
+                        {% trans 'Редактирование юридической информации' %}
+                    {% else %}
+                        <i class="fa fa-plus me-2"></i>
+                        {% trans 'Заполнение юридической информации' %}
+                    {% endif %}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" id="companyForm">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans 'Название организации' %} *</label>
+                            <input type="text" class="form-control" name="company_name" value="{{ user.company_name|default:'' }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans 'Руководитель' %} *</label>
+                            <input type="text" class="form-control" name="company_director" value="{{ user.company_director|default:'' }}" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">{% trans 'Юридический адрес' %} *</label>
+                            <input type="text" class="form-control" name="company_address" value="{{ user.company_address|default:'' }}" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{% trans 'ИНН' %} *</label>
+                            <input type="text" class="form-control" name="company_inn" value="{{ user.company_inn|default:'' }}" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{% trans 'ОГРН' %} *</label>
+                            <input type="text" class="form-control" name="company_ogrn" value="{{ user.company_ogrn|default:'' }}" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{% trans 'КПП' %} *</label>
+                            <input type="text" class="form-control" name="company_kpp" value="{{ user.company_kpp|default:'' }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans 'Дата регистрации' %} *</label>
+                            <input type="date" class="form-control" name="company_data_registration" value="{{ user.company_data_registration|date:'Y-m-d'|default:'' }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans 'Налоговый орган' %}</label>
+                            <input type="text" class="form-control" name="company_nalogovaya" value="{{ user.company_nalogovaya|default:'' }}">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">{% trans 'Основной вид деятельности' %} *</label>
+                            <textarea class="form-control" name="company_type_activity" rows="3" required>{{ user.company_type_activity|default:'' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" data-bs-dismiss="modal">
+                        <i class="fa fa-times me-2"></i>
+                        {% trans 'Отмена' %}
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa fa-floppy-disk me-2"></i>
+                        {% trans 'Сохранить' %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Контейнер для уведомлений -->
+<div id="notificationContainer"></div>
+{% endblock content %}
+
+{% block footertop %}
+<!-- Подключаем необходимые скрипты -->
+<script src="https://cdn.jsdelivr.net/npm/imask@latest/dist/imask.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/suggestions-jquery@latest/dist/js/jquery.suggestions.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    'use strict';
+
+    // Инициализация маски для телефона
+    const phoneInput = document.getElementById('id_phone');
+    if (phoneInput) {
+        IMask(phoneInput, {
+            mask: '+{7}(000)000-00-00',
+            lazy: false
+        });
+    }
+
+    // Инициализация подсказок для города
+    const cityInput = document.getElementById('id_city');
+    if (cityInput && typeof $.fn.suggestions !== 'undefined') {
+        const api_key = '7fd18aaabd7d53ffa4846e4521c1f736c13490eb';
+
+        function formatCity(suggestion) {
+            const address = suggestion.data;
+            if (address.city_with_type === address.region_with_type) {
+                return address.settlement_with_type || "";
+            }
+            return address.city_with_type || "";
+        }
+
+        $(cityInput).suggestions({
+            token: api_key,
+            type: 'ADDRESS',
+            hint: false,
+            bounds: "city-settlement",
+            formatSelected: formatCity
+        });
+    }
+
+    // Загрузка аватара
+    const avatarUpload = document.getElementById('avatarUpload');
+    const avatarInput = document.getElementById('id_avatar');
+    const avatarPreview = document.getElementById('avatarPreview');
+
+    if (avatarUpload && avatarInput) {
+        avatarUpload.addEventListener('click', function() {
+            avatarInput.click();
+        });
+
+        avatarInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    avatarPreview.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    // Система уведомлений
+    window.showNotification = function(message, type = 'success') {
+        const container = document.getElementById('notificationContainer');
+        const notification = document.createElement('div');
+        notification.className = `profile-alert ${type}`;
+        notification.innerHTML = `
+            <i class="fa fa-${type === 'success' ? 'circle-check' : type === 'error' ? 'circle-exclamation' : 'circle-info'}"></i>
+            <span>${message}</span>
+            <span class="alert-close" onclick="this.parentElement.remove()">
+                <i class="fa fa-times"></i>
+            </span>
+        `;
+
+        container.appendChild(notification);
+
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 5000);
+    };
+
+    // Обработка формы профиля
+    const profileForm = document.getElementById('profileForm');
+    if (profileForm) {
+        profileForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+
+            try {
+                const response = await fetch(window.location.href, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showNotification(data.message || 'Профиль успешно обновлен', 'success');
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    showNotification(data.message || 'Ошибка сохранения', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Ошибка сети. Попробуйте позже.', 'error');
+            }
+        });
+    }
+
+    // Обработка формы юридической информации
+    const companyForm = document.getElementById('companyForm');
+    if (companyForm) {
+        companyForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+
+            try {
+                const response = await fetch(window.location.href, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showNotification(data.message || 'Юридическая информация сохранена', 'success');
+
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('companyModal'));
+                    if (modal) modal.hide();
+
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    showNotification(data.message || 'Ошибка сохранения', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Ошибка сети. Попробуйте позже.', 'error');
+            }
+        });
+    }
+});
+</script>
+{% endblock footertop %}
