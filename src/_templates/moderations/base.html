@@ -680,6 +680,13 @@
                         <span class="nav-text"> {% trans "Хоз.часть" %} </span>
                     </a>
                 </li>
+
+                <li class="nav-item">
+                    <a class="nav-link " href="{% url 'moderation:payment_settings' %}">
+                        <span class="nav-icon"><iconify-icon icon="solar:hand-money-bold"></iconify-icon></span>
+                        <span class="nav-text"> {% trans "Настройки платежей" %} </span>
+                    </a>
+                </li>
                 {% endif %}
                 <li class="menu-title mt-2">{% trans "KPI" %}</li>
 

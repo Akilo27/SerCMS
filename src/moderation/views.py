@@ -189,6 +189,14 @@ from moderation.models import AggregatedExpense
 from shop.models import Cart
 
 
+class ModerationHome(View):
+    template_name = "moderations/base.html"
+    
+    def get(self, request):
+        return render(request, self.template_name)
+
+
+
 class UserShiftListView(ListView):
     model = WorkShift
     template_name = "moderations/user_shift_list.html"

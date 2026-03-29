@@ -625,7 +625,7 @@
                     <ul class="sw-nav-list">
                         <li><a href="{% url 'webmain:home' %}" class="sw-nav-link {% if request.path == '/' %}active{% endif %}">{% trans 'Главная' %}</a></li>
                         <li><a href="{% url 'webmain:about' %}" class='sw-nav-link {% if 'contacts' in request.path %}active{% endif %}'">{% trans 'О компании' %}</a></li>
-                        <li><a href="{% url 'shop:catalogs' %}" class="sw-nav-link {% if 'catalog' in request.path %}active{% endif %}">{% trans 'Портфолио' %}</a></li>
+                        <li><a href="{% url 'shop:catalogs' %}" class="sw-nav-link {% if 'catalog' in request.path %}active{% endif %}">{% trans 'Товары' %}</a></li>
                         <li><a href="{% url 'webmain:services' %}" class="sw-nav-link {% if 'services' in request.path %}active{% endif %}">{% trans 'Услуги' %}</a></li>
                         <li><a href="{% url 'webmain:blogs' %}" class="sw-nav-link {% if 'blog' in request.path %}active{% endif %}">{% trans 'Блог' %}</a></li>
                         <li><a href="{% url 'webmain:contacts' %}" class="sw-nav-link {% if 'contacts' in request.path %}active{% endif %}">{% trans 'Контакты' %}</a></li>

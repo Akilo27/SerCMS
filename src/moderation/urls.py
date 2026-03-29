@@ -6,6 +6,8 @@ from .views import subscribe
 
 
 urlpatterns = [
+    path("",views.ModerationHome.as_view(),name='home'),
+
     path("login/", views.CustomLoginView.as_view(), name="login"),
     path("subscribe/", subscribe, name="subscribe"),
     path("dashbord/", views.DashbordView.as_view(), name="dashbord"),
@@ -295,6 +297,7 @@ urlpatterns = [
         views.AjaxStatusPaymentCreateView.as_view(),
         name="ajax_statuspayment_create",
     ),
+    path('payment_settings/',views.PaymentSettings.as_view(),name='payment_settings'),
     # vacance
     path("site/vacance/", views.Vacances.as_view(), name="vacances"),
     path(

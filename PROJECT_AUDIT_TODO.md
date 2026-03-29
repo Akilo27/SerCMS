@@ -1,61 +1,61 @@
-# Project audit TODO (2026-03-27)
+# Аудит проекта: список задач (2026-03-27)
 
-## Critical
-- [ ] **URGENT: remove leaked private SSH key from repository history and rotate it immediately**.
-  - File: `src/_project/settings/sudo apt-get install -y nginx` (contains full private key material).
-  - Actions:
-    1. Revoke/rotate compromised key everywhere it was used.
-    2. Remove file from git and purge it from history (`git filter-repo`/BFG).
-    3. Add secret scanning in CI (`gitleaks`/`trufflehog`).
+## Критически важно
+- [ ] **СРОЧНО: удалить скомпрометированный приватный SSH-ключ из истории репозитория и немедленно сменить его**.
+  - Файл: `src/_project/settings/sudo apt-get install -y nginx` (содержит полный текст приватного ключа).
+  - Действия:
+    1. Отозвать/сменить скомпрометированный ключ везде, где он использовался.
+    2. Удалить файл из git и очистить историю (`git filter-repo`/BFG).
+    3. Добавить проверку секретов в CI (`gitleaks`/`trufflehog`).
 
-- [ ] **Move all hardcoded secrets/API keys to environment variables**.
-  - Affected examples: Django `SECRET_KEY`, `SECRET_API_TOKEN`, IP geolocation token, payment gateway keys/salts.
-  - Actions:
-    1. Replace literals with `env()` lookups.
-    2. Add `.env.example` without secrets.
-    3. Rotate exposed tokens/keys.
+- [ ] **Перенести все жестко заданные секреты/API-ключи в переменные окружения**.
+  - Примеры: Django `SECRET_KEY`, `SECRET_API_TOKEN`, токен геолокации IP, ключи/соли платежных систем.
+  - Действия:
+    1. Заменить литералы на вызовы `env()`.
+    2. Добавить `.env.example` без секретов.
+    3. Сменить скомпрометированные токены/ключи.
 
-## High priority
-- [ ] **Fix test architecture: no network calls on import**.
-  - `src/moderation/test_paytr.py` executes `requests.post(...)` at module import time.
-  - This breaks `python manage.py test` in offline/proxied CI and causes nondeterministic tests.
-  - Actions:
-    1. Convert this file into proper Django/pytest tests.
-    2. Mock external HTTP (`responses`/`requests-mock`).
-    3. Keep integration tests behind explicit marker/flag.
+## Высокий приоритет
+- [ ] **Исправить архитектуру тестов: никаких сетевых вызовов при импорте**.
+  - `src/moderation/test_paytr.py` выполняет `requests.post(...)` на этапе импорта модуля.
+  - Это нарушает работу `python manage.py test` в офлайн/прокси-среде CI и приводит к недетерминированным тестам.
+  - Действия:
+    1. Преобразовать этот файл в полноценные Django/pytest тесты.
+    2. Мокать внешние HTTP-запросы (`responses`/`requests-mock`).
+    3. Вынести интеграционные тесты под явный маркер/флаг.
 
-- [ ] **Address Django system warnings**.
-  - `ManyToManyField(..., null=True)` has no effect and should be removed.
-  - Actions:
-    1. Remove `null=True` from M2M fields.
-    2. Generate and apply migrations.
+- [ ] **Устранить предупреждения Django системы**.
+  - `ManyToManyField(..., null=True)` не имеет эффекта и должен быть удален.
+  - Действия:
+    1. Убрать `null=True` у M2M-полей.
+    2. Сгенерировать и применить миграции.
 
-- [ ] **Stop using unsupported CKEditor 4 package**.
-  - `django-ckeditor` warns about unsupported CKEditor 4 and known security issues.
-  - Actions:
-    1. Plan migration to CKEditor 5 package.
-    2. Validate license and data compatibility.
+- [ ] **Прекратить использование неподдерживаемого пакета CKEditor 4**.
+  - `django-ckeditor` предупреждает о прекращении поддержки CKEditor 4 и известных проблемах безопасности.
+  - Действия:
+    1. Спланировать миграцию на пакет CKEditor 5.
+    2. Проверить лицензию и совместимость данных.
 
-## Medium priority
-- [ ] **Harden production settings**.
-  - Current settings include `DEBUG = True` and permissive `CORS_ALLOW_ALL_ORIGINS = True`.
-  - Actions:
-    1. Create strict production profile.
-    2. Enforce secure cookie flags and restricted CORS/hosts.
+## Средний приоритет
+- [ ] **Усилить производственные настройки**.
+  - Текущие настройки включают `DEBUG = True` и разрешающий `CORS_ALLOW_ALL_ORIGINS = True`.
+  - Действия:
+    1. Создать строгий производственный профиль.
+    2. Включить безопасные флаги cookie и ограниченные CORS/hosts.
 
-- [ ] **Expand automated tests**.
-  - Many app test files are placeholders only.
-  - Actions:
-    1. Add smoke tests for URLs/views.
-    2. Add model validation tests.
-    3. Add payment callback signature-validation tests.
+- [ ] **Расширить автоматические тесты**.
+  - Во многих приложениях тестовые файлы содержат только заглушки.
+  - Действия:
+    1. Добавить дымовые тесты для URL/представлений.
+    2. Добавить тесты валидации моделей.
+    3. Добавить тесты проверки подписи callback-запросов платежных систем.
 
-- [ ] **Clean repository hygiene issues**.
-  - Suspicious file names and legacy duplicate modules (`tasks_old.py`, `product_import_old.py`) increase maintenance risk.
-  - Actions:
-    1. Archive/remove dead code with changelog note.
-    2. Add pre-commit hooks (formatting, import sort, secret scan, lint).
+- [ ] **Навести порядок в репозитории**.
+  - Подозрительные имена файлов и устаревшие дублирующиеся модули (`tasks_old.py`, `product_import_old.py`) увеличивают риски при сопровождении.
+  - Действия:
+    1. Архивировать/удалить неиспользуемый код с пометкой в changelog.
+    2. Добавить pre-commit хуки (форматирование, сортировка импортов, проверка секретов, линтинг).
 
-## Nice to have
-- [ ] Document local/CI quality gates in README (`check`, `test`, lint, secret scan).
-- [ ] Add architecture note for payment providers and callback verification flow.
+## Желательно
+- [ ] Добавить в README описание локальных/CI-проверок качества (`check`, `test`, линтинг, проверка секретов).
+- [ ] Добавить архитектурное описание для платежных провайдеров и процесса проверки callback-запросов.

@@ -24,14 +24,14 @@
 
 ### 1.1 Явно отсутствующие шаблоны
 
-- [ ] `moderations/htmx/client.html`
-- [ ] `moderations/htmx/partner.html`
-- [ ] `moderations/htmx/user.html`
+- [+] `moderations/htmx/client.html`
+- [ ] `moderations/htmx/partner.html` добавить модуль создания и работы с партнёрами ***
+- [?] `moderations/htmx/user.html`
 - [ ] `moderations/htmx/user_list_partial.html`
 - [ ] `moderations/password_reset_complete.html`
-- [ ] `moderations/password_reset_done.html`
-- [ ] `moderations/payment_form.html`
-- [ ] `moderations/payment_settings.html`
+- [+] `moderations/password_reset_done.html`
+- [+] `moderations/payment_form.html`
+- [ ] `moderations/payment_settings.html` дополнить надо страницу так создал ее ++
 - [ ] `moderations/restore_access.html`
 - [ ] `moderations/restore_access_user.html`
 - [ ] `moderations/template/dashboard.html`
