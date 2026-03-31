@@ -1,0 +1,228 @@
+{% extends 'moderations/base.html' %}
+{% load static i18n %}
+
+{% block title %}{% trans "Заказы доставки" %} - {{ integration.name }}{% endblock %}
+
+{% block head %}
+<style>
+    .tracking-status {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 500;
+    }
+    .status-pending { background: #fff3cd; color: #856404; }
+    .status-processing { background: #cce5ff; color: #004085; }
+    .status-delivering { background: #d4edda; color: #155724; }
+    .status-delivered { background: #d1ecf1; color: #0c5460; }
+    .status-cancelled { background: #f8d7da; color: #721c24; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="page-title">
+                <i class="ri-truck-line me-1"></i> {% trans "Заказы доставки" %} - {{ integration.name }}
+            </h4>
+            <div class="page-title-right">
+                <a href="{% url 'moderation:integration_detail' integration.id %}" class="btn btn-secondary">
+                    <i class="ri-arrow-left-line"></i> {% trans "Назад" %}
+                </a>
+                <button class="btn btn-primary ms-2" onclick="syncDeliveryOrders()">
+                    <i class="ri-refresh-line"></i> {% trans "Синхронизировать" %}
+                </button>
+                <button class="btn btn-success ms-2" onclick="exportOrders()">
+                    <i class="ri-download-line"></i> {% trans "Экспорт" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Фильтры -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-2">
+                        <input type="text" name="tracking" class="form-control" placeholder="{% trans 'Трек-номер' %}" value="{{ request.GET.tracking }}">
+                    </div>
+                    <div class="col-md-2">
+                        <select name="status" class="form-control">
+                            <option value="">{% trans "Все статусы" %}</option>
+                            {% for value, label in statuses %}
+                            <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="date" name="date_from" class="form-control" value="{{ request.GET.date_from }}">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="date" name="date_to" class="form-control" value="{{ request.GET.date_to }}">
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="ri-filter-line"></i> {% trans "Фильтр" %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Статистика -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h3>{{ total_orders|default:0 }}</h3>
+                <small class="text-muted">{% trans "Всего заказов" %}</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h3 class="text-warning">{{ processing_count|default:0 }}</h3>
+                <small class="text-muted">{% trans "В обработке" %}</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h3 class="text-info">{{ delivering_count|default:0 }}</h3>
+                <small class="text-muted">{% trans "В пути" %}</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h3 class="text-success">{{ delivered_count|default:0 }}</h3>
+                <small class="text-muted">{% trans "Доставлено" %}</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Таблица заказов -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Заказ" %}</th>
+                                <th>{% trans "Трек-номер" %}</th>
+                                <th>{% trans "Получатель" %}</th>
+                                <th>{% trans "Тип доставки" %}</th>
+                                <th>{% trans "Стоимость" %}</th>
+                                <th>{% trans "Статус" %}</th>
+                                <th>{% trans "Дата" %}</th>
+                                <th>{% trans "Действия" %}</th>
+                            </thead>
+                        <tbody>
+                            {% for order in orders %}
+                            <tr>
+                                <td>
+                                    <a href="/moderation/orders/{{ order.order_id }}/" class="text-decoration-none">
+                                        #{{ order.order_id }}
+                                    </a>
+                                </td>
+                                <td>
+                                    {% if order.tracking_number %}
+                                    <strong>{{ order.tracking_number }}</strong>
+                                    {% if order.tracking_url %}
+                                    <br>
+                                    <a href="{{ order.tracking_url }}" target="_blank" class="small">
+                                        <i class="ri-external-link-line"></i> {% trans "Отследить" %}
+                                    </a>
+                                    {% endif %}
+                                    {% else %}
+                                    <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <strong>{{ order.recipient_name }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ order.recipient_phone }}</small>
+                                </td>
+                                <td>{{ order.delivery_type }}</td>
+                                <td>{{ order.delivery_cost }} ₽</td>
+                                <td>
+                                    <span class="tracking-status status-{{ order.status }}">
+                                        {{ order.get_status_display }}
+                                    </span>
+                                    {% if order.estimated_delivery %}
+                                    <br>
+                                    <small>{% trans "Ожидается:" %} {{ order.estimated_delivery|date:"d.m.Y" }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <small>{{ order.created_at|date:"d.m.Y H:i" }}</small>
+                                    {% if order.actual_delivery %}
+                                    <br>
+                                    <small class="text-success">{% trans "Доставлен:" %} {{ order.actual_delivery|date:"d.m.Y" }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-info" onclick="viewDeliveryDetails({{ order.id }})">
+                                            <i class="ri-eye-line"></i>
+                                        </button>
+                                        {% if order.label_url %}
+                                        <a href="{{ order.label_url }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                            <i class="ri-printer-line"></i>
+                                        </a>
+                                        {% endif %}
+                                        {% if order.status == 'processing' %}
+                                        <button class="btn btn-sm btn-outline-warning" onclick="updateStatus({{ order.id }})">
+                                            <i class="ri-refresh-line"></i>
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" class="text-center py-5">
+                                    <i class="ri-truck-line fs-48 text-muted"></i>
+                                    <p class="mt-2">{% trans "Нет заказов доставки" %}</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Пагинация -->
+                {% if orders.has_other_pages %}
+                <div class="mt-3">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-end">
+                            {% if orders.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ orders.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="ri-arrow-left-s-line"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for num in orders.paginator.page_range %}
+                            <li class="page-item {% if orders.number == num %}active{% endif %}">
+                                <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                            </li>
+                            {% endfor %}
+                            
+                            {% if orders.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ orders.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i

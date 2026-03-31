@@ -1,0 +1,293 @@
+{% extends 'moderations/base.html' %}
+{% load static i18n %}
+
+{% block title %}{% trans "Настройки маркетплейса" %} - {{ integration.name }}{% endblock %}
+
+{% block head %}
+<style>
+    .settings-group {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    .param-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+    .param-row:last-child {
+        border-bottom: none;
+    }
+    .param-key {
+        font-weight: 500;
+        color: #495057;
+    }
+    .param-value {
+        color: #6c757d;
+        font-family: monospace;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="page-title">
+                <i class="ri-settings-4-line me-1"></i> {% trans "Настройки маркетплейса" %} - {{ integration.name }}
+            </h4>
+            <div class="page-title-right">
+                <a href="{% url 'moderation:integration_detail' integration.id %}" class="btn btn-secondary">
+                    <i class="ri-arrow-left-line"></i> {% trans "Назад" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{% trans "Основные настройки" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="ri-information-line"></i>
+                        {% trans "Настройте параметры синхронизации с маркетплейсом" %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">{% trans "Настройки синхронизации (JSON)" %}</label>
+                        {{ form.settings }}
+                        {% if form.settings.errors %}
+                        <div class="text-danger">{{ form.settings.errors }}</div>
+                        {% endif %}
+                        <small class="text-muted">
+                            {% trans "Пример формата:" %} {"sync_frequency": 3600, "auto_sync": true, "categories": ["all"]}
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{% trans "Синхронизация данных" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{% trans "Синхронизация товаров" %}</label>
+                            <select class="form-control" name="sync_products">
+                                <option value="manual" {% if integration.settings.get.sync_products == 'manual' %}selected{% endif %}>{% trans "Вручную" %}</option>
+                                <option value="hourly" {% if integration.settings.get.sync_products == 'hourly' %}selected{% endif %}>{% trans "Каждый час" %}</option>
+                                <option value="daily" {% if integration.settings.get.sync_products == 'daily' %}selected{% endif %}>{% trans "Раз в день" %}</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{% trans "Синхронизация заказов" %}</label>
+                            <select class="form-control" name="sync_orders">
+                                <option value="manual" {% if integration.settings.get.sync_orders == 'manual' %}selected{% endif %}>{% trans "Вручную" %}</option>
+                                <option value="realtime" {% if integration.settings.get.sync_orders == 'realtime' %}selected{% endif %}>{% trans "В реальном времени" %}</option>
+                                <option value="hourly" {% if integration.settings.get.sync_orders == 'hourly' %}selected{% endif %}>{% trans "Каждый час" %}</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{% trans "Синхронизация остатков" %}</label>
+                            <select class="form-control" name="sync_stocks">
+                                <option value="manual" {% if integration.settings.get.sync_stocks == 'manual' %}selected{% endif %}>{% trans "Вручную" %}</option>
+                                <option value="realtime" {% if integration.settings.get.sync_stocks == 'realtime' %}selected{% endif %}>{% trans "В реальном времени" %}</option>
+                                <option value="hourly" {% if integration.settings.get.sync_stocks == 'hourly' %}selected{% endif %}>{% trans "Каждый час" %}</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{% trans "Синхронизация цен" %}</label>
+                            <select class="form-control" name="sync_prices">
+                                <option value="manual" {% if integration.settings.get.sync_prices == 'manual' %}selected{% endif %}>{% trans "Вручную" %}</option>
+                                <option value="daily" {% if integration.settings.get.sync_prices == 'daily' %}selected{% endif %}>{% trans "Раз в день" %}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{% trans "Дополнительные параметры" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-check form-switch mb-3">
+                        <input type="checkbox" class="form-check-input" name="auto_create_orders" id="autoCreateOrders" 
+                               {% if integration.settings.get.auto_create_orders %}checked{% endif %}>
+                        <label class="form-check-label" for="autoCreateOrders">
+                            {% trans "Автоматически создавать заказы в системе" %}
+                        </label>
+                    </div>
+                    
+                    <div class="form-check form-switch mb-3">
+                        <input type="checkbox" class="form-check-input" name="auto_update_stocks" id="autoUpdateStocks"
+                               {% if integration.settings.get.auto_update_stocks %}checked{% endif %}>
+                        <label class="form-check-label" for="autoUpdateStocks">
+                            {% trans "Автоматически обновлять остатки" %}
+                        </label>
+                    </div>
+                    
+                    <div class="form-check form-switch">
+                        <input type="checkbox" class="form-check-input" name="notify_on_errors" id="notifyOnErrors"
+                               {% if integration.settings.get.notify_on_errors %}checked{% endif %}>
+                        <label class="form-check-label" for="notifyOnErrors">
+                            {% trans "Уведомлять об ошибках синхронизации" %}
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-3 mb-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="ri-save-line"></i> {% trans "Сохранить настройки" %}
+                </button>
+                <button type="button" class="btn btn-success ms-2" onclick="testSync()">
+                    <i class="ri-refresh-line"></i> {% trans "Тестовая синхронизация" %}
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Текущие настройки" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="settings-group">
+                    <div class="param-row">
+                        <span class="param-key">{% trans "Синхронизация товаров:" %}</span>
+                        <span class="param-value" id="syncProductsDisplay">
+                            {% if integration.settings.get.sync_products == 'hourly' %}Каждый час
+                            {% elif integration.settings.get.sync_products == 'daily' %}Раз в день
+                            {% else %}Вручную{% endif %}
+                        </span>
+                    </div>
+                    <div class="param-row">
+                        <span class="param-key">{% trans "Синхронизация заказов:" %}</span>
+                        <span class="param-value" id="syncOrdersDisplay">
+                            {% if integration.settings.get.sync_orders == 'realtime' %}В реальном времени
+                            {% elif integration.settings.get.sync_orders == 'hourly' %}Каждый час
+                            {% else %}Вручную{% endif %}
+                        </span>
+                    </div>
+                    <div class="param-row">
+                        <span class="param-key">{% trans "Автосоздание заказов:" %}</span>
+                        <span class="param-value">
+                            {% if integration.settings.get.auto_create_orders %}{% trans "Включено" %}{% else %}{% trans "Выключено" %}{% endif %}
+                        </span>
+                    </div>
+                    <div class="param-row">
+                        <span class="param-key">{% trans "Последняя синхронизация:" %}</span>
+                        <span class="param-value">{{ integration.last_sync|date:"d.m.Y H:i:s"|default:"Никогда" }}</span>
+                    </div>
+                </div>
+                
+                {% if integration.error_message %}
+                <div class="alert alert-danger mt-3">
+                    <i class="ri-error-warning-line"></i>
+                    {{ integration.error_message }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Статистика" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center">
+                    <div class="row">
+                        <div class="col-6">
+                            <h4>{{ integration.marketplace_products.count }}</h4>
+                            <small class="text-muted">{% trans "Товаров" %}</small>
+                        </div>
+                        <div class="col-6">
+                            <h4>{{ integration.marketplace_orders.count }}</h4>
+                            <small class="text-muted">{% trans "Заказов" %}</small>
+                        </div>
+                    </div>
+                    <hr>
+                    <a href="{% url 'moderation:marketplace_products' integration.id %}" class="btn btn-sm btn-outline-primary w-100 mb-2">
+                        <i class="ri-shopping-cart-line"></i> {% trans "Управление товарами" %}
+                    </a>
+                    <a href="{% url 'moderation:marketplace_orders' integration.id %}" class="btn btn-sm btn-outline-info w-100">
+                        <i class="ri-file-list-line"></i> {% trans "Заказы" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block javascript %}
+<script>
+    function testSync() {
+        Swal.fire({
+            title: '{% trans "Тестовая синхронизация" %}',
+            text: '{% trans "Запустить тестовую синхронизацию с маркетплейсом?" %}',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: '{% trans "Запустить" %}',
+            cancelButtonText: '{% trans "Отмена" %}'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: '{% trans "Синхронизация запущена" %}',
+                    text: '{% trans "Процесс выполняется в фоновом режиме" %}',
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                
+                $.ajax({
+                    url: '{% url "moderation:sync_products" %}',
+                    method: 'POST',
+                    data: {
+                        marketplace: {{ integration.id }},
+                        sync_type: 'all',
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    }
+                });
+            }
+        });
+    }
+    
+    // Обновление отображения при изменении настроек
+    $('select[name="sync_products"]').change(function() {
+        const value = $(this).val();
+        let text = '';
+        if (value === 'hourly') text = 'Каждый час';
+        else if (value === 'daily') text = 'Раз в день';
+        else text = 'Вручную';
+        $('#syncProductsDisplay').text(text);
+    });
+    
+    $('select[name="sync_orders"]').change(function() {
+        const value = $(this).val();
+        let text = '';
+        if (value === 'realtime') text = 'В реальном времени';
+        else if (value === 'hourly') text = 'Каждый час';
+        else text = 'Вручную';
+        $('#syncOrdersDisplay').text(text);
+    });
+</script>
+{% endblock %}
+{% endblock %}

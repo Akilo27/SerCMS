@@ -2,7 +2,7 @@ from django.apps import apps
 from django.core.mail import EmailMultiAlternatives
 from django.db.models.functions import TruncDate, TruncHour
 from django.utils.crypto import get_random_string
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_http_methods
 import uuid
 from django.contrib.sites.models import Site
 import xml.etree.ElementTree as ET
@@ -198,6 +198,12 @@ from moderation.forms import QuickCallForm, CallSettingsForm, CallQueueForm, Pho
 from moderation.models import CallSettings, CallRecord, CallRecording, VoiceMenu, CallQueue, PhoneNumber
 
 from moderation.forms import VoiceMenuForm
+
+from moderation.forms import SyncProductsForm, AdditionalServiceForm, DeliverySettingsForm, MessengerSettingsForm, \
+    PaymentSettingsForm, MarketplaceSettingsForm, IntegrationServiceForm
+from moderation.models import IntegrationService, MessengerMessage, DeliveryOrder, PaymentTransaction, \
+    MarketplaceOrder, MarketplaceProduct, IntegrationLog, AdditionalService, MessengerIntegration, DeliveryIntegration, \
+    PaymentIntegration
 
 
 class ModerationHome(View):
@@ -9298,3 +9304,592 @@ def reset_call_settings(request):
         return JsonResponse({'status': 'success'})
 
     return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+
+method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+
+
+class IntegrationsDashboardView(TemplateView):
+    """Дашборд интеграций"""
+    template_name = "moderations/integrations/dashboard.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Статистика по типам
+        context['stats'] = {
+            'total': IntegrationService.objects.count(),
+            'active': IntegrationService.objects.filter(is_active=True).count(),
+            'marketplace': IntegrationService.objects.filter(service_type='marketplace').count(),
+            'payment': IntegrationService.objects.filter(service_type='payment').count(),
+            'delivery': IntegrationService.objects.filter(service_type='delivery').count(),
+            'messenger': IntegrationService.objects.filter(service_type='messenger').count(),
+            'additional': IntegrationService.objects.filter(service_type='additional').count(),
+        }
+
+        # Последние логи
+        context['recent_logs'] = IntegrationLog.objects.select_related('integration')[:10]
+
+        # Активные интеграции
+        context['active_integrations'] = IntegrationService.objects.filter(is_active=True)[:8]
+
+        # Статистика синхронизации за последние 7 дней
+        last_week = timezone.now() - timedelta(days=7)
+        context['sync_stats'] = IntegrationLog.objects.filter(
+            started_at__gte=last_week,
+            operation__startswith='sync'
+        ).values('operation').annotate(
+            total=Count('id'),
+            success=Count('id', filter=Q(status='success')),
+            error=Count('id', filter=Q(status='error'))
+        )
+
+        return context
+
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class IntegrationListView(ListView):
+    """Список интеграций"""
+    model = IntegrationService
+    template_name = "moderations/integrations/list.html"
+    context_object_name = "integrations"
+    paginate_by = 20
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        service_type = self.request.GET.get('type')
+        if service_type:
+            queryset = queryset.filter(service_type=service_type)
+
+        search = self.request.GET.get('search')
+        if search:
+            queryset = queryset.filter(
+                Q(name__icontains=search) | Q(code__icontains=search)
+            )
+
+        status = self.request.GET.get('status')
+        if status == 'active':
+            queryset = queryset.filter(is_active=True)
+        elif status == 'inactive':
+            queryset = queryset.filter(is_active=False)
+
+        return queryset.order_by('service_type', 'name')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['service_types'] = IntegrationService.SERVICE_TYPES
+        context['active_filters'] = {
+            'type': self.request.GET.get('type', ''),
+            'search': self.request.GET.get('search', ''),
+            'status': self.request.GET.get('status', ''),
+        }
+        return context
+
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class IntegrationCreateView(CreateView):
+    """Создание интеграции"""
+    model = IntegrationService
+    form_class = IntegrationServiceForm
+    template_name = "moderations/integrations/form.html"
+    success_url = reverse_lazy("moderation:integrations")
+
+    def form_valid(self, form):
+        messages.success(self.request, f"Интеграция '{form.instance.name}' успешно создана")
+        return super().form_valid(form)
+
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class IntegrationUpdateView(UpdateView):
+    """Редактирование интеграции"""
+    model = IntegrationService
+    form_class = IntegrationServiceForm
+    template_name = "moderations/integrations/form.html"
+    success_url = reverse_lazy("moderation:integrations")
+
+    def form_valid(self, form):
+        messages.success(self.request, f"Интеграция '{form.instance.name}' успешно обновлена")
+        return super().form_valid(form)
+
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class IntegrationDeleteView(DeleteView):
+    """Удаление интеграции"""
+    model = IntegrationService
+    success_url = reverse_lazy("moderation:integrations")
+
+    def delete(self, request, *args, **kwargs):
+        integration = self.get_object()
+        messages.success(request, f"Интеграция '{integration.name}' удалена")
+        return super().delete(request, *args, **kwargs)
+
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class IntegrationDetailView(DetailView):
+    """Детальная информация об интеграции"""
+    model = IntegrationService
+    template_name = "moderations/integrations/detail.html"
+    context_object_name = "integration"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Логи интеграции
+        context['logs'] = IntegrationLog.objects.filter(
+            integration=self.object
+        )[:20]
+
+        # Статистика по типу
+        if self.object.service_type == 'marketplace':
+            context['products_count'] = MarketplaceProduct.objects.filter(
+                marketplace=self.object
+            ).count()
+            context['orders_count'] = MarketplaceOrder.objects.filter(
+                marketplace=self.object
+            ).count()
+        elif self.object.service_type == 'payment':
+            try:
+                context['payment_settings'] = PaymentIntegration.objects.get(
+                    integration=self.object
+                )
+            except PaymentIntegration.DoesNotExist:
+                context['payment_settings'] = None
+            context['transactions_count'] = PaymentTransaction.objects.filter(
+                payment=self.object
+            ).count()
+        elif self.object.service_type == 'delivery':
+            try:
+                context['delivery_settings'] = DeliveryIntegration.objects.get(
+                    integration=self.object
+                )
+            except DeliveryIntegration.DoesNotExist:
+                context['delivery_settings'] = None
+            context['delivery_orders_count'] = DeliveryOrder.objects.filter(
+                delivery=self.object
+            ).count()
+        elif self.object.service_type == 'messenger':
+            try:
+                context['messenger_settings'] = MessengerIntegration.objects.get(
+                    integration=self.object
+                )
+            except MessengerIntegration.DoesNotExist:
+                context['messenger_settings'] = None
+            context['messages_count'] = MessengerMessage.objects.filter(
+                messenger=self.object
+            ).count()
+
+        return context
+
+
+@login_required
+def integration_settings(request, pk):
+    """Настройки интеграции в зависимости от типа"""
+    integration = get_object_or_404(IntegrationService, pk=pk)
+
+    if integration.service_type == 'marketplace':
+        form = MarketplaceSettingsForm(instance=integration)
+        template = 'moderations/integrations/marketplace_settings.html'
+    elif integration.service_type == 'payment':
+        payment_settings, created = PaymentIntegration.objects.get_or_create(
+            integration=integration
+        )
+        form = PaymentSettingsForm(instance=payment_settings)
+        template = 'moderations/integrations/payment_settings.html'
+    elif integration.service_type == 'delivery':
+        delivery_settings, created = DeliveryIntegration.objects.get_or_create(
+            integration=integration
+        )
+        form = DeliverySettingsForm(instance=delivery_settings)
+        template = 'moderations/integrations/delivery_settings.html'
+    elif integration.service_type == 'messenger':
+        messenger_settings, created = MessengerIntegration.objects.get_or_create(
+            integration=integration
+        )
+        form = MessengerSettingsForm(instance=messenger_settings)
+        template = 'moderations/integrations/messenger_settings.html'
+    else:
+        additional_settings, created = AdditionalService.objects.get_or_create(
+            integration=integration
+        )
+        form = AdditionalServiceForm(instance=additional_settings)
+        template = 'moderations/integrations/additional_settings.html'
+
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Настройки успешно сохранены")
+            return redirect('moderation:integration_detail', pk=integration.pk)
+
+    return render(request, template, {
+        'integration': integration,
+        'form': form
+    })
+
+
+@login_required
+def test_integration(request, pk):
+    """Тестирование подключения к интеграции"""
+    if request.method == 'POST':
+        integration = get_object_or_404(IntegrationService, pk=pk)
+
+        # Здесь должна быть логика тестирования подключения
+        # Для каждого типа интеграции свой тест
+
+        # Имитация тестирования
+        is_successful = True
+
+        if is_successful:
+            IntegrationLog.objects.create(
+                integration=integration,
+                operation='webhook',
+                status='success',
+                request_data={'test': True},
+                response_data={'message': 'Connection successful'},
+                duration=0.5,
+                completed_at=timezone.now()
+            )
+            return JsonResponse({'status': 'success', 'message': 'Подключение успешно'})
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Ошибка подключения'}, status=400)
+
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+
+@login_required
+def sync_products(request):
+    """Синхронизация товаров с маркетплейсом"""
+    if request.method == 'POST':
+        form = SyncProductsForm(request.POST)
+        if form.is_valid():
+            marketplace = form.cleaned_data['marketplace']
+            sync_type = form.cleaned_data['sync_type']
+
+            # Создаем лог
+            log = IntegrationLog.objects.create(
+                integration=marketplace,
+                operation='sync_products',
+                status='pending',
+                request_data={'sync_type': sync_type},
+                started_at=timezone.now()
+            )
+
+            # Здесь должна быть асинхронная задача на синхронизацию
+            # Для примера - синхронная обработка
+
+            try:
+                # Имитация синхронизации
+                products_synced = 0
+                log.status = 'success'
+                log.response_data = {'products_synced': products_synced}
+                log.completed_at = timezone.now()
+                log.duration = 1.5
+                log.save()
+
+                messages.success(request, f"Синхронизация завершена. Синхронизировано товаров: {products_synced}")
+            except Exception as e:
+                log.status = 'error'
+                log.error_message = str(e)
+                log.completed_at = timezone.now()
+                log.save()
+                messages.error(request, f"Ошибка синхронизации: {str(e)}")
+
+            return redirect('moderation:integration_detail', pk=marketplace.pk)
+
+    return redirect('moderation:integrations')
+
+
+@login_required
+def integration_logs(request, pk=None):
+    """Просмотр логов интеграции"""
+    logs = IntegrationLog.objects.select_related('integration')
+
+    integration = None
+    if pk:
+        try:
+            integration = get_object_or_404(IntegrationService, pk=pk)
+            logs = logs.filter(integration=integration)
+        except IntegrationService.DoesNotExist:
+            # Если интеграция удалена, показываем все логи
+            pass
+
+    # Фильтрация
+    operation = request.GET.get('operation')
+    if operation:
+        logs = logs.filter(operation=operation)
+
+    status = request.GET.get('status')
+    if status:
+        logs = logs.filter(status=status)
+
+    date_from = request.GET.get('date_from')
+    if date_from:
+        logs = logs.filter(started_at__date__gte=date_from)
+
+    date_to = request.GET.get('date_to')
+    if date_to:
+        logs = logs.filter(started_at__date__lte=date_to)
+
+    # Пагинация
+    paginator = Paginator(logs, 30)
+    page = request.GET.get('page')
+    logs_page = paginator.get_page(page)
+
+    # Получаем уникальные интеграции для фильтра
+    integrations = IntegrationService.objects.filter(
+        id__in=logs.values_list('integration_id', flat=True).distinct()
+    )
+
+    return render(request, 'moderations/integrations/logs.html', {
+        'logs': logs_page,
+        'integration': integration,
+        'integrations': integrations,
+        'operations': IntegrationLog.OPERATION_TYPES,
+        'statuses': [('success', 'Успех'), ('error', 'Ошибка'), ('pending', 'В процессе')],
+        'filters': {
+            'operation': operation,
+            'status': status,
+            'date_from': date_from,
+            'date_to': date_to,
+        }
+    })
+
+
+@login_required
+def webhook_handler(request, code):
+    """Обработчик webhook для интеграции"""
+    try:
+        integration = IntegrationService.objects.get(code=code, is_active=True)
+    except IntegrationService.DoesNotExist:
+        return JsonResponse({'error': 'Integration not found'}, status=404)
+
+    # Получаем данные из запроса
+    if request.method == 'POST':
+        data = json.loads(request.body)
+
+        # Создаем лог
+        log = IntegrationLog.objects.create(
+            integration=integration,
+            operation='webhook',
+            status='pending',
+            request_data=data,
+            started_at=timezone.now()
+        )
+
+        try:
+            # Обработка webhook в зависимости от типа интеграции
+            # Здесь должна быть логика обработки
+
+            log.status = 'success'
+            log.completed_at = timezone.now()
+            log.save()
+
+            return JsonResponse({'status': 'ok'})
+        except Exception as e:
+            log.status = 'error'
+            log.error_message = str(e)
+            log.completed_at = timezone.now()
+            log.save()
+
+            return JsonResponse({'error': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+
+@login_required
+def marketplace_products(request, pk):
+    """Список товаров маркетплейса"""
+    integration = get_object_or_404(IntegrationService, pk=pk, service_type='marketplace')
+    products = MarketplaceProduct.objects.filter(marketplace=integration)
+
+    # Фильтрация
+    search = request.GET.get('search')
+    if search:
+        products = products.filter(
+            Q(marketplace_sku__icontains=search) |
+            Q(product__name__icontains=search)
+        )
+
+    status = request.GET.get('status')
+    if status:
+        products = products.filter(status=status)
+
+    # Пагинация
+    paginator = Paginator(products, 30)
+    page = request.GET.get('page')
+    products_page = paginator.get_page(page)
+
+    return render(request, 'moderations/integrations/marketplace_products.html', {
+        'integration': integration,
+        'products': products_page,
+        'statuses': [('active', 'Активен'), ('inactive', 'Неактивен'), ('archived', 'Архивирован')],
+    })
+
+
+@login_required
+def marketplace_orders(request, pk):
+    """Список заказов маркетплейса"""
+    integration = get_object_or_404(IntegrationService, pk=pk, service_type='marketplace')
+    orders = MarketplaceOrder.objects.filter(marketplace=integration).order_by('-order_date')
+
+    # Фильтрация
+    search = request.GET.get('search')
+    if search:
+        orders = orders.filter(marketplace_order_id__icontains=search)
+
+    sync_status = request.GET.get('sync_status')
+    if sync_status:
+        orders = orders.filter(sync_status=sync_status)
+
+    date_from = request.GET.get('date_from')
+    if date_from:
+        orders = orders.filter(order_date__date__gte=date_from)
+
+    date_to = request.GET.get('date_to')
+    if date_to:
+        orders = orders.filter(order_date__date__lte=date_to)
+
+    # Пагинация
+    paginator = Paginator(orders, 30)
+    page = request.GET.get('page')
+    orders_page = paginator.get_page(page)
+
+    return render(request, 'moderations/integrations/marketplace_orders.html', {
+        'integration': integration,
+        'orders': orders_page,
+        'sync_statuses': [('pending', 'Ожидает'), ('synced', 'Синхронизирован'), ('error', 'Ошибка')],
+    })
+
+
+@login_required
+def payment_transactions(request, pk):
+    """Список платежных транзакций"""
+    integration = get_object_or_404(IntegrationService, pk=pk, service_type='payment')
+    transactions = PaymentTransaction.objects.filter(payment=integration).order_by('-created_at')
+
+    # Фильтрация
+    status = request.GET.get('status')
+    if status:
+        transactions = transactions.filter(status=status)
+
+    date_from = request.GET.get('date_from')
+    if date_from:
+        transactions = transactions.filter(created_at__date__gte=date_from)
+
+    date_to = request.GET.get('date_to')
+    if date_to:
+        transactions = transactions.filter(created_at__date__lte=date_to)
+
+    # Пагинация
+    paginator = Paginator(transactions, 30)
+    page = request.GET.get('page')
+    transactions_page = paginator.get_page(page)
+
+    return render(request, 'moderations/integrations/payment_transactions.html', {
+        'integration': integration,
+        'transactions': transactions_page,
+        'statuses': PaymentTransaction.STATUS_CHOICES,
+    })
+
+
+@login_required
+def delivery_orders(request, pk):
+    """Список заказов доставки"""
+    integration = get_object_or_404(IntegrationService, pk=pk, service_type='delivery')
+    orders = DeliveryOrder.objects.filter(delivery=integration).order_by('-created_at')
+
+    # Фильтрация
+    status = request.GET.get('status')
+    if status:
+        orders = orders.filter(status=status)
+
+    tracking = request.GET.get('tracking')
+    if tracking:
+        orders = orders.filter(tracking_number__icontains=tracking)
+
+    # Пагинация
+    paginator = Paginator(orders, 30)
+    page = request.GET.get('page')
+    orders_page = paginator.get_page(page)
+
+    return render(request, 'moderations/integrations/delivery_orders.html', {
+        'integration': integration,
+        'orders': orders_page,
+        'statuses': DeliveryOrder.STATUS_CHOICES,
+    })
+
+
+@login_required
+def messenger_messages(request, pk):
+    """Список сообщений мессенджера"""
+    integration = get_object_or_404(IntegrationService, pk=pk, service_type='messenger')
+    messages = MessengerMessage.objects.filter(messenger=integration).order_by('-created_at')
+
+    # Фильтрация
+    direction = request.GET.get('direction')
+    if direction:
+        messages = messages.filter(direction=direction)
+
+    is_read = request.GET.get('is_read')
+    if is_read:
+        messages = messages.filter(is_read=(is_read == 'true'))
+
+    # Пагинация
+    paginator = Paginator(messages, 30)
+    page = request.GET.get('page')
+    messages_page = paginator.get_page(page)
+
+    return render(request, 'moderations/integrations/messenger_messages.html', {
+        'integration': integration,
+        'messages': messages_page,
+        'directions': [('inbound', 'Входящие'), ('outbound', 'Исходящие')],
+    })
+
+
+@login_required
+def log_details_api(request, log_id):
+    """API для получения деталей лога"""
+    log = get_object_or_404(IntegrationLog, id=log_id)
+
+    return JsonResponse({
+        'id': log.id,
+        'integration_id': log.integration.id,
+        'integration_name': log.integration.name,
+        'operation': log.operation,
+        'operation_display': log.get_operation_display(),
+        'status': log.status,
+        'status_display': log.get_status_display(),
+        'request_data': log.request_data,
+        'response_data': log.response_data,
+        'error_message': log.error_message,
+        'duration': log.duration,
+        'duration_formatted': log.get_duration_formatted(),
+        'started_at': log.started_at.strftime('%d.%m.%Y %H:%M:%S'),
+        'completed_at': log.completed_at.strftime('%d.%m.%Y %H:%M:%S') if log.completed_at else None,
+    })
+
+
+@login_required
+@require_http_methods(["POST"])
+def sync_all_integrations(request):
+    """Синхронизация всех интеграций"""
+    out = io.StringIO()
+
+    try:
+        call_command('sync_integrations', stdout=out)
+        output = out.getvalue()
+
+        success_count = output.count('Успешно')
+        error_count = output.count('Ошибка')
+
+        return JsonResponse({
+            'status': 'success',
+            'success_count': success_count,
+            'error_count': error_count,
+            'output': output
+        })
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=500)

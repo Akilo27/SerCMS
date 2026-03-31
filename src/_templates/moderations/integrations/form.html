@@ -1,0 +1,353 @@
+{% extends 'moderations/base.html' %}
+{% load static i18n %}
+
+{% block title %}{% if form.instance.pk %}{% trans "Редактирование интеграции" %}{% else %}{% trans "Создание интеграции" %}{% endif %}{% endblock %}
+
+{% block head %}
+<style>
+    .preview-logo {
+        width: 80px;
+        height: 80px;
+        border-radius: 8px;
+        object-fit: contain;
+        border: 1px solid #dee2e6;
+        padding: 5px;
+    }
+    .code-preview {
+        font-family: monospace;
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 6px;
+        font-size: 12px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="page-title">
+                {% if form.instance.pk %}
+                    <i class="ri-edit-line me-1"></i> {% trans "Редактирование интеграции" %}
+                {% else %}
+                    <i class="ri-add-line me-1"></i> {% trans "Создание интеграции" %}
+                {% endif %}
+            </h4>
+            <div class="page-title-right">
+                <a href="{% url 'moderation:integrations' %}" class="btn btn-secondary">
+                    <i class="ri-arrow-left-line"></i> {% trans "Назад к списку" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <form method="post" enctype="multipart/form-data" id="integrationForm">
+            {% csrf_token %}
+            
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{% trans "Основная информация" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.name.id_for_label }}" class="form-label">
+                                {% trans "Название интеграции" %} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                            <div class="text-danger">{{ form.name.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">{% trans "Например: Ozon, СберБанк, СДЭК" %}</small>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.code.id_for_label }}" class="form-label">
+                                {% trans "Уникальный код" %} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.code }}
+                            {% if form.code.errors %}
+                            <div class="text-danger">{{ form.code.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">{% trans "Только латинские буквы, цифры и знак подчеркивания" %}</small>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.service_type.id_for_label }}" class="form-label">
+                                {% trans "Тип интеграции" %} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.service_type }}
+                            {% if form.service_type.errors %}
+                            <div class="text-danger">{{ form.service_type.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.logo.id_for_label }}" class="form-label">
+                                {% trans "Логотип" %}
+                            </label>
+                            {{ form.logo }}
+                            {% if form.logo.errors %}
+                            <div class="text-danger">{{ form.logo.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{% trans "API настройки" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            <label for="{{ form.api_url.id_for_label }}" class="form-label">
+                                {% trans "API URL" %}
+                            </label>
+                            {{ form.api_url }}
+                            {% if form.api_url.errors %}
+                            <div class="text-danger">{{ form.api_url.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">{% trans "Базовый URL для API запросов" %}</small>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.api_key.id_for_label }}" class="form-label">
+                                {% trans "API ключ" %}
+                            </label>
+                            {{ form.api_key }}
+                            {% if form.api_key.errors %}
+                            <div class="text-danger">{{ form.api_key.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.api_secret.id_for_label }}" class="form-label">
+                                {% trans "API секрет" %}
+                            </label>
+                            {{ form.api_secret }}
+                            {% if form.api_secret.errors %}
+                            <div class="text-danger">{{ form.api_secret.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.webhook_url.id_for_label }}" class="form-label">
+                            {% trans "Webhook URL" %}
+                        </label>
+                        {{ form.webhook_url }}
+                        {% if form.webhook_url.errors %}
+                        <div class="text-danger">{{ form.webhook_url.errors }}</div>
+                        {% endif %}
+                        <small class="text-muted">{% trans "URL для приема уведомлений от сервиса" %}</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{% trans "Дополнительные настройки" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="{{ form.settings.id_for_label }}" class="form-label">
+                            {% trans "Дополнительные параметры (JSON)" %}
+                        </label>
+                        {{ form.settings }}
+                        {% if form.settings.errors %}
+                        <div class="text-danger">{{ form.settings.errors }}</div>
+                        {% endif %}
+                        <small class="text-muted">
+                            {% trans "Формат: {\"param1\": \"value1\", \"param2\": \"value2\"}" %}
+                        </small>
+                    </div>
+                    
+                    <div class="form-check form-switch">
+                        {{ form.is_active }}
+                        <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                            {% trans "Активна" %}
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-3 mb-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="ri-save-line"></i> {% trans "Сохранить" %}
+                </button>
+                <a href="{% url 'moderation:integrations' %}" class="btn btn-secondary">
+                    {% trans "Отмена" %}
+                </a>
+                {% if form.instance.pk %}
+                <button type="button" class="btn btn-danger float-end" onclick="deleteIntegration({{ form.instance.id }})">
+                    <i class="ri-delete-bin-line"></i> {% trans "Удалить" %}
+                </button>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+    
+    <div class="col-lg-4">
+        <!-- Информационная панель -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Предпросмотр" %}</h5>
+            </div>
+            <div class="card-body text-center">
+                <div id="logoPreview">
+                    {% if form.instance.logo %}
+                    <img src="{{ form.instance.logo.url }}" class="preview-logo mb-3">
+                    {% else %}
+                    <div class="preview-logo bg-light d-flex align-items-center justify-content-center mx-auto mb-3">
+                        <i class="ri-apps-line fs-32 text-muted"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                <h5 id="previewName">{{ form.instance.name|default:"Название" }}</h5>
+                <p id="previewType" class="text-muted">
+                    {% if form.instance.service_type %}
+                        {{ form.instance.get_service_type_display }}
+                    {% else %}
+                        {% trans "Тип не выбран" %}
+                    {% endif %}
+                </p>
+                <div id="previewCode" class="code-preview">
+                    {% trans "Код:" %} {{ form.instance.code|default:"---" }}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Справка -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Справка" %}</h5>
+            </div>
+            <div class="card-body">
+                <h6>{% trans "Типы интеграций" %}</h6>
+                <ul class="small">
+                    <li><strong>Маркетплейсы</strong> - Ozon, Wildberries, Яндекс.Маркет</li>
+                    <li><strong>Платежные системы</strong> - СберБанк, Т-Банк, ЮMoney</li>
+                    <li><strong>Службы доставки</strong> - СДЭК, Почта России, Яндекс.Доставка</li>
+                    <li><strong>Мессенджеры</strong> - Telegram, WhatsApp, VK</li>
+                    <li><strong>Дополнительные</strong> - DaData, Yandex Maps, CRM</li>
+                </ul>
+                <hr>
+                <h6>{% trans "Генерация кода" %}</h6>
+                <p class="small text-muted">
+                    {% trans "Код используется для идентификации интеграции в системе и в webhook URL. Рекомендуется использовать английские буквы в нижнем регистре." %}
+                </p>
+                <div class="alert alert-info small">
+                    <i class="ri-information-line"></i>
+                    {% trans "После сохранения интеграции вы сможете настроить дополнительные параметры, специфичные для выбранного типа." %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block javascript %}
+<script>
+    // Предпросмотр при изменении полей
+    $('#id_name').on('input', function() {
+        $('#previewName').text($(this).val() || 'Название');
+        if (!$('#id_code').val()) {
+            const code = $(this).val().toLowerCase()
+                .replace(/[^a-zа-яё0-9\s]/g, '')
+                .replace(/\s+/g, '_')
+                .replace(/[а-яё]/g, function(match) {
+                    const map = {
+                        'а':'a','б':'b','в':'v','г':'g','д':'d','е':'e','ё':'e',
+                        'ж':'zh','з':'z','и':'i','й':'y','к':'k','л':'l','м':'m',
+                        'н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u',
+                        'ф':'f','х':'h','ц':'ts','ч':'ch','ш':'sh','щ':'sch','ъ':'',
+                        'ы':'y','ь':'','э':'e','ю':'yu','я':'ya'
+                    };
+                    return map[match] || match;
+                });
+            $('#id_code').val(code);
+            $('#previewCode').text('Код: ' + (code || '---'));
+        }
+    });
+    
+    $('#id_code').on('input', function() {
+        $('#previewCode').text('Код: ' + ($(this).val() || '---'));
+    });
+    
+    $('#id_service_type').on('change', function() {
+        const text = $(this).find('option:selected').text();
+        $('#previewType').text(text || 'Тип не выбран');
+    });
+    
+    // Предпросмотр логотипа
+    $('#id_logo').on('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $('#logoPreview').html(`<img src="${e.target.result}" class="preview-logo mb-3">`);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+    
+    // Валидация JSON
+    $('#id_settings').on('change', function() {
+        const value = $(this).val();
+        if (value) {
+            try {
+                JSON.parse(value);
+                $(this).removeClass('is-invalid');
+            } catch(e) {
+                $(this).addClass('is-invalid');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Ошибка JSON',
+                    text: 'Неверный формат JSON. Проверьте синтаксис.',
+                    timer: 3000
+                });
+            }
+        }
+    });
+    
+    // Удаление
+    function deleteIntegration(id) {
+        Swal.fire({
+            title: '{% trans "Удалить интеграцию?" %}',
+            text: '{% trans "Это действие нельзя отменить. Все данные об интеграции будут удалены." %}',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: '{% trans "Да, удалить" %}',
+            cancelButtonText: '{% trans "Отмена" %}'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `/moderation/integrations/${id}/delete/`,
+                    method: 'POST',
+                    data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+                    success: function() {
+                        window.location.href = '{% url "moderation:integrations" %}';
+                    }
+                });
+            }
+        });
+    }
+    
+    // Автогенерация кода при потере фокуса
+    $('#id_name').blur(function() {
+        if (!$('#id_code').val() && $(this).val()) {
+            $('#id_code').trigger('input');
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}

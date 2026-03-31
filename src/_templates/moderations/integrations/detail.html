@@ -1,0 +1,613 @@
+{% extends 'moderations/base.html' %}
+{% load static i18n %}
+
+{% block title %}{{ integration.name }} - {% trans "Детали интеграции" %}{% endblock %}
+
+{% block head %}
+<style>
+    .info-row {
+        padding: 10px 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+    .info-label {
+        font-weight: 500;
+        color: #6c757d;
+        width: 140px;
+        display: inline-block;
+    }
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+    .tab-content {
+        padding: 20px 0;
+    }
+    .nav-tabs .nav-link {
+        color: #6c757d;
+        border: none;
+        padding: 10px 20px;
+    }
+    .nav-tabs .nav-link.active {
+        color: #4a90e2;
+        border-bottom: 2px solid #4a90e2;
+        background: transparent;
+    }
+    .stat-circle {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        font-size: 24px;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="page-title">
+                        <i class="ri-repeat-line me-1"></i> {{ integration.name }}
+                    </h4>
+                    <p class="text-muted mb-0">
+                        {{ integration.get_service_type_display }}
+                        {% if integration.code %}
+                        <code class="ms-2">{{ integration.code }}</code>
+                        {% endif %}
+                    </p>
+                </div>
+                <div>
+                    <a href="{% url 'moderation:integrations' %}" class="btn btn-secondary">
+                        <i class="ri-arrow-left-line"></i> {% trans "Назад" %}
+                    </a>
+                    <a href="{% url 'moderation:integration_edit' integration.id %}" class="btn btn-primary ms-2">
+                        <i class="ri-edit-line"></i> {% trans "Редактировать" %}
+                    </a>
+                    <button class="btn btn-info ms-2" onclick="testIntegration({{ integration.id }})">
+                        <i class="ri-wifi-line"></i> {% trans "Проверить" %}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Основная информация -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Информация об интеграции" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-row">
+                            <span class="info-label">{% trans "Название:" %}</span>
+                            <span>{{ integration.name }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">{% trans "Тип:" %}</span>
+                            <span>{{ integration.get_service_type_display }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">{% trans "Код:" %}</span>
+                            <code>{{ integration.code }}</code>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">{% trans "Статус:" %}</span>
+                            <span class="status-badge bg-{% if integration.is_active %}success{% else %}secondary{% endif %}">
+                                {% if integration.is_active %}{% trans "Активен" %}{% else %}{% trans "Неактивен" %}{% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-row">
+                            <span class="info-label">{% trans "API URL:" %}</span>
+                            <span class="text-break">{{ integration.api_url|default:"—" }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">{% trans "Webhook URL:" %}</span>
+                            <span class="text-break">{{ integration.webhook_url|default:"—" }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">{% trans "Последняя синхронизация:" %}</span>
+                            <span>{{ integration.last_sync|date:"d.m.Y H:i:s"|default:"—" }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">{% trans "Создано:" %}</span>
+                            <span>{{ integration.created_at|date:"d.m.Y H:i:s" }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if integration.settings %}
+                <div class="mt-3">
+                    <h6>{% trans "Дополнительные настройки:" %}</h6>
+                    <pre class="bg-light p-3 rounded" style="font-size: 12px;">{{ integration.settings|pprint }}</pre>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Табы для разных разделов -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs" id="integrationTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="logs-tab" data-bs-toggle="tab" data-bs-target="#logs" type="button" role="tab">
+                            <i class="ri-history-line"></i> {% trans "Логи" %}
+                        </button>
+                    </li>
+                    
+                    {% if integration.service_type == 'marketplace' %}
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="products-tab" data-bs-toggle="tab" data-bs-target="#products" type="button" role="tab">
+                            <i class="ri-shopping-cart-line"></i> {% trans "Товары" %} ({{ products_count|default:0 }})
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="orders-tab" data-bs-toggle="tab" data-bs-target="#orders" type="button" role="tab">
+                            <i class="ri-file-list-line"></i> {% trans "Заказы" %} ({{ orders_count|default:0 }})
+                        </button>
+                    </li>
+                    {% endif %}
+                    
+                    {% if integration.service_type == 'payment' %}
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="transactions-tab" data-bs-toggle="tab" data-bs-target="#transactions" type="button" role="tab">
+                            <i class="ri-bank-card-line"></i> {% trans "Транзакции" %} ({{ transactions_count|default:0 }})
+                        </button>
+                    </li>
+                    {% endif %}
+                    
+                    {% if integration.service_type == 'delivery' %}
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="delivery-orders-tab" data-bs-toggle="tab" data-bs-target="#deliveryOrders" type="button" role="tab">
+                            <i class="ri-truck-line"></i> {% trans "Заказы доставки" %} ({{ delivery_orders_count|default:0 }})
+                        </button>
+                    </li>
+                    {% endif %}
+                    
+                    {% if integration.service_type == 'messenger' %}
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="messages-tab" data-bs-toggle="tab" data-bs-target="#messages" type="button" role="tab">
+                            <i class="ri-chat-3-line"></i> {% trans "Сообщения" %} ({{ messages_count|default:0 }})
+                        </button>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+            <div class="card-body">
+                <div class="tab-content" id="integrationTabsContent">
+                    <!-- Логи -->
+                    <div class="tab-pane fade show active" id="logs" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>{% trans "Время" %}</th>
+                                        <th>{% trans "Операция" %}</th>
+                                        <th>{% trans "Статус" %}</th>
+                                        <th>{% trans "Длительность" %}</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for log in logs %}
+                                    <tr>
+                                        <td>{{ log.started_at|date:"d.m.Y H:i:s" }}</td>
+                                        <td>{{ log.get_operation_display }}</td>
+                                        <td>
+                                            {% if log.status == 'success' %}
+                                            <span class="badge bg-success">{% trans "Успех" %}</span>
+                                            {% elif log.status == 'error' %}
+                                            <span class="badge bg-danger">{% trans "Ошибка" %}</span>
+                                            {% else %}
+                                            <span class="badge bg-warning">{% trans "В процессе" %}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ log.get_duration_formatted }}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-info" onclick="viewLogDetails({{ log.id }})">
+                                                <i class="ri-eye-line"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center">{% trans "Нет логов" %}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="{% url 'moderation:integration_logs_filtered' integration.id %}" class="btn btn-link">
+                                {% trans "Все логи" %} <i class="ri-arrow-right-line"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    {% if integration.service_type == 'marketplace' %}
+                    <!-- Товары -->
+                    <div class="tab-pane fade" id="products" role="tabpanel">
+                        <div class="text-center mb-3">
+                            <a href="{% url 'moderation:marketplace_products' integration.id %}" class="btn btn-primary">
+                                <i class="ri-list-view"></i> {% trans "Управление товарами" %}
+                            </a>
+                            <button class="btn btn-success" onclick="syncProducts({{ integration.id }})">
+                                <i class="ri-refresh-line"></i> {% trans "Синхронизировать" %}
+                            </button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>SKU</th>
+                                        <th>{% trans "Цена" %}</th>
+                                        <th>{% trans "Остаток" %}</th>
+                                        <th>{% trans "Статус" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for product in integration.marketplaceproduct_set.all|slice:":5" %}
+                                    <tr>
+                                        <td>{{ product.marketplace_sku|default:product.marketplace_id }}</td>
+                                        <td>{{ product.price }} ₽</td>
+                                        <td>{{ product.stock }}</td>
+                                        <td>
+                                            <span class="badge bg-{% if product.status == 'active' %}success{% else %}secondary{% endif %}">
+                                                {{ product.get_status_display }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center">{% trans "Нет товаров" %}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Заказы -->
+                    <div class="tab-pane fade" id="orders" role="tabpanel">
+                        <div class="text-center mb-3">
+                            <a href="{% url 'moderation:marketplace_orders' integration.id %}" class="btn btn-primary">
+                                <i class="ri-list-view"></i> {% trans "Все заказы" %}
+                            </a>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>ID заказа</th>
+                                        <th>{% trans "Дата" %}</th>
+                                        <th>{% trans "Сумма" %}</th>
+                                        <th>{% trans "Статус" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in integration.marketplaceorder_set.all|slice:":5" %}
+                                    <tr>
+                                        <td>{{ order.marketplace_order_id }}</td>
+                                        <td>{{ order.order_date|date:"d.m.Y" }}</td>
+                                        <td>{{ order.total_amount }} ₽</td>
+                                        <td>
+                                            <span class="badge bg-{% if order.sync_status == 'synced' %}success{% elif order.sync_status == 'error' %}danger{% else %}warning{% endif %}">
+                                                {{ order.get_sync_status_display }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center">{% trans "Нет заказов" %}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <!-- Специфичные настройки -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="ri-settings-4-line"></i> {% trans "Настройки" %}
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if integration.service_type == 'payment' and payment_settings %}
+                <div class="mb-3">
+                    <small class="text-muted d-block">{% trans "Тип платежа:" %}</small>
+                    <strong>{{ payment_settings.get_payment_type_display }}</strong>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted d-block">{% trans "Комиссия:" %}</small>
+                    <strong>{{ payment_settings.commission_percent }}% + {{ payment_settings.commission_fixed }} ₽</strong>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted d-block">{% trans "Автоподтверждение:" %}</small>
+                    {% if payment_settings.auto_confirm %}
+                    <span class="badge bg-success">{% trans "Включено" %}</span>
+                    {% else %}
+                    <span class="badge bg-secondary">{% trans "Выключено" %}</span>
+                    {% endif %}
+                </div>
+                {% endif %}
+                
+                {% if integration.service_type == 'delivery' and delivery_settings %}
+                <div class="mb-3">
+                    <small class="text-muted d-block">{% trans "Номер аккаунта:" %}</small>
+                    <code>{{ delivery_settings.account_number|default:"—" }}</code>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted d-block">{% trans "ID склада:" %}</small>
+                    <code>{{ delivery_settings.warehouse_id|default:"—" }}</code>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted d-block">{% trans "Печать этикеток:" %}</small>
+                    {% if delivery_settings.print_label %}
+                    <span class="badge bg-success">{% trans "Включено" %}</span>
+                    {% else %}
+                    <span class="badge bg-secondary">{% trans "Выключено" %}</span>
+                    {% endif %}
+                </div>
+                {% endif %}
+                
+                {% if integration.service_type == 'messenger' and messenger_settings %}
+                <div class="mb-3">
+                    <small class="text-muted d-block">{% trans "Имя бота:" %}</small>
+                    <strong>{{ messenger_settings.bot_name|default:"—" }}</strong>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted d-block">{% trans "Уведомления:" %}</small>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% if messenger_settings.notify_on_order %}
+                        <span class="badge bg-info">{% trans "Заказы" %}</span>
+                        {% endif %}
+                        {% if messenger_settings.notify_on_payment %}
+                        <span class="badge bg-info">{% trans "Оплаты" %}</span>
+                        {% endif %}
+                        {% if messenger_settings.notify_on_delivery %}
+                        <span class="badge bg-info">{% trans "Доставка" %}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="text-center mt-3">
+                    <a href="{% url 'moderation:integration_settings' integration.id %}" class="btn btn-outline-primary w-100">
+                        <i class="ri-settings-4-line"></i> {% trans "Настроить" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Webhook информация -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="ri-webhook-line"></i> {% trans "Webhook" %}
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <small class="text-muted d-block">{% trans "URL для приема webhook:" %}</small>
+                    <code class="text-break" style="font-size: 11px;">
+                        {{ request.build_absolute_uri }}{% url 'moderation:integration_webhook' integration.code %}
+                    </code>
+                </div>
+                <button class="btn btn-sm btn-outline-primary w-100 mt-2" onclick="copyWebhookUrl()">
+                    <i class="ri-copy-line"></i> {% trans "Скопировать URL" %}
+                </button>
+            </div>
+        </div>
+        
+        <!-- Статистика -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="ri-bar-chart-line"></i> {% trans "Статистика" %}
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <div class="stat-circle bg-success-light text-success">
+                            {{ logs|length }}
+                        </div>
+                        <small class="text-muted">{% trans "Всего операций" %}</small>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-circle bg-danger-light text-danger">
+                            {% with errors=logs|dictsortreversed:"status" %}{% for log in errors %}{% if log.status == 'error' %}{{ forloop.counter }}{% endif %}{% endfor %}{% endwith %}
+                        </div>
+                        <small class="text-muted">{% trans "Ошибок" %}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal деталей лога -->
+<div class="modal fade" id="logDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{% trans "Детали операции" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="logDetailsContent">
+                    <div class="text-center py-5">
+                        <div class="spinner-border" role="status"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block javascript %}
+<script>
+    // Тестирование интеграции
+    function testIntegration(id) {
+        Swal.fire({
+            title: '{% trans "Проверка подключения" %}',
+            text: '{% trans "Выполняется проверка..." %}',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+                
+                $.ajax({
+                    url: `/moderation/integrations/${id}/test/`,
+                    method: 'POST',
+                    data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+                    success: function(response) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '{% trans "Успешно" %}',
+                            text: response.message || '{% trans "Подключение установлено" %}'
+                        });
+                    },
+                    error: function(xhr) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: '{% trans "Ошибка" %}',
+                            text: xhr.responseJSON?.message || '{% trans "Не удалось установить подключение" %}'
+                        });
+                    }
+                });
+            }
+        });
+    }
+    
+    // Синхронизация товаров
+    function syncProducts(id) {
+        Swal.fire({
+            title: '{% trans "Синхронизация товаров" %}',
+            text: '{% trans "Запустить синхронизацию товаров с маркетплейсом?" %}',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: '{% trans "Запустить" %}',
+            cancelButtonText: '{% trans "Отмена" %}'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: '{% trans "Синхронизация запущена" %}',
+                    text: '{% trans "Товары синхронизируются в фоновом режиме" %}',
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                
+                $.ajax({
+                    url: '{% url "moderation:sync_products" %}',
+                    method: 'POST',
+                    data: {
+                        marketplace: id,
+                        sync_type: 'all',
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    }
+                });
+            }
+        });
+    }
+    
+    // Просмотр деталей лога
+    function viewLogDetails(logId) {
+        $('#logDetailsModal').modal('show');
+        $('#logDetailsContent').html(`
+            <div class="text-center py-5">
+                <div class="spinner-border" role="status"></div>
+                <p class="mt-2">{% trans "Загрузка данных..." %}</p>
+            </div>
+        `);
+        
+        $.ajax({
+            url: `/moderation/integrations/logs/${logId}/`,
+            method: 'GET',
+            success: function(data) {
+                let html = `
+                    <div class="mb-3">
+                        <strong>{% trans "Операция:" %}</strong> ${data.operation_display}
+                    </div>
+                    <div class="mb-3">
+                        <strong>{% trans "Статус:" %}</strong> 
+                        <span class="badge bg-${data.status === 'success' ? 'success' : (data.status === 'error' ? 'danger' : 'warning')}">
+                            ${data.status_display}
+                        </span>
+                    </div>
+                    <div class="mb-3">
+                        <strong>{% trans "Время начала:" %}</strong> ${data.started_at}
+                    </div>
+                    <div class="mb-3">
+                        <strong>{% trans "Длительность:" %}</strong> ${data.duration_formatted}
+                    </div>
+                `;
+                
+                if (data.request_data && Object.keys(data.request_data).length > 0) {
+                    html += `
+                        <div class="mb-3">
+                            <strong>{% trans "Данные запроса:" %}</strong>
+                            <pre class="bg-light p-2 rounded" style="font-size: 12px;">${JSON.stringify(data.request_data, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+                
+                if (data.response_data && Object.keys(data.response_data).length > 0) {
+                    html += `
+                        <div class="mb-3">
+                            <strong>{% trans "Данные ответа:" %}</strong>
+                            <pre class="bg-light p-2 rounded" style="font-size: 12px;">${JSON.stringify(data.response_data, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+                
+                if (data.error_message) {
+                    html += `
+                        <div class="mb-3">
+                            <strong>{% trans "Сообщение об ошибке:" %}</strong>
+                            <div class="alert alert-danger">${data.error_message}</div>
+                        </div>
+                    `;
+                }
+                
+                $('#logDetailsContent').html(html);
+            }
+        });
+    }
+    
+    // Копирование webhook URL
+    function copyWebhookUrl() {
+        const url = `{{ request.build_absolute_uri }}{% url 'moderation:integration_webhook' integration.code %}`;
+        navigator.clipboard.writeText(url);
+        Swal.fire({
+            icon: 'success',
+            title: '{% trans "Скопировано" %}',
+            text: '{% trans "Webhook URL скопирован в буфер обмена" %}',
+            timer: 2000,
+            showConfirmButton: false
+        });
+    }
+</script>
+{% endblock %}
+{% endblock %}

@@ -1,3 +1,5 @@
+import json
+
 from django import forms
 from django.contrib.sites.models import Site
 from django.forms import Textarea
@@ -16,7 +18,8 @@ from .models import (
     Notificationgroups,
     Ticket,
     Groups,
-    Collaborations, EmailTemplate, CallRecord, CallSettings, VoiceMenu, CallQueue, PhoneNumber,
+    Collaborations, EmailTemplate, CallRecord, CallSettings, VoiceMenu, CallQueue, PhoneNumber, IntegrationService,
+    AdditionalService, MessengerIntegration, DeliveryIntegration, PaymentIntegration,
 )
 from _project.settings import LANGUAGES
 
@@ -2924,3 +2927,140 @@ class CallNoteForm(forms.ModelForm):
         if tags:
             return [tag.strip() for tag in tags.split(',') if tag.strip()]
         return []
+
+
+class IntegrationServiceForm(forms.ModelForm):
+    """Форма для интеграции"""
+
+    class Meta:
+        model = IntegrationService
+        fields = ['name', 'service_type', 'code', 'logo', 'api_url', 'api_key',
+                  'api_secret', 'webhook_url', 'settings', 'is_active']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'service_type': forms.Select(attrs={'class': 'form-control'}),
+            'code': forms.TextInput(attrs={'class': 'form-control'}),
+            'logo': forms.FileInput(attrs={'class': 'form-control'}),
+            'api_url': forms.URLInput(attrs={'class': 'form-control'}),
+            'api_key': forms.TextInput(attrs={'class': 'form-control'}),
+            'api_secret': forms.PasswordInput(attrs={'class': 'form-control'}),
+            'webhook_url': forms.URLInput(attrs={'class': 'form-control'}),
+            'settings': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+    def clean_code(self):
+        code = self.cleaned_data.get('code')
+        if IntegrationService.objects.filter(code=code).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError("Интеграция с таким кодом уже существует")
+        return code
+
+
+class MarketplaceSettingsForm(forms.ModelForm):
+    """Настройки маркетплейса"""
+
+    class Meta:
+        model = IntegrationService
+        fields = ['settings']
+        widgets = {
+            'settings': forms.Textarea(attrs={'class': 'form-control', 'rows': 10}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.settings:
+            self.initial['settings'] = json.dumps(self.instance.settings, ensure_ascii=False, indent=2)
+
+
+class PaymentSettingsForm(forms.ModelForm):
+    """Настройки платежной системы"""
+
+    class Meta:
+        model = PaymentIntegration
+        fields = ['payment_type', 'merchant_id', 'secret_key', 'public_key',
+                  'commission_percent', 'commission_fixed', 'auto_confirm',
+                  'success_url', 'fail_url']
+        widgets = {
+            'payment_type': forms.Select(attrs={'class': 'form-control'}),
+            'merchant_id': forms.TextInput(attrs={'class': 'form-control'}),
+            'secret_key': forms.PasswordInput(attrs={'class': 'form-control'}),
+            'public_key': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'commission_percent': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'commission_fixed': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'auto_confirm': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'success_url': forms.URLInput(attrs={'class': 'form-control'}),
+            'fail_url': forms.URLInput(attrs={'class': 'form-control'}),
+        }
+
+
+class DeliverySettingsForm(forms.ModelForm):
+    """Настройки доставки"""
+
+    class Meta:
+        model = DeliveryIntegration
+        fields = ['account_number', 'warehouse_id', 'default_delivery_type',
+                  'auto_create_order', 'print_label']
+        widgets = {
+            'account_number': forms.TextInput(attrs={'class': 'form-control'}),
+            'warehouse_id': forms.TextInput(attrs={'class': 'form-control'}),
+            'default_delivery_type': forms.TextInput(attrs={'class': 'form-control'}),
+            'auto_create_order': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'print_label': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+
+class MessengerSettingsForm(forms.ModelForm):
+    """Настройки мессенджера"""
+
+    class Meta:
+        model = MessengerIntegration
+        fields = ['bot_token', 'bot_name', 'webhook_secret', 'notify_on_order',
+                  'notify_on_payment', 'notify_on_delivery', 'auto_reply', 'welcome_message']
+        widgets = {
+            'bot_token': forms.TextInput(attrs={'class': 'form-control'}),
+            'bot_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'webhook_secret': forms.TextInput(attrs={'class': 'form-control'}),
+            'notify_on_order': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'notify_on_payment': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'notify_on_delivery': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'auto_reply': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'welcome_message': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
+
+
+class AdditionalServiceForm(forms.ModelForm):
+    """Форма дополнительного сервиса"""
+
+    class Meta:
+        model = AdditionalService
+        fields = ['service_category', 'api_version', 'rate_limit', 'cache_enabled', 'cache_ttl']
+        widgets = {
+            'service_category': forms.Select(attrs={'class': 'form-control'}),
+            'api_version': forms.TextInput(attrs={'class': 'form-control'}),
+            'rate_limit': forms.NumberInput(attrs={'class': 'form-control'}),
+            'cache_enabled': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'cache_ttl': forms.NumberInput(attrs={'class': 'form-control'}),
+        }
+
+
+class SyncProductsForm(forms.Form):
+    """Форма синхронизации товаров"""
+    marketplace = forms.ModelChoiceField(queryset=IntegrationService.objects.filter(
+        service_type='marketplace', is_active=True
+    ), widget=forms.Select(attrs={'class': 'form-control'}))
+
+    sync_type = forms.ChoiceField(choices=[
+        ('all', 'Все товары'),
+        ('new', 'Только новые'),
+        ('updated', 'Только обновленные'),
+    ], widget=forms.Select(attrs={'class': 'form-control'}))
+
+    category = forms.CharField(required=False, widget=forms.TextInput(attrs={
+        'class': 'form-control', 'placeholder': 'ID категории'
+    }))
+
+
+class TestConnectionForm(forms.Form):
+    """Форма тестирования подключения"""
+    integration = forms.ModelChoiceField(queryset=IntegrationService.objects.filter(is_active=True),
+                                         widget=forms.Select(attrs={'class': 'form-control'}))

@@ -1157,12 +1157,6 @@ class IntegrationService(models.Model):
     def __str__(self):
         return f"{self.get_service_type_display()}: {self.name}"
 
-    def get_settings_display(self):
-        """Получить настройки для отображения"""
-        if not self.settings:
-            return {}
-        return self.settings
-
 
 class IntegrationLog(models.Model):
     """Логи работы интеграций"""
@@ -1214,15 +1208,14 @@ class MarketplaceProduct(models.Model):
     """Модель товара на маркетплейсе"""
     marketplace = models.ForeignKey(IntegrationService, on_delete=models.CASCADE,
                                     limit_choices_to={'service_type': 'marketplace'},
+                                    related_name='marketplace_products',
                                     verbose_name="Маркетплейс")
 
-    # Связь с внутренним товаром
-    product = models.ForeignKey('moderation.Product', on_delete=models.SET_NULL,
-                                null=True, blank=True, related_name='marketplace_products',
-                                verbose_name="Внутренний товар")
+    # Связь с внутренним товаром (используем строковую ссылку, так как модель Product может быть в другом приложении)
+    product_id = models.PositiveIntegerField(null=True, blank=True, verbose_name="ID внутреннего товара")
 
     # Данные маркетплейса
-    marketplace_id = models.CharField(max_length=100, verbose_name="ID на маркетплейсе")
+    marketplace_product_id = models.CharField(max_length=100, verbose_name="ID товара на маркетплейсе")
     marketplace_sku = models.CharField(max_length=100, verbose_name="SKU на маркетплейсе", blank=True)
     marketplace_url = models.URLField(blank=True, verbose_name="Ссылка на товар")
 
@@ -1246,22 +1239,21 @@ class MarketplaceProduct(models.Model):
     class Meta:
         verbose_name = "Товар маркетплейса"
         verbose_name_plural = "Товары маркетплейсов"
-        unique_together = ['marketplace', 'marketplace_id']
+        unique_together = ['marketplace', 'marketplace_product_id']
 
     def __str__(self):
-        return f"{self.marketplace.name}: {self.marketplace_sku or self.marketplace_id}"
+        return f"{self.marketplace.name}: {self.marketplace_sku or self.marketplace_product_id}"
 
 
 class MarketplaceOrder(models.Model):
     """Модель заказа на маркетплейсе"""
     marketplace = models.ForeignKey(IntegrationService, on_delete=models.CASCADE,
                                     limit_choices_to={'service_type': 'marketplace'},
+                                    related_name='marketplace_orders',
                                     verbose_name="Маркетплейс")
 
     # Связь с внутренним заказом
-    order = models.ForeignKey('moderation.Order', on_delete=models.SET_NULL,
-                              null=True, blank=True, related_name='marketplace_orders',
-                              verbose_name="Внутренний заказ")
+    order_id = models.PositiveIntegerField(null=True, blank=True, verbose_name="ID внутреннего заказа")
 
     # Данные маркетплейса
     marketplace_order_id = models.CharField(max_length=100, verbose_name="ID заказа на маркетплейсе")
@@ -1354,12 +1346,11 @@ class PaymentTransaction(models.Model):
 
     payment = models.ForeignKey(IntegrationService, on_delete=models.CASCADE,
                                 limit_choices_to={'service_type': 'payment'},
+                                related_name='payment_transactions',
                                 verbose_name="Платежная система")
 
     # Связь с заказом
-    order = models.ForeignKey('moderation.Order', on_delete=models.SET_NULL,
-                              null=True, blank=True, related_name='payment_transactions',
-                              verbose_name="Заказ")
+    order_id = models.PositiveIntegerField(null=True, blank=True, verbose_name="ID заказа")
 
     # Данные транзакции
     transaction_id = models.CharField(max_length=100, unique=True, verbose_name="ID транзакции")
@@ -1435,14 +1426,14 @@ class DeliveryOrder(models.Model):
 
     delivery = models.ForeignKey(IntegrationService, on_delete=models.CASCADE,
                                  limit_choices_to={'service_type': 'delivery'},
+                                 related_name='delivery_orders',
                                  verbose_name="Служба доставки")
 
     # Связь с заказом
-    order = models.ForeignKey('moderation.Order', on_delete=models.CASCADE,
-                              related_name='delivery_orders', verbose_name="Заказ")
+    order_id = models.PositiveIntegerField(verbose_name="ID заказа")
 
     # Данные доставки
-    delivery_id = models.CharField(max_length=100, blank=True, verbose_name="ID доставки")
+    delivery_order_id = models.CharField(max_length=100, blank=True, verbose_name="ID доставки")
     tracking_number = models.CharField(max_length=100, blank=True, verbose_name="Трек-номер")
     tracking_url = models.URLField(blank=True, verbose_name="URL отслеживания")
 
@@ -1481,7 +1472,7 @@ class DeliveryOrder(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.order.id} - {self.tracking_number or 'Не создан'}"
+        return f"Order {self.order_id} - {self.tracking_number or 'Не создан'}"
 
 
 # ========== Мессенджеры ==========
@@ -1526,10 +1517,10 @@ class MessengerMessage(models.Model):
 
     messenger = models.ForeignKey(IntegrationService, on_delete=models.CASCADE,
                                   limit_choices_to={'service_type': 'messenger'},
+                                  related_name='messages',
                                   verbose_name="Мессенджер")
 
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True,
-                             verbose_name="Пользователь")
+    user_id = models.PositiveIntegerField(null=True, blank=True, verbose_name="ID пользователя")
 
     # Данные сообщения
     external_id = models.CharField(max_length=200, verbose_name="ID сообщения")
@@ -1590,3 +1581,7 @@ class AdditionalService(models.Model):
 
     def __str__(self):
         return f"{self.get_service_category_display()}: {self.integration.name}"
+
+
+
+

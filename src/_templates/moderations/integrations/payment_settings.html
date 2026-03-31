@@ -1,0 +1,203 @@
+{% extends 'moderations/base.html' %}
+{% load static i18n %}
+
+{% block title %}{% trans "Настройки платежной системы" %} - {{ integration.name }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="page-title">
+                <i class="ri-bank-card-line me-1"></i> {% trans "Настройки платежной системы" %} - {{ integration.name }}
+            </h4>
+            <div class="page-title-right">
+                <a href="{% url 'moderation:integration_detail' integration.id %}" class="btn btn-secondary">
+                    <i class="ri-arrow-left-line"></i> {% trans "Назад" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{% trans "Основные настройки" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.payment_type.id_for_label }}" class="form-label">
+                                {% trans "Тип платежа" %}
+                            </label>
+                            {{ form.payment_type }}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.merchant_id.id_for_label }}" class="form-label">
+                                {% trans "ID мерчанта" %}
+                            </label>
+                            {{ form.merchant_id }}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.secret_key.id_for_label }}" class="form-label">
+                                {% trans "Секретный ключ" %}
+                            </label>
+                            {{ form.secret_key }}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.public_key.id_for_label }}" class="form-label">
+                                {% trans "Публичный ключ" %}
+                            </label>
+                            {{ form.public_key }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{% trans "Комиссии и обработка" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.commission_percent.id_for_label }}" class="form-label">
+                                {% trans "Комиссия (%)" %}
+                            </label>
+                            {{ form.commission_percent }}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.commission_fixed.id_for_label }}" class="form-label">
+                                {% trans "Фиксированная комиссия" %}
+                            </label>
+                            {{ form.commission_fixed }}
+                        </div>
+                    </div>
+                    
+                    <div class="form-check form-switch mb-3">
+                        {{ form.auto_confirm }}
+                        <label class="form-check-label" for="{{ form.auto_confirm.id_for_label }}">
+                            {% trans "Автоматическое подтверждение платежей" %}
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{% trans "URL для callback" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="{{ form.success_url.id_for_label }}" class="form-label">
+                            {% trans "URL успешной оплаты" %}
+                        </label>
+                        {{ form.success_url }}
+                        <small class="text-muted">{% trans "Куда перенаправить после успешной оплаты" %}</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.fail_url.id_for_label }}" class="form-label">
+                            {% trans "URL ошибки оплаты" %}
+                        </label>
+                        {{ form.fail_url }}
+                        <small class="text-muted">{% trans "Куда перенаправить при ошибке" %}</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-3 mb-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="ri-save-line"></i> {% trans "Сохранить настройки" %}
+                </button>
+                <button type="button" class="btn btn-info ms-2" onclick="showWebhookUrl()">
+                    <i class="ri-webhook-line"></i> {% trans "Показать webhook URL" %}
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Информация" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="ri-information-line"></i>
+                    <strong>{% trans "Webhook URL для приема уведомлений:" %}</strong><br>
+                    <code class="text-break" style="font-size: 11px;">
+                        {{ request.build_absolute_uri }}{% url 'moderation:integration_webhook' integration.code %}
+                    </code>
+                    <button class="btn btn-sm btn-outline-primary mt-2" onclick="copyWebhookUrl()">
+                        <i class="ri-copy-line"></i> {% trans "Скопировать" %}
+                    </button>
+                </div>
+                
+                <h6>{% trans "Статистика транзакций" %}</h6>
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h4>{{ integration.payment_transactions.count }}</h4>
+                        <small class="text-muted">{% trans "Всего" %}</small>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-success">
+                            {{ integration.payment_transactions.filter|default:0 }}
+                        </h4>
+                        <small class="text-muted">{% trans "Успешных" %}</small>
+                    </div>
+                </div>
+                <hr>
+                <a href="{% url 'moderation:payment_transactions' integration.id %}" class="btn btn-outline-primary w-100">
+                    <i class="ri-list-view"></i> {% trans "Все транзакции" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block javascript %}
+<script>
+    function copyWebhookUrl() {
+        const url = `{{ request.build_absolute_uri }}{% url 'moderation:integration_webhook' integration.code %}`;
+        navigator.clipboard.writeText(url);
+        Swal.fire({
+            icon: 'success',
+            title: '{% trans "Скопировано" %}',
+            text: '{% trans "Webhook URL скопирован в буфер обмена" %}',
+            timer: 2000,
+            showConfirmButton: false
+        });
+    }
+    
+    function showWebhookUrl() {
+        Swal.fire({
+            title: '{% trans "Webhook URL" %}',
+            html: `
+                <div class="text-start">
+                    <p>{% trans "Используйте этот URL для приема уведомлений от платежной системы:" %}</p>
+                    <code class="text-break bg-light p-2 rounded d-block" style="font-size: 12px;">
+                        {{ request.build_absolute_uri }}{% url 'moderation:integration_webhook' integration.code %}
+                    </code>
+                    <button class="btn btn-sm btn-primary mt-3" onclick="copyWebhookUrl()">
+                        <i class="ri-copy-line"></i> {% trans "Скопировать" %}
+                    </button>
+                </div>
+            `,
+            showConfirmButton: false,
+            showCloseButton: true
+        });
+    }
+</script>
+{% endblock %}
+{% endblock %}

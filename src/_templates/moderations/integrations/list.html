@@ -1,0 +1,255 @@
+{% extends 'moderations/base.html' %}
+{% load static i18n %}
+
+{% block title %}{% trans "Интеграции" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="page-title">
+                <i class="ri-repeat-line me-1"></i> {% trans "Интеграции" %}
+            </h4>
+            <div class="page-title-right">
+                <a href="{% url 'moderation:integration_create' %}" class="btn btn-primary">
+                    <i class="ri-add-line"></i> {% trans "Добавить интеграцию" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Фильтры -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-3">
+                        <select name="type" class="form-control">
+                            <option value="">{% trans "Все типы" %}</option>
+                            {% for value, label in service_types %}
+                            <option value="{{ value }}" {% if active_filters.type == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select name="status" class="form-control">
+                            <option value="">{% trans "Все статусы" %}</option>
+                            <option value="active" {% if active_filters.status == 'active' %}selected{% endif %}>{% trans "Активные" %}</option>
+                            <option value="inactive" {% if active_filters.status == 'inactive' %}selected{% endif %}>{% trans "Неактивные" %}</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="text" name="search" class="form-control" placeholder="{% trans 'Поиск по названию' %}" value="{{ active_filters.search }}">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="ri-filter-line"></i> {% trans "Фильтр" %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Список интеграций -->
+<div class="row">
+    {% for integration in integrations %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-start justify-content-between mb-3">
+                    <div class="d-flex align-items-center">
+                        {% if integration.logo %}
+                        <img src="{{ integration.logo.url }}" class="rounded me-3" style="width: 48px; height: 48px; object-fit: contain;">
+                        {% else %}
+                        <div class="bg-light rounded d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px;">
+                            <i class="ri-apps-line fs-24 text-muted"></i>
+                        </div>
+                        {% endif %}
+                        <div>
+                            <h5 class="mb-0">{{ integration.name }}</h5>
+                            <small class="text-muted">{{ integration.get_service_type_display }}</small>
+                        </div>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-link" data-bs-toggle="dropdown">
+                            <i class="ri-more-2-line"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'moderation:integration_detail' integration.id %}">
+                                    <i class="ri-eye-line"></i> {% trans "Детали" %}
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'moderation:integration_edit' integration.id %}">
+                                    <i class="ri-edit-line"></i> {% trans "Редактировать" %}
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'moderation:integration_settings' integration.id %}">
+                                    <i class="ri-settings-4-line"></i> {% trans "Настройки" %}
+                                </a>
+                            </li>
+                            <li>
+                                <button class="dropdown-item" onclick="testIntegration({{ integration.id }})">
+                                    <i class="ri-wifi-line"></i> {% trans "Проверить подключение" %}
+                                </button>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <button class="dropdown-item text-danger" onclick="deleteIntegration({{ integration.id }}, '{{ integration.name }}')">
+                                    <i class="ri-delete-bin-line"></i> {% trans "Удалить" %}
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">{% trans "Код:" %}</span>
+                        <code>{{ integration.code }}</code>
+                    </div>
+                    {% if integration.api_url %}
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">{% trans "API URL:" %}</span>
+                        <small class="text-truncate" style="max-width: 200px;">{{ integration.api_url }}</small>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="mt-3">
+                    <span class="badge bg-{% if integration.is_active %}success{% else %}secondary{% endif %} me-2">
+                        {% if integration.is_active %}{% trans "Активен" %}{% else %}{% trans "Неактивен" %}{% endif %}
+                    </span>
+                    {% if integration.last_sync %}
+                    <small class="text-muted">
+                        <i class="ri-refresh-line"></i> {{ integration.last_sync|timesince }} {% trans "назад" %}
+                    </small>
+                    {% endif %}
+                </div>
+                
+                {% if integration.sync_status != 'pending' %}
+                <div class="mt-2">
+                    <div class="progress" style="height: 3px;">
+                        <div class="progress-bar bg-{% if integration.sync_status == 'success' %}success{% else %}danger{% endif %}" 
+                             style="width: 100%"></div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="ri-plug-line fs-48 text-muted"></i>
+                <h5 class="mt-3">{% trans "Нет интеграций" %}</h5>
+                <p class="text-muted">{% trans "Добавьте первую интеграцию для подключения внешних сервисов" %}</p>
+                <a href="{% url 'moderation:integration_create' %}" class="btn btn-primary">
+                    <i class="ri-add-line"></i> {% trans "Добавить интеграцию" %}
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Пагинация -->
+{% if page_obj.has_other_pages %}
+<div class="row mt-3">
+    <div class="col-12">
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in active_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                        <i class="ri-arrow-left-s-line"></i>
+                    </a>
+                </li>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}{% for key, value in active_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                </li>
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in active_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                        <i class="ri-arrow-right-s-line"></i>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</div>
+{% endif %}
+
+{% block javascript %}
+<script>
+    function testIntegration(id) {
+        Swal.fire({
+            title: '{% trans "Проверка подключения" %}',
+            text: '{% trans "Выполняется проверка подключения..." %}',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+                
+                $.ajax({
+                    url: `/moderation/integrations/${id}/test/`,
+                    method: 'POST',
+                    data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+                    success: function(response) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '{% trans "Успешно" %}',
+                            text: response.message || '{% trans "Подключение установлено" %}'
+                        });
+                    },
+                    error: function(xhr) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: '{% trans "Ошибка" %}',
+                            text: xhr.responseJSON?.message || '{% trans "Не удалось установить подключение" %}'
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    function deleteIntegration(id, name) {
+        Swal.fire({
+            title: '{% trans "Удалить интеграцию?" %}',
+            text: `{% trans "Вы уверены, что хотите удалить" %} "${name}"? {% trans "Это действие нельзя отменить" %}.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: '{% trans "Да, удалить" %}',
+            cancelButtonText: '{% trans "Отмена" %}'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `/moderation/integrations/${id}/delete/`,
+                    method: 'POST',
+                    data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+                    success: function() {
+                        location.reload();
+                    },
+                    error: function() {
+                        Swal.fire('{% trans "Ошибка" %}', '{% trans "Не удалось удалить интеграцию" %}', 'error');
+                    }
+                });
+            }
+        });
+    }
+</script>
+{% endblock %}
+{% endblock %}

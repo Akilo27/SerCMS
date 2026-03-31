@@ -1,0 +1,288 @@
+{% extends 'moderations/base.html' %}
+{% load static i18n %}
+
+{% block title %}{% trans "Интеграции - Дашборд" %}{% endblock %}
+
+{% block head %}
+<style>
+    .integration-card {
+        transition: all 0.3s;
+        cursor: pointer;
+        border-left: 4px solid transparent;
+    }
+    .integration-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .integration-card.active {
+        border-left-color: #28a745;
+    }
+    .integration-card.inactive {
+        border-left-color: #dc3545;
+        opacity: 0.7;
+    }
+    .stat-box {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .stat-number {
+        font-size: 32px;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    .integration-logo {
+        width: 48px;
+        height: 48px;
+        object-fit: contain;
+        border-radius: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="page-title">
+                <i class="ri-repeat-line me-1"></i> {% trans "Интеграции" %}
+            </h4>
+            <div class="page-title-right">
+                <a href="{% url 'moderation:integration_create' %}" class="btn btn-primary">
+                    <i class="ri-add-line"></i> {% trans "Добавить интеграцию" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Статистика -->
+<div class="row">
+    <div class="col-md-3">
+        <div class="stat-box" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="stat-number">{{ stats.total }}</div>
+            <div>{% trans "Всего интеграций" %}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-box" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+            <div class="stat-number">{{ stats.active }}</div>
+            <div>{% trans "Активных" %}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-box" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+            <div class="stat-number">{{ stats.marketplace }}</div>
+            <div>{% trans "Маркетплейсы" %}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-box" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+            <div class="stat-number">{{ stats.payment }}</div>
+            <div>{% trans "Платежные системы" %}</div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="stat-box" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+            <div class="stat-number">{{ stats.delivery }}</div>
+            <div>{% trans "Службы доставки" %}</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-box" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);">
+            <div class="stat-number">{{ stats.messenger }}</div>
+            <div>{% trans "Мессенджеры" %}</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-box" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
+            <div class="stat-number">{{ stats.additional }}</div>
+            <div>{% trans "Дополнительные" %}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Активные интеграции -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Активные интеграции" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for integration in active_integrations %}
+                    <div class="col-md-6 col-lg-3 mb-3">
+                        <div class="card integration-card {% if integration.is_active %}active{% else %}inactive{% endif %}" 
+                             onclick="window.location.href='{% url 'moderation:integration_detail' integration.id %}'">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-3">
+                                    {% if integration.logo %}
+                                    <img src="{{ integration.logo.url }}" class="integration-logo me-3" alt="{{ integration.name }}">
+                                    {% else %}
+                                    <div class="integration-logo bg-light d-flex align-items-center justify-content-center me-3">
+                                        <i class="ri-apps-line fs-24 text-muted"></i>
+                                    </div>
+                                    {% endif %}
+                                    <div>
+                                        <h6 class="mb-0">{{ integration.name }}</h6>
+                                        <small class="text-muted">{{ integration.get_service_type_display }}</small>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <span class="badge bg-{% if integration.is_active %}success{% else %}secondary{% endif %}">
+                                        {% if integration.is_active %}{% trans "Активен" %}{% else %}{% trans "Неактивен" %}{% endif %}
+                                    </span>
+                                    {% if integration.last_sync %}
+                                    <small class="text-muted ms-2">
+                                        <i class="ri-refresh-line"></i> {{ integration.last_sync|timesince }} {% trans "назад" %}
+                                    </small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12 text-center py-5">
+                        <i class="ri-plug-line fs-48 text-muted"></i>
+                        <p class="mt-2 text-muted">{% trans "Нет активных интеграций" %}</p>
+                        <a href="{% url 'moderation:integration_create' %}" class="btn btn-primary">
+                            {% trans "Добавить интеграцию" %}
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="text-center mt-3">
+                    <a href="{% url 'moderation:integrations' %}" class="btn btn-link">
+                        {% trans "Все интеграции" %} <i class="ri-arrow-right-line"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Последние логи -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Последние события" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Время" %}</th>
+                                <th>{% trans "Интеграция" %}</th>
+                                <th>{% trans "Операция" %}</th>
+                                <th>{% trans "Статус" %}</th>
+                                <th>{% trans "Длительность" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in recent_logs %}
+                            <tr>
+                                <td>{{ log.started_at|date:"d.m.Y H:i:s" }}</td>
+                                <td>{{ log.integration.name }}</td>
+                                <td>{{ log.get_operation_display }}</td>
+                                <td>
+                                    {% if log.status == 'success' %}
+                                    <span class="badge bg-success">{% trans "Успех" %}</span>
+                                    {% elif log.status == 'error' %}
+                                    <span class="badge bg-danger">{% trans "Ошибка" %}</span>
+                                    {% else %}
+                                    <span class="badge bg-warning">{% trans "В процессе" %}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ log.get_duration_formatted }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center">{% trans "Нет событий" %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- График синхронизации -->
+{% if sync_stats %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Статистика синхронизации (за 7 дней)" %}</h5>
+            </div>
+            <div class="card-body">
+                <div id="syncChart"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% block javascript %}
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.37.1/dist/apexcharts.min.js"></script>
+<script>
+    // График синхронизации
+    const syncData = {{ sync_stats|safe }};
+    
+    if (syncData.length > 0) {
+        const categories = syncData.map(item => {
+            const ops = {
+                'sync_products': 'Товары',
+                'sync_orders': 'Заказы',
+                'sync_stocks': 'Остатки',
+                'sync_prices': 'Цены'
+            };
+            return ops[item.operation] || item.operation;
+        });
+        
+        const successData = syncData.map(item => item.success);
+        const errorData = syncData.map(item => item.error);
+        
+        const options = {
+            series: [{
+                name: 'Успешно',
+                data: successData
+            }, {
+                name: 'Ошибки',
+                data: errorData
+            }],
+            chart: {
+                type: 'bar',
+                height: 350,
+                toolbar: { show: false }
+            },
+            plotOptions: {
+                bar: {
+                    horizontal: false,
+                    columnWidth: '55%',
+                    endingShape: 'rounded'
+                }
+            },
+            dataLabels: { enabled: false },
+            stroke: { show: true, width: 2, colors: ['transparent'] },
+            xaxis: { categories: categories },
+            yaxis: { title: { text: 'Количество операций' } },
+            fill: { opacity: 1 },
+            colors: ['#28a745', '#dc3545']
+        };
+        
+        const chart = new ApexCharts(document.querySelector("#syncChart"), options);
+        chart.render();
+    }
+</script>
+{% endblock %}
+{% endblock %}

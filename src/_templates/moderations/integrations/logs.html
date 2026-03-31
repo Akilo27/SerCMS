@@ -1,0 +1,268 @@
+{% extends 'moderations/base.html' %}
+{% load static i18n %}
+
+{% block title %}{% if integration %}{{ integration.name }} - {% endif %}{% trans "Логи интеграций" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="page-title">
+                <i class="ri-history-line me-1"></i> 
+                {% if integration %}
+                    {% trans "Логи интеграции" %} - {{ integration.name }}
+                {% else %}
+                    {% trans "Логи интеграций" %}
+                {% endif %}
+            </h4>
+            <div class="page-title-right">
+                {% if integration %}
+                <a href="{% url 'moderation:integration_detail' integration.id %}" class="btn btn-secondary">
+                    <i class="ri-arrow-left-line"></i> {% trans "Назад" %}
+                </a>
+                {% else %}
+                <a href="{% url 'moderation:integrations' %}" class="btn btn-secondary">
+                    <i class="ri-arrow-left-line"></i> {% trans "Назад" %}
+                </a>
+                {% endif %}
+                <a href="{% url 'moderation:integration_logs' %}" class="btn btn-outline-primary ms-2">
+                    <i class="ri-refresh-line"></i> {% trans "Обновить" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Фильтры -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-3">
+                        <select name="operation" class="form-control">
+                            <option value="">{% trans "Все операции" %}</option>
+                            {% for value, label in operations %}
+                            <option value="{{ value }}" {% if filters.operation == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="status" class="form-control">
+                            <option value="">{% trans "Все статусы" %}</option>
+                            {% for value, label in statuses %}
+                            <option value="{{ value }}" {% if filters.status == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="date" name="date_from" class="form-control" value="{{ filters.date_from }}" placeholder="С даты">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="date" name="date_to" class="form-control" value="{{ filters.date_to }}" placeholder="По дату">
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="ri-filter-line"></i> {% trans "Применить фильтр" %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Таблица логов -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Время" %}</th>
+                                <th>{% trans "Интеграция" %}</th>
+                                <th>{% trans "Операция" %}</th>
+                                <th>{% trans "Статус" %}</th>
+                                <th>{% trans "Длительность" %}</th>
+                                <th>{% trans "Действия" %}</th>
+                            </thead>
+                        <tbody>
+                            {% for log in logs %}
+                            <tr>
+                                <td>{{ log.started_at|date:"d.m.Y H:i:s" }}</td>
+                                <td>
+                                    {% if log.integration %}
+                                    <a href="{% url 'moderation:integration_detail' log.integration.id %}" class="text-decoration-none">
+                                        {{ log.integration.name }}
+                                    </a>
+                                    {% else %}
+                                    <span class="text-muted">{% trans "Удалена" %}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ log.get_operation_display }}</td>
+                                <td>
+                                    {% if log.status == 'success' %}
+                                    <span class="badge bg-success">{% trans "Успех" %}</span>
+                                    {% elif log.status == 'error' %}
+                                    <span class="badge bg-danger">{% trans "Ошибка" %}</span>
+                                    {% else %}
+                                    <span class="badge bg-warning">{% trans "В процессе" %}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ log.get_duration_formatted }}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-info" onclick="viewLogDetails({{ log.id }})">
+                                        <i class="ri-eye-line"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center py-5">
+                                    <i class="ri-history-line fs-48 text-muted"></i>
+                                    <p class="mt-2">{% trans "Нет логов по заданным критериям" %}</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Пагинация -->
+                {% if logs.has_other_pages %}
+                <div class="mt-3">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-end">
+                            {% if logs.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ logs.previous_page_number }}{% for key, value in filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="ri-arrow-left-s-line"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+
+                            {% for num in logs.paginator.page_range %}
+                            <li class="page-item {% if logs.number == num %}active{% endif %}">
+                                <a class="page-link" href="?page={{ num }}{% for key, value in filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                            </li>
+                            {% endfor %}
+
+                            {% if logs.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ logs.next_page_number }}{% for key, value in filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="ri-arrow-right-s-line"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal деталей лога -->
+<div class="modal fade" id="logDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{% trans "Детали операции" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="logDetailsContent">
+                    <div class="text-center py-5">
+                        <div class="spinner-border" role="status"></div>
+                        <p class="mt-2">{% trans "Загрузка данных..." %}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block javascript %}
+<script>
+    function viewLogDetails(logId) {
+        $('#logDetailsModal').modal('show');
+        $('#logDetailsContent').html(`
+            <div class="text-center py-5">
+                <div class="spinner-border" role="status"></div>
+                <p class="mt-2">{% trans "Загрузка данных..." %}</p>
+            </div>
+        `);
+
+        $.ajax({
+            url: `/moderation/api/integrations/logs/${logId}/`,
+            method: 'GET',
+            success: function(data) {
+                let html = `
+                    <div class="mb-3">
+                        <strong>{% trans "Интеграция:" %}</strong>
+                        ${data.integration_id ? `<a href="/moderation/integrations/${data.integration_id}/">${data.integration_name}</a>` : '<span class="text-muted">Удалена</span>'}
+                    </div>
+                    <div class="mb-3">
+                        <strong>{% trans "Операция:" %}</strong> ${data.operation_display}
+                    </div>
+                    <div class="mb-3">
+                        <strong>{% trans "Статус:" %}</strong> 
+                        <span class="badge bg-${data.status === 'success' ? 'success' : (data.status === 'error' ? 'danger' : 'warning')}">
+                            ${data.status_display}
+                        </span>
+                    </div>
+                    <div class="mb-3">
+                        <strong>{% trans "Время начала:" %}</strong> ${data.started_at}
+                    </div>
+                    <div class="mb-3">
+                        <strong>{% trans "Время завершения:" %}</strong> ${data.completed_at || '—'}
+                    </div>
+                    <div class="mb-3">
+                        <strong>{% trans "Длительность:" %}</strong> ${data.duration_formatted}
+                    </div>
+                `;
+                
+                if (data.request_data && Object.keys(data.request_data).length > 0) {
+                    html += `
+                        <div class="mb-3">
+                            <strong>{% trans "Данные запроса:" %}</strong>
+                            <pre class="bg-light p-2 rounded" style="font-size: 12px; max-height: 300px; overflow: auto;">${JSON.stringify(data.request_data, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+                
+                if (data.response_data && Object.keys(data.response_data).length > 0) {
+                    html += `
+                        <div class="mb-3">
+                            <strong>{% trans "Данные ответа:" %}</strong>
+                            <pre class="bg-light p-2 rounded" style="font-size: 12px; max-height: 300px; overflow: auto;">${JSON.stringify(data.response_data, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+                
+                if (data.error_message) {
+                    html += `
+                        <div class="mb-3">
+                            <strong>{% trans "Сообщение об ошибке:" %}</strong>
+                            <div class="alert alert-danger">${data.error_message}</div>
+                        </div>
+                    `;
+                }
+                
+                $('#logDetailsContent').html(html);
+            },
+            error: function() {
+                $('#logDetailsContent').html(`
+                    <div class="alert alert-danger">
+                        {% trans "Не удалось загрузить детали операции" %}
+                    </div>
+                `);
+            }
+        });
+    }
+</script>
+{% endblock %}
+{% endblock %}

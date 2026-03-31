@@ -1,0 +1,329 @@
+{% extends 'moderations/base.html' %}
+{% load static i18n %}
+
+{% block title %}{% trans "Платежные транзакции" %} - {{ integration.name }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="page-title">
+                <i class="ri-bank-card-line me-1"></i> {% trans "Платежные транзакции" %} - {{ integration.name }}
+            </h4>
+            <div class="page-title-right">
+                <a href="{% url 'moderation:integration_detail' integration.id %}" class="btn btn-secondary">
+                    <i class="ri-arrow-left-line"></i> {% trans "Назад" %}
+                </a>
+                <button class="btn btn-success ms-2" onclick="exportTransactions()">
+                    <i class="ri-download-line"></i> {% trans "Экспорт" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Фильтры -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-3">
+                        <input type="text" name="search" class="form-control" placeholder="{% trans 'ID транзакции' %}" value="{{ request.GET.search }}">
+                    </div>
+                    <div class="col-md-2">
+                        <select name="status" class="form-control">
+                            <option value="">{% trans "Все статусы" %}</option>
+                            {% for value, label in statuses %}
+                            <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="date" name="date_from" class="form-control" value="{{ request.GET.date_from }}" placeholder="С даты">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="date" name="date_to" class="form-control" value="{{ request.GET.date_to }}" placeholder="По дату">
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="ri-filter-line"></i> {% trans "Фильтр" %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Статистика -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h3 class="mb-0">{{ total_amount|default:0 }} ₽</h3>
+                <small>{% trans "Общая сумма" %}</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h3 class="mb-0">{{ success_count|default:0 }}</h3>
+                <small>{% trans "Успешных транзакций" %}</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-danger text-white">
+            <div class="card-body">
+                <h3 class="mb-0">{{ failed_count|default:0 }}</h3>
+                <small>{% trans "Ошибок" %}</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h3 class="mb-0">{{ avg_amount|default:0 }} ₽</h3>
+                <small>{% trans "Средний чек" %}</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Таблица транзакций -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>{% trans "ID транзакции" %}</th>
+                                <th>{% trans "Дата" %}</th>
+                                <th>{% trans "Плательщик" %}</th>
+                                <th>{% trans "Сумма" %}</th>
+                                <th>{% trans "Статус" %}</th>
+                                <th>{% trans "Заказ" %}</th>
+                                <th>{% trans "Действия" %}</th>
+                            </thead>
+                        <tbody>
+                            {% for transaction in transactions %}
+                            <tr>
+                                <td>
+                                    <strong>{{ transaction.transaction_id }}</strong>
+                                    {% if transaction.external_id %}
+                                    <br>
+                                    <small class="text-muted">{{ transaction.external_id }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>{{ transaction.created_at|date:"d.m.Y H:i:s" }}</td>
+                                <td>
+                                    <strong>{{ transaction.payer_name|default:"—" }}</strong>
+                                    {% if transaction.payer_email %}
+                                    <br>
+                                    <small class="text-muted">{{ transaction.payer_email }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <strong>{{ transaction.amount }} {{ transaction.currency }}</strong>
+                                </td>
+                                <td>
+                                    {% if transaction.status == 'success' %}
+                                    <span class="badge bg-success">{% trans "Успешно" %}</span>
+                                    {% elif transaction.status == 'pending' %}
+                                    <span class="badge bg-warning">{% trans "Ожидает" %}</span>
+                                    {% elif transaction.status == 'failed' %}
+                                    <span class="badge bg-danger">{% trans "Ошибка" %}</span>
+                                    {% elif transaction.status == 'refunded' %}
+                                    <span class="badge bg-info">{% trans "Возвращен" %}</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">{{ transaction.get_status_display }}</span>
+                                    {% endif %}
+                                    {% if transaction.paid_at %}
+                                    <br>
+                                    <small class="text-muted">{{ transaction.paid_at|date:"d.m.Y H:i" }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if transaction.order_id %}
+                                    <a href="/moderation/orders/{{ transaction.order_id }}/" class="text-decoration-none">
+                                        #{{ transaction.order_id }}
+                                    </a>
+                                    {% else %}
+                                    <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-info" onclick="viewTransactionDetails({{ transaction.id }})">
+                                            <i class="ri-eye-line"></i>
+                                        </button>
+                                        {% if transaction.status == 'success' %}
+                                        <button class="btn btn-sm btn-outline-warning" onclick="refundTransaction({{ transaction.id }})">
+                                            <i class="ri-refund-line"></i>
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center py-5">
+                                    <i class="ri-bank-card-line fs-48 text-muted"></i>
+                                    <p class="mt-2">{% trans "Нет транзакций" %}</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Пагинация -->
+                {% if transactions.has_other_pages %}
+                <div class="mt-3">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-end">
+                            {% if transactions.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ transactions.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="ri-arrow-left-s-line"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for num in transactions.paginator.page_range %}
+                            <li class="page-item {% if transactions.number == num %}active{% endif %}">
+                                <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                            </li>
+                            {% endfor %}
+                            
+                            {% if transactions.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ transactions.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="ri-arrow-right-s-line"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal деталей транзакции -->
+<div class="modal fade" id="transactionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{% trans "Детали транзакции" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="transactionDetails">
+                    <div class="text-center py-5">
+                        <div class="spinner-border" role="status"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block javascript %}
+<script>
+    function exportTransactions() {
+        window.location.href = '?export=csv{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}';
+    }
+    
+    function viewTransactionDetails(transactionId) {
+        $('#transactionModal').modal('show');
+        $('#transactionDetails').html(`
+            <div class="text-center py-5">
+                <div class="spinner-border" role="status"></div>
+                <p class="mt-2">{% trans "Загрузка данных..." %}</p>
+            </div>
+        `);
+        
+        $.ajax({
+            url: `/moderation/api/payment/transactions/${transactionId}/`,
+            method: 'GET',
+            success: function(data) {
+                let html = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>{% trans "Информация о транзакции" %}</h6>
+                            <table class="table table-sm">
+                                <tr><th>{% trans "ID транзакции:" %}</th><td>${data.transaction_id}</td></tr>
+                                <tr><th>{% trans "Внешний ID:" %}</th><td>${data.external_id || '—'}</td></tr>
+                                <tr><th>{% trans "Дата:" %}</th><td>${data.created_at}</td></tr>
+                                <tr><th>{% trans "Сумма:" %}</th><td>${data.amount} ${data.currency}</td></tr>
+                                <tr><th>{% trans "Статус:" %}</th><td>${data.status_display}</td></tr>
+                                ${data.paid_at ? `<tr><th>{% trans "Дата оплаты:" %}</th><td>${data.paid_at}</td></tr>` : ''}
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>{% trans "Информация о плательщике" %}</h6>
+                            <table class="table table-sm">
+                                <tr><th>{% trans "Имя:" %}</th><td>${data.payer_name || '—'}</td></tr>
+                                <tr><th>{% trans "Email:" %}</th><td>${data.payer_email || '—'}</td></tr>
+                                <tr><th>{% trans "Телефон:" %}</th><td>${data.payer_phone || '—'}</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                `;
+                
+                if (data.payment_data && Object.keys(data.payment_data).length > 0) {
+                    html += `
+                        <hr>
+                        <h6>{% trans "Данные платежа" %}</h6>
+                        <pre class="bg-light p-2 rounded" style="font-size: 12px;">${JSON.stringify(data.payment_data, null, 2)}</pre>
+                    `;
+                }
+                
+                if (data.callback_data && Object.keys(data.callback_data).length > 0) {
+                    html += `
+                        <hr>
+                        <h6>{% trans "Callback данные" %}</h6>
+                        <pre class="bg-light p-2 rounded" style="font-size: 12px;">${JSON.stringify(data.callback_data, null, 2)}</pre>
+                    `;
+                }
+                
+                $('#transactionDetails').html(html);
+            }
+        });
+    }
+    
+    function refundTransaction(transactionId) {
+        Swal.fire({
+            title: '{% trans "Возврат платежа" %}',
+            text: '{% trans "Вы уверены, что хотите вернуть платеж?" %}',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: '{% trans "Да, вернуть" %}',
+            cancelButtonText: '{% trans "Отмена" %}'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `/moderation/api/payment/transactions/${transactionId}/refund/`,
+                    method: 'POST',
+                    data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+                    success: function() {
+                        Swal.fire('{% trans "Успех" %}', '{% trans "Платеж возвращен" %}', 'success');
+                        location.reload();
+                    },
+                    error: function() {
+                        Swal.fire('{% trans "Ошибка" %}', '{% trans "Не удалось вернуть платеж" %}', 'error');
+                    }
+                });
+            }
+        });
+    }
+</script>
+{% endblock %}
+{% endblock %}

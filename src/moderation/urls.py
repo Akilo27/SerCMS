@@ -3,8 +3,7 @@ from . import views
 
 app_name = "moderation"
 from .views import subscribe
-
-
+from . import api
 urlpatterns = [
     path("",views.ModerationHome.as_view(),name='home'),
 
@@ -733,5 +732,55 @@ urlpatterns = [
     path('telephony/api/recording/<int:call_id>/download/', views.download_recording, name='download_recording'),
     path('telephony/api/queue-stats/<int:pk>/', views.queue_stats_api, name='queue_stats_api'),
     path('telephony/api/menu-structure/<int:pk>/', views.menu_structure_api, name='menu_structure_api'),
-]
 
+    # Дашборд
+    path('integrations/', views.IntegrationsDashboardView.as_view(), name='integrations_dashboard'),
+    path('integrations/list/', views.IntegrationListView.as_view(), name='integrations'),
+
+    # CRUD интеграций
+    path('integrations/create/', views.IntegrationCreateView.as_view(), name='integration_create'),
+    path('integrations/<int:pk>/', views.IntegrationDetailView.as_view(), name='integration_detail'),
+    path('integrations/<int:pk>/edit/', views.IntegrationUpdateView.as_view(), name='integration_edit'),
+    path('integrations/<int:pk>/delete/', views.IntegrationDeleteView.as_view(), name='integration_delete'),
+    path('integrations/<int:pk>/settings/', views.integration_settings, name='integration_settings'),
+    path('integrations/<int:pk>/test/', views.test_integration, name='test_integration'),
+
+    # Логи
+    path('integrations/logs/', views.integration_logs, name='integration_logs'),
+    path('integrations/<int:pk>/logs/', views.integration_logs, name='integration_logs_filtered'),
+
+    # Маркетплейсы
+    path('integrations/marketplace/<int:pk>/products/', views.marketplace_products, name='marketplace_products'),
+    path('integrations/marketplace/<int:pk>/orders/', views.marketplace_orders, name='marketplace_orders'),
+    path('integrations/marketplace/sync/', views.sync_products, name='sync_products'),
+
+    # Платежные системы
+    path('integrations/payment/<int:pk>/transactions/', views.payment_transactions, name='payment_transactions'),
+
+    # Доставка
+    path('integrations/delivery/<int:pk>/orders/', views.delivery_orders, name='delivery_orders'),
+
+    # Мессенджеры
+    path('integrations/messenger/<int:pk>/messages/', views.messenger_messages, name='messenger_messages'),
+    path('integrations/logs/<int:log_id>/', views.log_details_api, name='log_details_api'),
+
+    # Webhook
+    path('integrations/webhook/<slug:code>/', views.webhook_handler, name='integration_webhook'),
+
+    path('api/products/list/', api.products_list_api, name='api_products_list'),
+    path('api/marketplace/products/link/', api.link_marketplace_product, name='api_link_product'),
+    path('api/marketplace/products/price/', api.update_marketplace_price, name='api_update_price'),
+    path('api/marketplace/products/stock/', api.update_marketplace_stock, name='api_update_stock'),
+    path('api/marketplace/orders/<int:order_id>/', api.marketplace_order_detail, name='api_order_detail'),
+    path('api/marketplace/orders/create/', api.create_internal_order, name='api_create_order'),
+    path('api/payment/transactions/<int:transaction_id>/', api.payment_transaction_detail, name='api_transaction_detail'),
+    path('api/payment/transactions/<int:transaction_id>/refund/', api.refund_payment, name='api_refund_payment'),
+    path('api/messenger/messages/<int:message_id>/', api.messenger_message_detail, name='api_message_detail'),
+    path('api/messenger/messages/<int:message_id>/read/', api.mark_message_read, name='api_mark_read'),
+    path('api/messenger/messages/<int:message_id>/reply/', api.reply_to_message, name='api_reply_message'),
+    path('api/messenger/messages/mark-all-read/', api.mark_all_messages_read, name='api_mark_all_read'),
+    path('api/delivery/orders/<int:order_id>/', api.delivery_order_detail, name='api_delivery_detail'),
+    path('api/delivery/orders/<int:order_id>/update-status/', api.update_delivery_status, name='api_update_delivery_status'),
+    path('api/integrations/logs/<int:log_id>/', api.integration_log_detail, name='api_log_detail'),
+    path('integrations/sync-all/', views.sync_all_integrations, name='sync_all_integrations'),
+]
