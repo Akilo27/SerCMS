@@ -1,0 +1,258 @@
+{% extends 'moderations/base.html' %}
+{% load static i18n %}
+
+{% block title %}{% trans "Детали письма" %} - {{ log.subject }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="page-title">
+                <i class="ri-mail-line me-1"></i> {% trans "Детали письма" %}
+            </h4>
+            <div class="page-title-right">
+                <a href="{% url 'moderation:email_logs' %}" class="btn btn-secondary">
+                    <i class="ri-arrow-left-line"></i> {% trans "Назад к логам" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Информация о письме" %}</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered">
+                    <tr>
+                        <th style="width: 200px;">{% trans "Получатель" %}</th>
+                        <td>
+                            <strong>{{ log.recipient_name|default:log.recipient_email }}</strong><br>
+                            <small>{{ log.recipient_email }}</small>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>{% trans "Тема" %}</th>
+                        <td>{{ log.subject }}</td>
+                    </tr>
+                    <tr>
+                        <th>{% trans "Статус" %}</th>
+                        <td>
+                            {% if log.status == 'sent' %}
+                            <span class="badge bg-success">{% trans "Отправлено" %}</span>
+                            {% elif log.status == 'failed' %}
+                            <span class="badge bg-danger">{% trans "Ошибка" %}</span>
+                            {% elif log.status == 'opened' %}
+                            <span class="badge bg-info">{% trans "Открыто" %}</span>
+                            {% elif log.status == 'clicked' %}
+                            <span class="badge bg-primary">{% trans "Кликнут" %}</span>
+                            {% else %}
+                            <span class="badge bg-warning">{% trans "В ожидании" %}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>{% trans "Шаблон" %}</th>
+                        <td>
+                            {% if log.template %}
+                            <a href="{% url 'moderation:email_template_detail' log.template.id %}">
+                                {{ log.template.name }}
+                            </a>
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>{% trans "Дата создания" %}</th>
+                        <td>{{ log.created_at|date:"d.m.Y H:i:s" }}</td>
+                    </tr>
+                    <tr>
+                        <th>{% trans "Дата отправки" %}</th>
+                        <td>{{ log.sent_at|date:"d.m.Y H:i:s"|default:"-" }}</td>
+                    </tr>
+                    {% if log.opened_at %}
+                    <tr>
+                        <th>{% trans "Дата открытия" %}</th>
+                        <td>{{ log.opened_at|date:"d.m.Y H:i:s" }}</td>
+                    </tr>
+                    {% endif %}
+                    {% if log.clicked_at %}
+                    <tr>
+                        <th>{% trans "Дата клика" %}</th>
+                        <td>{{ log.clicked_at|date:"d.m.Y H:i:s" }}</td>
+                    </tr>
+                    {% endif %}
+                    {% if log.ip_address %}
+                    <tr>
+                        <th>{% trans "IP адрес" %}</th>
+                        <td>{{ log.ip_address }}</td>
+                    </tr>
+                    {% endif %}
+                    {% if log.error_message %}
+                    <tr>
+                        <th>{% trans "Ошибка" %}</th>
+                        <td class="text-danger">{{ log.error_message }}</td>
+                    </tr>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Содержание письма" %}</h5>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-sm btn-outline-primary" id="toggleView">
+                        <i class="ri-code-line"></i> {% trans "Показать HTML" %}
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="htmlView">
+                    <div class="border rounded p-3" style="max-height: 500px; overflow: auto;">
+                        {{ log.content|safe }}
+                    </div>
+                </div>
+                <div id="codeView" style="display: none;">
+                    <div class="border rounded p-3 bg-light" style="max-height: 500px; overflow: auto;">
+                        <pre style="white-space: pre-wrap; word-wrap: break-word;">{{ log.content|escape }}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        {% if log.attachments.exists %}
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Вложения" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    {% for attachment in log.attachments.all %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="ri-attachment-line me-2"></i>
+                                {{ attachment.filename }}
+                                <small class="text-muted">({{ attachment.file_size|filesizeformat }})</small>
+                            </div>
+                            <a href="{{ attachment.file.url }}" class="btn btn-sm btn-outline-primary" download>
+                                <i class="ri-download-line"></i> {% trans "Скачать" %}
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "User Agent" %}</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-0" style="word-break: break-all;">
+                    {{ log.user_agent|default:"-" }}
+                </p>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Действия" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn btn-success" id="resendBtn">
+                        <i class="ri-mail-send-line"></i> {% trans "Отправить повторно" %}
+                    </button>
+                    <button type="button" class="btn btn-danger" id="deleteLogBtn">
+                        <i class="ri-delete-bin-line"></i> {% trans "Удалить запись" %}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block javascript %}
+<script>
+    // Переключение между HTML и кодом
+    let isHtmlView = true;
+    $('#toggleView').click(function() {
+        if (isHtmlView) {
+            $('#htmlView').hide();
+            $('#codeView').show();
+            $(this).html('<i class="ri-eye-line"></i> {% trans "Показать HTML" %}');
+        } else {
+            $('#htmlView').show();
+            $('#codeView').hide();
+            $(this).html('<i class="ri-code-line"></i> {% trans "Показать HTML" %}');
+        }
+        isHtmlView = !isHtmlView;
+    });
+    
+    // Повторная отправка
+    $('#resendBtn').click(function() {
+        Swal.fire({
+            title: '{% trans "Повторная отправка" %}',
+            text: '{% trans "Отправить это письмо повторно?" %}',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: '{% trans "Да, отправить" %}',
+            cancelButtonText: '{% trans "Отмена" %}'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '{% url "moderation:resend_email" log.id %}',
+                    type: 'POST',
+                    data: {
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function() {
+                        Swal.fire('Успех', 'Письмо отправлено повторно', 'success');
+                    },
+                    error: function() {
+                        Swal.fire('Ошибка', 'Не удалось отправить письмо', 'error');
+                    }
+                });
+            }
+        });
+    });
+    
+    // Удаление лога
+    $('#deleteLogBtn').click(function() {
+        Swal.fire({
+            title: '{% trans "Вы уверены?" %}',
+            text: '{% trans "Эта запись будет удалена безвозвратно" %}',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: '{% trans "Да, удалить" %}',
+            cancelButtonText: '{% trans "Отмена" %}'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '{% url "moderation:delete_email_log" log.id %}',
+                    type: 'POST',
+                    data: {
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function() {
+                        window.location.href = '{% url "moderation:email_logs" %}';
+                    }
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

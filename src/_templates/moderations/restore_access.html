@@ -1,0 +1,46 @@
+{% extends 'moderations/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans 'Восстановление доступа' %}{% endblock title %}
+
+{% block content %}
+<div class="col-lg-6 mx-auto">
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title">{% trans 'Восстановление пароля' %}</h4>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <div class="mb-3">
+                    <label for="id_email" class="form-label">{% trans 'Email' %}</label>
+                    <input type="email" name="email" class="form-control {% if form.email.errors %}is-invalid{% endif %}" 
+                           id="id_email" placeholder="{% trans 'Введите ваш email' %}" required>
+                    {% if form.email.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.email.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        {% trans 'Отправить инструкцию' %}
+                    </button>
+                    <a href="{% url 'moderation:login' %}" class="btn btn-link">
+                        {% trans 'Вернуться к входу' %}
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock content %}

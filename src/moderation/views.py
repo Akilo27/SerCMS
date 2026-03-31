@@ -1,4 +1,5 @@
 from django.apps import apps
+from django.core.mail import EmailMultiAlternatives
 from django.utils.crypto import get_random_string
 from django.views.decorators.http import require_POST
 import uuid
@@ -71,7 +72,7 @@ from django.views.generic import TemplateView, ListView, DetailView
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.db import transaction
+from django.db import transaction, models
 from django.shortcuts import render
 from webmain.models import (
     Blogs,
@@ -187,6 +188,9 @@ from shop.models import Tag, Brands, ProductExpense, ProductExpensePosition, Pro
 from moderation.models import AggregatedExpense
 
 from shop.models import Cart
+
+from moderation.forms import SendEmailForm, EmailTemplateForm, EmailTemplateFilterForm
+from moderation.models import EmailLog, EmailQueue, EmailTemplate
 
 
 class ModerationHome(View):
@@ -611,10 +615,10 @@ def custom_logout(request):
 
 class CustomPasswordResetView(PasswordResetView):
     template_name = "moderations/restore_access.html"
-    email_template_name = "email/password_reset_email.html"
-    subject_template_name = "email/password_reset_subject.txt"
+    email_template_name = "moderations/email/password_reset_email.html"
+    subject_template_name = "moderations/email/password_reset_subject.txt"
     form_class = PasswordResetEmailForm
-    success_url = reverse_lazy("useraccount:password_reset_done")
+    success_url = reverse_lazy("webmain:password_reset_done")
 
 
 class CustomPasswordResetDoneView(PasswordResetDoneView):
@@ -624,7 +628,7 @@ class CustomPasswordResetDoneView(PasswordResetDoneView):
 class CustomPasswordResetConfirmView(PasswordResetConfirmView):
     template_name = "moderations/restore_access_user.html"
     form_class = SetPasswordFormCustom
-    success_url = reverse_lazy("useraccount:password_reset_complete")
+    success_url = reverse_lazy("webmain:password_reset_complete")
 
 
 class CustomPasswordResetCompleteView(PasswordResetCompleteView):
@@ -2777,7 +2781,7 @@ class PaymentDeleteView(LoginRequiredMixin, View):
 
 @method_decorator(login_required(login_url="moderation:login"), name="dispatch")
 class SchoolPage(LoginRequiredMixin, TemplateView):
-    template_name = "moderations/template/school.html"
+    template_name = "moderations/school.html"
 
 
 @method_decorator(login_required(login_url="moderation:login"), name="dispatch")
@@ -8088,3 +8092,521 @@ class DeleteMaterialView(View):
             return JsonResponse({"success": False, "error": "Material not found"}, status=404)
 
 
+# Email
+
+def can_manage_emails(user):
+    return user.is_superuser or user.has_perm('moderation.can_manage_emails')
+
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class EmailTemplateListView(ListView):
+    """Список шаблонов email"""
+    model = EmailTemplate
+    template_name = "moderations/email_templates_list.html"
+    context_object_name = "templates"
+    paginate_by = 20
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        form = EmailTemplateFilterForm(self.request.GET)
+
+        if form.is_valid():
+            search = form.cleaned_data.get('search')
+            if search:
+                queryset = queryset.filter(
+                    Q(name__icontains=search) |
+                    Q(subject__icontains=search) |
+                    Q(slug__icontains=search)
+                )
+
+            category = form.cleaned_data.get('category')
+            if category:
+                queryset = queryset.filter(category=category)
+
+            is_active = form.cleaned_data.get('is_active')
+            if is_active == 'true':
+                queryset = queryset.filter(is_active=True)
+            elif is_active == 'false':
+                queryset = queryset.filter(is_active=False)
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['filter_form'] = EmailTemplateFilterForm(self.request.GET)
+        context['categories'] = EmailTemplate.CATEGORY_CHOICES
+        return context
+
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class EmailTemplateCreateView(CreateView):
+    """Создание шаблона"""
+    model = EmailTemplate
+    form_class = EmailTemplateForm
+    template_name = "moderations/email_template_form.html"
+    success_url = reverse_lazy("moderation:email_templates")
+
+    def form_valid(self, form):
+        messages.success(self.request, "Шаблон успешно создан")
+        return super().form_valid(form)
+
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class EmailTemplateUpdateView(UpdateView):
+    """Редактирование шаблона"""
+    model = EmailTemplate
+    form_class = EmailTemplateForm
+    template_name = "moderations/email_template_form.html"
+    success_url = reverse_lazy("moderation:email_templates")
+
+    def form_valid(self, form):
+        messages.success(self.request, "Шаблон успешно обновлен")
+        return super().form_valid(form)
+
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class EmailTemplateDeleteView(DeleteView):
+    """Удаление шаблона"""
+    model = EmailTemplate
+    success_url = reverse_lazy("moderation:email_templates")
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(request, "Шаблон успешно удален")
+        return super().delete(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = json.loads(request.body)
+        template_ids = data.get("template_ids", [])
+        if template_ids:
+            EmailTemplate.objects.filter(id__in=template_ids).delete()
+        return JsonResponse({"status": "success", "redirect": str(self.success_url)})
+
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class EmailTemplateDetailView(DetailView):
+    """Детальный просмотр шаблона"""
+    model = EmailTemplate
+    template_name = "moderations/email_template_detail.html"
+    context_object_name = "template"
+
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class SendEmailView(View):
+    """Отправка email"""
+
+    def get(self, request):
+        form = SendEmailForm()
+        form.fields['user_group'].choices = [('', 'Выберите группу')] + [
+            (group.id, group.name) for group in request.user.groups.all()
+        ]
+        return render(request, 'moderations/send_email.html', {'form': form})
+
+    def post(self, request):
+        form = SendEmailForm(request.POST, request.FILES)
+        if form.is_valid():
+            recipients = self.get_recipients(form.cleaned_data)
+
+            subject = form.cleaned_data['subject']
+            content = form.cleaned_data['content']
+            template = form.cleaned_data.get('template')
+            send_now = form.cleaned_data['send_now']
+            scheduled_time = form.cleaned_data.get('scheduled_time')
+
+            success_count = 0
+            error_count = 0
+
+            for recipient_email, recipient_name in recipients:
+                # Замена переменных в шаблоне
+                final_content = content
+                final_subject = subject
+
+                if template:
+                    # Подстановка переменных
+                    context = {
+                        'username': recipient_name,
+                        'email': recipient_email,
+                        'site_name': settings.SITE_NAME,
+                        'site_url': settings.SITE_URL,
+                    }
+                    final_content = template.content
+                    final_subject = template.subject
+
+                    # Замена переменных в шаблоне
+                    for key, value in context.items():
+                        final_content = final_content.replace(f'{{{{ {key} }}}}', str(value))
+                        final_subject = final_subject.replace(f'{{{{ {key} }}}}', str(value))
+
+                if send_now:
+                    # Отправка сейчас
+                    success = self.send_single_email(
+                        recipient_email,
+                        recipient_name,
+                        final_subject,
+                        final_content,
+                        template,
+                        request
+                    )
+                    if success:
+                        success_count += 1
+                    else:
+                        error_count += 1
+                else:
+                    # Добавление в очередь
+                    self.add_to_queue(
+                        recipient_email,
+                        recipient_name,
+                        final_subject,
+                        final_content,
+                        template,
+                        scheduled_time
+                    )
+                    success_count += 1
+
+            if send_now:
+                messages.success(request, f"Письма отправлены: {success_count} успешно, {error_count} с ошибкой")
+            else:
+                messages.success(request, f"{success_count} писем добавлено в очередь на {scheduled_time}")
+
+            return redirect('moderation:email_logs')
+
+        return render(request, 'moderations/send_email.html', {'form': form})
+
+    def get_recipients(self, data):
+        """Получение списка получателей"""
+        recipients = []
+        recipient_type = data['recipient_type']
+
+        if recipient_type == 'single':
+            recipients.append((data['recipient_email'], ''))
+        elif recipient_type == 'multiple':
+            emails = data['recipient_emails'].split('\n')
+            for email in emails:
+                email = email.strip()
+                if email:
+                    recipients.append((email, ''))
+        elif recipient_type == 'group' and data.get('user_group'):
+            from django.contrib.auth.models import Group
+            group = Group.objects.get(id=data['user_group'])
+            for user in group.user_set.all():
+                recipients.append((user.email, user.get_full_name() or user.username))
+
+        return recipients
+
+    def send_single_email(self, to_email, to_name, subject, content, template, request):
+        """Отправка одного email"""
+        try:
+            from_email = settings.DEFAULT_FROM_EMAIL
+
+            # Создание письма с HTML и текстовой версией
+            msg = EmailMultiAlternatives(subject, content, from_email, [to_email])
+            msg.attach_alternative(content, "text/html")
+
+            # Отправка
+            msg.send()
+
+            # Логирование
+            EmailLog.objects.create(
+                recipient_email=to_email,
+                recipient_name=to_name,
+                subject=subject,
+                template=template,
+                content=content,
+                status='sent',
+                sent_at=timezone.now(),
+                ip_address=request.META.get('REMOTE_ADDR'),
+                user_agent=request.META.get('HTTP_USER_AGENT', '')
+            )
+
+            return True
+        except Exception as e:
+            # Логирование ошибки
+            EmailLog.objects.create(
+                recipient_email=to_email,
+                recipient_name=to_name,
+                subject=subject,
+                template=template,
+                content=content,
+                status='failed',
+                error_message=str(e)
+            )
+            return False
+
+    def add_to_queue(self, to_email, to_name, subject, content, template, scheduled_time):
+        """Добавление в очередь"""
+        EmailQueue.objects.create(
+            recipient_email=to_email,
+            recipient_name=to_name,
+            subject=subject,
+            content=content,
+            template=template,
+            scheduled_for=scheduled_time
+        )
+
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class EmailLogListView(ListView):
+    """Логи отправленных писем"""
+    model = EmailLog
+    template_name = "moderations/email_logs_list.html"
+    context_object_name = "logs"
+    paginate_by = 30
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        # Фильтрация
+        status = self.request.GET.get('status')
+        if status:
+            queryset = queryset.filter(status=status)
+
+        search = self.request.GET.get('search')
+        if search:
+            queryset = queryset.filter(
+                Q(recipient_email__icontains=search) |
+                Q(recipient_name__icontains=search) |
+                Q(subject__icontains=search)
+            )
+
+        date_from = self.request.GET.get('date_from')
+        if date_from:
+            queryset = queryset.filter(created_at__date__gte=date_from)
+
+        date_to = self.request.GET.get('date_to')
+        if date_to:
+            queryset = queryset.filter(created_at__date__lte=date_to)
+
+        return queryset.order_by('-created_at')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['status_choices'] = EmailLog.STATUS_CHOICES
+
+        # Статистика
+        context['total_count'] = EmailLog.objects.count()
+        context['sent_count'] = EmailLog.objects.filter(status='sent').count()
+        context['failed_count'] = EmailLog.objects.filter(status='failed').count()
+        context['opened_count'] = EmailLog.objects.filter(status='opened').count()
+
+        return context
+
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class EmailQueueListView(ListView):
+    """Очередь писем"""
+    model = EmailQueue
+    template_name = "moderations/email_queue_list.html"
+    context_object_name = "queue_items"
+    paginate_by = 30
+
+    def get_queryset(self):
+        return EmailQueue.objects.filter(is_sent=False).order_by('-priority', 'scheduled_for')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['total_pending'] = EmailQueue.objects.filter(is_sent=False).count()
+        context['total_sent'] = EmailQueue.objects.filter(is_sent=True).count()
+        return context
+
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class EmailQueueDeleteView(View):
+    """Удаление из очереди"""
+
+    def post(self, request):
+        data = json.loads(request.body)
+        queue_ids = data.get("queue_ids", [])
+        if queue_ids:
+            EmailQueue.objects.filter(id__in=queue_ids).delete()
+        return JsonResponse({"status": "success"})
+
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class EmailLogDetailView(DetailView):
+    """Детальный просмотр лога"""
+    model = EmailLog
+    template_name = "moderations/email_log_detail.html"
+    context_object_name = "log"
+
+
+@login_required
+def preview_email_template(request, template_id):
+    """Предпросмотр шаблона"""
+    template = get_object_or_404(EmailTemplate, id=template_id)
+
+    # Тестовые данные для предпросмотра
+    context = {
+        'username': 'Иван Иванов',
+        'email': 'ivan@example.com',
+        'site_name': settings.SITE_NAME,
+        'site_url': settings.SITE_URL,
+        'confirmation_link': '#',
+        'reset_link': '#',
+        'order_number': 'ORD-12345',
+        'order_total': '5000 ₽',
+    }
+
+    content = template.content
+    subject = template.subject
+
+    for key, value in context.items():
+        content = content.replace(f'{{{{ {key} }}}}', str(value))
+        subject = subject.replace(f'{{{{ {key} }}}}', str(value))
+
+    return JsonResponse({
+        'subject': subject,
+        'content': content
+    })
+
+
+@login_required
+def email_statistics(request):
+    """Статистика email"""
+    # Статистика по дням
+    last_30_days = timezone.now() - timezone.timedelta(days=30)
+    daily_stats = EmailLog.objects.filter(created_at__gte=last_30_days) \
+        .extra({'day': "date(created_at)"}) \
+        .values('day') \
+        .annotate(
+        total=models.Count('id'),
+        sent=models.Count('id', filter=models.Q(status='sent')),
+        failed=models.Count('id', filter=models.Q(status='failed')),
+        opened=models.Count('id', filter=models.Q(status='opened'))
+    ) \
+        .order_by('day')
+
+    # Статистика по шаблонам
+    template_stats = EmailLog.objects.values('template__name') \
+        .annotate(
+        total=models.Count('id'),
+        opened=models.Count('id', filter=models.Q(status='opened'))
+    ) \
+        .order_by('-total')[:10]
+
+    # Статистика по статусам
+    status_stats = EmailLog.objects.values('status') \
+        .annotate(count=models.Count('id'))
+
+    return JsonResponse({
+        'daily_stats': list(daily_stats),
+        'template_stats': list(template_stats),
+        'status_stats': list(status_stats),
+        'total_sent': EmailLog.objects.filter(status='sent').count(),
+        'total_failed': EmailLog.objects.filter(status='failed').count(),
+        'total_opened': EmailLog.objects.filter(status='opened').count(),
+    })
+
+
+# Функция для отправки писем из очереди (запускать через cron или celery)
+def process_email_queue():
+    """Обработка очереди писем"""
+    now = timezone.now()
+    pending_emails = EmailQueue.objects.filter(
+        is_sent=False,
+        scheduled_for__lte=now,
+        attempts__lt=5  # Максимум 5 попыток
+    ).order_by('-priority', 'scheduled_for')
+
+    for email in pending_emails:
+        try:
+            from_email = settings.DEFAULT_FROM_EMAIL
+            msg = EmailMultiAlternatives(email.subject, email.content, from_email, [email.recipient_email])
+            msg.attach_alternative(email.content, "text/html")
+            msg.send()
+
+            email.is_sent = True
+            email.sent_at = now
+            email.save()
+
+            # Логирование
+            EmailLog.objects.create(
+                recipient_email=email.recipient_email,
+                recipient_name=email.recipient_name,
+                subject=email.subject,
+                template=email.template,
+                content=email.content,
+                status='sent',
+                sent_at=now
+            )
+        except Exception as e:
+            email.attempts += 1
+            email.error = str(e)
+            email.save()
+
+
+@login_required
+def send_test_email(request, template_id):
+    """Отправка тестового письма"""
+    if request.method == 'POST':
+        template = get_object_or_404(EmailTemplate, id=template_id)
+        email = request.POST.get('email')
+        name = request.POST.get('name', 'Test User')
+
+        try:
+            # Подготовка контента
+            context = {
+                'username': name,
+                'email': email,
+                'site_name': settings.SITE_NAME,
+                'site_url': settings.SITE_URL,
+                'confirmation_link': '#',
+                'reset_link': '#',
+                'order_number': 'TEST-123',
+                'order_total': '0 ₽',
+            }
+
+            content = template.content
+            subject = template.subject
+
+            for key, value in context.items():
+                content = content.replace(f'{{{{ {key} }}}}', str(value))
+                subject = subject.replace(f'{{{{ {key} }}}}', str(value))
+
+            # Отправка
+            msg = EmailMultiAlternatives(subject, content, settings.DEFAULT_FROM_EMAIL, [email])
+            msg.attach_alternative(content, "text/html")
+            msg.send()
+
+            return JsonResponse({'status': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+
+@login_required
+def resend_email(request, log_id):
+    """Повторная отправка письма"""
+    if request.method == 'POST':
+        log = get_object_or_404(EmailLog, id=log_id)
+
+        try:
+            msg = EmailMultiAlternatives(
+                log.subject,
+                log.content,
+                settings.DEFAULT_FROM_EMAIL,
+                [log.recipient_email]
+            )
+            msg.attach_alternative(log.content, "text/html")
+            msg.send()
+
+            # Обновление статуса
+            log.status = 'sent'
+            log.sent_at = timezone.now()
+            log.save()
+
+            return JsonResponse({'status': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+
+@login_required
+def delete_email_log(request, log_id):
+    """Удаление лога"""
+    if request.method == 'POST':
+        log = get_object_or_404(EmailLog, id=log_id)
+        log.delete()
+        return JsonResponse({'status': 'success'})
+
+    return JsonResponse({'error': 'Method not allowed'}, status=405)

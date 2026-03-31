@@ -16,7 +16,7 @@ from .models import (
     Notificationgroups,
     Ticket,
     Groups,
-    Collaborations,
+    Collaborations, EmailTemplate,
 )
 from _project.settings import LANGUAGES
 
@@ -2684,3 +2684,95 @@ class LessonForm(forms.ModelForm):
 
         # Скрываем поле owner
         self.fields["owner"].widget = forms.HiddenInput()
+
+
+class EmailTemplateForm(forms.ModelForm):
+    content = forms.CharField(widget=CKEditorWidget(), label="Содержание (HTML)")
+
+    class Meta:
+        model = EmailTemplate
+        fields = ['name', 'subject', 'slug', 'category', 'content', 'plain_content', 'is_active', 'variables']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Например: Приветственное письмо'}),
+            'subject': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Тема письма'}),
+            'slug': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'welcome_email'}),
+            'category': forms.Select(attrs={'class': 'form-control'}),
+            'plain_content': forms.Textarea(
+                attrs={'class': 'form-control', 'rows': 5, 'placeholder': 'Текстовая версия письма'}),
+            'variables': forms.Textarea(attrs={'class': 'form-control', 'rows': 3,
+                                               'placeholder': '["username", "site_name", "confirmation_link"]'}),
+        }
+
+    def clean_slug(self):
+        slug = self.cleaned_data.get('slug')
+        if EmailTemplate.objects.filter(slug=slug).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError("Шаблон с таким slug уже существует")
+        return slug
+
+
+class SendEmailForm(forms.Form):
+    recipient_type = forms.ChoiceField(
+        choices=[('single', 'Одному получателю'), ('multiple', 'Нескольким'), ('group', 'Группе пользователей')],
+        widget=forms.RadioSelect,
+        initial='single'
+    )
+    recipient_email = forms.EmailField(required=False, widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    recipient_emails = forms.CharField(required=False, widget=forms.Textarea(
+        attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'email1@example.com\nemail2@example.com'}))
+    user_group = forms.ChoiceField(required=False, widget=forms.Select(attrs={'class': 'form-control'}))
+
+    subject = forms.CharField(max_length=500, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    content = forms.CharField(widget=CKEditorWidget())
+    template = forms.ModelChoiceField(queryset=EmailTemplate.objects.filter(is_active=True), required=False,
+                                      widget=forms.Select(attrs={'class': 'form-control'}))
+
+    send_now = forms.BooleanField(required=False, initial=True, label="Отправить сейчас")
+    scheduled_time = forms.DateTimeField(required=False, widget=forms.DateTimeInput(
+        attrs={'class': 'form-control', 'type': 'datetime-local'}))
+
+    has_attachments = forms.BooleanField(required=False, label="Добавить вложения")
+    attachment = forms.FileField(
+        required=False,
+        widget=forms.ClearableFileInput(attrs={'class': 'form-control'}),
+        label='Вложение',
+        help_text='Максимальный размер файла: 10MB',
+        validators=[
+            FileExtensionValidator(
+                allowed_extensions=['jpg', 'jpeg', 'png', 'gif', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'txt'],
+                message='Неподдерживаемый тип файла'
+            )
+        ]
+    )
+
+    def clean_attachment(self):
+        attachment = self.cleaned_data.get('attachment')
+        if attachment and attachment.size > 10 * 1024 * 1024:
+            raise forms.ValidationError('Размер файла не должен превышать 10MB')
+        return attachment
+
+
+    def clean(self):
+        cleaned_data = super().clean()
+        recipient_type = cleaned_data.get('recipient_type')
+
+        if recipient_type == 'single' and not cleaned_data.get('recipient_email'):
+            raise forms.ValidationError("Укажите email получателя")
+        elif recipient_type == 'multiple' and not cleaned_data.get('recipient_emails'):
+            raise forms.ValidationError("Укажите email получателей")
+
+        send_now = cleaned_data.get('send_now')
+        scheduled_time = cleaned_data.get('scheduled_time')
+
+        if not send_now and not scheduled_time:
+            raise forms.ValidationError("Укажите время отложенной отправки")
+
+        return cleaned_data
+
+
+class EmailTemplateFilterForm(forms.Form):
+    search = forms.CharField(required=False, widget=forms.TextInput(
+        attrs={'class': 'form-control', 'placeholder': 'Поиск по названию'}))
+    category = forms.ChoiceField(required=False, choices=[('', 'Все категории')] + EmailTemplate.CATEGORY_CHOICES,
+                                 widget=forms.Select(attrs={'class': 'form-control'}))
+    is_active = forms.ChoiceField(required=False, choices=[('', 'Все'), ('true', 'Активные'), ('false', 'Неактивные')],
+                                  widget=forms.Select(attrs={'class': 'form-control'}))

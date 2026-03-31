@@ -9,6 +9,13 @@ urlpatterns = [
     path("",views.ModerationHome.as_view(),name='home'),
 
     path("login/", views.CustomLoginView.as_view(), name="login"),
+
+    path(
+        "password_reset/",
+        views.CustomPasswordResetView.as_view(),
+        name="password_reset",
+    ),
+
     path("subscribe/", subscribe, name="subscribe"),
     path("dashbord/", views.DashbordView.as_view(), name="dashbord"),
     path("languages/", views.LanguageListView.as_view(), name="language_list"),
@@ -446,6 +453,7 @@ urlpatterns = [
     ),
     path("storages/delete/", views.StorageDeleteView.as_view(), name="storages_delete"),
     # ЗАявки
+    path("dashboard/", views.Dashboard.as_view(), name="dashboard"),
 
     path("manufacturers/", views.ManufacturersList.as_view(), name="manufacturers"),
     path("mymanufacturers/", views.MyManufacturerListView.as_view(), name="mymanufacturers"),
@@ -660,4 +668,32 @@ urlpatterns = [
         name="price_update",
     ),
     path("prices/delete/", views.PricesDeleteView.as_view(), name="price_delete"),
+
+    # School
+    path('school/', views.SchoolPage.as_view(),name='school'),
+    # Email Templates
+    path('emails/templates/', views.EmailTemplateListView.as_view(), name='email_templates'),
+    path('emails/templates/create/', views.EmailTemplateCreateView.as_view(), name='email_template_create'),
+    path('emails/templates/<int:pk>/edit/', views.EmailTemplateUpdateView.as_view(), name='email_template_edit'),
+    path('emails/templates/<int:pk>/delete/', views.EmailTemplateDeleteView.as_view(), name='email_template_delete'),
+    path('emails/templates/<int:pk>/', views.EmailTemplateDetailView.as_view(), name='email_template_detail'),
+    path('emails/templates/<int:template_id>/preview/', views.preview_email_template, name='email_template_preview'),
+
+    # Send Email
+    path('emails/send/', views.SendEmailView.as_view(), name='send_email'),
+
+    # Email Logs
+    path('emails/logs/', views.EmailLogListView.as_view(), name='email_logs'),
+    path('emails/logs/<int:pk>/', views.EmailLogDetailView.as_view(), name='email_log_detail'),
+
+    # Email Queue
+    path('emails/queue/', views.EmailQueueListView.as_view(), name='email_queue'),
+    path('emails/queue/delete/', views.EmailQueueDeleteView.as_view(), name='email_queue_delete'),
+
+    # Statistics
+    path('emails/statistics/', views.email_statistics, name='email_statistics'),
+    path('emails/template/<int:template_id>/send-test/', views.send_test_email, name='send_test_email'),
+    path('emails/log/<int:log_id>/resend/', views.resend_email, name='resend_email'),
+    path('emails/log/<int:log_id>/delete/', views.delete_email_log, name='delete_email_log'),
+
 ]

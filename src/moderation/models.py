@@ -1,9 +1,11 @@
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.conf import settings
 import os
 import uuid
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
+from django.utils import timezone
 from multiselectfield import MultiSelectField
 from django.core.validators import FileExtensionValidator
 from uuid import uuid4
@@ -670,3 +672,129 @@ class AssetUsage(models.Model):
     class Meta:
         verbose_name = "История использования"
         verbose_name_plural = "Истории использований"
+
+
+User = get_user_model()
+
+
+class EmailTemplate(models.Model):
+    """Модель для шаблонов email"""
+    CATEGORY_CHOICES = [
+        ('registration', 'Регистрация'),
+        ('password_reset', 'Восстановление пароля'),
+        ('order', 'Заказы'),
+        ('payment', 'Платежи'),
+        ('newsletter', 'Рассылка'),
+        ('notification', 'Уведомления'),
+        ('promotion', 'Акции'),
+        ('support', 'Поддержка'),
+    ]
+
+    name = models.CharField(max_length=200, verbose_name="Название шаблона")
+    subject = models.CharField(max_length=300, verbose_name="Тема письма")
+    slug = models.SlugField(max_length=200, unique=True, verbose_name="Уникальный идентификатор")
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, verbose_name="Категория")
+    content = models.TextField(verbose_name="Содержание письма (HTML)")
+    plain_content = models.TextField(verbose_name="Текстовая версия", blank=True)
+    is_active = models.BooleanField(default=True, verbose_name="Активен")
+    variables = models.JSONField(default=list, blank=True, verbose_name="Доступные переменные",
+                                 help_text="Список доступных переменных для шаблона")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Шаблон email"
+        verbose_name_plural = "Шаблоны email"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.name} - {self.get_category_display()}"
+
+
+class EmailLog(models.Model):
+    """Лог отправленных писем"""
+    STATUS_CHOICES = [
+        ('pending', 'В ожидании'),
+        ('sent', 'Отправлено'),
+        ('failed', 'Ошибка'),
+        ('opened', 'Открыто'),
+        ('clicked', 'Кликнут'),
+    ]
+
+    recipient = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Получатель")
+    recipient_email = models.EmailField(verbose_name="Email получателя")
+    recipient_name = models.CharField(max_length=200, blank=True, verbose_name="Имя получателя")
+    subject = models.CharField(max_length=500, verbose_name="Тема")
+    template = models.ForeignKey(EmailTemplate, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Шаблон")
+    content = models.TextField(verbose_name="Содержание")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', verbose_name="Статус")
+    error_message = models.TextField(blank=True, verbose_name="Ошибка")
+
+    sent_at = models.DateTimeField(null=True, blank=True, verbose_name="Время отправки")
+    opened_at = models.DateTimeField(null=True, blank=True, verbose_name="Время открытия")
+    clicked_at = models.DateTimeField(null=True, blank=True, verbose_name="Время клика")
+
+    ip_address = models.GenericIPAddressField(null=True, blank=True, verbose_name="IP адрес")
+    user_agent = models.TextField(blank=True, verbose_name="User Agent")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Лог email"
+        verbose_name_plural = "Логи email"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Email to {self.recipient_email} - {self.get_status_display()}"
+
+
+class EmailAttachment(models.Model):
+    """Модель для вложений"""
+    email_log = models.ForeignKey(EmailLog, on_delete=models.CASCADE, related_name='attachments', verbose_name="Email")
+    file = models.FileField(upload_to='email_attachments/%Y/%m/%d/', verbose_name="Файл")
+    filename = models.CharField(max_length=255, verbose_name="Имя файла")
+    file_size = models.IntegerField(verbose_name="Размер файла", help_text="в байтах")
+    content_type = models.CharField(max_length=100, verbose_name="Тип контента")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Вложение"
+        verbose_name_plural = "Вложения"
+
+    def __str__(self):
+        return self.filename
+
+
+class EmailQueue(models.Model):
+    """Очередь для отложенной отправки"""
+    PRIORITY_CHOICES = [
+        (1, 'Низкий'),
+        (2, 'Средний'),
+        (3, 'Высокий'),
+        (4, 'Срочный'),
+    ]
+
+    recipient_email = models.EmailField(verbose_name="Email получателя")
+    recipient_name = models.CharField(max_length=200, blank=True, verbose_name="Имя получателя")
+    subject = models.CharField(max_length=500, verbose_name="Тема")
+    content = models.TextField(verbose_name="Содержание")
+    template = models.ForeignKey(EmailTemplate, on_delete=models.SET_NULL, null=True, blank=True)
+    priority = models.IntegerField(choices=PRIORITY_CHOICES, default=2, verbose_name="Приоритет")
+    scheduled_for = models.DateTimeField(default=timezone.now, verbose_name="Запланировано на")
+
+    is_sent = models.BooleanField(default=False, verbose_name="Отправлено")
+    sent_at = models.DateTimeField(null=True, blank=True, verbose_name="Отправлено в")
+    attempts = models.IntegerField(default=0, verbose_name="Попытки отправки")
+    error = models.TextField(blank=True, verbose_name="Ошибка")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Очередь email"
+        verbose_name_plural = "Очередь email"
+        ordering = ['-priority', 'scheduled_for']
+
+    def __str__(self):
+        return f"Queue: {self.recipient_email} - {self.subject[:50]}"

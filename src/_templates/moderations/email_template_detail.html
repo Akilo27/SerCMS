@@ -1,0 +1,301 @@
+{% extends 'moderations/base.html' %}
+{% load static i18n %}
+
+{% block title %}{{ template.name }} - {% trans "Детали шаблона" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="page-title">
+                <i class="ri-mail-line me-1"></i> {{ template.name }}
+            </h4>
+            <div class="page-title-right">
+                <div class="btn-group">
+                    <a href="{% url 'moderation:email_template_edit' template.id %}" class="btn btn-primary">
+                        <i class="ri-edit-line"></i> {% trans "Редактировать" %}
+                    </a>
+                    <button type="button" class="btn btn-info" id="previewBtn">
+                        <i class="ri-eye-line"></i> {% trans "Предпросмотр" %}
+                    </button>
+                    <a href="{% url 'moderation:email_templates' %}" class="btn btn-secondary">
+                        <i class="ri-arrow-left-line"></i> {% trans "Назад" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Информация о шаблоне" %}</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered">
+                    <tr>
+                        <th style="width: 200px;">{% trans "Название" %}</th>
+                        <td>{{ template.name }}</td>
+                    </tr>
+                    <tr>
+                        <th>{% trans "Уникальный идентификатор" %}</th>
+                        <td><code>{{ template.slug }}</code></td>
+                    </tr>
+                    <tr>
+                        <th>{% trans "Тема письма" %}</th>
+                        <td>{{ template.subject }}</td>
+                    </tr>
+                    <tr>
+                        <th>{% trans "Категория" %}</th>
+                        <td>
+                            <span class="badge bg-info">{{ template.get_category_display }}</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>{% trans "Статус" %}</th>
+                        <td>
+                            {% if template.is_active %}
+                            <span class="badge bg-success">{% trans "Активен" %}</span>
+                            {% else %}
+                            <span class="badge bg-danger">{% trans "Неактивен" %}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>{% trans "Дата создания" %}</th>
+                        <td>{{ template.created_at|date:"d.m.Y H:i:s" }}</td>
+                    </tr>
+                    <tr>
+                        <th>{% trans "Последнее обновление" %}</th>
+                        <td>{{ template.updated_at|date:"d.m.Y H:i:s" }}</td>
+                    </tr>
+                    <tr>
+                        <th>{% trans "Переменные" %}</th>
+                        <td>
+                            {% if template.variables %}
+                            <div class="d-flex flex-wrap gap-1">
+                                {% for variable in template.variables %}
+                                <code class="bg-light p-1 rounded">{% verbatim %}{{{% endverbatim %} {{ variable }} {% verbatim %}}}{% endverbatim %}</code>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <span class="text-muted">{% trans "Нет переменных" %}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "HTML содержание" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="border rounded p-3 bg-light" style="max-height: 400px; overflow: auto;">
+                    <pre style="white-space: pre-wrap; word-wrap: break-word;">{{ template.content|escape }}</pre>
+                </div>
+            </div>
+        </div>
+        
+        {% if template.plain_content %}
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Текстовая версия" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="border rounded p-3 bg-light" style="max-height: 300px; overflow: auto;">
+                    <pre style="white-space: pre-wrap; word-wrap: break-word;">{{ template.plain_content }}</pre>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Статистика использования" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center">
+                    <div class="mb-3">
+                        <i class="ri-mail-send-line" style="font-size: 48px; color: #4a90e2;"></i>
+                        <h3 class="mt-2">0</h3>
+                        <p class="text-muted">{% trans "Отправлено писем" %}</p>
+                    </div>
+                    <hr>
+                    <div class="mb-3">
+                        <i class="ri-mail-open-line" style="font-size: 48px; color: #28a745;"></i>
+                        <h3 class="mt-2">0</h3>
+                        <p class="text-muted">{% trans "Открыто писем" %}</p>
+                    </div>
+                    <hr>
+                    <div class="mb-3">
+                        <i class="ri-mail-check-line" style="font-size: 48px; color: #17a2b8;"></i>
+                        <h3 class="mt-2">0%</h3>
+                        <p class="text-muted">{% trans "Конверсия" %}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Действия" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn btn-success" id="testSendBtn">
+                        <i class="ri-mail-send-line"></i> {% trans "Отправить тестовое письмо" %}
+                    </button>
+                    <button type="button" class="btn btn-danger" id="deleteBtn">
+                        <i class="ri-delete-bin-line"></i> {% trans "Удалить шаблон" %}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal предпросмотра -->
+<div class="modal fade" id="previewModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{% trans "Предпросмотр шаблона" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>{% trans "Тема:" %} <span id="previewSubject"></span></h6>
+                <hr>
+                <div id="previewContent"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal тестовой отправки -->
+<div class="modal fade" id="testSendModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{% trans "Отправка тестового письма" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="testSendForm">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">{% trans "Email для теста" %}</label>
+                        <input type="email" class="form-control" id="testEmail" required placeholder="test@example.com">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{% trans "Имя получателя (опционально)" %}</label>
+                        <input type="text" class="form-control" id="testName" placeholder="Иван Иванов">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Отмена" %}</button>
+                <button type="button" class="btn btn-primary" id="sendTestEmail">{% trans "Отправить" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block javascript %}
+<script>
+    // Предпросмотр
+    $('#previewBtn, #previewTemplateBtn').click(function() {
+        const subject = '{{ template.subject|escapejs }}';
+        let content = `{{ template.content|escapejs }}`;
+        
+        // Замена переменных тестовыми значениями
+        const testData = {
+            username: 'Иван Иванов',
+            email: 'ivan@example.com',
+            site_name: '{{ settings.name }}',
+            site_url: window.location.origin,
+            confirmation_link: '#',
+            reset_link: '#',
+            order_number: 'ORD-12345',
+            order_total: '5000 ₽',
+            order_items: '<ul><li>Товар 1 - 1000 ₽</li><li>Товар 2 - 4000 ₽</li></ul>',
+            payment_link: '#',
+            unsubscribe_link: '#'
+        };
+        
+        for (const [key, value] of Object.entries(testData)) {
+            const regex = new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, 'g');
+            content = content.replace(regex, value);
+        }
+        
+        $('#previewSubject').text(subject);
+        $('#previewContent').html(content);
+        $('#previewModal').modal('show');
+    });
+    
+    // Тестовая отправка
+    $('#testSendBtn').click(function() {
+        $('#testSendModal').modal('show');
+    });
+    
+    $('#sendTestEmail').click(function() {
+        const email = $('#testEmail').val();
+        const name = $('#testName').val();
+        
+        if (!email) {
+            Swal.fire('Ошибка', 'Введите email для отправки', 'error');
+            return;
+        }
+        
+        $.ajax({
+            url: '{% url "moderation:send_test_email" template.id %}',
+            type: 'POST',
+            data: {
+                email: email,
+                name: name,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function(response) {
+                Swal.fire('Успех', 'Тестовое письмо отправлено на ' + email, 'success');
+                $('#testSendModal').modal('hide');
+            },
+            error: function() {
+                Swal.fire('Ошибка', 'Не удалось отправить тестовое письмо', 'error');
+            }
+        });
+    });
+    
+    // Удаление
+    $('#deleteBtn').click(function() {
+        Swal.fire({
+            title: '{% trans "Вы уверены?" %}',
+            text: '{% trans "Это действие нельзя отменить" %}',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: '{% trans "Да, удалить" %}',
+            cancelButtonText: '{% trans "Отмена" %}'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '{% url "moderation:email_template_delete" template.id %}',
+                    type: 'POST',
+                    data: {
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function() {
+                        window.location.href = '{% url "moderation:email_templates" %}';
+                    }
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

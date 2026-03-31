@@ -1,0 +1,556 @@
+{% extends 'moderations/base.html' %}
+{% load static i18n %}
+
+{% block title %}{% if form.instance.pk %}{% trans "Редактирование шаблона" %}{% else %}{% trans "Создание шаблона" %}{% endif %}{% endblock %}
+
+{% block head %}
+<!-- Подключение CKEditor -->
+<script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+<style>
+    .ck-editor__editable {
+        min-height: 400px;
+    }
+    .variable-badge {
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .variable-badge:hover {
+        transform: scale(1.05);
+        opacity: 0.8;
+    }
+    .preview-card {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 20px;
+        background: #f8f9fa;
+    }
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 9999;
+        display: none;
+        justify-content: center;
+        align-items: center;
+    }
+    .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="page-title">
+                {% if form.instance.pk %}
+                <i class="ri-edit-line me-1"></i> {% trans "Редактирование шаблона" %}
+                {% else %}
+                <i class="ri-add-line me-1"></i> {% trans "Создание шаблона" %}
+                {% endif %}
+            </h4>
+            <div class="page-title-right">
+                <a href="{% url 'moderation:email_templates' %}" class="btn btn-secondary">
+                    <i class="ri-arrow-left-line"></i> {% trans "Назад к списку" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Информация о шаблоне" %}</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" id="templateForm">
+                    {% csrf_token %}
+
+                    <!-- Название -->
+                    <div class="mb-3">
+                        <label for="{{ form.name.id_for_label }}" class="form-label">
+                            {% trans "Название шаблона" %} <span class="text-danger">*</span>
+                        </label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                        <div class="text-danger">{{ form.name.errors }}</div>
+                        {% endif %}
+                        <small class="text-muted">{% trans "Например: Приветственное письмо, Подтверждение заказа и т.д." %}</small>
+                    </div>
+
+                    <!-- Slug -->
+                    <div class="mb-3">
+                        <label for="{{ form.slug.id_for_label }}" class="form-label">
+                            {% trans "Уникальный идентификатор (Slug)" %} <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            {{ form.slug }}
+                            <button type="button" class="btn btn-outline-secondary" id="generateSlug">
+                                <i class="ri-refresh-line"></i> {% trans "Сгенерировать" %}
+                            </button>
+                        </div>
+                        {% if form.slug.errors %}
+                        <div class="text-danger">{{ form.slug.errors }}</div>
+                        {% endif %}
+                        <small class="text-muted">{% trans "Только латинские буквы, цифры и знак подчеркивания" %}</small>
+                    </div>
+
+                    <!-- Тема письма -->
+                    <div class="mb-3">
+                        <label for="{{ form.subject.id_for_label }}" class="form-label">
+                            {% trans "Тема письма" %} <span class="text-danger">*</span>
+                        </label>
+                        {{ form.subject }}
+                        {% if form.subject.errors %}
+                        <div class="text-danger">{{ form.subject.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Категория -->
+                    <div class="mb-3">
+                        <label for="{{ form.category.id_for_label }}" class="form-label">
+                            {% trans "Категория" %} <span class="text-danger">*</span>
+                        </label>
+                        {{ form.category }}
+                        {% if form.category.errors %}
+                        <div class="text-danger">{{ form.category.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- HTML Содержание -->
+                    <div class="mb-3">
+                        <label for="{{ form.content.id_for_label }}" class="form-label">
+                            {% trans "HTML содержание" %} <span class="text-danger">*</span>
+                        </label>
+                        {{ form.content }}
+                        {% if form.content.errors %}
+                        <div class="text-danger">{{ form.content.errors }}</div>
+                        {% endif %}
+                        <small class="text-muted">{% trans "Вы можете использовать HTML теги и переменные" %}</small>
+                    </div>
+
+                    <!-- Текстовая версия -->
+                    <div class="mb-3">
+                        <label for="{{ form.plain_content.id_for_label }}" class="form-label">
+                            {% trans "Текстовая версия (plain text)" %}
+                        </label>
+                        {{ form.plain_content }}
+                        {% if form.plain_content.errors %}
+                        <div class="text-danger">{{ form.plain_content.errors }}</div>
+                        {% endif %}
+                        <small class="text-muted">{% trans "Для почтовых клиентов, не поддерживающих HTML" %}</small>
+                    </div>
+
+                    <!-- Статус -->
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            {{ form.is_active }}
+                            <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                {% trans "Активен" %}
+                            </label>
+                        </div>
+                        {% if form.is_active.errors %}
+                        <div class="text-danger">{{ form.is_active.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Переменные -->
+                    <div class="mb-3">
+                        <label for="{{ form.variables.id_for_label }}" class="form-label">
+                            {% trans "Доступные переменные (JSON)" %}
+                        </label>
+                        {{ form.variables }}
+                        {% if form.variables.errors %}
+                        <div class="text-danger">{{ form.variables.errors }}</div>
+                        {% endif %}
+                        <small class="text-muted">
+                            {% trans 'Формат: ["username", "site_name", "confirmation_link"]' %}
+                        </small>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <i class="ri-save-line"></i> {% trans "Сохранить" %}
+                        </button>
+                        <a href="{% url 'moderation:email_templates' %}" class="btn btn-secondary">
+                            {% trans "Отмена" %}
+                        </a>
+                        {% if form.instance.pk %}
+                        <button type="button" class="btn btn-info" id="previewTemplate">
+                            <i class="ri-eye-line"></i> {% trans "Предпросмотр" %}
+                        </button>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Доступные переменные -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Доступные переменные" %}</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-2">{% trans "Нажмите на переменную, чтобы вставить её в редактор:" %}</p>
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="badge bg-primary variable-badge" data-variable="username">{{ username }}</span>
+                    <span class="badge bg-primary variable-badge" data-variable="email">{{ email }}</span>
+                    <span class="badge bg-primary variable-badge" data-variable="site_name">{{ site_name }}</span>
+                    <span class="badge bg-primary variable-badge" data-variable="site_url">{{ site_url }}</span>
+                    <span class="badge bg-primary variable-badge" data-variable="confirmation_link">{{ confirmation_link }}</span>
+                    <span class="badge bg-primary variable-badge" data-variable="reset_link">{{ reset_link }}</span>
+                    <span class="badge bg-primary variable-badge" data-variable="order_number">{{ order_number }}</span>
+                    <span class="badge bg-primary variable-badge" data-variable="order_total">{{ order_total }}</span>
+                    <span class="badge bg-primary variable-badge" data-variable="order_items">{{ order_items }}</span>
+                    <span class="badge bg-primary variable-badge" data-variable="payment_link">{{ payment_link }}</span>
+                    <span class="badge bg-primary variable-badge" data-variable="unsubscribe_link">{{ unsubscribe_link }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Подсказки -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Советы" %}</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2">
+                        <i class="ri-information-line text-primary me-2"></i>
+                        <strong>{% trans "Переменные:" %}</strong>
+                        <small class="text-muted d-block mt-1">
+                            {% trans "Используйте двойные фигурные скобки для вставки переменных" %}
+                        </small>
+                    </li>
+                    <li class="mb-2">
+                        <i class="ri-information-line text-primary me-2"></i>
+                        <strong>{% trans "HTML:" %}</strong>
+                        <small class="text-muted d-block mt-1">
+                            {% trans "Вы можете использовать любые HTML теги и CSS стили" %}
+                        </small>
+                    </li>
+                    <li class="mb-2">
+                        <i class="ri-information-line text-primary me-2"></i>
+                        <strong>{% trans "Адаптивность:" %}</strong>
+                        <small class="text-muted d-block mt-1">
+                            {% trans "Рекомендуется использовать адаптивный дизайн для мобильных устройств" %}
+                        </small>
+                    </li>
+                    <li>
+                        <i class="ri-information-line text-primary me-2"></i>
+                        <strong>{% trans "Тестирование:" %}</strong>
+                        <small class="text-muted d-block mt-1">
+                            {% trans "Всегда тестируйте шаблон перед отправкой реальным пользователям" %}
+                        </small>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Пример шаблона -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Пример HTML шаблона" %}</h5>
+            </div>
+            <div class="card-body">
+                <button type="button" class="btn btn-sm btn-outline-primary w-100" id="loadExample">
+                    <i class="ri-code-line"></i> {% trans "Загрузить пример" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal предпросмотра -->
+<div class="modal fade" id="previewModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{% trans "Предпросмотр шаблона" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="preview-card">
+                    <h6>{% trans "Тема:" %} <span id="previewSubject"></span></h6>
+                    <hr>
+                    <div id="previewContent"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Закрыть" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+</div>
+
+{% block javascript %}
+<script>
+    // Функция для показа/скрытия загрузки
+    function showLoading() {
+        const overlay = document.getElementById('loadingOverlay');
+        if (overlay) overlay.style.display = 'flex';
+    }
+
+    function hideLoading() {
+        const overlay = document.getElementById('loadingOverlay');
+        if (overlay) overlay.style.display = 'none';
+    }
+
+    // Ждем полной загрузки DOM
+    document.addEventListener('DOMContentLoaded', function() {
+        let editor = null;
+
+        // Инициализация CKEditor
+        const contentElement = document.querySelector('#id_content');
+        if (contentElement) {
+            ClassicEditor
+                .create(contentElement, {
+                    toolbar: {
+                        items: [
+                            'heading', '|',
+                            'bold', 'italic', 'underline', 'strikethrough', '|',
+                            'bulletedList', 'numberedList', '|',
+                            'outdent', 'indent', '|',
+                            'link', 'blockQuote', 'insertTable', '|',
+                            'undo', 'redo'
+                        ]
+                    }
+                })
+                .then(newEditor => {
+                    editor = newEditor;
+                })
+                .catch(error => {
+                    console.error('CKEditor error:', error);
+                });
+        }
+
+        // Генерация slug
+        const generateBtn = document.getElementById('generateSlug');
+        if (generateBtn) {
+            generateBtn.addEventListener('click', function() {
+                const nameField = document.getElementById('id_name');
+                const slugField = document.getElementById('id_slug');
+                if (nameField && slugField && nameField.value) {
+                    let slug = nameField.value.toLowerCase()
+                        .replace(/[^a-zа-яё0-9\s]/g, '')
+                        .replace(/\s+/g, '_')
+                        .replace(/[а-яё]/g, function(match) {
+                            const map = {
+                                'а':'a','б':'b','в':'v','г':'g','д':'d','е':'e','ё':'e',
+                                'ж':'zh','з':'z','и':'i','й':'y','к':'k','л':'l','м':'m',
+                                'н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u',
+                                'ф':'f','х':'h','ц':'ts','ч':'ch','ш':'sh','щ':'sch','ъ':'',
+                                'ы':'y','ь':'','э':'e','ю':'yu','я':'ya'
+                            };
+                            return map[match] || match;
+                        });
+                    slugField.value = slug;
+                }
+            });
+        }
+
+        // Автогенерация slug
+        const nameField = document.getElementById('id_name');
+        const slugField = document.getElementById('id_slug');
+        if (nameField && slugField) {
+            nameField.addEventListener('blur', function() {
+                if (!slugField.value && nameField.value) {
+                    const event = new Event('click');
+                    if (generateBtn) generateBtn.dispatchEvent(event);
+                }
+            });
+        }
+
+        // Вставка переменных
+        const variableBadges = document.querySelectorAll('.variable-badge');
+        variableBadges.forEach(badge => {
+            badge.addEventListener('click', function() {
+                const variable = this.getAttribute('data-variable');
+                const variableText = '{{ ' + variable + ' }}';
+
+                if (editor) {
+                    editor.model.change(writer => {
+                        writer.insertText(variableText, editor.model.document.selection.getFirstPosition());
+                    });
+                } else if (contentElement) {
+                    const cursorPos = contentElement.selectionStart;
+                    const currentValue = contentElement.value;
+                    contentElement.value = currentValue.substring(0, cursorPos) + variableText + currentValue.substring(cursorPos);
+                    contentElement.focus();
+                }
+            });
+        });
+
+        // Предпросмотр
+        const previewBtn = document.getElementById('previewTemplate');
+        if (previewBtn) {
+            previewBtn.addEventListener('click', function() {
+                const subjectField = document.getElementById('id_subject');
+                let subject = subjectField ? subjectField.value : '';
+                let content = '';
+
+                if (editor) {
+                    content = editor.getData();
+                } else if (contentElement) {
+                    content = contentElement.value;
+                }
+
+                // Тестовые данные
+                const testData = {
+                    username: 'Иван Иванов',
+                    email: 'ivan@example.com',
+                    site_name: '{{ settings.name|default:"My Site" }}',
+                    site_url: window.location.origin,
+                    confirmation_link: '#',
+                    reset_link: '#',
+                    order_number: 'ORD-12345',
+                    order_total: '5000 ₽',
+                    order_items: '<ul><li>Товар 1 - 1000 ₽</li><li>Товар 2 - 4000 ₽</li></ul>',
+                    payment_link: '#',
+                    unsubscribe_link: '#'
+                };
+
+                for (const [key, value] of Object.entries(testData)) {
+                    const regex = new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, 'g');
+                    content = content.replace(regex, value);
+                    subject = subject.replace(regex, value);
+                }
+
+                const previewSubject = document.getElementById('previewSubject');
+                const previewContent = document.getElementById('previewContent');
+                if (previewSubject) previewSubject.textContent = subject;
+                if (previewContent) previewContent.innerHTML = content;
+
+                const modal = new bootstrap.Modal(document.getElementById('previewModal'));
+                modal.show();
+            });
+        }
+
+        // Загрузка примера
+        const loadExampleBtn = document.getElementById('loadExample');
+        if (loadExampleBtn) {
+            loadExampleBtn.addEventListener('click', function() {
+                const exampleTemplate = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Template</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #4a90e2; color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+        .content { background-color: #ffffff; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 8px 8px; }
+        .button { display: inline-block; padding: 12px 24px; background-color: #4a90e2; color: white; text-decoration: none; border-radius: 4px; margin: 20px 0; }
+        .footer { text-align: center; padding: 20px; font-size: 12px; color: #999; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header"><h1>{{ site_name }}</h1></div>
+        <div class="content">
+            <h2>Здравствуйте, {{ username }}!</h2>
+            <p>Благодарим вас за регистрацию на нашем сайте.</p>
+            <p>Для подтверждения вашего email адреса, пожалуйста, нажмите на кнопку ниже:</p>
+            <div style="text-align: center;">
+                <a href="{{ confirmation_link }}" class="button">Подтвердить email</a>
+            </div>
+            <p>Если вы не регистрировались на нашем сайте, просто проигнорируйте это письмо.</p>
+            <hr>
+            <p><small>С уважением,<br>Команда {{ site_name }}</small></p>
+        </div>
+        <div class="footer">
+            <p>© 2024 {{ site_name }}. Все права защищены.</p>
+            <p><a href="{{ unsubscribe_link }}">Отписаться от рассылки</a></p>
+        </div>
+    </div>
+</body>
+</html>`;
+
+                if (editor) {
+                    editor.setData(exampleTemplate);
+                } else if (contentElement) {
+                    contentElement.value = exampleTemplate;
+                }
+
+                const subjectField = document.getElementById('id_subject');
+                if (subjectField) {
+                    subjectField.value = 'Добро пожаловать на {{ site_name }}!';
+                }
+
+                // Уведомление
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Пример загружен',
+                        text: 'Пример шаблона успешно загружен',
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                }
+            });
+        }
+
+        // Валидация формы
+        const templateForm = document.getElementById('templateForm');
+        if (templateForm) {
+            templateForm.addEventListener('submit', function(e) {
+                const name = document.getElementById('id_name');
+                const slug = document.getElementById('id_slug');
+                const subject = document.getElementById('id_subject');
+
+                if (!name || !name.value) {
+                    e.preventDefault();
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire('Ошибка', 'Введите название шаблона', 'error');
+                    }
+                    return false;
+                }
+
+                if (!slug || !slug.value) {
+                    e.preventDefault();
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire('Ошибка', 'Введите уникальный идентификатор', 'error');
+                    }
+                    return false;
+                }
+
+                if (!subject || !subject.value) {
+                    e.preventDefault();
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire('Ошибка', 'Введите тему письма', 'error');
+                    }
+                    return false;
+                }
+
+                showLoading();
+                return true;
+            });
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,227 @@
+{% extends 'moderations/base.html' %}
+{% load static i18n %}
+
+{% block title %}{% trans "Шаблоны Email" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="page-title">{% trans "Шаблоны Email" %}</h4>
+            <div class="page-title-right">
+                <a href="{% url 'moderation:email_template_create' %}" class="btn btn-primary">
+                    <i class="ri-add-line"></i> {% trans "Создать шаблон" %}
+                </a>
+                <a href="{% url 'moderation:send_email' %}" class="btn btn-success">
+                    <i class="ri-mail-send-line"></i> {% trans "Отправить письмо" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <!-- Filter Form -->
+                <form method="get" class="mb-4">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <input type="text" name="search" class="form-control" placeholder="{% trans 'Поиск...' %}" value="{{ request.GET.search }}">
+                        </div>
+                        <div class="col-md-3">
+                            <select name="category" class="form-control">
+                                <option value="">{% trans "Все категории" %}</option>
+                                {% for value, label in categories %}
+                                <option value="{{ value }}" {% if request.GET.category == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select name="is_active" class="form-control">
+                                <option value="">{% trans "Все" %}</option>
+                                <option value="true" {% if request.GET.is_active == 'true' %}selected{% endif %}>{% trans "Активные" %}</option>
+                                <option value="false" {% if request.GET.is_active == 'false' %}selected{% endif %}>{% trans "Неактивные" %}</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">{% trans "Фильтр" %}</button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Templates Table -->
+                <div class="table-responsive">
+                    <table class="table table-centered mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 20px;">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="checkAll">
+                                    </div>
+                                </th>
+                                <th>{% trans "Название" %}</th>
+                                <th>{% trans "Тема" %}</th>
+                                <th>{% trans "Категория" %}</th>
+                                <th>{% trans "Slug" %}</th>
+                                <th>{% trans "Статус" %}</th>
+                                <th>{% trans "Действия" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for template in templates %}
+                            <tr>
+                                <td>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input template-checkbox" value="{{ template.id }}">
+                                    </div>
+                                </td>
+                                <td>{{ template.name }}</td>
+                                <td>{{ template.subject|truncatechars:50 }}</td>
+                                <td>
+                                    <span class="badge bg-info">{{ template.get_category_display }}</span>
+                                </td>
+                                <td><code>{{ template.slug }}</code></td>
+                                <td>
+                                    {% if template.is_active %}
+                                    <span class="badge bg-success">{% trans "Активен" %}</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">{% trans "Неактивен" %}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-sm btn-outline-info preview-template" data-id="{{ template.id }}">
+                                            <i class="ri-eye-line"></i>
+                                        </button>
+                                        <a href="{% url 'moderation:email_template_edit' template.id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="ri-edit-line"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-outline-danger delete-template" data-id="{{ template.id }}">
+                                            <i class="ri-delete-bin-line"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center">{% trans "Нет шаблонов" %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if page_obj.has_other_pages %}
+                <div class="mt-3">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-end">
+                            {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Previous</a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for num in page_obj.paginator.page_range %}
+                            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                                <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">{{ num }}</a>
+                            </li>
+                            {% endfor %}
+                            
+                            {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Next</a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{% trans "Удаление шаблонов" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>{% trans "Вы уверены, что хотите удалить выбранные шаблоны?" %}</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Отмена" %}</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">{% trans "Удалить" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Preview Modal -->
+<div class="modal fade" id="previewModal" tabindex="-1" style="max-width: 80%;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{% trans "Предпросмотр шаблона" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>{% trans "Тема:" %} <span id="previewSubject"></span></h6>
+                <hr>
+                <div id="previewContent"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block javascript %}
+<script>
+$(document).ready(function() {
+    // Check all checkbox
+    $('#checkAll').change(function() {
+        $('.template-checkbox').prop('checked', $(this).prop('checked'));
+    });
+
+    // Preview template
+    $('.preview-template').click(function() {
+        var templateId = $(this).data('id');
+        $.ajax({
+            url: '{% url "moderation:email_template_preview" 0 %}'.replace('0', templateId),
+            type: 'GET',
+            success: function(data) {
+                $('#previewSubject').text(data.subject);
+                $('#previewContent').html(data.content);
+                $('#previewModal').modal('show');
+            }
+        });
+    });
+
+    // Delete templates
+    var selectedTemplates = [];
+    $('.delete-template').click(function() {
+        selectedTemplates = [$(this).data('id')];
+        $('#deleteModal').modal('show');
+    });
+
+    $('#confirmDelete').click(function() {
+        $.ajax({
+            url: '{% url "moderation:email_template_delete" 0 %}'.replace('0', ''),
+            type: 'POST',
+            data: JSON.stringify({template_ids: selectedTemplates}),
+            contentType: 'application/json',
+            headers: {'X-CSRFToken': '{{ csrf_token }}'},
+            success: function(data) {
+                location.reload();
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}
