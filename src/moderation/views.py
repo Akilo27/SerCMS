@@ -205,6 +205,11 @@ from moderation.models import IntegrationService, MessengerMessage, DeliveryOrde
     MarketplaceOrder, MarketplaceProduct, IntegrationLog, AdditionalService, MessengerIntegration, DeliveryIntegration, \
     PaymentIntegration
 
+from moderation.forms import LoyaltyProgramForm, LoyaltyLevelForm, LoyaltyFilterForm, AddPointsForm, \
+    LoyaltyPromoCodeForm, LoyaltySettingsForm
+from moderation.models import UserLoyalty, LoyaltyLevel, LoyaltyTransaction, LoyaltyPromoCode, PointsExpiry, \
+    LoyaltyProgram, LoyaltyPromoCodeUsage, LoyaltyNotification, LoyaltySettings
+
 
 class ModerationHome(View):
     template_name = "moderations/base.html"
@@ -9893,3 +9898,479 @@ def sync_all_integrations(request):
             'status': 'error',
             'message': str(e)
         }, status=500)
+
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class LoyaltyDashboardView(TemplateView):
+    """Дашборд программы лояльности"""
+    template_name = "moderations/loyalty/dashboard.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Основная статистика
+        context['total_users'] = UserLoyalty.objects.count()
+        context['total_points'] = UserLoyalty.objects.aggregate(total=Sum('points'))['total'] or 0
+        context['total_points_earned'] = \
+        LoyaltyTransaction.objects.filter(type='earn').aggregate(total=Sum('points'))['total'] or 0
+        context['total_points_spent'] = \
+        LoyaltyTransaction.objects.filter(type='spend').aggregate(total=Sum('points'))['total'] or 0
+
+        # Статистика по уровням
+        levels_data = []
+        for level in LoyaltyLevel.objects.all():
+            count = UserLoyalty.objects.filter(level=level).count()
+            levels_data.append({
+                'name': level.name,
+                'color': level.color,
+                'count': count,
+                'discount': level.discount_percent
+            })
+        context['levels_data'] = levels_data
+
+        # Последние транзакции
+        context['recent_transactions'] = LoyaltyTransaction.objects.select_related('user')[:10]
+
+        # Топ пользователей по баллам
+        context['top_users'] = UserLoyalty.objects.select_related('user', 'level').order_by('-points')[:10]
+
+        # Активные промокоды
+        context['active_promocodes'] = LoyaltyPromoCode.objects.filter(
+            is_active=True,
+            valid_to__gte=timezone.now()
+        ).count()
+
+        # Сгорающие баллы (следующие 30 дней)
+        expiry_soon = PointsExpiry.objects.filter(
+            is_expired=False,
+            expires_at__lte=timezone.now() + timedelta(days=30)
+        ).aggregate(total=Sum('points'))['total'] or 0
+        context['expiry_soon'] = expiry_soon
+
+        # Статистика по дням за последние 30 дней
+        last_30_days = timezone.now() - timedelta(days=30)
+        daily_stats = LoyaltyTransaction.objects.filter(
+            created_at__gte=last_30_days
+        ).extra({'date': "date(created_at)"}).values('date').annotate(
+            earned=Sum('points', filter=Q(type='earn')),
+            spent=Sum('points', filter=Q(type='spend'))
+        ).order_by('date')
+
+        context['daily_stats'] = list(daily_stats)
+
+        return context
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class LoyaltyProgramListView(ListView):
+    """Список программ лояльности"""
+    model = LoyaltyProgram
+    template_name = "moderations/loyalty/programs.html"
+    context_object_name = "programs"
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class LoyaltyProgramCreateView(CreateView):
+    """Создание программы лояльности"""
+    model = LoyaltyProgram
+    form_class = LoyaltyProgramForm
+    template_name = "moderations/loyalty/program_form.html"
+    success_url = reverse_lazy("moderation:loyalty_programs")
+
+    def form_valid(self, form):
+        messages.success(self.request, "Программа лояльности успешно создана")
+        return super().form_valid(form)
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class LoyaltyProgramUpdateView(UpdateView):
+    """Редактирование программы лояльности"""
+    model = LoyaltyProgram
+    form_class = LoyaltyProgramForm
+    template_name = "moderations/loyalty/program_form.html"
+    success_url = reverse_lazy("moderation:loyalty_programs")
+
+    def form_valid(self, form):
+        messages.success(self.request, "Программа лояльности успешно обновлена")
+        return super().form_valid(form)
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class LoyaltyLevelListView(ListView):
+    """Список уровней лояльности"""
+    model = LoyaltyLevel
+    template_name = "moderations/loyalty/levels.html"
+    context_object_name = "levels"
+
+    def get_queryset(self):
+        program_id = self.kwargs.get('program_id')
+        if program_id:
+            return LoyaltyLevel.objects.filter(program_id=program_id)
+        return LoyaltyLevel.objects.all()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.kwargs.get('program_id'):
+            context['program'] = get_object_or_404(LoyaltyProgram, id=self.kwargs['program_id'])
+        return context
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class LoyaltyLevelCreateView(CreateView):
+    """Создание уровня лояльности"""
+    model = LoyaltyLevel
+    form_class = LoyaltyLevelForm
+    template_name = "moderations/loyalty/level_form.html"
+
+    def get_success_url(self):
+        program_id = self.kwargs.get('program_id')
+        if program_id:
+            return reverse_lazy("moderation:loyalty_levels", kwargs={'program_id': program_id})
+        return reverse_lazy("moderation:loyalty_levels")
+
+    def get_initial(self):
+        initial = super().get_initial()
+        if self.kwargs.get('program_id'):
+            initial['program'] = self.kwargs['program_id']
+        return initial
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.kwargs.get('program_id'):
+            context['program'] = get_object_or_404(LoyaltyProgram, id=self.kwargs['program_id'])
+        return context
+
+    def form_valid(self, form):
+        messages.success(self.request, "Уровень лояльности успешно создан")
+        return super().form_valid(form)
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class LoyaltyLevelUpdateView(UpdateView):
+    """Редактирование уровня лояльности"""
+    model = LoyaltyLevel
+    form_class = LoyaltyLevelForm
+    template_name = "moderations/loyalty/level_form.html"
+
+    def get_success_url(self):
+        return reverse_lazy("moderation:loyalty_levels", kwargs={'program_id': self.object.program.id})
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class LoyaltyLevelDeleteView(DeleteView):
+    """Удаление уровня лояльности"""
+    model = LoyaltyLevel
+
+    def get_success_url(self):
+        return reverse_lazy("moderation:loyalty_levels", kwargs={'program_id': self.object.program.id})
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class LoyaltyUsersListView(ListView):
+    """Список пользователей лояльности"""
+    model = UserLoyalty
+    template_name = "moderations/loyalty/users.html"
+    context_object_name = "users"
+    paginate_by = 20
+
+    def get_queryset(self):
+        queryset = super().get_queryset().select_related('user', 'level')
+
+        # Фильтрация
+        search = self.request.GET.get('search')
+        if search:
+            queryset = queryset.filter(
+                Q(user__username__icontains=search) |
+                Q(user__email__icontains=search) |
+                Q(user__first_name__icontains=search) |
+                Q(user__last_name__icontains=search)
+            )
+
+        level = self.request.GET.get('level')
+        if level:
+            queryset = queryset.filter(level_id=level)
+
+        min_points = self.request.GET.get('min_points')
+        if min_points:
+            queryset = queryset.filter(points__gte=min_points)
+
+        max_points = self.request.GET.get('max_points')
+        if max_points:
+            queryset = queryset.filter(points__lte=max_points)
+
+        return queryset.order_by('-points')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['filter_form'] = LoyaltyFilterForm(self.request.GET)
+        context['levels'] = LoyaltyLevel.objects.all()
+        return context
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class LoyaltyUserDetailView(DetailView):
+    """Детальная информация о пользователе лояльности"""
+    model = UserLoyalty
+    template_name = "moderations/loyalty/user_detail.html"
+    context_object_name = "loyalty"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Транзакции пользователя
+        context['transactions'] = LoyaltyTransaction.objects.filter(
+            user=self.object.user
+        ).order_by('-created_at')[:50]
+
+        # Промокоды пользователя
+        context['promocode_usages'] = LoyaltyPromoCodeUsage.objects.filter(
+            user=self.object.user
+        ).select_related('promo_code').order_by('-used_at')[:20]
+
+        # Уведомления
+        context['notifications'] = LoyaltyNotification.objects.filter(
+            user=self.object.user
+        ).order_by('-created_at')[:20]
+
+        # Сгорающие баллы
+        context['expiring_points'] = PointsExpiry.objects.filter(
+            user=self.object.user,
+            is_expired=False,
+            expires_at__lte=timezone.now() + timedelta(days=30)
+        ).order_by('expires_at')
+
+        # Форма начисления баллов
+        context['add_points_form'] = AddPointsForm(initial={'user': self.object.user.id})
+
+        return context
+
+@login_required
+def add_loyalty_points(request):
+    """Начисление баллов пользователю"""
+    if request.method == 'POST':
+        form = AddPointsForm(request.POST)
+        if form.is_valid():
+            user = form.cleaned_data['user']
+            points = form.cleaned_data['points']
+            reason = form.cleaned_data['reason']
+
+            try:
+                user_loyalty = UserLoyalty.objects.get(user=user)
+                user_loyalty.add_points(points, reason)
+
+                messages.success(request, f"Пользователю {user.username} начислено {points} баллов")
+                return redirect('moderation:loyalty_user_detail', pk=user_loyalty.id)
+            except UserLoyalty.DoesNotExist:
+                messages.error(request, "Пользователь не участвует в программе лояльности")
+        else:
+            messages.error(request, "Ошибка в форме")
+
+    return redirect('moderation:loyalty_users')
+
+@login_required
+def loyalty_transactions(request):
+    """Список всех транзакций"""
+    transactions = LoyaltyTransaction.objects.select_related('user').order_by('-created_at')
+
+    # Фильтрация
+    user_id = request.GET.get('user')
+    if user_id:
+        transactions = transactions.filter(user_id=user_id)
+
+    type_filter = request.GET.get('type')
+    if type_filter:
+        transactions = transactions.filter(type=type_filter)
+
+    date_from = request.GET.get('date_from')
+    if date_from:
+        transactions = transactions.filter(created_at__date__gte=date_from)
+
+    date_to = request.GET.get('date_to')
+    if date_to:
+        transactions = transactions.filter(created_at__date__lte=date_to)
+
+    # Пагинация
+    paginator = Paginator(transactions, 30)
+    page = request.GET.get('page')
+    transactions_page = paginator.get_page(page)
+
+    return render(request, 'moderations/loyalty/transactions.html', {
+        'transactions': transactions_page,
+        'users': UserLoyalty.objects.select_related('user'),
+        'types': LoyaltyTransaction.TYPES,
+        'filters': {
+            'user': user_id,
+            'type': type_filter,
+            'date_from': date_from,
+            'date_to': date_to,
+        }
+    })
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class LoyaltyPromoCodeListView(ListView):
+    """Список промокодов"""
+    model = LoyaltyPromoCode
+    template_name = "moderations/loyalty/promocodes.html"
+    context_object_name = "promocodes"
+    paginate_by = 20
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        search = self.request.GET.get('search')
+        if search:
+            queryset = queryset.filter(
+                Q(code__icontains=search) |
+                Q(name__icontains=search)
+            )
+
+        is_active = self.request.GET.get('is_active')
+        if is_active == 'true':
+            queryset = queryset.filter(is_active=True)
+        elif is_active == 'false':
+            queryset = queryset.filter(is_active=False)
+
+        return queryset.order_by('-created_at')
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class LoyaltyPromoCodeCreateView(CreateView):
+    """Создание промокода"""
+    model = LoyaltyPromoCode
+    form_class = LoyaltyPromoCodeForm
+    template_name = "moderations/loyalty/promocode_form.html"
+    success_url = reverse_lazy("moderation:loyalty_promocodes")
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        return kwargs
+
+    def form_valid(self, form):
+        messages.success(self.request, "Промокод успешно создан")
+        return super().form_valid(form)
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class LoyaltyPromoCodeUpdateView(UpdateView):
+    """Редактирование промокода"""
+    model = LoyaltyPromoCode
+    form_class = LoyaltyPromoCodeForm
+    template_name = "moderations/loyalty/promocode_form.html"
+    success_url = reverse_lazy("moderation:loyalty_promocodes")
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class LoyaltyPromoCodeDeleteView(DeleteView):
+    """Удаление промокода"""
+    model = LoyaltyPromoCode
+    success_url = reverse_lazy("moderation:loyalty_promocodes")
+
+@login_required
+def loyalty_settings(request):
+    """Настройки программы лояльности"""
+    settings, created = LoyaltySettings.objects.get_or_create(id=1)
+
+    if request.method == 'POST':
+        form = LoyaltySettingsForm(request.POST, instance=settings)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Настройки сохранены")
+            return redirect('moderation:loyalty_settings')
+    else:
+        form = LoyaltySettingsForm(instance=settings)
+
+    return render(request, 'moderations/loyalty/settings.html', {
+        'form': form,
+        'settings': settings
+    })
+
+@login_required
+def loyalty_notifications(request):
+    """Уведомления программы лояльности"""
+    notifications = LoyaltyNotification.objects.select_related('user').order_by('-created_at')
+
+    # Фильтрация
+    user_id = request.GET.get('user')
+    if user_id:
+        notifications = notifications.filter(user_id=user_id)
+
+    type_filter = request.GET.get('type')
+    if type_filter:
+        notifications = notifications.filter(type=type_filter)
+
+    is_read = request.GET.get('is_read')
+    if is_read == 'true':
+        notifications = notifications.filter(is_read=True)
+    elif is_read == 'false':
+        notifications = notifications.filter(is_read=False)
+
+    # Пагинация
+    paginator = Paginator(notifications, 30)
+    page = request.GET.get('page')
+    notifications_page = paginator.get_page(page)
+
+    return render(request, 'moderations/loyalty/notifications.html', {
+        'notifications': notifications_page,
+        'users': UserLoyalty.objects.select_related('user'),
+        'types': LoyaltyNotification.TYPES,
+        'filters': {
+            'user': user_id,
+            'type': type_filter,
+            'is_read': is_read,
+        }
+    })
+
+@login_required
+def mark_notification_read(request, notification_id):
+    """Отметить уведомление как прочитанное"""
+    if request.method == 'POST':
+        notification = get_object_or_404(LoyaltyNotification, id=notification_id)
+        notification.is_read = True
+        notification.save()
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({'status': 'error'}, status=400)
+
+@login_required
+def loyalty_statistics(request):
+    """Статистика программы лояльности (API)"""
+    # Статистика по дням
+    last_30_days = timezone.now() - timedelta(days=30)
+    daily_stats = LoyaltyTransaction.objects.filter(
+        created_at__gte=last_30_days
+    ).extra({'date': "date(created_at)"}).values('date').annotate(
+        earned=Sum('points', filter=Q(type='earn')),
+        spent=Sum('points', filter=Q(type='spend'))
+    ).order_by('date')
+
+    # Статистика по уровням
+    level_stats = []
+    for level in LoyaltyLevel.objects.all():
+        users = UserLoyalty.objects.filter(level=level)
+        level_stats.append({
+            'name': level.name,
+            'color': level.color,
+            'users_count': users.count(),
+            'total_points': users.aggregate(total=Sum('points'))['total'] or 0
+        })
+
+    # Статистика по типам транзакций
+    transaction_stats = LoyaltyTransaction.objects.values('type').annotate(
+        total=Sum('points'),
+        count=Count('id')
+    )
+
+    return JsonResponse({
+        'daily_stats': list(daily_stats),
+        'level_stats': level_stats,
+        'transaction_stats': list(transaction_stats)
+    })
+
+
+@login_required
+def reset_loyalty_settings(request):
+    """Сброс настроек лояльности к значениям по умолчанию"""
+    if request.method == 'POST':
+        settings, created = LoyaltySettings.objects.get_or_create(id=1)
+        settings.welcome_points = 100
+        settings.welcome_points_enabled = True
+        settings.registration_points = 0
+        settings.birthday_points = 500
+        settings.birthday_points_enabled = True
+        settings.review_points = 50
+        settings.review_points_enabled = True
+        settings.notify_on_points_earn = True
+        settings.notify_on_level_up = True
+        settings.notify_on_points_expire = True
+        settings.save()
+
+        return JsonResponse({'status': 'success'})
+
+    return JsonResponse({'status': 'error'}, status=400)

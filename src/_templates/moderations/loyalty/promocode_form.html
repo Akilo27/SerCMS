@@ -1,0 +1,270 @@
+{% extends 'moderations/base.html' %}
+{% load static i18n %}
+
+{% block title %}{% if form.instance.pk %}{% trans "Редактирование промокода" %}{% else %}{% trans "Создание промокода" %}{% endif %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="page-title">
+                {% if form.instance.pk %}
+                    <i class="ri-edit-line me-1"></i> {% trans "Редактирование промокода" %}
+                {% else %}
+                    <i class="ri-add-line me-1"></i> {% trans "Создание промокода" %}
+                {% endif %}
+            </h4>
+            <div class="page-title-right">
+                <a href="{% url 'moderation:loyalty_promocodes' %}" class="btn btn-secondary">
+                    <i class="ri-arrow-left-line"></i> {% trans "Назад" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{% trans "Основная информация" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.code.id_for_label }}" class="form-label">
+                                {% trans "Код промокода" %} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.code }}
+                            {% if form.code.errors %}
+                            <div class="text-danger">{{ form.code.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">{% trans "Только латинские буквы и цифры, без пробелов" %}</small>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.name.id_for_label }}" class="form-label">
+                                {% trans "Название" %}
+                            </label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                            <div class="text-danger">{{ form.name.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.description.id_for_label }}" class="form-label">
+                            {% trans "Описание" %}
+                        </label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                        <div class="text-danger">{{ form.description.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{% trans "Настройки скидки" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.discount_type.id_for_label }}" class="form-label">
+                                {% trans "Тип скидки" %}
+                            </label>
+                            {{ form.discount_type }}
+                            {% if form.discount_type.errors %}
+                            <div class="text-danger">{{ form.discount_type.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.discount_value.id_for_label }}" class="form-label">
+                                {% trans "Значение скидки" %}
+                            </label>
+                            {{ form.discount_value }}
+                            {% if form.discount_value.errors %}
+                            <div class="text-danger">{{ form.discount_value.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">
+                                {% trans "Для процентов - число от 1 до 100, для фиксированной - сумма в рублях" %}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{% trans "Ограничения" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.min_order_amount.id_for_label }}" class="form-label">
+                                {% trans "Минимальная сумма заказа" %}
+                            </label>
+                            {{ form.min_order_amount }}
+                            {% if form.min_order_amount.errors %}
+                            <div class="text-danger">{{ form.min_order_amount.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">{% trans "0 - без ограничений" %}</small>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.max_uses.id_for_label }}" class="form-label">
+                                {% trans "Максимальное количество использований" %}
+                            </label>
+                            {{ form.max_uses }}
+                            {% if form.max_uses.errors %}
+                            <div class="text-danger">{{ form.max_uses.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">{% trans "Количество раз, которое можно использовать промокод" %}</small>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.valid_from.id_for_label }}" class="form-label">
+                                {% trans "Действует с" %}
+                            </label>
+                            {{ form.valid_from }}
+                            {% if form.valid_from.errors %}
+                            <div class="text-danger">{{ form.valid_from.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.valid_to.id_for_label }}" class="form-label">
+                                {% trans "Действует до" %}
+                            </label>
+                            {{ form.valid_to }}
+                            {% if form.valid_to.errors %}
+                            <div class="text-danger">{{ form.valid_to.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">{% trans "Оставьте пустым для бессрочного действия" %}</small>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.level_required.id_for_label }}" class="form-label">
+                            {% trans "Требуемый уровень" %}
+                        </label>
+                        {{ form.level_required }}
+                        {% if form.level_required.errors %}
+                        <div class="text-danger">{{ form.level_required.errors }}</div>
+                        {% endif %}
+                        <small class="text-muted">{% trans "Оставьте пустым для всех уровней" %}</small>
+                    </div>
+                    
+                    <div class="form-check form-switch">
+                        {{ form.is_active }}
+                        <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                            {% trans "Активен" %}
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-3 mb-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="ri-save-line"></i> {% trans "Сохранить" %}
+                </button>
+                <a href="{% url 'moderation:loyalty_promocodes' %}" class="btn btn-secondary">
+                    {% trans "Отмена" %}
+                </a>
+            </div>
+        </form>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Предпросмотр" %}</h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="border rounded p-4 mb-3" id="previewCode">
+                    <strong class="fs-3 text-primary">ПРОМОКОД</strong>
+                </div>
+                <div id="previewDiscount">
+                    <span class="badge bg-success fs-6 p-2">—</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Справка" %}</h5>
+            </div>
+            <div class="card-body">
+                <h6>{% trans "Рекомендации" %}</h6>
+                <ul class="small">
+                    <li>Используйте понятные и запоминающиеся коды</li>
+                    <li>Устанавливайте реалистичные сроки действия</li>
+                    <li>Ограничивайте количество использований для эксклюзивных промокодов</li>
+                    <li>Привязывайте промокоды к уровням для мотивации клиентов</li>
+                </ul>
+                <hr>
+                <h6>{% trans "Примеры кодов" %}</h6>
+                <ul class="small">
+                    <li><code>WELCOME2024</code> - приветственный</li>
+                    <li><code>BIRTHDAY</code> - ко дню рождения</li>
+                    <li><code>LOYALTY50</code> - для постоянных клиентов</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block javascript %}
+<script>
+    // Предпросмотр кода
+    $('#id_code').on('input', function() {
+        const code = $(this).val().toUpperCase() || 'ПРОМОКОД';
+        $('#previewCode strong').text(code);
+    });
+    
+    // Предпросмотр скидки
+    function updateDiscountPreview() {
+        const type = $('#id_discount_type').val();
+        const value = $('#id_discount_value').val();
+        
+        let text = '';
+        let color = 'bg-success';
+        
+        if (type === 'percent') {
+            text = value + '%';
+        } else if (type === 'fixed') {
+            text = value + ' ₽';
+        } else {
+            text = '—';
+        }
+        
+        $('#previewDiscount span').text(text);
+    }
+    
+    $('#id_discount_type, #id_discount_value').on('change input', updateDiscountPreview);
+    updateDiscountPreview();
+    
+    // Генерация кода из названия
+    $('#id_name').on('blur', function() {
+        if (!$('#id_code').val()) {
+            let code = $(this).val()
+                .toUpperCase()
+                .replace(/[^A-Z0-9]/g, '')
+                .substring(0, 20);
+            if (code) {
+                $('#id_code').val(code);
+                $('#previewCode strong').text(code);
+            }
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}

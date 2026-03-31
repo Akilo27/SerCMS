@@ -1583,5 +1583,393 @@ class AdditionalService(models.Model):
         return f"{self.get_service_category_display()}: {self.integration.name}"
 
 
+class LoyaltyProgram(models.Model):
+    """Основная программа лояльности"""
+    name = models.CharField(max_length=100, verbose_name="Название программы")
+    is_active = models.BooleanField(default=True, verbose_name="Активна")
+    description = models.TextField(blank=True, verbose_name="Описание")
+
+    # Правила начисления баллов
+    earn_rules = models.JSONField(default=dict, verbose_name="Правила начисления",
+                                  help_text='{"percent": 5, "fixed": 0, "min_order": 1000}')
+
+    # Правила списания баллов
+    burn_rules = models.JSONField(default=dict, verbose_name="Правила списания",
+                                  help_text='{"max_percent": 50, "min_points": 100}')
+
+    # Срок действия баллов
+    points_validity_days = models.IntegerField(default=365, verbose_name="Срок действия баллов (дней)")
+
+    # Минимальная сумма для начисления
+    min_order_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0,
+                                           verbose_name="Минимальная сумма заказа")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Программа лояльности"
+        verbose_name_plural = "Программы лояльности"
+
+    def __str__(self):
+        return self.name
+
+
+class LoyaltyLevel(models.Model):
+    """Уровни лояльности"""
+    program = models.ForeignKey(LoyaltyProgram, on_delete=models.CASCADE,
+                                related_name='levels', verbose_name="Программа")
+    name = models.CharField(max_length=50, verbose_name="Название уровня")
+    icon = models.CharField(max_length=50, blank=True, verbose_name="Иконка")
+    color = models.CharField(max_length=20, default='#4a90e2', verbose_name="Цвет")
+
+    # Условия
+    min_points = models.IntegerField(default=0, verbose_name="Минимальное количество баллов")
+    min_orders = models.IntegerField(default=0, verbose_name="Минимальное количество заказов")
+    min_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0,
+                                     verbose_name="Минимальная сумма покупок")
+
+    # Бонусы уровня
+    points_multiplier = models.FloatField(default=1.0, verbose_name="Множитель баллов")
+    discount_percent = models.FloatField(default=0, verbose_name="Скидка (%)")
+    free_delivery = models.BooleanField(default=False, verbose_name="Бесплатная доставка")
+    priority_support = models.BooleanField(default=False, verbose_name="Приоритетная поддержка")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Уровень лояльности"
+        verbose_name_plural = "Уровни лояльности"
+        ordering = ['min_points']
+
+    def __str__(self):
+        return f"{self.program.name} - {self.name}"
+
+
+class UserLoyalty(models.Model):
+    """Данные лояльности пользователя"""
+    user = models.OneToOneField(User, on_delete=models.CASCADE,
+                                related_name='loyalty', verbose_name="Пользователь")
+    program = models.ForeignKey(LoyaltyProgram, on_delete=models.CASCADE,
+                                verbose_name="Программа")
+    level = models.ForeignKey(LoyaltyLevel, on_delete=models.SET_NULL,
+                              null=True, blank=True, verbose_name="Текущий уровень")
+
+    # Баллы
+    points = models.IntegerField(default=0, verbose_name="Текущие баллы")
+    total_points_earned = models.IntegerField(default=0, verbose_name="Всего заработано")
+    total_points_spent = models.IntegerField(default=0, verbose_name="Всего потрачено")
+
+    # Статистика покупок
+    total_orders = models.IntegerField(default=0, verbose_name="Всего заказов")
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0,
+                                       verbose_name="Сумма покупок")
+    last_order_date = models.DateTimeField(null=True, blank=True, verbose_name="Дата последнего заказа")
+
+    # Дата вступления в программу
+    joined_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата вступления")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
+
+    class Meta:
+        verbose_name = "Данные лояльности"
+        verbose_name_plural = "Данные лояльности"
+
+    def __str__(self):
+        return f"{self.user.username} - {self.points} баллов"
+
+    def update_level(self):
+        """Обновить уровень пользователя"""
+        levels = self.program.levels.filter(
+            min_points__lte=self.points,
+            min_orders__lte=self.total_orders,
+            min_amount__lte=self.total_amount
+        ).order_by('-min_points')
+
+        if levels.exists():
+            new_level = levels.first()
+            if self.level != new_level:
+                self.level = new_level
+                self.save()
+
+                # Создаем уведомление о повышении уровня
+                LoyaltyNotification.objects.create(
+                    user=self.user,
+                    title=f"Повышение уровня до {new_level.name}",
+                    message=f"Поздравляем! Вы достигли уровня {new_level.name}. " +
+                            f"Теперь вам доступны: {int(new_level.discount_percent)}% скидка" +
+                            (", бесплатная доставка" if new_level.free_delivery else ""),
+                    type='level_up'
+                )
+
+    def add_points(self, points, reason, order_id=None):
+        """Добавить баллы пользователю"""
+        if points <= 0:
+            return
+
+        # Проверяем множитель уровня
+        if self.level and self.level.points_multiplier > 1:
+            points = int(points * self.level.points_multiplier)
+
+        # Создаем транзакцию
+        transaction = LoyaltyTransaction.objects.create(
+            user=self.user,
+            type='earn',
+            points=points,
+            balance_before=self.points,
+            balance_after=self.points + points,
+            reason=reason,
+            order_id=order_id
+        )
+
+        # Обновляем баланс
+        self.points += points
+        self.total_points_earned += points
+        self.save()
+
+        # Проверяем срок действия баллов
+        if self.program.points_validity_days > 0:
+            PointsExpiry.objects.create(
+                user=self.user,
+                points=points,
+                transaction=transaction,
+                expires_at=timezone.now() + timezone.timedelta(days=self.program.points_validity_days)
+            )
+
+        # Обновляем уровень
+        self.update_level()
+
+    def spend_points(self, points, reason, order_id=None):
+        """Списать баллы"""
+        if points <= 0:
+            return False
+
+        if self.points < points:
+            return False
+
+        # Проверяем лимит списания
+        if self.program.burn_rules.get('max_percent', 100) > 0:
+            # Проверка будет в процессе оформления заказа
+            pass
+
+        # Создаем транзакцию
+        LoyaltyTransaction.objects.create(
+            user=self.user,
+            type='spend',
+            points=points,
+            balance_before=self.points,
+            balance_after=self.points - points,
+            reason=reason,
+            order_id=order_id
+        )
+
+        # Обновляем баланс
+        self.points -= points
+        self.total_points_spent += points
+        self.save()
+
+        return True
+
+
+class LoyaltyTransaction(models.Model):
+    """Транзакции баллов"""
+    TYPES = [
+        ('earn', 'Начисление'),
+        ('spend', 'Списание'),
+        ('expire', 'Сгорание'),
+        ('adjust', 'Корректировка'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE,
+                             related_name='loyalty_transactions', verbose_name="Пользователь")
+    type = models.CharField(max_length=10, choices=TYPES, verbose_name="Тип")
+    points = models.IntegerField(verbose_name="Количество баллов")
+    balance_before = models.IntegerField(verbose_name="Баланс до")
+    balance_after = models.IntegerField(verbose_name="Баланс после")
+
+    reason = models.CharField(max_length=200, verbose_name="Причина")
+    order_id = models.PositiveIntegerField(null=True, blank=True, verbose_name="ID заказа")
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата")
+
+    class Meta:
+        verbose_name = "Транзакция баллов"
+        verbose_name_plural = "Транзакции баллов"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.get_type_display()}: {self.points}"
+
+
+class PointsExpiry(models.Model):
+    """Срок действия баллов"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE,
+                             related_name='points_expiry', verbose_name="Пользователь")
+    points = models.IntegerField(verbose_name="Количество баллов")
+    transaction = models.ForeignKey(LoyaltyTransaction, on_delete=models.CASCADE,
+                                    verbose_name="Транзакция")
+    expires_at = models.DateTimeField(verbose_name="Дата истечения")
+    is_expired = models.BooleanField(default=False, verbose_name="Истекли")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Срок действия баллов"
+        verbose_name_plural = "Сроки действия баллов"
+
+    def __str__(self):
+        return f"{self.user.username} - {self.points} баллов до {self.expires_at}"
+
+
+class LoyaltyPromoCode(models.Model):
+    """Промокоды программы лояльности"""
+    DISCOUNT_TYPES = [
+        ('percent', 'Процент'),
+        ('fixed', 'Фиксированная'),
+        ('points', 'Баллы'),
+    ]
+
+    code = models.CharField(max_length=50, unique=True, verbose_name="Промокод")
+    name = models.CharField(max_length=100, verbose_name="Название")
+    description = models.TextField(blank=True, verbose_name="Описание")
+
+    discount_type = models.CharField(max_length=10, choices=DISCOUNT_TYPES, verbose_name="Тип скидки")
+    discount_value = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Значение скидки")
+
+    # Ограничения
+    min_order_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0,
+                                           verbose_name="Минимальная сумма заказа")
+    max_uses = models.IntegerField(default=1, verbose_name="Максимальное количество использований")
+    used_count = models.IntegerField(default=0, verbose_name="Использовано раз")
+
+    # Даты действия
+    valid_from = models.DateTimeField(default=timezone.now, verbose_name="Действует с")
+    valid_to = models.DateTimeField(null=True, blank=True, verbose_name="Действует до")
+
+    # Связь с уровнями
+    level_required = models.ForeignKey(LoyaltyLevel, on_delete=models.SET_NULL,
+                                       null=True, blank=True, verbose_name="Требуемый уровень")
+
+    is_active = models.BooleanField(default=True, verbose_name="Активен")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Промокод"
+        verbose_name_plural = "Промокоды"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.code
+
+    def is_valid(self, user=None, order_amount=0):
+        """Проверка валидности промокода"""
+        now = timezone.now()
+
+        if not self.is_active:
+            return False, "Промокод неактивен"
+
+        if self.valid_to and now > self.valid_to:
+            return False, "Срок действия промокода истек"
+
+        if now < self.valid_from:
+            return False, "Промокод еще не активен"
+
+        if self.used_count >= self.max_uses:
+            return False, "Промокод уже использован максимальное количество раз"
+
+        if order_amount < self.min_order_amount:
+            return False, f"Минимальная сумма заказа: {self.min_order_amount} ₽"
+
+        if self.level_required and user:
+            try:
+                user_loyalty = UserLoyalty.objects.get(user=user)
+                if user_loyalty.level != self.level_required:
+                    return False, f"Требуется уровень: {self.level_required.name}"
+            except UserLoyalty.DoesNotExist:
+                return False, "Пользователь не участвует в программе лояльности"
+
+        return True, "OK"
+
+
+class LoyaltyPromoCodeUsage(models.Model):
+    """Использование промокодов"""
+    promo_code = models.ForeignKey(LoyaltyPromoCode, on_delete=models.CASCADE,
+                                   related_name='usages', verbose_name="Промокод")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Пользователь")
+    order_id = models.PositiveIntegerField(verbose_name="ID заказа")
+    discount_amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Сумма скидки")
+
+    used_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата использования")
+
+    class Meta:
+        verbose_name = "Использование промокода"
+        verbose_name_plural = "Использования промокодов"
+        unique_together = ['promo_code', 'order_id']
+
+    def __str__(self):
+        return f"{self.promo_code.code} - {self.user.username}"
+
+
+class LoyaltyNotification(models.Model):
+    """Уведомления программы лояльности"""
+    TYPES = [
+        ('level_up', 'Повышение уровня'),
+        ('points_earn', 'Начисление баллов'),
+        ('points_expire', 'Сгорание баллов'),
+        ('promo', 'Промокод'),
+        ('birthday', 'День рождения'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE,
+                             related_name='loyalty_notifications', verbose_name="Пользователь")
+    title = models.CharField(max_length=200, verbose_name="Заголовок")
+    message = models.TextField(verbose_name="Сообщение")
+    type = models.CharField(max_length=20, choices=TYPES, verbose_name="Тип")
+
+    is_read = models.BooleanField(default=False, verbose_name="Прочитано")
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата")
+
+    class Meta:
+        verbose_name = "Уведомление"
+        verbose_name_plural = "Уведомления"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.title}"
+
+
+class LoyaltySettings(models.Model):
+    """Глобальные настройки программы лояльности"""
+    # Приветственные баллы
+    welcome_points = models.IntegerField(default=100, verbose_name="Приветственные баллы")
+    welcome_points_enabled = models.BooleanField(default=True, verbose_name="Давать приветственные баллы")
+
+    # Баллы за регистрацию
+    registration_points = models.IntegerField(default=0, verbose_name="Баллы за регистрацию")
+
+    # Баллы за день рождения
+    birthday_points = models.IntegerField(default=500, verbose_name="Баллы в день рождения")
+    birthday_points_enabled = models.BooleanField(default=True, verbose_name="Давать баллы в день рождения")
+
+    # Баллы за отзывы
+    review_points = models.IntegerField(default=50, verbose_name="Баллы за отзыв")
+    review_points_enabled = models.BooleanField(default=True, verbose_name="Давать баллы за отзывы")
+
+    # Настройки уведомлений
+    notify_on_points_earn = models.BooleanField(default=True, verbose_name="Уведомлять о начислении баллов")
+    notify_on_level_up = models.BooleanField(default=True, verbose_name="Уведомлять о повышении уровня")
+    notify_on_points_expire = models.BooleanField(default=True, verbose_name="Уведомлять о сгорании баллов")
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Настройки лояльности"
+        verbose_name_plural = "Настройки лояльности"
+
+    def __str__(self):
+        return "Глобальные настройки"
 
 

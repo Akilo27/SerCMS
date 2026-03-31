@@ -1,0 +1,224 @@
+{% extends 'moderations/base.html' %}
+{% load static i18n %}
+
+{% block title %}{% trans "Настройки программы лояльности" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="page-title">
+                <i class="ri-settings-4-line me-1"></i> {% trans "Настройки программы лояльности" %}
+            </h4>
+            <div class="page-title-right">
+                <a href="{% url 'moderation:loyalty_dashboard' %}" class="btn btn-secondary">
+                    <i class="ri-arrow-left-line"></i> {% trans "Назад" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{% trans "Начисление баллов" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="form-check form-switch">
+                                {{ form.welcome_points_enabled }}
+                                <label class="form-check-label" for="{{ form.welcome_points_enabled.id_for_label }}">
+                                    {% trans "Давать приветственные баллы" %}
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.welcome_points.id_for_label }}" class="form-label">
+                                {% trans "Количество приветственных баллов" %}
+                            </label>
+                            {{ form.welcome_points }}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.registration_points.id_for_label }}" class="form-label">
+                                {% trans "Баллы за регистрацию" %}
+                            </label>
+                            {{ form.registration_points }}
+                            <small class="text-muted">{% trans "0 - не начислять" %}</small>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="form-check form-switch mt-4">
+                                {{ form.birthday_points_enabled }}
+                                <label class="form-check-label" for="{{ form.birthday_points_enabled.id_for_label }}">
+                                    {% trans "Давать баллы в день рождения" %}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.birthday_points.id_for_label }}" class="form-label">
+                                {% trans "Баллы в день рождения" %}
+                            </label>
+                            {{ form.birthday_points }}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="form-check form-switch mt-4">
+                                {{ form.review_points_enabled }}
+                                <label class="form-check-label" for="{{ form.review_points_enabled.id_for_label }}">
+                                    {% trans "Давать баллы за отзывы" %}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.review_points.id_for_label }}" class="form-label">
+                                {% trans "Баллы за отзыв" %}
+                            </label>
+                            {{ form.review_points }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{% trans "Уведомления" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-check form-switch mb-3">
+                        {{ form.notify_on_points_earn }}
+                        <label class="form-check-label" for="{{ form.notify_on_points_earn.id_for_label }}">
+                            {% trans "Уведомлять о начислении баллов" %}
+                        </label>
+                    </div>
+
+                    <div class="form-check form-switch mb-3">
+                        {{ form.notify_on_level_up }}
+                        <label class="form-check-label" for="{{ form.notify_on_level_up.id_for_label }}">
+                            {% trans "Уведомлять о повышении уровня" %}
+                        </label>
+                    </div>
+
+                    <div class="form-check form-switch">
+                        {{ form.notify_on_points_expire }}
+                        <label class="form-check-label" for="{{ form.notify_on_points_expire.id_for_label }}">
+                            {% trans "Уведомлять о сгорании баллов" %}
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-3 mb-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="ri-save-line"></i> {% trans "Сохранить настройки" %}
+                </button>
+                <button type="button" class="btn btn-secondary ms-2" onclick="resetDefaults()">
+                    <i class="ri-refresh-line"></i> {% trans "Сбросить по умолчанию" %}
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Текущие настройки" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <small class="text-muted d-block">{% trans "Приветственные баллы" %}</small>
+                    <strong>
+                        {% if settings.welcome_points_enabled %}
+                            {{ settings.welcome_points }} {% trans "баллов" %}
+                        {% else %}
+                            {% trans "Отключены" %}
+                        {% endif %}
+                    </strong>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted d-block">{% trans "Баллы за регистрацию" %}</small>
+                    <strong>{{ settings.registration_points }} {% trans "баллов" %}</strong>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted d-block">{% trans "Баллы в день рождения" %}</small>
+                    <strong>
+                        {% if settings.birthday_points_enabled %}
+                            {{ settings.birthday_points }} {% trans "баллов" %}
+                        {% else %}
+                            {% trans "Отключены" %}
+                        {% endif %}
+                    </strong>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted d-block">{% trans "Баллы за отзыв" %}</small>
+                    <strong>
+                        {% if settings.review_points_enabled %}
+                            {{ settings.review_points }} {% trans "баллов" %}
+                        {% else %}
+                            {% trans "Отключены" %}
+                        {% endif %}
+                    </strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Информация" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="ri-information-line"></i>
+                    <strong>{% trans "Как это работает" %}</strong>
+                    <ul class="mt-2 mb-0">
+                        <li>Приветственные баллы начисляются при первом заказе</li>
+                        <li>Баллы за регистрацию начисляются после подтверждения email</li>
+                        <li>Баллы в день рождения начисляются автоматически в день рождения пользователя</li>
+                        <li>Баллы за отзывы начисляются после модерации отзыва</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block javascript %}
+<script>
+    function resetDefaults() {
+        Swal.fire({
+            title: '{% trans "Сбросить настройки?" %}',
+            text: '{% trans "Все настройки будут возвращены к значениям по умолчанию" %}',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: '{% trans "Да, сбросить" %}',
+            cancelButtonText: '{% trans "Отмена" %}'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '{% url "moderation:loyalty_settings_reset" %}',
+                    method: 'POST',
+                    data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+                    success: function() {
+                        location.reload();
+                    }
+                });
+            }
+        });
+    }
+</script>
+{% endblock %}
+{% endblock %}

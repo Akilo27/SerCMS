@@ -1,0 +1,216 @@
+{% extends 'moderations/base.html' %}
+{% load static i18n %}
+
+{% block title %}{% trans "Участники программы лояльности" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="page-title">
+                <i class="ri-group-line me-1"></i> {% trans "Участники программы лояльности" %}
+            </h4>
+            <div class="page-title-right">
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addPointsModal">
+                    <i class="ri-add-line"></i> {% trans "Начислить баллы" %}
+                </button>
+                <a href="{% url 'moderation:loyalty_dashboard' %}" class="btn btn-secondary ms-2">
+                    <i class="ri-arrow-left-line"></i> {% trans "Назад" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Фильтры -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-3">
+                        {{ filter_form.search }}
+                    </div>
+                    <div class="col-md-2">
+                        {{ filter_form.level }}
+                    </div>
+                    <div class="col-md-2">
+                        {{ filter_form.min_points }}
+                    </div>
+                    <div class="col-md-2">
+                        {{ filter_form.max_points }}
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="ri-filter-line"></i> {% trans "Фильтр" %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Таблица пользователей -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Пользователь" %}</th>
+                                <th>{% trans "Уровень" %}</th>
+                                <th>{% trans "Баллы" %}</th>
+                                <th>{% trans "Заказов" %}</th>
+                                <th>{% trans "Сумма покупок" %}</th>
+                                <th>{% trans "Дата регистрации" %}</th>
+                                <th>{% trans "Действия" %}</th>
+                            </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="{{ user.user.avatar.url|default:'/static/images/default-avatar.png' }}" 
+                                             class="rounded-circle me-2" width="40" height="40">
+                                        <div>
+                                            <strong>{{ user.user.get_full_name|default:user.user.username }}</strong>
+                                            <br>
+                                            <small class="text-muted">{{ user.user.email }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if user.level %}
+                                    <span class="badge" style="background: {{ user.level.color }}; color: white; padding: 5px 10px;">
+                                        {{ user.level.name }}
+                                    </span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">{% trans "Базовый" %}</span>
+                                    {% endif %}
+                                 </td>
+                                 <td>
+                                    <strong class="{% if user.points > 1000 %}text-success{% elif user.points > 500 %}text-warning{% endif %}">
+                                        {{ user.points }}
+                                    </strong>
+                                    <br>
+                                    <small class="text-muted">
+                                        {% trans "Заработано:" %} {{ user.total_points_earned }}
+                                    </small>
+                                 </td>
+                                 <td>{{ user.total_orders }}</td>
+                                 <td>{{ user.total_amount|floatformat:0 }} ₽</td>
+                                 <td><small>{{ user.joined_at|date:"d.m.Y" }}</small></td>
+                                 <td>
+                                    <div class="btn-group">
+                                        <a href="{% url 'moderation:loyalty_user_detail' user.id %}" class="btn btn-sm btn-outline-info">
+                                            <i class="ri-eye-line"></i>
+                                        </a>
+                                        <button class="btn btn-sm btn-outline-success" onclick="addPoints({{ user.user.id }}, '{{ user.user.username }}')">
+                                            <i class="ri-add-line"></i>
+                                        </button>
+                                    </div>
+                                 </td>
+                             </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center py-5">
+                                    <i class="ri-group-line fs-48 text-muted"></i>
+                                    <p class="mt-2">{% trans "Нет участников" %}</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Пагинация -->
+                {% if page_obj.has_other_pages %}
+                <div class="mt-3">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-end">
+                            {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="ri-arrow-left-s-line"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+
+                            {% for num in page_obj.paginator.page_range %}
+                            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                                <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                            </li>
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="ri-arrow-right-s-line"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal начисления баллов -->
+<div class="modal fade" id="addPointsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{% trans "Начисление баллов" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'moderation:add_loyalty_points' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">{% trans "Пользователь" %}</label>
+                        <select name="user" class="form-control" required>
+                            <option value="">{% trans "Выберите пользователя..." %}</option>
+                            {% for user in users %}
+                            <option value="{{ user.user.id }}">{{ user.user.get_full_name|default:user.user.username }} ({{ user.user.email }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{% trans "Количество баллов" %}</label>
+                        <input type="number" name="points" class="form-control" required min="1">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{% trans "Причина" %}</label>
+                        <input type="text" name="reason" class="form-control" required placeholder="Например: Промоакция, Компенсация">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Отмена" %}</button>
+                    <button type="submit" class="btn btn-primary">{% trans "Начислить" %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% block javascript %}
+<script>
+    function addPoints(userId, username) {
+        const select = document.querySelector('select[name="user"]');
+        for (let option of select.options) {
+            if (option.value == userId) {
+                option.selected = true;
+                break;
+            }
+        }
+        $('#addPointsModal').modal('show');
+    }
+</script>
+{% endblock %}
+{% endblock %}

@@ -19,7 +19,8 @@ from .models import (
     Ticket,
     Groups,
     Collaborations, EmailTemplate, CallRecord, CallSettings, VoiceMenu, CallQueue, PhoneNumber, IntegrationService,
-    AdditionalService, MessengerIntegration, DeliveryIntegration, PaymentIntegration,
+    AdditionalService, MessengerIntegration, DeliveryIntegration, PaymentIntegration, LoyaltyLevel, LoyaltySettings,
+    LoyaltyPromoCode, LoyaltyProgram,
 )
 from _project.settings import LANGUAGES
 
@@ -3064,3 +3065,127 @@ class TestConnectionForm(forms.Form):
     """Форма тестирования подключения"""
     integration = forms.ModelChoiceField(queryset=IntegrationService.objects.filter(is_active=True),
                                          widget=forms.Select(attrs={'class': 'form-control'}))
+
+
+class LoyaltyProgramForm(forms.ModelForm):
+    """Форма программы лояльности"""
+
+    class Meta:
+        model = LoyaltyProgram
+        fields = ['name', 'is_active', 'description', 'earn_rules', 'burn_rules',
+                  'points_validity_days', 'min_order_amount']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'earn_rules': forms.Textarea(attrs={'class': 'form-control', 'rows': 5,
+                                                'placeholder': '{"percent": 5, "fixed": 0, "min_order": 1000}'}),
+            'burn_rules': forms.Textarea(attrs={'class': 'form-control', 'rows': 3,
+                                                'placeholder': '{"max_percent": 50, "min_points": 100}'}),
+            'points_validity_days': forms.NumberInput(attrs={'class': 'form-control'}),
+            'min_order_amount': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+        }
+
+    def clean_earn_rules(self):
+        data = self.cleaned_data.get('earn_rules')
+        if isinstance(data, str):
+            try:
+                import json
+                return json.loads(data)
+            except json.JSONDecodeError:
+                raise forms.ValidationError("Неверный формат JSON")
+        return data
+
+
+class LoyaltyLevelForm(forms.ModelForm):
+    """Форма уровня лояльности"""
+
+    class Meta:
+        model = LoyaltyLevel
+        fields = ['name', 'icon', 'color', 'min_points', 'min_orders', 'min_amount',
+                  'points_multiplier', 'discount_percent', 'free_delivery', 'priority_support']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'icon': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ri-star-line'}),
+            'color': forms.TextInput(attrs={'class': 'form-control', 'type': 'color'}),
+            'min_points': forms.NumberInput(attrs={'class': 'form-control'}),
+            'min_orders': forms.NumberInput(attrs={'class': 'form-control'}),
+            'min_amount': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'points_multiplier': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
+            'discount_percent': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
+            'free_delivery': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'priority_support': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+
+class LoyaltyPromoCodeForm(forms.ModelForm):
+    """Форма промокода"""
+
+    class Meta:
+        model = LoyaltyPromoCode
+        fields = ['code', 'name', 'description', 'discount_type', 'discount_value',
+                  'min_order_amount', 'max_uses', 'valid_from', 'valid_to',
+                  'level_required', 'is_active']
+        widgets = {
+            'code': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'WELCOME2024'}),
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'discount_type': forms.Select(attrs={'class': 'form-control'}),
+            'discount_value': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'min_order_amount': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'max_uses': forms.NumberInput(attrs={'class': 'form-control'}),
+            'valid_from': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
+            'valid_to': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
+            'level_required': forms.Select(attrs={'class': 'form-control'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+    def clean_code(self):
+        code = self.cleaned_data.get('code', '').upper()
+        if LoyaltyPromoCode.objects.filter(code=code).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError("Промокод с таким кодом уже существует")
+        return code
+
+
+class LoyaltySettingsForm(forms.ModelForm):
+    """Форма настроек лояльности"""
+
+    class Meta:
+        model = LoyaltySettings
+        fields = ['welcome_points', 'welcome_points_enabled', 'registration_points',
+                  'birthday_points', 'birthday_points_enabled', 'review_points',
+                  'review_points_enabled', 'notify_on_points_earn', 'notify_on_level_up',
+                  'notify_on_points_expire']
+        widgets = {
+            'welcome_points': forms.NumberInput(attrs={'class': 'form-control'}),
+            'welcome_points_enabled': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'registration_points': forms.NumberInput(attrs={'class': 'form-control'}),
+            'birthday_points': forms.NumberInput(attrs={'class': 'form-control'}),
+            'birthday_points_enabled': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'review_points': forms.NumberInput(attrs={'class': 'form-control'}),
+            'review_points_enabled': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'notify_on_points_earn': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'notify_on_level_up': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'notify_on_points_expire': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+
+class AddPointsForm(forms.Form):
+    """Форма начисления баллов"""
+    user = forms.ModelChoiceField(queryset=User.objects.filter(is_active=True),
+                                  widget=forms.Select(attrs={'class': 'form-control'}))
+    points = forms.IntegerField(min_value=1, widget=forms.NumberInput(attrs={'class': 'form-control'}))
+    reason = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Причина начисления'}))
+
+
+class LoyaltyFilterForm(forms.Form):
+    """Форма фильтрации пользователей лояльности"""
+    search = forms.CharField(required=False, widget=forms.TextInput(
+        attrs={'class': 'form-control', 'placeholder': 'Поиск по пользователю'}))
+    level = forms.ModelChoiceField(required=False, queryset=LoyaltyLevel.objects.all(),
+                                   widget=forms.Select(attrs={'class': 'form-control'}))
+    min_points = forms.IntegerField(required=False, widget=forms.NumberInput(
+        attrs={'class': 'form-control', 'placeholder': 'Мин. баллы'}))
+    max_points = forms.IntegerField(required=False, widget=forms.NumberInput(
+        attrs={'class': 'form-control', 'placeholder': 'Макс. баллы'}))

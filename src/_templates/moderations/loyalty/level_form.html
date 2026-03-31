@@ -1,0 +1,274 @@
+{% extends 'moderations/base.html' %}
+{% load static i18n %}
+
+{% block title %}{% if form.instance.pk %}{% trans "Редактирование уровня" %}{% else %}{% trans "Создание уровня" %}{% endif %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="page-title">
+                {% if form.instance.pk %}
+                    <i class="ri-edit-line me-1"></i> {% trans "Редактирование уровня" %}
+                {% else %}
+                    <i class="ri-add-line me-1"></i> {% trans "Создание уровня" %}
+                {% endif %}
+            </h4>
+            <div class="page-title-right">
+                <a href="{% url 'moderation:loyalty_levels' %}" class="btn btn-secondary">
+                    <i class="ri-arrow-left-line"></i> {% trans "Назад" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="program" value="{{ program.id }}">
+            
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{% trans "Основная информация" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.name.id_for_label }}" class="form-label">
+                                {% trans "Название уровня" %} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                            <div class="text-danger">{{ form.name.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">{% trans "Например: Бронзовый, Серебряный, Золотой" %}</small>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.icon.id_for_label }}" class="form-label">
+                                {% trans "Иконка" %}
+                            </label>
+                            {{ form.icon }}
+                            {% if form.icon.errors %}
+                            <div class="text-danger">{{ form.icon.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">{% trans "Иконка из библиотеки Remix Icon (например: ri-star-line)" %}</small>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.color.id_for_label }}" class="form-label">
+                            {% trans "Цвет" %}
+                        </label>
+                        <div class="input-group">
+                            {{ form.color }}
+                            <span class="input-group-text" id="colorPreview" style="width: 50px;"></span>
+                        </div>
+                        {% if form.color.errors %}
+                        <div class="text-danger">{{ form.color.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{% trans "Условия достижения" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.min_points.id_for_label }}" class="form-label">
+                                {% trans "Минимальное количество баллов" %}
+                            </label>
+                            {{ form.min_points }}
+                            {% if form.min_points.errors %}
+                            <div class="text-danger">{{ form.min_points.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">{% trans "0 - без ограничений" %}</small>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.min_orders.id_for_label }}" class="form-label">
+                                {% trans "Минимальное количество заказов" %}
+                            </label>
+                            {{ form.min_orders }}
+                            {% if form.min_orders.errors %}
+                            <div class="text-danger">{{ form.min_orders.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">{% trans "0 - без ограничений" %}</small>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.min_amount.id_for_label }}" class="form-label">
+                                {% trans "Минимальная сумма покупок" %}
+                            </label>
+                            {{ form.min_amount }}
+                            {% if form.min_amount.errors %}
+                            <div class="text-danger">{{ form.min_amount.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">{% trans "0 - без ограничений" %}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{% trans "Бонусы уровня" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.points_multiplier.id_for_label }}" class="form-label">
+                                {% trans "Множитель баллов" %}
+                            </label>
+                            {{ form.points_multiplier }}
+                            {% if form.points_multiplier.errors %}
+                            <div class="text-danger">{{ form.points_multiplier.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">{% trans "1.0 - стандартное начисление" %}</small>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.discount_percent.id_for_label }}" class="form-label">
+                                {% trans "Скидка (%)" %}
+                            </label>
+                            {{ form.discount_percent }}
+                            {% if form.discount_percent.errors %}
+                            <div class="text-danger">{{ form.discount_percent.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <div class="mt-4">
+                                <div class="form-check">
+                                    {{ form.free_delivery }}
+                                    <label class="form-check-label" for="{{ form.free_delivery.id_for_label }}">
+                                        {% trans "Бесплатная доставка" %}
+                                    </label>
+                                </div>
+                                <div class="form-check mt-2">
+                                    {{ form.priority_support }}
+                                    <label class="form-check-label" for="{{ form.priority_support.id_for_label }}">
+                                        {% trans "Приоритетная поддержка" %}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-3 mb-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="ri-save-line"></i> {% trans "Сохранить" %}
+                </button>
+                <a href="{% url 'moderation:loyalty_levels' %}" class="btn btn-secondary">
+                    {% trans "Отмена" %}
+                </a>
+            </div>
+        </form>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Предпросмотр уровня" %}</h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <div class="level-badge mx-auto" id="previewIcon" style="width: 60px; height: 60px; font-size: 30px;">
+                        <i class="ri-star-line"></i>
+                    </div>
+                    <h4 id="previewName" class="mt-2">Название</h4>
+                    <div id="previewColor" style="width: 50px; height: 50px; border-radius: 50%; margin: 0 auto;"></div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-6">
+                        <span id="previewDiscount" class="badge bg-success fs-6">0%</span>
+                        <br>
+                        <small>скидка</small>
+                    </div>
+                    <div class="col-6">
+                        <span id="previewMultiplier" class="badge bg-info fs-6">x1.0</span>
+                        <br>
+                        <small>множитель</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Справка" %}</h5>
+            </div>
+            <div class="card-body">
+                <h6>{% trans "Рекомендации по уровням" %}</h6>
+                <ul class="small">
+                    <li>Создавайте 3-5 уровней для мотивации клиентов</li>
+                    <li>Увеличивайте скидку на 5-10% на каждом уровне</li>
+                    <li>Добавляйте эксклюзивные бонусы для высоких уровней</li>
+                    <li>Устанавливайте реалистичные условия достижения</li>
+                </ul>
+                <hr>
+                <h6>{% trans "Пример иконок" %}</h6>
+                <div class="row">
+                    <div class="col-3 text-center">
+                        <i class="ri-star-line fs-4"></i>
+                        <div class="small">star-line</div>
+                    </div>
+                    <div class="col-3 text-center">
+                        <i class="ri-medal-line fs-4"></i>
+                        <div class="small">medal-line</div>
+                    </div>
+                    <div class="col-3 text-center">
+                        <i class="ri-crown-line fs-4"></i>
+                        <div class="small">crown-line</div>
+                    </div>
+                    <div class="col-3 text-center">
+                        <i class="ri-diamond-line fs-4"></i>
+                        <div class="small">diamond-line</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block javascript %}
+<script>
+    // Предпросмотр
+    $('#id_name').on('input', function() {
+        $('#previewName').text($(this).val() || 'Название');
+    });
+    
+    $('#id_icon').on('input', function() {
+        const icon = $(this).val() || 'ri-star-line';
+        $('#previewIcon i').attr('class', icon);
+    });
+    
+    $('#id_color').on('input', function() {
+        const color = $(this).val();
+        $('#previewColor').css('background', color);
+        $('#colorPreview').css('background', color);
+    });
+    
+    $('#id_discount_percent').on('input', function() {
+        const value = $(this).val() || 0;
+        $('#previewDiscount').text(value + '%');
+    });
+    
+    $('#id_points_multiplier').on('input', function() {
+        const value = $(this).val() || 1;
+        $('#previewMultiplier').text('x' + value);
+    });
+    
+    // Инициализация
+    $('#id_color').trigger('input');
+</script>
+{% endblock %}
+{% endblock %}

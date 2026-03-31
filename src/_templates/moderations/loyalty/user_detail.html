@@ -1,0 +1,324 @@
+{% extends 'moderations/base.html' %}
+{% load static i18n %}
+
+{% block title %}{{ loyalty.user.get_full_name|default:loyalty.user.username }} - {% trans "Профиль лояльности" %}{% endblock %}
+
+{% block head %}
+<style>
+    .profile-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    .points-card {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+    }
+    .level-badge-large {
+        font-size: 48px;
+        font-weight: bold;
+        line-height: 1;
+    }
+    .transaction-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+    }
+    .earn-icon { background: #d4edda; color: #28a745; }
+    .spend-icon { background: #f8d7da; color: #dc3545; }
+    .expire-icon { background: #fff3cd; color: #ffc107; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="profile-header">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <img src="{{ loyalty.user.avatar.url|default:'/static/images/default-avatar.png' }}" 
+                         class="rounded-circle" width="100" height="100">
+                </div>
+                <div class="col">
+                    <h2 class="mb-1">{{ loyalty.user.get_full_name|default:loyalty.user.username }}</h2>
+                    <p class="mb-0 opacity-75">{{ loyalty.user.email }}</p>
+                    <p class="mb-0 opacity-75">
+                        <i class="ri-phone-line"></i> {{ loyalty.user.phone|default:"Не указан" }}
+                    </p>
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-light" onclick="addPoints({{ loyalty.user.id }})">
+                        <i class="ri-add-line"></i> {% trans "Начислить баллы" %}
+                    </button>
+                    <a href="{% url 'moderation:loyalty_users' %}" class="btn btn-outline-light ms-2">
+                        <i class="ri-arrow-left-line"></i> {% trans "Назад" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-4">
+        <!-- Карточка баллов -->
+        <div class="points-card mb-4">
+            <h5 class="mb-2">{% trans "Текущий баланс" %}</h5>
+            <div class="level-badge-large">{{ loyalty.points }}</div>
+            <p class="mb-0 mt-2">{% trans "баллов" %}</p>
+            <hr class="my-3 bg-white">
+            <div class="row text-center">
+                <div class="col-6">
+                    <small>{% trans "Всего заработано" %}</small>
+                    <h5 class="mb-0">{{ loyalty.total_points_earned }}</h5>
+                </div>
+                <div class="col-6">
+                    <small>{% trans "Всего потрачено" %}</small>
+                    <h5 class="mb-0">{{ loyalty.total_points_spent }}</h5>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Информация об уровне -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Уровень лояльности" %}</h5>
+            </div>
+            <div class="card-body text-center">
+                {% if loyalty.level %}
+                <div class="mb-3">
+                    <span class="badge" style="background: {{ loyalty.level.color }}; font-size: 18px; padding: 8px 20px;">
+                        {{ loyalty.level.name }}
+                    </span>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-6">
+                        <small class="text-muted">{% trans "Скидка" %}</small>
+                        <h5>{{ loyalty.level.discount_percent|floatformat:0 }}%</h5>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted">{% trans "Множитель баллов" %}</small>
+                        <h5>x{{ loyalty.level.points_multiplier }}</h5>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    {% if loyalty.level.free_delivery %}
+                    <span class="badge bg-success">{% trans "Бесплатная доставка" %}</span>
+                    {% endif %}
+                    {% if loyalty.level.priority_support %}
+                    <span class="badge bg-info">{% trans "Приоритетная поддержка" %}</span>
+                    {% endif %}
+                </div>
+                {% else %}
+                <p class="text-muted">{% trans "Нет назначенного уровня" %}</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Статистика -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Статистика" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <small class="text-muted d-block">{% trans "Всего заказов" %}</small>
+                    <h4>{{ loyalty.total_orders }}</h4>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted d-block">{% trans "Сумма покупок" %}</small>
+                    <h4>{{ loyalty.total_amount|floatformat:0 }} ₽</h4>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted d-block">{% trans "Средний чек" %}</small>
+                    <h4>
+                        {% if loyalty.total_orders > 0 %}
+                            {{ loyalty.total_amount|div:loyalty.total_orders|floatformat:0 }} ₽
+                        {% else %}
+                            0 ₽
+                        {% endif %}
+                    </h4>
+                </div>
+                <div>
+                    <small class="text-muted d-block">{% trans "Дата регистрации" %}</small>
+                    <h4>{{ loyalty.joined_at|date:"d.m.Y" }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-8">
+        <!-- Сгорающие баллы -->
+        {% if expiring_points %}
+        <div class="card mb-4">
+            <div class="card-header bg-warning">
+                <h5 class="card-title mb-0 text-dark">
+                    <i class="ri-alert-line"></i> {% trans "Внимание! Баллы скоро сгорят" %}
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Количество баллов" %}</th>
+                                <th>{% trans "Дата сгорания" %}</th>
+                                <th>{% trans "Дней осталось" %}</th>
+                            </thead>
+                        <tbody>
+                            {% for expiry in expiring_points %}
+                            <tr>
+                                <td><strong>{{ expiry.points }}</strong>点
+                                <td>{{ expiry.expires_at|date:"d.m.Y" }}点
+                                <td>
+                                    {{ expiry.expires_at|timeuntil }}
+                                点
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Транзакции -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "История транзакций" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Дата" %}</th>
+                                <th>{% trans "Тип" %}</th>
+                                <th>{% trans "Баллы" %}</th>
+                                <th>{% trans "Баланс" %}</th>
+                                <th>{% trans "Причина" %}</th>
+                            </thead>
+                        <tbody>
+                            {% for transaction in transactions %}
+                            <tr>
+                                <td><small>{{ transaction.created_at|date:"d.m.Y H:i" }}</small>点
+                                <td>
+                                    <div class="transaction-icon {% if transaction.type == 'earn' %}earn-icon{% elif transaction.type == 'spend' %}spend-icon{% else %}expire-icon{% endif %} d-inline-flex me-2">
+                                        {% if transaction.type == 'earn' %}
+                                        <i class="ri-add-line"></i>
+                                        {% elif transaction.type == 'spend' %}
+                                        <i class="ri-subtract-line"></i>
+                                        {% else %}
+                                        <i class="ri-alert-line"></i>
+                                        {% endif %}
+                                    </div>
+                                    {{ transaction.get_type_display }}
+                                点
+                                <td>
+                                    <strong class="{% if transaction.type == 'earn' %}text-success{% else %}text-danger{% endif %}">
+                                        {{ transaction.points }}
+                                    </strong>
+                                点
+                                <td>{{ transaction.balance_after }}点
+                                <td>{{ transaction.reason }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center">{% trans "Нет транзакций" %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Использованные промокоды -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Использованные промокоды" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Промокод" %}</th>
+                                <th>{% trans "Скидка" %}</th>
+                                <th>{% trans "Заказ" %}</th>
+                                <th>{% trans "Дата использования" %}</th>
+                            </thead>
+                        <tbody>
+                            {% for usage in promocode_usages %}
+                            <tr>
+                                <td><strong>{{ usage.promo_code.code }}</strong></td>
+                                <td>
+                                    {% if usage.promo_code.discount_type == 'percent' %}
+                                    {{ usage.promo_code.discount_value }}%
+                                    {% else %}
+                                    {{ usage.promo_code.discount_value }} ₽
+                                    {% endif %}
+                                </td>
+                                <td>#{{ usage.order_id }}</td>
+                                <td><small>{{ usage.used_at|date:"d.m.Y H:i" }}</small></td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center">{% trans "Нет использованных промокодов" %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal начисления баллов -->
+<div class="modal fade" id="addPointsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{% trans "Начисление баллов" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'moderation:add_loyalty_points' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <input type="hidden" name="user" value="{{ loyalty.user.id }}">
+                    <div class="mb-3">
+                        <label class="form-label">{% trans "Количество баллов" %}</label>
+                        <input type="number" name="points" class="form-control" required min="1">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{% trans "Причина" %}</label>
+                        <input type="text" name="reason" class="form-control" required placeholder="Например: Промоакция, Компенсация">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Отмена" %}</button>
+                    <button type="submit" class="btn btn-primary">{% trans "Начислить" %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% block javascript %}
+<script>
+    function addPoints(userId) {
+        $('#addPointsModal').modal('show');
+    }
+</script>
+{% endblock %}
+{% endblock %}

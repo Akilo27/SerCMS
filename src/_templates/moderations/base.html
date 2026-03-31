@@ -819,10 +819,49 @@
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link text-warning" href="{% url 'moderation:indevelopment' %}">
+                    <a class="nav-link menu-arrow" href="#sidebarLoyalty" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarLoyalty">
                         <span class="nav-icon"><iconify-icon icon="solar:hand-heart-line-duotone"></iconify-icon></span>
-                        <span class="nav-text"> {% trans "Програма лояльности" %} </span>
+                        <span class="nav-text"> {% trans "Программа лояльности" %} </span>
                     </a>
+                    <div class="collapse" id="sidebarLoyalty">
+                        <ul class="nav sub-navbar-nav">
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link" href="{% url 'moderation:loyalty_dashboard' %}">
+                                    <i class="ri-dashboard-line"></i> {% trans "Дашборд" %}
+                                </a>
+                            </li>
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link" href="{% url 'moderation:loyalty_users' %}">
+                                    <i class="ri-group-line"></i> {% trans "Участники" %}
+                                </a>
+                            </li>
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link" href="{% url 'moderation:loyalty_levels' %}">
+                                    <i class="ri-bar-chart-line"></i> {% trans "Уровни" %}
+                                </a>
+                            </li>
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link" href="{% url 'moderation:loyalty_promocodes' %}">
+                                    <i class="ri-coupon-line"></i> {% trans "Промокоды" %}
+                                </a>
+                            </li>
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link" href="{% url 'moderation:loyalty_transactions' %}">
+                                    <i class="ri-history-line"></i> {% trans "Транзакции" %}
+                                </a>
+                            </li>
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link" href="{% url 'moderation:loyalty_notifications' %}">
+                                    <i class="ri-notification-line"></i> {% trans "Уведомления" %}
+                                </a>
+                            </li>
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link" href="{% url 'moderation:loyalty_settings' %}">
+                                    <i class="ri-settings-4-line"></i> {% trans "Настройки" %}
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </li>
 
                 <li class="nav-item">

@@ -1,0 +1,340 @@
+{% extends 'moderations/base.html' %}
+{% load static i18n %}
+
+{% block title %}{% trans "Программа лояльности" %}{% endblock %}
+
+{% block head %}
+<style>
+    .stat-card {
+        transition: all 0.3s;
+        cursor: pointer;
+        border-left: 4px solid #4a90e2;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .level-badge {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 8px;
+    }
+    .points-trend-up {
+        color: #28a745;
+    }
+    .points-trend-down {
+        color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="page-title">
+                <i class="ri-heart-line me-1"></i> {% trans "Программа лояльности" %}
+            </h4>
+            <div class="page-title-right">
+                <a href="{% url 'moderation:loyalty_settings' %}" class="btn btn-outline-secondary">
+                    <i class="ri-settings-4-line"></i> {% trans "Настройки" %}
+                </a>
+                <a href="{% url 'moderation:loyalty_programs' %}" class="btn btn-primary ms-2">
+                    <i class="ri-add-line"></i> {% trans "Управление программами" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Статистика -->
+<div class="row">
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted mb-1">{% trans "Всего участников" %}</p>
+                        <h3 class="mb-0">{{ total_users }}</h3>
+                    </div>
+                    <div class="avatar-lg bg-primary-light rounded">
+                        <i class="ri-group-line fs-32 text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted mb-1">{% trans "Всего баллов" %}</p>
+                        <h3 class="mb-0">{{ total_points|floatformat:0 }}</h3>
+                    </div>
+                    <div class="avatar-lg bg-success-light rounded">
+                        <i class="ri-star-line fs-32 text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted mb-1">{% trans "Начислено баллов" %}</p>
+                        <h3 class="mb-0">{{ total_points_earned|floatformat:0 }}</h3>
+                        <small class="text-success">
+                            <i class="ri-arrow-up-line"></i> {% trans "всего" %}
+                        </small>
+                    </div>
+                    <div class="avatar-lg bg-info-light rounded">
+                        <i class="ri-add-line fs-32 text-info"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted mb-1">{% trans "Списано баллов" %}</p>
+                        <h3 class="mb-0">{{ total_points_spent|floatformat:0 }}</h3>
+                        <small class="text-danger">
+                            <i class="ri-arrow-down-line"></i> {% trans "всего" %}
+                        </small>
+                    </div>
+                    <div class="avatar-lg bg-warning-light rounded">
+                        <i class="ri-subtract-line fs-32 text-warning"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Активные промокоды" %}</h5>
+            </div>
+            <div class="card-body text-center">
+                <h3 class="mb-0">{{ active_promocodes }}</h3>
+                <a href="{% url 'moderation:loyalty_promocodes' %}" class="btn btn-sm btn-link mt-2">
+                    {% trans "Управление" %} <i class="ri-arrow-right-line"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Сгорает в ближайшие 30 дней" %}</h5>
+            </div>
+            <div class="card-body text-center">
+                <h3 class="mb-0 text-warning">{{ expiry_soon|floatformat:0 }}</h3>
+                <small class="text-muted">{% trans "баллов" %}</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Уровни лояльности" %}</h5>
+            </div>
+            <div class="card-body">
+                {% for level in levels_data %}
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                        <span class="level-badge" style="background: {{ level.color }}"></span>
+                        <strong>{{ level.name }}</strong>
+                    </div>
+                    <div>
+                        <span class="badge bg-secondary">{{ level.count }} {% trans "участников" %}</span>
+                        <span class="badge bg-info">{{ level.discount }}%</span>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted text-center">{% trans "Нет настроенных уровней" %}</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Топ пользователей -->
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Топ участников по баллам" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Участник" %}</th>
+                                <th>{% trans "Уровень" %}</th>
+                                <th>{% trans "Баллы" %}</th>
+                                <th>{% trans "Заказов" %}</th>
+                            </thead>
+                        <tbody>
+                            {% for user in top_users %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="{{ user.user.avatar.url|default:'/static/images/default-avatar.png' }}" 
+                                             class="rounded-circle me-2" width="32" height="32">
+                                        <div>
+                                            <strong>{{ user.user.get_full_name|default:user.user.username }}</strong>
+                                            <br>
+                                            <small class="text-muted">{{ user.user.email }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if user.level %}
+                                    <span class="badge" style="background: {{ user.level.color }}; color: white;">
+                                        {{ user.level.name }}
+                                    </span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">{% trans "Нет" %}</span>
+                                    {% endif %}
+                                </td>
+                                <td><strong>{{ user.points }}</strong></td>
+                                <td>{{ user.total_orders }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center">{% trans "Нет участников" %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Последние транзакции" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Дата" %}</th>
+                                <th>{% trans "Пользователь" %}</th>
+                                <th>{% trans "Тип" %}</th>
+                                <th>{% trans "Баллы" %}</th>
+                            </thead>
+                        <tbody>
+                            {% for transaction in recent_transactions %}
+                            <tr>
+                                <td><small>{{ transaction.created_at|date:"d.m.Y H:i" }}</small></td>
+                                <td>{{ transaction.user.username }}</td>
+                                <td>
+                                    {% if transaction.type == 'earn' %}
+                                    <span class="badge bg-success">+ {{ transaction.points }}</span>
+                                    {% elif transaction.type == 'spend' %}
+                                    <span class="badge bg-danger">- {{ transaction.points }}</span>
+                                    {% else %}
+                                    <span class="badge bg-warning">{{ transaction.get_type_display }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <strong>{{ transaction.points }}</strong>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center">{% trans "Нет транзакций" %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-center mt-3">
+                    <a href="{% url 'moderation:loyalty_transactions' %}" class="btn btn-link">
+                        {% trans "Все транзакции" %} <i class="ri-arrow-right-line"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- График динамики -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Динамика баллов (последние 30 дней)" %}</h5>
+            </div>
+            <div class="card-body">
+                <div id="pointsChart"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block javascript %}
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.37.1/dist/apexcharts.min.js"></script>
+<script>
+    const dailyStats = {{ daily_stats|safe }};
+    
+    const dates = dailyStats.map(item => item.date);
+    const earnedData = dailyStats.map(item => item.earned || 0);
+    const spentData = dailyStats.map(item => item.spent || 0);
+    
+    const options = {
+        series: [{
+            name: 'Начислено',
+            data: earnedData
+        }, {
+            name: 'Списано',
+            data: spentData
+        }],
+        chart: {
+            type: 'bar',
+            height: 350,
+            toolbar: { show: false }
+        },
+        plotOptions: {
+            bar: {
+                horizontal: false,
+                columnWidth: '55%',
+                endingShape: 'rounded'
+            }
+        },
+        dataLabels: { enabled: false },
+        stroke: { show: true, width: 2, colors: ['transparent'] },
+        xaxis: { categories: dates, title: { text: 'Дата' } },
+        yaxis: { title: { text: 'Баллы' } },
+        fill: { opacity: 1 },
+        colors: ['#28a745', '#dc3545'],
+        tooltip: {
+            y: {
+                formatter: function(val) {
+                    return val + " баллов";
+                }
+            }
+        }
+    };
+    
+    const chart = new ApexCharts(document.querySelector("#pointsChart"), options);
+    chart.render();
+</script>
+{% endblock %}
+{% endblock %}

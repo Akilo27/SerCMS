@@ -783,4 +783,42 @@ urlpatterns = [
     path('api/delivery/orders/<int:order_id>/update-status/', api.update_delivery_status, name='api_update_delivery_status'),
     path('api/integrations/logs/<int:log_id>/', api.integration_log_detail, name='api_log_detail'),
     path('integrations/sync-all/', views.sync_all_integrations, name='sync_all_integrations'),
+
+    path('loyalty/', views.LoyaltyDashboardView.as_view(), name='loyalty_dashboard'),
+
+    # Программы
+    path('loyalty/programs/', views.LoyaltyProgramListView.as_view(), name='loyalty_programs'),
+    path('loyalty/programs/create/', views.LoyaltyProgramCreateView.as_view(), name='loyalty_program_create'),
+    path('loyalty/programs/<int:pk>/edit/', views.LoyaltyProgramUpdateView.as_view(), name='loyalty_program_edit'),
+
+    # Уровни
+    path('loyalty/levels/', views.LoyaltyLevelListView.as_view(), name='loyalty_levels'),
+    path('loyalty/levels/create/<int:program_id>/', views.LoyaltyLevelCreateView.as_view(), name='loyalty_level_create'),
+    path('loyalty/levels/<int:pk>/edit/', views.LoyaltyLevelUpdateView.as_view(), name='loyalty_level_edit'),
+    path('loyalty/levels/<int:pk>/delete/', views.LoyaltyLevelDeleteView.as_view(), name='loyalty_level_delete'),
+
+    # Пользователи
+    path('loyalty/users/', views.LoyaltyUsersListView.as_view(), name='loyalty_users'),
+    path('loyalty/users/<int:pk>/', views.LoyaltyUserDetailView.as_view(), name='loyalty_user_detail'),
+    path('loyalty/users/add-points/', views.add_loyalty_points, name='add_loyalty_points'),
+
+    # Транзакции
+    path('loyalty/transactions/', views.loyalty_transactions, name='loyalty_transactions'),
+
+    # Промокоды
+    path('loyalty/promocodes/', views.LoyaltyPromoCodeListView.as_view(), name='loyalty_promocodes'),
+    path('loyalty/promocodes/create/', views.LoyaltyPromoCodeCreateView.as_view(), name='loyalty_promocode_create'),
+    path('loyalty/promocodes/<int:pk>/edit/', views.LoyaltyPromoCodeUpdateView.as_view(), name='loyalty_promocode_edit'),
+    path('loyalty/promocodes/<int:pk>/delete/', views.LoyaltyPromoCodeDeleteView.as_view(), name='loyalty_promocode_delete'),
+
+    # Настройки
+    path('loyalty/settings/', views.loyalty_settings, name='loyalty_settings'),
+    path('loyalty/settings/reset/', views.reset_loyalty_settings, name='loyalty_settings_reset'),
+
+    # Уведомления
+    path('loyalty/notifications/', views.loyalty_notifications, name='loyalty_notifications'),
+    path('loyalty/notifications/<int:notification_id>/read/', views.mark_notification_read, name='mark_notification_read'),
+
+    # API
+    path('loyalty/api/statistics/', views.loyalty_statistics, name='loyalty_statistics'),
 ]

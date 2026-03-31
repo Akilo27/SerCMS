@@ -1,0 +1,222 @@
+{% extends 'moderations/base.html' %}
+{% load static i18n %}
+
+{% block title %}{% trans "Уведомления программы лояльности" %}{% endblock %}
+
+{% block head %}
+<style>
+    .notification-item {
+        transition: all 0.2s;
+        cursor: pointer;
+        border-left: 3px solid transparent;
+    }
+    .notification-item:hover {
+        background-color: #f8f9fa;
+    }
+    .notification-item.unread {
+        background-color: #e3f2fd;
+        border-left-color: #4a90e2;
+    }
+    .notification-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .icon-level_up { background: #d4edda; color: #28a745; }
+    .icon-points_earn { background: #cce5ff; color: #004085; }
+    .icon-points_expire { background: #fff3cd; color: #856404; }
+    .icon-promo { background: #d1ecf1; color: #0c5460; }
+    .icon-birthday { background: #f8d7da; color: #721c24; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="page-title">
+                <i class="ri-notification-line me-1"></i> {% trans "Уведомления программы лояльности" %}
+            </h4>
+            <div class="page-title-right">
+                <button class="btn btn-outline-primary" onclick="markAllRead()">
+                    <i class="ri-mail-check-line"></i> {% trans "Отметить все прочитанными" %}
+                </button>
+                <a href="{% url 'moderation:loyalty_dashboard' %}" class="btn btn-secondary ms-2">
+                    <i class="ri-arrow-left-line"></i> {% trans "Назад" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Фильтры -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-3">
+                        <select name="user" class="form-control">
+                            <option value="">{% trans "Все пользователи" %}</option>
+                            {% for user in users %}
+                            <option value="{{ user.user.id }}" {% if filters.user == user.user.id|stringformat:"s" %}selected{% endif %}>
+                                {{ user.user.get_full_name|default:user.user.username }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="type" class="form-control">
+                            <option value="">{% trans "Все типы" %}</option>
+                            {% for value, label in types %}
+                            <option value="{{ value }}" {% if filters.type == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="is_read" class="form-control">
+                            <option value="">{% trans "Все" %}</option>
+                            <option value="false" {% if filters.is_read == 'false' %}selected{% endif %}>{% trans "Непрочитанные" %}</option>
+                            <option value="true" {% if filters.is_read == 'true' %}selected{% endif %}>{% trans "Прочитанные" %}</option>
+                        </select>
+                    </div>
+                    <div class="col-md-5">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="ri-filter-line"></i> {% trans "Фильтр" %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Список уведомлений -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="list-group">
+                    {% for notification in notifications %}
+                    <div class="list-group-item notification-item {% if not notification.is_read %}unread{% endif %}" 
+                         onclick="markRead({{ notification.id }})">
+                        <div class="d-flex">
+                            <div class="flex-shrink-0">
+                                <div class="notification-icon icon-{{ notification.type }}">
+                                    {% if notification.type == 'level_up' %}
+                                    <i class="ri-medal-line fs-4"></i>
+                                    {% elif notification.type == 'points_earn' %}
+                                    <i class="ri-star-line fs-4"></i>
+                                    {% elif notification.type == 'points_expire' %}
+                                    <i class="ri-alert-line fs-4"></i>
+                                    {% elif notification.type == 'promo' %}
+                                    <i class="ri-coupon-line fs-4"></i>
+                                    {% elif notification.type == 'birthday' %}
+                                    <i class="ri-cake-line fs-4"></i>
+                                    {% else %}
+                                    <i class="ri-notification-line fs-4"></i>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">{{ notification.title }}</h6>
+                                        <p class="mb-1 text-muted">{{ notification.message }}</p>
+                                        <small class="text-muted">
+                                            <i class="ri-user-line"></i> {{ notification.user.get_full_name|default:notification.user.username }}
+                                        </small>
+                                    </div>
+                                    <div class="text-end">
+                                        <small class="text-muted">{{ notification.created_at|date:"d.m.Y H:i" }}</small>
+                                        {% if not notification.is_read %}
+                                        <span class="badge bg-danger ms-2">{% trans "Новое" %}</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-5">
+                        <i class="ri-notification-line fs-48 text-muted"></i>
+                        <p class="mt-2">{% trans "Нет уведомлений" %}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Пагинация -->
+                {% if notifications.has_other_pages %}
+                <div class="mt-3">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-end">
+                            {% if notifications.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ notifications.previous_page_number }}{% for key, value in filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="ri-arrow-left-s-line"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for num in notifications.paginator.page_range %}
+                            <li class="page-item {% if notifications.number == num %}active{% endif %}">
+                                <a class="page-link" href="?page={{ num }}{% for key, value in filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                            </li>
+                            {% endfor %}
+                            
+                            {% if notifications.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ notifications.next_page_number }}{% for key, value in filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="ri-arrow-right-s-line"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block javascript %}
+<script>
+    function markRead(notificationId) {
+        $.ajax({
+            url: `/moderation/loyalty/notifications/${notificationId}/read/`,
+            method: 'POST',
+            data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+            success: function() {
+                location.reload();
+            }
+        });
+    }
+    
+    function markAllRead() {
+        Swal.fire({
+            title: '{% trans "Отметить все прочитанными?" %}',
+            text: '{% trans "Все уведомления будут отмечены как прочитанные" %}',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: '{% trans "Да" %}',
+            cancelButtonText: '{% trans "Отмена" %}'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/moderation/loyalty/notifications/mark-all-read/',
+                    method: 'POST',
+                    data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+                    success: function() {
+                        location.reload();
+                    }
+                });
+            }
+        });
+    }
+</script>
+{% endblock %}
+{% endblock %}
