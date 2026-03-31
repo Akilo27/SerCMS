@@ -696,4 +696,42 @@ urlpatterns = [
     path('emails/log/<int:log_id>/resend/', views.resend_email, name='resend_email'),
     path('emails/log/<int:log_id>/delete/', views.delete_email_log, name='delete_email_log'),
 
+    path('telephony/', views.CallDashboardView.as_view(), name='call_dashboard'),
+
+    # Звонки
+    path('telephony/calls/', views.CallRecordListView.as_view(), name='call_records'),
+    path('telephony/calls/<int:pk>/', views.CallRecordDetailView.as_view(), name='call_detail'),
+    path('telephony/calls/export/', views.export_calls_csv, name='export_calls_csv'),
+    path('telephony/calls/make/', views.make_call, name='make_call'),
+
+    # Телефонные номера
+    path('telephony/numbers/', views.PhoneNumberListView.as_view(), name='phone_numbers'),
+    path('telephony/numbers/create/', views.PhoneNumberCreateView.as_view(), name='phone_number_create'),
+    path('telephony/numbers/<int:pk>/edit/', views.PhoneNumberUpdateView.as_view(), name='phone_number_edit'),
+    path('telephony/numbers/<int:pk>/delete/', views.PhoneNumberDeleteView.as_view(), name='phone_number_delete'),
+
+    # Очереди звонков
+    path('telephony/queues/', views.CallQueueListView.as_view(), name='queues'),
+    path('telephony/queues/create/', views.CallQueueCreateView.as_view(), name='queue_create'),
+    path('telephony/queues/<int:pk>/edit/', views.CallQueueUpdateView.as_view(), name='queue_edit'),
+    path('telephony/queues/<int:pk>/delete/', views.CallQueueDeleteView.as_view(), name='queue_delete'),
+
+    # Голосовые меню (IVR)
+    path('telephony/menus/', views.VoiceMenuListView.as_view(), name='voice_menus'),
+    path('telephony/menus/create/', views.VoiceMenuCreateView.as_view(), name='voice_menu_create'),
+    path('telephony/menus/<int:pk>/edit/', views.VoiceMenuUpdateView.as_view(), name='voice_menu_edit'),
+    path('telephony/menus/<int:pk>/delete/', views.VoiceMenuDeleteView.as_view(), name='voice_menu_delete'),
+
+    # Настройки
+    path('telephony/settings/', views.CallSettingsView.as_view(), name='call_settings'),
+    path('telephony/settings/status/', views.set_operator_status, name='set_operator_status'),
+    path('telephony/settings/status/get/', views.get_operator_status, name='get_operator_status'),
+    path('telephony/settings/reset/', views.reset_call_settings, name='reset_call_settings'),
+
+    # API
+    path('telephony/api/statistics/', views.call_statistics, name='call_statistics'),
+    path('telephony/api/recording/<int:call_id>/download/', views.download_recording, name='download_recording'),
+    path('telephony/api/queue-stats/<int:pk>/', views.queue_stats_api, name='queue_stats_api'),
+    path('telephony/api/menu-structure/<int:pk>/', views.menu_structure_api, name='menu_structure_api'),
 ]
+

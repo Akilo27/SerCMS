@@ -1,0 +1,183 @@
+{% extends 'moderations/base.html' %}
+{% load static i18n %}
+
+{% block title %}{% if form.instance.pk %}{% trans "Редактирование очереди" %}{% else %}{% trans "Создание очереди" %}{% endif %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="page-title">
+                {% if form.instance.pk %}
+                    <i class="ri-edit-line me-1"></i> {% trans "Редактирование очереди" %}
+                {% else %}
+                    <i class="ri-add-line me-1"></i> {% trans "Создание очереди" %}
+                {% endif %}
+            </h4>
+            <div class="page-title-right">
+                <a href="{% url 'moderation:queues' %}" class="btn btn-secondary">
+                    <i class="ri-arrow-left-line"></i> {% trans "Назад к списку" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{% trans "Основная информация" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.name.id_for_label }}" class="form-label">
+                                {% trans "Название очереди" %} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                            <div class="text-danger">{{ form.name.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.extension.id_for_label }}" class="form-label">
+                                {% trans "Внутренний номер" %} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.extension }}
+                            {% if form.extension.errors %}
+                            <div class="text-danger">{{ form.extension.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">{% trans "Короткий номер для звонков в очередь" %}</small>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.strategy.id_for_label }}" class="form-label">
+                            {% trans "Стратегия распределения" %}
+                        </label>
+                        {{ form.strategy }}
+                        {% if form.strategy.errors %}
+                        <div class="text-danger">{{ form.strategy.errors }}</div>
+                        {% endif %}
+                        <div class="row mt-2">
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">
+                                    <strong>ringall:</strong> {% trans "Звонок всем операторам одновременно" %}
+                                </small>
+                                <small class="text-muted d-block mt-1">
+                                    <strong>leastrecent:</strong> {% trans "Оператору, который дольше всех не отвечал" %}
+                                </small>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">
+                                    <strong>fewestcalls:</strong> {% trans "Оператору с наименьшим количеством звонков" %}
+                                </small>
+                                <small class="text-muted d-block mt-1">
+                                    <strong>roundrobin:</strong> {% trans "По кругу" %}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.timeout.id_for_label }}" class="form-label">
+                                {% trans "Таймаут (сек)" %}
+                            </label>
+                            {{ form.timeout }}
+                            {% if form.timeout.errors %}
+                            <div class="text-danger">{{ form.timeout.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">{% trans "Время ожидания ответа оператора" %}</small>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.max_wait_time.id_for_label }}" class="form-label">
+                                {% trans "Макс. время ожидания (сек)" %}
+                            </label>
+                            {{ form.max_wait_time }}
+                            {% if form.max_wait_time.errors %}
+                            <div class="text-danger">{{ form.max_wait_time.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">{% trans "Максимальное время в очереди" %}</small>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.music_on_hold.id_for_label }}" class="form-label">
+                            {% trans "Музыка ожидания" %}
+                        </label>
+                        {{ form.music_on_hold }}
+                        {% if form.music_on_hold.errors %}
+                        <div class="text-danger">{{ form.music_on_hold.errors }}</div>
+                        {% endif %}
+                        {% if form.instance.music_on_hold %}
+                        <div class="mt-2">
+                            <audio controls style="width: 100%;">
+                                <source src="{{ form.instance.music_on_hold.url }}" type="audio/mpeg">
+                            </audio>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.members.id_for_label }}" class="form-label">
+                            {% trans "Операторы" %}
+                        </label>
+                        {{ form.members }}
+                        {% if form.members.errors %}
+                        <div class="text-danger">{{ form.members.errors }}</div>
+                        {% endif %}
+                        <small class="text-muted">{% trans "Удерживайте Ctrl для выбора нескольких операторов" %}</small>
+                    </div>
+                    
+                    <div class="form-check form-switch">
+                        {{ form.is_active }}
+                        <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                            {% trans "Активна" %}
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-3 mb-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="ri-save-line"></i> {% trans "Сохранить" %}
+                </button>
+                <a href="{% url 'moderation:queues' %}" class="btn btn-secondary">
+                    {% trans "Отмена" %}
+                </a>
+            </div>
+        </form>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Справка" %}</h5>
+            </div>
+            <div class="card-body">
+                <h6>{% trans "Стратегии распределения" %}</h6>
+                <ul class="small">
+                    <li><strong>Звонок всем</strong> - все операторы получают звонок одновременно</li>
+                    <li><strong>Наименее недавний</strong> - звонок идет оператору, который дольше всех не отвечал</li>
+                    <li><strong>Наименьшее кол-во звонков</strong> - оператору с наименьшей нагрузкой</li>
+                    <li><strong>По кругу</strong> - операторы получают звонки по очереди</li>
+                </ul>
+                <hr>
+                <h6>{% trans "Советы" %}</h6>
+                <ul class="small">
+                    <li>Установите оптимальный таймаут (обычно 15-30 сек)</li>
+                    <li>Добавьте музыку ожидания для комфорта клиентов</li>
+                    <li>Регулярно отслеживайте статистику очереди</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,379 @@
+{% extends 'moderations/base.html' %}
+{% load static i18n %}
+
+{% block title %}{% trans "Очереди звонков" %}{% endblock %}
+
+{% block head %}
+<style>
+    .queue-stats {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    .queue-card {
+        transition: all 0.3s;
+        border-left: 4px solid #4a90e2;
+    }
+    .queue-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .member-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        margin-right: -8px;
+        border: 2px solid white;
+        transition: transform 0.2s;
+    }
+    .member-avatar:hover {
+        transform: scale(1.1);
+        z-index: 10;
+    }
+    .strategy-badge {
+        background: #e3f2fd;
+        color: #1976d2;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 500;
+    }
+    .queue-status {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 5px;
+    }
+    .status-active {
+        background-color: #28a745;
+        box-shadow: 0 0 5px #28a745;
+    }
+    .status-inactive {
+        background-color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="page-title">
+                <i class="ri-stack-line me-1"></i> {% trans "Очереди звонков" %}
+            </h4>
+            <div class="page-title-right">
+                <a href="{% url 'moderation:queue_create' %}" class="btn btn-primary">
+                    <i class="ri-add-line"></i> {% trans "Создать очередь" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Общая статистика -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="queue-stats">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-0 opacity-75">{% trans "Всего очередей" %}</h6>
+                    <h3 class="mb-0">{{ queues.count }}</h3>
+                </div>
+                <i class="ri-stack-line fs-32 opacity-50"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="queue-stats" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-0 opacity-75">{% trans "Активные" %}</h6>
+                    <h3 class="mb-0">{{ queues|dictsortreversed:"is_active"|length }}</h3>
+                </div>
+                <i class="ri-checkbox-circle-line fs-32 opacity-50"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="queue-stats" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-0 opacity-75">{% trans "Всего операторов" %}</h6>
+                    <h3 class="mb-0">{{ total_members|default:0 }}</h3>
+                </div>
+                <i class="ri-user-line fs-32 opacity-50"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="queue-stats" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-0 opacity-75">{% trans "Среднее ожидание" %}</h6>
+                    <h3 class="mb-0">{{ avg_wait_time|floatformat:0|default:0 }} сек</h3>
+                </div>
+                <i class="ri-timer-line fs-32 opacity-50"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    {% for queue in queues %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card queue-card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <h5 class="card-title mb-1">
+                            <span class="queue-status {% if queue.is_active %}status-active{% else %}status-inactive{% endif %}"></span>
+                            {{ queue.name }}
+                        </h5>
+                        <small class="text-muted">
+                            <i class="ri-phone-line"></i> {% trans "Внутренний:" %} {{ queue.extension }}
+                        </small>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-link" data-bs-toggle="dropdown">
+                            <i class="ri-more-2-line"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'moderation:queue_edit' queue.id %}">
+                                    <i class="ri-edit-line"></i> {% trans "Редактировать" %}
+                                </a>
+                            </li>
+                            <li>
+                                <button class="dropdown-item" onclick="viewQueueStats({{ queue.id }})">
+                                    <i class="ri-bar-chart-line"></i> {% trans "Статистика" %}
+                                </button>
+                            </li>
+                            <li>
+                                <button class="dropdown-item text-danger" onclick="deleteQueue({{ queue.id }})">
+                                    <i class="ri-delete-bin-line"></i> {% trans "Удалить" %}
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <span class="strategy-badge">
+                        <i class="ri-shuffle-line"></i> {{ queue.get_strategy_display }}
+                    </span>
+                    <span class="strategy-badge ms-2">
+                        <i class="ri-time-line"></i> {% trans "Таймаут:" %} {{ queue.timeout }} сек
+                    </span>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <small class="text-muted">{% trans "Операторы" %}</small>
+                        <small class="text-muted">{{ queue.members.count }} {% trans "чел." %}</small>
+                    </div>
+                    <div class="d-flex flex-wrap">
+                        {% for member in queue.members.all|slice:":5" %}
+                        <img src="{{ member.avatar.url|default:'/static/images/default-avatar.png' }}" 
+                             class="member-avatar" 
+                             title="{{ member.get_full_name|default:member.username }}"
+                             alt="{{ member.username }}">
+                        {% endfor %}
+                        {% if queue.members.count > 5 %}
+                        <span class="member-avatar bg-secondary text-white d-inline-flex align-items-center justify-content-center" style="background: #6c757d;">
+                            +{{ queue.members.count|add:"-5" }}
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="row text-center mt-3">
+                    <div class="col-4">
+                        <h6 class="mb-0">{{ queue.total_calls }}</h6>
+                        <small class="text-muted">{% trans "Всего" %}</small>
+                    </div>
+                    <div class="col-4">
+                        <h6 class="mb-0 text-success">{{ queue.answered_calls }}</h6>
+                        <small class="text-muted">{% trans "Отвечено" %}</small>
+                    </div>
+                    <div class="col-4">
+                        <h6 class="mb-0 text-danger">{{ queue.missed_calls }}</h6>
+                        <small class="text-muted">{% trans "Пропущено" %}</small>
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <div class="progress" style="height: 5px;">
+                        <div class="progress-bar bg-success" style="width: {% if queue.total_calls > 0 %}{% widthratio queue.answered_calls queue.total_calls 100 %}{% else %}0{% endif %}%"></div>
+                        <div class="progress-bar bg-danger" style="width: {% if queue.total_calls > 0 %}{% widthratio queue.missed_calls queue.total_calls 100 %}{% else %}0{% endif %}%"></div>
+                    </div>
+                    <div class="d-flex justify-content-between mt-2">
+                        <small class="text-success">{{ queue.answered_calls }} {% trans "отвечено" %}</small>
+                        <small class="text-danger">{{ queue.missed_calls }} {% trans "пропущено" %}</small>
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <button class="btn btn-sm btn-outline-primary w-100" onclick="testQueue('{{ queue.extension }}')">
+                        <i class="ri-phone-line"></i> {% trans "Тестовый звонок в очередь" %}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="ri-stack-line fs-48 text-muted"></i>
+                <h5 class="mt-3">{% trans "Нет очередей" %}</h5>
+                <p class="text-muted">{% trans "Создайте первую очередь для распределения звонков между операторами" %}</p>
+                <a href="{% url 'moderation:queue_create' %}" class="btn btn-primary">
+                    <i class="ri-add-line"></i> {% trans "Создать очередь" %}
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Modal статистики -->
+<div class="modal fade" id="statsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{% trans "Статистика очереди" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="statsContent">
+                    <div class="text-center py-5">
+                        <div class="spinner-border" role="status"></div>
+                        <p class="mt-2">{% trans "Загрузка статистики..." %}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block javascript %}
+<script>
+    function deleteQueue(id) {
+        Swal.fire({
+            title: '{% trans "Удалить очередь?" %}',
+            text: '{% trans "Это действие нельзя отменить. Все данные о звонках в очереди будут сохранены." %}',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: '{% trans "Да, удалить" %}',
+            cancelButtonText: '{% trans "Отмена" %}'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `/moderation/telephony/queues/${id}/delete/`,
+                    method: 'POST',
+                    data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+                    success: function() {
+                        location.reload();
+                    },
+                    error: function() {
+                        Swal.fire('{% trans "Ошибка" %}', '{% trans "Не удалось удалить очередь" %}', 'error');
+                    }
+                });
+            }
+        });
+    }
+    
+    function viewQueueStats(id) {
+        $('#statsModal').modal('show');
+        $('#statsContent').html(`
+            <div class="text-center py-5">
+                <div class="spinner-border" role="status"></div>
+                <p class="mt-2">{% trans "Загрузка статистики..." %}</p>
+            </div>
+        `);
+        
+        $.ajax({
+            url: `/moderation/telephony/api/queue-stats/${id}/`,
+            method: 'GET',
+            success: function(data) {
+                let html = `
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body text-center">
+                                    <h3>${data.total_calls}</h3>
+                                    <small>{% trans "Всего звонков" %}</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-success text-white">
+                                <div class="card-body text-center">
+                                    <h3>${data.answered_calls}</h3>
+                                    <small>{% trans "Отвечено" %}</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-danger text-white">
+                                <div class="card-body text-center">
+                                    <h3>${data.missed_calls}</h3>
+                                    <small>{% trans "Пропущено" %}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <h6>{% trans "Динамика по дням" %}</h6>
+                            <div id="queueChart"></div>
+                        </div>
+                    </div>
+                `;
+                $('#statsContent').html(html);
+                
+                // График
+                const options = {
+                    series: [{
+                        name: 'Звонки',
+                        data: data.daily_stats.map(item => item.total)
+                    }],
+                    chart: { type: 'line', height: 300 },
+                    xaxis: { categories: data.daily_stats.map(item => item.date) }
+                };
+                const chart = new ApexCharts(document.querySelector("#queueChart"), options);
+                chart.render();
+            }
+        });
+    }
+    
+    function testQueue(extension) {
+        Swal.fire({
+            title: '{% trans "Тестовый звонок" %}',
+            text: `{% trans "Совершить тестовый звонок в очередь" %} ${extension}?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: '{% trans "Да" %}',
+            cancelButtonText: '{% trans "Отмена" %}'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '{% url "moderation:make_call" %}',
+                    method: 'POST',
+                    data: {
+                        number: extension,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function() {
+                        Swal.fire('{% trans "Успех" %}', '{% trans "Звонок направлен в очередь" %}', 'success');
+                    }
+                });
+            }
+        });
+    }
+</script>
+{% endblock %}
+{% endblock %}

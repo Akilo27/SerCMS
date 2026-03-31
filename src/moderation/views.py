@@ -1,5 +1,6 @@
 from django.apps import apps
 from django.core.mail import EmailMultiAlternatives
+from django.db.models.functions import TruncDate, TruncHour
 from django.utils.crypto import get_random_string
 from django.views.decorators.http import require_POST
 import uuid
@@ -39,7 +40,7 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Avg
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import logout, get_user_model
 from django.shortcuts import redirect
@@ -191,6 +192,12 @@ from shop.models import Cart
 
 from moderation.forms import SendEmailForm, EmailTemplateForm, EmailTemplateFilterForm
 from moderation.models import EmailLog, EmailQueue, EmailTemplate
+
+from moderation.forms import QuickCallForm, CallSettingsForm, CallQueueForm, PhoneNumberForm, CallNoteForm, \
+    CallFilterForm
+from moderation.models import CallSettings, CallRecord, CallRecording, VoiceMenu, CallQueue, PhoneNumber
+
+from moderation.forms import VoiceMenuForm
 
 
 class ModerationHome(View):
@@ -8607,6 +8614,687 @@ def delete_email_log(request, log_id):
     if request.method == 'POST':
         log = get_object_or_404(EmailLog, id=log_id)
         log.delete()
+        return JsonResponse({'status': 'success'})
+
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+
+# Telephonia
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class CallDashboardView(TemplateView):
+    """Дашборд телефонии"""
+    template_name = "moderations/telephony/dashboard.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        today = timezone.now().date()
+        week_ago = today - timedelta(days=7)
+
+        # Основная статистика
+        context['today_stats'] = CallRecord.objects.filter(
+            start_time__date=today
+        ).aggregate(
+            total=Count('id'),
+            answered=Count('id', filter=Q(status='answered')),
+            missed=Count('id', filter=Q(status='missed')),
+            avg_duration=Avg('duration')
+        )
+
+        context['week_stats'] = CallRecord.objects.filter(
+            start_time__date__gte=week_ago
+        ).aggregate(
+            total=Count('id'),
+            answered=Count('id', filter=Q(status='answered')),
+            missed=Count('id', filter=Q(status='missed')),
+            total_duration=Sum('duration')
+        )
+
+        # Последние звонки
+        context['recent_calls'] = CallRecord.objects.select_related('caller', 'callee') \
+            .order_by('-start_time')[:10]
+
+        # Активные номера
+        context['active_numbers'] = PhoneNumber.objects.filter(status='active').count()
+
+        # Операторы онлайн
+        context['online_operators'] = CallSettings.objects.filter(
+            is_online=True,
+            dnd_mode=False
+        ).count()
+
+        # Топ операторов
+        context['top_operators'] = CallRecord.objects.filter(
+            start_time__date__gte=week_ago,
+            callee__isnull=False,
+            status='answered'
+        ).values('callee__username').annotate(
+            total=Count('id'),
+            total_duration=Sum('duration')
+        ).order_by('-total')[:5]
+
+        # Динамика звонков по часам (сегодня)
+        hourly_stats = CallRecord.objects.filter(
+            start_time__date=today
+        ).annotate(
+            hour=TruncHour('start_time')
+        ).values('hour').annotate(
+            total=Count('id'),
+            inbound=Count('id', filter=Q(direction='inbound')),
+            outbound=Count('id', filter=Q(direction='outbound'))
+        ).order_by('hour')
+
+        context['hourly_stats'] = list(hourly_stats)
+
+        return context
+
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class CallRecordListView(ListView):
+    """Список звонков"""
+    model = CallRecord
+    template_name = "moderations/telephony/call_list.html"
+    context_object_name = "calls"
+    paginate_by = 20
+
+    def get_queryset(self):
+        queryset = super().get_queryset().select_related('caller', 'callee')
+
+        # Фильтрация
+        direction = self.request.GET.get('direction')
+        if direction:
+            queryset = queryset.filter(direction=direction)
+
+        status = self.request.GET.get('status')
+        if status:
+            queryset = queryset.filter(status=status)
+
+        caller = self.request.GET.get('caller')
+        if caller:
+            queryset = queryset.filter(caller_number__icontains=caller)
+
+        callee = self.request.GET.get('callee')
+        if callee:
+            queryset = queryset.filter(callee_number__icontains=callee)
+
+        date_from = self.request.GET.get('date_from')
+        if date_from:
+            queryset = queryset.filter(start_time__date__gte=date_from)
+
+        date_to = self.request.GET.get('date_to')
+        if date_to:
+            queryset = queryset.filter(start_time__date__lte=date_to)
+
+        duration_min = self.request.GET.get('duration_min')
+        if duration_min:
+            queryset = queryset.filter(duration__gte=duration_min)
+
+        duration_max = self.request.GET.get('duration_max')
+        if duration_max:
+            queryset = queryset.filter(duration__lte=duration_max)
+
+        operator = self.request.GET.get('operator')
+        if operator:
+            queryset = queryset.filter(Q(caller_id=operator) | Q(callee_id=operator))
+
+        return queryset.order_by('-start_time')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['filter_form'] = CallFilterForm(self.request.GET)
+        context['directions'] = CallRecord.DIRECTION_CHOICES
+        context['statuses'] = CallRecord.STATUS_CHOICES
+        return context
+
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class CallRecordDetailView(DetailView):
+    """Детальная информация о звонке"""
+    model = CallRecord
+    template_name = "moderations/telephony/call_detail.html"
+    context_object_name = "call"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['note_form'] = CallNoteForm(instance=self.object)
+
+        # Получаем запись разговора
+        try:
+            context['recording'] = CallRecording.objects.get(call=self.object)
+        except CallRecording.DoesNotExist:
+            context['recording'] = None
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = CallNoteForm(request.POST, instance=self.object)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Заметка сохранена")
+            return redirect('moderation:call_detail', pk=self.object.pk)
+
+        context = self.get_context_data()
+        context['note_form'] = form
+        return self.render_to_response(context)
+
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class PhoneNumberListView(ListView):
+    """Список телефонных номеров"""
+    model = PhoneNumber
+    template_name = "moderations/telephony/phone_numbers.html"
+    context_object_name = "numbers"
+    paginate_by = 20
+
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class PhoneNumberCreateView(CreateView):
+    """Создание телефонного номера"""
+    model = PhoneNumber
+    form_class = PhoneNumberForm
+    template_name = "moderations/telephony/phone_number_form.html"
+    success_url = reverse_lazy("moderation:phone_numbers")
+
+    def form_valid(self, form):
+        messages.success(self.request, "Номер успешно добавлен")
+        return super().form_valid(form)
+
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class PhoneNumberUpdateView(UpdateView):
+    """Редактирование телефонного номера"""
+    model = PhoneNumber
+    form_class = PhoneNumberForm
+    template_name = "moderations/telephony/phone_number_form.html"
+    success_url = reverse_lazy("moderation:phone_numbers")
+
+    def form_valid(self, form):
+        messages.success(self.request, "Номер успешно обновлен")
+        return super().form_valid(form)
+
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class PhoneNumberDeleteView(DeleteView):
+    """Удаление телефонного номера"""
+    model = PhoneNumber
+    success_url = reverse_lazy("moderation:phone_numbers")
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(request, "Номер удален")
+        return super().delete(request, *args, **kwargs)
+
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class CallQueueListView(ListView):
+    """Список очередей"""
+    model = CallQueue
+    template_name = "moderations/telephony/queues.html"
+    context_object_name = "queues"
+
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class CallQueueCreateView(CreateView):
+    """Создание очереди"""
+    model = CallQueue
+    form_class = CallQueueForm
+    template_name = "moderations/telephony/queue_form.html"
+    success_url = reverse_lazy("moderation:queues")
+
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class VoiceMenuListView(ListView):
+    """Список голосовых меню"""
+    model = VoiceMenu
+    template_name = "moderations/telephony/voice_menus.html"
+    context_object_name = "menus"
+
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class CallSettingsView(UpdateView):
+    """Настройки телефонии пользователя"""
+    model = CallSettings
+    form_class = CallSettingsForm
+    template_name = "moderations/telephony/settings.html"
+
+    def get_object(self, queryset=None):
+        obj, created = CallSettings.objects.get_or_create(user=self.request.user)
+        return obj
+
+    def get_success_url(self):
+        return reverse_lazy("moderation:call_settings")
+
+    def form_valid(self, form):
+        messages.success(self.request, "Настройки сохранены")
+        return super().form_valid(form)
+
+
+@login_required
+def make_call(request):
+    """Совершить звонок"""
+    if request.method == 'POST':
+        form = QuickCallForm(request.POST)
+        if form.is_valid():
+            number = form.cleaned_data['number']
+            extension = form.cleaned_data.get('extension', '')
+
+            # Здесь логика инициации звонка через API телефонии
+            try:
+                # Имитация звонка
+                call = CallRecord.objects.create(
+                    call_id=f"call_{timezone.now().timestamp()}",
+                    direction='outbound',
+                    status='answered',
+                    caller=request.user,
+                    caller_number=request.user.phone_settings.extension if hasattr(request.user,
+                                                                                   'phone_settings') else '',
+                    caller_name=request.user.get_full_name(),
+                    callee_number=number,
+                    callee_name='',
+                    start_time=timezone.now(),
+                    answer_time=timezone.now(),
+                )
+
+                messages.success(request, f"Звонок на номер {number} инициирован")
+                return JsonResponse({'status': 'success', 'call_id': call.id})
+            except Exception as e:
+                return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+
+@login_required
+def call_statistics(request):
+    """Статистика звонков"""
+    # Статистика по дням за последние 30 дней
+    last_30_days = timezone.now() - timedelta(days=30)
+    daily_stats = CallRecord.objects.filter(
+        start_time__gte=last_30_days
+    ).annotate(
+        date=TruncDate('start_time')
+    ).values('date').annotate(
+        total=Count('id'),
+        answered=Count('id', filter=Q(status='answered')),
+        missed=Count('id', filter=Q(status='missed')),
+        inbound=Count('id', filter=Q(direction='inbound')),
+        outbound=Count('id', filter=Q(direction='outbound')),
+        avg_duration=Avg('duration')
+    ).order_by('date')
+
+    # Статистика по операторам
+    operator_stats = CallRecord.objects.filter(
+        start_time__gte=last_30_days,
+        status='answered'
+    ).values('callee__username').annotate(
+        total=Count('id'),
+        total_duration=Sum('duration'),
+        avg_duration=Avg('duration')
+    ).order_by('-total')
+
+    # Статистика по часам
+    hourly_stats = CallRecord.objects.filter(
+        start_time__gte=last_30_days
+    ).annotate(
+        hour=TruncHour('start_time')
+    ).values('hour').annotate(
+        total=Count('id')
+    ).order_by('hour')
+
+    return JsonResponse({
+        'daily_stats': list(daily_stats),
+        'operator_stats': list(operator_stats),
+        'hourly_stats': list(hourly_stats),
+    })
+
+
+@login_required
+def download_recording(request, call_id):
+    """Скачать запись разговора"""
+    recording = get_object_or_404(CallRecording, call_id=call_id)
+
+    if recording.audio_file:
+        recording.download_count += 1
+        recording.is_downloaded = True
+        recording.save()
+
+        response = HttpResponse(recording.audio_file.read(), content_type='audio/mpeg')
+        response['Content-Disposition'] = f'attachment; filename="call_{call_id}.{recording.file_format}"'
+        return response
+
+    return HttpResponse("Запись не найдена", status=404)
+
+
+@login_required
+def export_calls_csv(request):
+    """Экспорт звонков в CSV"""
+    queryset = CallRecord.objects.filter(
+        start_time__date__gte=request.GET.get('date_from', '2024-01-01'),
+        start_time__date__lte=request.GET.get('date_to', timezone.now().date())
+    ).select_related('caller', 'callee')
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="calls_export.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['ID', 'Дата', 'Направление', 'Статус', 'Звонящий', 'Получатель',
+                     'Длительность', 'Ожидание', 'Стоимость', 'Заметки'])
+
+    for call in queryset:
+        writer.writerow([
+            call.id,
+            call.start_time.strftime('%Y-%m-%d %H:%M:%S'),
+            call.get_direction_display(),
+            call.get_status_display(),
+            f"{call.caller_name} ({call.caller_number})",
+            f"{call.callee_name} ({call.callee_number})",
+            call.get_duration_formatted(),
+            call.get_wait_formatted(),
+            call.cost,
+            call.notes[:100]
+        ])
+
+    return response
+
+
+@login_required
+def set_operator_status(request):
+    """Установить статус оператора"""
+    if request.method == 'POST':
+        settings, created = CallSettings.objects.get_or_create(user=request.user)
+
+        status_type = request.POST.get('status')
+        if status_type == 'online':
+            settings.is_online = True
+            settings.dnd_mode = False
+        elif status_type == 'offline':
+            settings.is_online = False
+        elif status_type == 'dnd':
+            settings.dnd_mode = True
+        elif status_type == 'away':
+            settings.away_message = request.POST.get('message', '')
+
+        settings.save()
+
+        return JsonResponse({'status': 'success'})
+
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+
+@login_required
+def get_operator_status(request):
+    """Получить статус оператора"""
+    settings, created = CallSettings.objects.get_or_create(user=request.user)
+
+    status = 'online'
+    if not settings.is_online:
+        status = 'offline'
+    elif settings.dnd_mode:
+        status = 'dnd'
+
+    return JsonResponse({
+        'status': status,
+        'away_message': settings.away_message if status == 'away' else ''
+    })
+
+
+@login_required
+def queue_stats_api(request, pk):
+    """API для получения статистики очереди"""
+    queue = get_object_or_404(CallQueue, id=pk)
+
+    # Получаем статистику за последние 30 дней
+    last_30_days = timezone.now() - timedelta(days=30)
+    daily_stats = CallRecord.objects.filter(
+        callee_number=queue.extension,
+        start_time__gte=last_30_days
+    ).annotate(
+        date=TruncDate('start_time')
+    ).values('date').annotate(
+        total=Count('id'),
+        answered=Count('id', filter=Q(status='answered')),
+        missed=Count('id', filter=Q(status='missed'))
+    ).order_by('date')
+
+    return JsonResponse({
+        'name': queue.name,
+        'total_calls': queue.total_calls,
+        'answered_calls': queue.answered_calls,
+        'missed_calls': queue.missed_calls,
+        'daily_stats': list(daily_stats)
+    })
+
+
+@login_required
+def menu_structure_api(request, pk):
+    """API для получения структуры голосового меню"""
+    menu = get_object_or_404(VoiceMenu, id=pk)
+
+    return JsonResponse({
+        'name': menu.name,
+        'greeting_message': menu.greeting_message,
+        'menu_items': menu.menu_items,
+        'timeout': menu.timeout,
+        'max_retries': menu.max_retries
+    })
+
+
+@login_required
+def reset_call_settings(request):
+    """Сброс настроек телефонии"""
+    if request.method == 'POST':
+        settings, created = CallSettings.objects.get_or_create(user=request.user)
+        settings.extension = ''
+        settings.mobile_forward = ''
+        settings.email_forward = ''
+        settings.notify_on_call = True
+        settings.notify_on_missed = True
+        settings.notify_by_email = True
+        settings.notify_by_sms = False
+        settings.auto_record = True
+        settings.record_outbound = True
+        settings.record_inbound = True
+        settings.work_start = '09:00'
+        settings.work_end = '18:00'
+        settings.work_days = [1, 2, 3, 4, 5]
+        settings.is_online = True
+        settings.dnd_mode = False
+        settings.away_message = ''
+        settings.save()
+
+        return JsonResponse({'status': 'success'})
+
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class CallQueueListView(ListView):
+    """Список очередей"""
+    model = CallQueue
+    template_name = "moderations/telephony/queues.html"
+    context_object_name = "queues"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Подсчет общего количества операторов
+        total_members = 0
+        for queue in context['queues']:
+            total_members += queue.members.count()
+        context['total_members'] = total_members
+
+        # Среднее время ожидания
+        avg_wait_time = CallRecord.objects.filter(
+            status='answered',
+            wait_duration__gt=0
+        ).aggregate(avg=Avg('wait_duration'))['avg']
+        context['avg_wait_time'] = avg_wait_time or 0
+
+        return context
+
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class CallQueueCreateView(CreateView):
+    """Создание очереди"""
+    model = CallQueue
+    form_class = CallQueueForm
+    template_name = "moderations/telephony/queue_form.html"
+    success_url = reverse_lazy("moderation:queues")
+
+    def form_valid(self, form):
+        messages.success(self.request, "Очередь успешно создана")
+        return super().form_valid(form)
+
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class CallQueueUpdateView(UpdateView):
+    """Редактирование очереди"""
+    model = CallQueue
+    form_class = CallQueueForm
+    template_name = "moderations/telephony/queue_form.html"
+    success_url = reverse_lazy("moderation:queues")
+
+    def form_valid(self, form):
+        messages.success(self.request, "Очередь успешно обновлена")
+        return super().form_valid(form)
+
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class CallQueueDeleteView(DeleteView):
+    """Удаление очереди"""
+    model = CallQueue
+    success_url = reverse_lazy("moderation:queues")
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(request, "Очередь удалена")
+        return super().delete(request, *args, **kwargs)
+
+
+# ========== Голосовые меню (IVR) ==========
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class VoiceMenuListView(ListView):
+    """Список голосовых меню"""
+    model = VoiceMenu
+    template_name = "moderations/telephony/voice_menus.html"
+    context_object_name = "menus"
+
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class VoiceMenuCreateView(CreateView):
+    """Создание голосового меню"""
+    model = VoiceMenu
+    form_class = VoiceMenuForm
+    template_name = "moderations/telephony/voice_menu_form.html"
+    success_url = reverse_lazy("moderation:voice_menus")
+
+    def form_valid(self, form):
+        messages.success(self.request, "Голосовое меню успешно создано")
+        return super().form_valid(form)
+
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class VoiceMenuUpdateView(UpdateView):
+    """Редактирование голосового меню"""
+    model = VoiceMenu
+    form_class = VoiceMenuForm
+    template_name = "moderations/telephony/voice_menu_form.html"
+    success_url = reverse_lazy("moderation:voice_menus")
+
+    def form_valid(self, form):
+        messages.success(self.request, "Голосовое меню успешно обновлено")
+        return super().form_valid(form)
+
+
+@method_decorator(login_required(login_url="moderation:login"), name="dispatch")
+class VoiceMenuDeleteView(DeleteView):
+    """Удаление голосового меню"""
+    model = VoiceMenu
+    success_url = reverse_lazy("moderation:voice_menus")
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(request, "Голосовое меню удалено")
+        return super().delete(request, *args, **kwargs)
+
+
+# ========== API функции ==========
+
+@login_required
+def queue_stats_api(request, pk):
+    """API для получения статистики очереди"""
+    queue = get_object_or_404(CallQueue, id=pk)
+
+    # Получаем статистику за последние 30 дней
+    from django.db.models.functions import TruncDate
+    from django.db.models import Count, Q
+
+    last_30_days = timezone.now() - timedelta(days=30)
+    daily_stats = CallRecord.objects.filter(
+        callee_number=queue.extension,
+        start_time__gte=last_30_days
+    ).annotate(
+        date=TruncDate('start_time')
+    ).values('date').annotate(
+        total=Count('id'),
+        answered=Count('id', filter=Q(status='answered')),
+        missed=Count('id', filter=Q(status='missed'))
+    ).order_by('date')
+
+    # Форматируем даты
+    daily_list = []
+    for stat in daily_stats:
+        daily_list.append({
+            'date': stat['date'].strftime('%Y-%m-%d') if stat['date'] else None,
+            'total': stat['total'],
+            'answered': stat['answered'],
+            'missed': stat['missed']
+        })
+
+    return JsonResponse({
+        'name': queue.name,
+        'total_calls': queue.total_calls,
+        'answered_calls': queue.answered_calls,
+        'missed_calls': queue.missed_calls,
+        'daily_stats': daily_list
+    })
+
+
+@login_required
+def menu_structure_api(request, pk):
+    """API для получения структуры голосового меню"""
+    menu = get_object_or_404(VoiceMenu, id=pk)
+
+    return JsonResponse({
+        'name': menu.name,
+        'greeting_message': menu.greeting_message,
+        'menu_items': menu.menu_items,
+        'timeout': menu.timeout,
+        'max_retries': menu.max_retries
+    })
+
+
+@login_required
+def reset_call_settings(request):
+    """Сброс настроек телефонии"""
+    if request.method == 'POST':
+        settings, created = CallSettings.objects.get_or_create(user=request.user)
+        settings.extension = ''
+        settings.mobile_forward = ''
+        settings.email_forward = ''
+        settings.notify_on_call = True
+        settings.notify_on_missed = True
+        settings.notify_by_email = True
+        settings.notify_by_sms = False
+        settings.auto_record = True
+        settings.record_outbound = True
+        settings.record_inbound = True
+        settings.work_start = '09:00'
+        settings.work_end = '18:00'
+        settings.work_days = [1, 2, 3, 4, 5]
+        settings.is_online = True
+        settings.dnd_mode = False
+        settings.away_message = ''
+        settings.save()
+
         return JsonResponse({'status': 'success'})
 
     return JsonResponse({'error': 'Method not allowed'}, status=405)

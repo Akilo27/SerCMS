@@ -1,0 +1,325 @@
+{% extends 'moderations/base.html' %}
+{% load static i18n %}
+
+{% block title %}{% if form.instance.pk %}{% trans "Редактирование голосового меню" %}{% else %}{% trans "Создание голосового меню" %}{% endif %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="page-title">
+                {% if form.instance.pk %}
+                    <i class="ri-edit-line me-1"></i> {% trans "Редактирование голосового меню" %}
+                {% else %}
+                    <i class="ri-add-line me-1"></i> {% trans "Создание голосового меню" %}
+                {% endif %}
+            </h4>
+            <div class="page-title-right">
+                <a href="{% url 'moderation:voice_menus' %}" class="btn btn-secondary">
+                    <i class="ri-arrow-left-line"></i> {% trans "Назад к списку" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{% trans "Основная информация" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.name.id_for_label }}" class="form-label">
+                                {% trans "Название меню" %} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                            <div class="text-danger">{{ form.name.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.extension.id_for_label }}" class="form-label">
+                                {% trans "Внутренний номер" %} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.extension }}
+                            {% if form.extension.errors %}
+                            <div class="text-danger">{{ form.extension.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">{% trans "Номер для вызова голосового меню" %}</small>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.greeting_message.id_for_label }}" class="form-label">
+                            {% trans "Приветственное сообщение" %}
+                        </label>
+                        {{ form.greeting_message }}
+                        {% if form.greeting_message.errors %}
+                        <div class="text-danger">{{ form.greeting_message.errors }}</div>
+                        {% endif %}
+                        <small class="text-muted">{% trans "Текст, который услышит caller" %}</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.greeting_audio.id_for_label }}" class="form-label">
+                            {% trans "Аудио приветствие (опционально)" %}
+                        </label>
+                        {{ form.greeting_audio }}
+                        {% if form.greeting_audio.errors %}
+                        <div class="text-danger">{{ form.greeting_audio.errors }}</div>
+                        {% endif %}
+                        {% if form.instance.greeting_audio %}
+                        <div class="mt-2">
+                            <audio controls>
+                                <source src="{{ form.instance.greeting_audio.url }}" type="audio/mpeg">
+                            </audio>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.timeout.id_for_label }}" class="form-label">
+                                {% trans "Таймаут (сек)" %}
+                            </label>
+                            {{ form.timeout }}
+                            {% if form.timeout.errors %}
+                            <div class="text-danger">{{ form.timeout.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">{% trans "Время ожидания ввода" %}</small>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.max_retries.id_for_label }}" class="form-label">
+                                {% trans "Максимум попыток" %}
+                            </label>
+                            {{ form.max_retries }}
+                            {% if form.max_retries.errors %}
+                            <div class="text-danger">{{ form.max_retries.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">{% trans "Количество попыток при ошибке" %}</small>
+                        </div>
+                    </div>
+                    
+                    <div class="form-check form-switch">
+                        {{ form.is_active }}
+                        <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                            {% trans "Активно" %}
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{% trans "Пункты меню" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div id="menuItems">
+                        {% if form.instance.menu_items %}
+                            {% for key, value in form.instance.menu_items.items %}
+                            <div class="menu-item border p-3 mb-2 rounded">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <label class="form-label">{% trans "Клавиша" %}</label>
+                                        <input type="text" class="form-control menu-key" value="{{ key }}" placeholder="1, 2, 3...">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">{% trans "Действие" %}</label>
+                                        <select class="form-control menu-action">
+                                            <option value="transfer" {% if value.action == 'transfer' %}selected{% endif %}>{% trans "Перевод на номер" %}</option>
+                                            <option value="queue" {% if value.action == 'queue' %}selected{% endif %}>{% trans "Очередь" %}</option>
+                                            <option value="voicemail" {% if value.action == 'voicemail' %}selected{% endif %}>{% trans "Голосовая почта" %}</option>
+                                            <option value="repeat" {% if value.action == 'repeat' %}selected{% endif %}>{% trans "Повторить меню" %}</option>
+                                            <option value="hangup" {% if value.action == 'hangup' %}selected{% endif %}>{% trans "Завершить звонок" %}</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">{% trans "Цель" %}</label>
+                                        <input type="text" class="form-control menu-target" value="{{ value.target }}" placeholder="Номер, очередь или email">
+                                    </div>
+                                    <div class="col-md-1">
+                                        <label class="form-label">&nbsp;</label>
+                                        <button type="button" class="btn btn-danger btn-sm remove-menu-item w-100">
+                                            <i class="ri-delete-bin-line"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    
+                    <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="addMenuItem">
+                        <i class="ri-add-line"></i> {% trans "Добавить пункт меню" %}
+                    </button>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{% trans "Действие при ошибке" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div id="invalidAction">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">{% trans "Действие" %}</label>
+                                <select class="form-control" id="invalidActionType">
+                                    <option value="repeat" {% if form.instance.invalid_action.action == 'repeat' %}selected{% endif %}>{% trans "Повторить меню" %}</option>
+                                    <option value="transfer" {% if form.instance.invalid_action.action == 'transfer' %}selected{% endif %}>{% trans "Перевод на номер" %}</option>
+                                    <option value="hangup" {% if form.instance.invalid_action.action == 'hangup' %}selected{% endif %}>{% trans "Завершить звонок" %}</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6" id="invalidTargetDiv" style="display: {% if form.instance.invalid_action.action == 'transfer' %}block{% else %}none{% endif %};">
+                                <label class="form-label">{% trans "Цель" %}</label>
+                                <input type="text" class="form-control" id="invalidTarget" value="{{ form.instance.invalid_action.target|default:'' }}" placeholder="Номер или очередь">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-3 mb-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="ri-save-line"></i> {% trans "Сохранить" %}
+                </button>
+                <a href="{% url 'moderation:voice_menus' %}" class="btn btn-secondary">
+                    {% trans "Отмена" %}
+                </a>
+            </div>
+        </form>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Справка" %}</h5>
+            </div>
+            <div class="card-body">
+                <h6>{% trans "Доступные действия" %}</h6>
+                <ul class="small">
+                    <li><strong>Перевод на номер</strong> - перевести звонок на указанный номер</li>
+                    <li><strong>Очередь</strong> - поставить в очередь операторов</li>
+                    <li><strong>Голосовая почта</strong> - оставить сообщение</li>
+                    <li><strong>Повторить меню</strong> - повторить приветствие</li>
+                    <li><strong>Завершить звонок</strong> - завершить вызов</li>
+                </ul>
+                <hr>
+                <h6>{% trans "Пример структуры" %}</h6>
+                <pre class="bg-light p-2 rounded small">
+1 → 📞 Перевод на 101 (Продажи)
+2 → 👥 Очередь support (Поддержка)
+3 → 🎙️ Голосовая почта
+0 → 🔄 Повторить меню
+                </pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block javascript %}
+<script>
+    // Шаблон для пункта меню
+    function getMenuItemTemplate(key = '', action = 'transfer', target = '') {
+        return `
+            <div class="menu-item border p-3 mb-2 rounded">
+                <div class="row">
+                    <div class="col-md-3">
+                        <label class="form-label">Клавиша</label>
+                        <input type="text" class="form-control menu-key" value="${key}" placeholder="1, 2, 3...">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Действие</label>
+                        <select class="form-control menu-action">
+                            <option value="transfer" ${action === 'transfer' ? 'selected' : ''}>Перевод на номер</option>
+                            <option value="queue" ${action === 'queue' ? 'selected' : ''}>Очередь</option>
+                            <option value="voicemail" ${action === 'voicemail' ? 'selected' : ''}>Голосовая почта</option>
+                            <option value="repeat" ${action === 'repeat' ? 'selected' : ''}>Повторить меню</option>
+                            <option value="hangup" ${action === 'hangup' ? 'selected' : ''}>Завершить звонок</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Цель</label>
+                        <input type="text" class="form-control menu-target" value="${target}" placeholder="Номер, очередь или email">
+                    </div>
+                    <div class="col-md-1">
+                        <label class="form-label">&nbsp;</label>
+                        <button type="button" class="btn btn-danger btn-sm remove-menu-item w-100">
+                            <i class="ri-delete-bin-line"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Добавление пункта меню
+    $('#addMenuItem').click(function() {
+        $('#menuItems').append(getMenuItemTemplate());
+    });
+    
+    // Удаление пункта меню
+    $(document).on('click', '.remove-menu-item', function() {
+        $(this).closest('.menu-item').remove();
+    });
+    
+    // Показ/скрытие поля цели для действия при ошибке
+    $('#invalidActionType').change(function() {
+        if ($(this).val() === 'transfer') {
+            $('#invalidTargetDiv').show();
+        } else {
+            $('#invalidTargetDiv').hide();
+        }
+    });
+    
+    // Сбор данных перед отправкой
+    $('form').on('submit', function(e) {
+        // Собираем пункты меню
+        const menuItems = {};
+        $('.menu-item').each(function() {
+            const key = $(this).find('.menu-key').val();
+            const action = $(this).find('.menu-action').val();
+            const target = $(this).find('.menu-target').val();
+            
+            if (key && action) {
+                menuItems[key] = {
+                    action: action,
+                    target: target || ''
+                };
+            }
+        });
+        
+        // Создаем скрытое поле для menu_items
+        const menuItemsInput = $('<input>')
+            .attr('type', 'hidden')
+            .attr('name', 'menu_items')
+            .val(JSON.stringify(menuItems));
+        $(this).append(menuItemsInput);
+        
+        // Собираем действие при ошибке
+        const invalidAction = {
+            action: $('#invalidActionType').val()
+        };
+        if (invalidAction.action === 'transfer') {
+            invalidAction.target = $('#invalidTarget').val();
+        }
+        
+        const invalidActionInput = $('<input>')
+            .attr('type', 'hidden')
+            .attr('name', 'invalid_action')
+            .val(JSON.stringify(invalidAction));
+        $(this).append(invalidActionInput);
+        
+        return true;
+    });
+</script>
+{% endblock %}
+{% endblock %}

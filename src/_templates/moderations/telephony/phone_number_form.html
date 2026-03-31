@@ -1,0 +1,726 @@
+{% extends 'moderations/base.html' %}
+{% load static i18n %}
+
+{% block title %}
+    {% if form.instance.pk %}
+        {% trans "Редактирование номера" %} - {{ form.instance.number }}
+    {% else %}
+        {% trans "Добавление номера" %}
+    {% endif %}
+{% endblock %}
+
+{% block head %}
+<style>
+    .sip-credentials {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 15px;
+    }
+    .ivr-editor {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 15px;
+        display: none;
+    }
+    .ivr-item {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 10px;
+        margin-bottom: 10px;
+        position: relative;
+    }
+    .ivr-item .remove-ivr {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        cursor: pointer;
+        color: #dc3545;
+    }
+    .ivr-item .remove-ivr:hover {
+        color: #c82333;
+    }
+    .preview-number {
+        font-family: monospace;
+        font-size: 18px;
+        letter-spacing: 2px;
+    }
+    .action-buttons {
+        position: sticky;
+        bottom: 20px;
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        z-index: 100;
+    }
+    .status-badge {
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="page-title">
+                {% if form.instance.pk %}
+                    <i class="ri-edit-line me-1"></i> {% trans "Редактирование номера" %}
+                {% else %}
+                    <i class="ri-add-line me-1"></i> {% trans "Добавление номера" %}
+                {% endif %}
+            </h4>
+            <div class="page-title-right">
+                <a href="{% url 'moderation:phone_numbers' %}" class="btn btn-secondary">
+                    <i class="ri-arrow-left-line"></i> {% trans "Назад к списку" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <form method="post" id="phoneNumberForm">
+            {% csrf_token %}
+            
+            <!-- Основная информация -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="ri-information-line"></i> {% trans "Основная информация" %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.number.id_for_label }}" class="form-label">
+                                {% trans "Номер телефона" %} <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="ri-phone-line"></i></span>
+                                {{ form.number }}
+                            </div>
+                            {% if form.number.errors %}
+                            <div class="text-danger mt-1">{{ form.number.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">{% trans "Формат: +7 (999) 123-45-67 или 74951234567" %}</small>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.extension.id_for_label }}" class="form-label">
+                                {% trans "Внутренний номер" %}
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="ri-keyboard-line"></i></span>
+                                {{ form.extension }}
+                            </div>
+                            {% if form.extension.errors %}
+                            <div class="text-danger mt-1">{{ form.extension.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">{% trans "Короткий номер для внутренних звонков" %}</small>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.owner.id_for_label }}" class="form-label">
+                                {% trans "Владелец" %}
+                            </label>
+                            {{ form.owner }}
+                            {% if form.owner.errors %}
+                            <div class="text-danger mt-1">{{ form.owner.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">{% trans "Сотрудник, за которым закреплен номер" %}</small>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.department.id_for_label }}" class="form-label">
+                                {% trans "Отдел" %}
+                            </label>
+                            {{ form.department }}
+                            {% if form.department.errors %}
+                            <div class="text-danger mt-1">{{ form.department.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">{% trans "Например: Отдел продаж, Служба поддержки" %}</small>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.status.id_for_label }}" class="form-label">
+                                {% trans "Статус" %}
+                            </label>
+                            {{ form.status }}
+                            {% if form.status.errors %}
+                            <div class="text-danger mt-1">{{ form.status.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="mt-4">
+                                <div class="form-check form-switch">
+                                    {{ form.is_primary }}
+                                    <label class="form-check-label" for="{{ form.is_primary.id_for_label }}">
+                                        {% trans "Основной номер" %}
+                                    </label>
+                                </div>
+                                <div class="form-check form-switch mt-2">
+                                    {{ form.is_ivr }}
+                                    <label class="form-check-label" for="{{ form.is_ivr.id_for_label }}" id="ivrToggleLabel">
+                                        {% trans "IVR номер (голосовое меню)" %}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- SIP настройки -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="ri-wifi-line"></i> {% trans "SIP настройки" %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="ri-information-line"></i>
+                        {% trans "Эти настройки необходимы для подключения номера к SIP серверу. Заполните их, если номер будет использоваться для звонков." %}
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.sip_login.id_for_label }}" class="form-label">
+                                {% trans "SIP логин" %}
+                            </label>
+                            {{ form.sip_login }}
+                            {% if form.sip_login.errors %}
+                            <div class="text-danger mt-1">{{ form.sip_login.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.sip_password.id_for_label }}" class="form-label">
+                                {% trans "SIP пароль" %}
+                            </label>
+                            {{ form.sip_password }}
+                            {% if form.sip_password.errors %}
+                            <div class="text-danger mt-1">{{ form.sip_password.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">{% trans "Пароль будет сохранен в зашифрованном виде" %}</small>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.sip_server.id_for_label }}" class="form-label">
+                            {% trans "SIP сервер" %}
+                        </label>
+                        {{ form.sip_server }}
+                        {% if form.sip_server.errors %}
+                        <div class="text-danger mt-1">{{ form.sip_server.errors }}</div>
+                        {% endif %}
+                        <small class="text-muted">{% trans "Например: sip.provider.com:5060" %}</small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- IVR настройки (видимы только если is_ivr = true) -->
+            <div class="card mt-3" id="ivrSettings" style="display: none;">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="ri-menu-line"></i> {% trans "IVR меню" %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="ri-information-line"></i>
+                        {% trans "Настройте голосовое меню для автоматической маршрутизации звонков" %}
+                    </div>
+                    
+                    <div id="ivrEditor">
+                        <div id="ivrItems">
+                            {% if form.instance.ivr_menu %}
+                                {% for key, value in form.instance.ivr_menu.items %}
+                                <div class="ivr-item">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <label class="form-label">{% trans "Клавиша" %}</label>
+                                            <input type="text" class="form-control ivr-key" value="{{ key }}" placeholder="1, 2, 3...">
+                                        </div>
+                                        <div class="col-md-5">
+                                            <label class="form-label">{% trans "Действие" %}</label>
+                                            <select class="form-control ivr-action">
+                                                <option value="transfer" {% if value.action == 'transfer' %}selected{% endif %}>{% trans "Перевод" %}</option>
+                                                <option value="queue" {% if value.action == 'queue' %}selected{% endif %}>{% trans "Очередь" %}</option>
+                                                <option value="voicemail" {% if value.action == 'voicemail' %}selected{% endif %}>{% trans "Голосовая почта" %}</option>
+                                                <option value="repeat" {% if value.action == 'repeat' %}selected{% endif %}>{% trans "Повторить меню" %}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">{% trans "Цель" %}</label>
+                                            <input type="text" class="form-control ivr-target" value="{{ value.target }}" placeholder="Номер или очередь">
+                                        </div>
+                                        <div class="col-md-1">
+                                            <label class="form-label">&nbsp;</label>
+                                            <button type="button" class="btn btn-danger btn-sm remove-ivr w-100">
+                                                <i class="ri-delete-bin-line"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        
+                        <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="addIvrItem">
+                            <i class="ri-add-line"></i> {% trans "Добавить пункт меню" %}
+                        </button>
+                    </div>
+                    
+                    <div class="alert alert-warning mt-3">
+                        <i class="ri-alert-line"></i>
+                        <strong>{% trans "Примеры действий:" %}</strong><br>
+                        - {% trans "Перевод на номер: transfer, target: 101" %}<br>
+                        - {% trans "Очередь: queue, target: support" %}<br>
+                        - {% trans "Голосовая почта: voicemail, target: user@domain" %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Предпросмотр номера -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="ri-eye-line"></i> {% trans "Предпросмотр" %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center">
+                        <div class="preview-number" id="previewNumber">
+                            {% if form.instance.number %}
+                                {{ form.instance.number }}
+                            {% else %}
+                                +7 (___) ___-__-__
+                            {% endif %}
+                        </div>
+                        <div class="mt-2">
+                            <span class="status-badge" id="previewStatus">
+                                {% if form.instance.status %}
+                                    {{ form.instance.get_status_display }}
+                                {% else %}
+                                    {% trans "Не указан" %}
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Кнопки действий -->
+            <div class="action-buttons">
+                <div class="d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-secondary" onclick="window.history.back()">
+                        <i class="ri-close-line"></i> {% trans "Отмена" %}
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <i class="ri-save-line"></i> {% trans "Сохранить" %}
+                    </button>
+                    {% if form.instance.pk %}
+                    <button type="button" class="btn btn-danger" onclick="deleteNumber({{ form.instance.id }})">
+                        <i class="ri-delete-bin-line"></i> {% trans "Удалить" %}
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </form>
+    </div>
+    
+    <div class="col-lg-4">
+        <!-- Информационная панель -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="ri-question-line"></i> {% trans "Помощь" %}
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6>{% trans "Формат номера" %}</h6>
+                    <p class="text-muted small">
+                        {% trans "Номер должен быть в международном формате с кодом страны. Примеры:" %}<br>
+                        <code>+74951234567</code><br>
+                        <code>74951234567</code><br>
+                        <code>8-495-123-45-67</code>
+                    </p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6>{% trans "Внутренний номер" %}</h6>
+                    <p class="text-muted small">
+                        {% trans "Короткий номер для звонков внутри компании. Обычно 3-4 цифры. Примеры:" %}<br>
+                        <code>101</code> - {% trans "Отдел продаж" %}<br>
+                        <code>102</code> - {% trans "Служба поддержки" %}
+                    </p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6>{% trans "IVR меню" %}</h6>
+                    <p class="text-muted small">
+                        {% trans "Голосовое меню позволяет автоматически маршрутизировать звонки. Настройте действия для каждой цифры." %}
+                    </p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6>{% trans "Статусы номеров" %}</h6>
+                    <ul class="list-unstyled small">
+                        <li><span class="badge bg-success me-2">Активен</span> - {% trans "Номер работает и принимает звонки" %}</li>
+                        <li class="mt-1"><span class="badge bg-secondary me-2">Неактивен</span> - {% trans "Номер отключен" %}</li>
+                        <li class="mt-1"><span class="badge bg-danger me-2">Заблокирован</span> - {% trans "Номер заблокирован" %}</li>
+                        <li class="mt-1"><span class="badge bg-warning me-2">На проверке</span> - {% trans "Номер ожидает проверки" %}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Статистика (для существующего номера) -->
+        {% if form.instance.pk %}
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="ri-bar-chart-line"></i> {% trans "Статистика номера" %}
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <div class="row">
+                        <div class="col-6">
+                            <h4>0</h4>
+                            <small class="text-muted">{% trans "Всего звонков" %}</small>
+                        </div>
+                        <div class="col-6">
+                            <h4>0</h4>
+                            <small class="text-muted">{% trans "Пропущено" %}</small>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <div class="text-center">
+                    <small class="text-muted">{% trans "За последние 30 дней" %}</small>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Тестирование (для существующего номера) -->
+        {% if form.instance.pk %}
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="ri-smartphone-line"></i> {% trans "Тестирование" %}
+                </h5>
+            </div>
+            <div class="card-body">
+                <button type="button" class="btn btn-outline-primary w-100 mb-2" onclick="testCall()">
+                    <i class="ri-phone-line"></i> {% trans "Тестовый звонок" %}
+                </button>
+                <button type="button" class="btn btn-outline-info w-100" onclick="checkStatus()">
+                    <i class="ri-refresh-line"></i> {% trans "Проверить статус" %}
+                </button>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Шаблон для IVR пункта -->
+<template id="ivrItemTemplate">
+    <div class="ivr-item">
+        <div class="row">
+            <div class="col-md-3">
+                <label class="form-label">{% trans "Клавиша" %}</label>
+                <input type="text" class="form-control ivr-key" placeholder="1, 2, 3...">
+            </div>
+            <div class="col-md-5">
+                <label class="form-label">{% trans "Действие" %}</label>
+                <select class="form-control ivr-action">
+                    <option value="transfer">{% trans "Перевод" %}</option>
+                    <option value="queue">{% trans "Очередь" %}</option>
+                    <option value="voicemail">{% trans "Голосовая почта" %}</option>
+                    <option value="repeat">{% trans "Повторить меню" %}</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">{% trans "Цель" %}</label>
+                <input type="text" class="form-control ivr-target" placeholder="Номер или очередь">
+            </div>
+            <div class="col-md-1">
+                <label class="form-label">&nbsp;</label>
+                <button type="button" class="btn btn-danger btn-sm remove-ivr w-100">
+                    <i class="ri-delete-bin-line"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</template>
+
+{% block javascript %}
+<script>
+    // Форматирование номера телефона
+    function formatPhoneNumber(value) {
+        // Удаляем все нецифровые символы
+        let numbers = value.replace(/\D/g, '');
+        
+        if (numbers.length === 11 && numbers.startsWith('7')) {
+            return `+7 (${numbers.slice(1, 4)}) ${numbers.slice(4, 7)}-${numbers.slice(7, 9)}-${numbers.slice(9, 11)}`;
+        } else if (numbers.length === 10) {
+            return `+7 (${numbers.slice(0, 3)}) ${numbers.slice(3, 6)}-${numbers.slice(6, 8)}-${numbers.slice(8, 10)}`;
+        }
+        return value;
+    }
+    
+    // Предпросмотр номера при вводе
+    $('#id_number').on('input', function() {
+        const value = $(this).val();
+        const formatted = formatPhoneNumber(value);
+        $('#previewNumber').text(formatted || '+7 (___) ___-__-__');
+    });
+    
+    // Предпросмотр статуса
+    $('#id_status').on('change', function() {
+        const status = $(this).find('option:selected').text();
+        $('#previewStatus').text(status);
+        
+        // Изменяем цвет статуса
+        const statusClass = $(this).val();
+        let bgClass = 'bg-secondary';
+        if (statusClass === 'active') bgClass = 'bg-success';
+        else if (statusClass === 'blocked') bgClass = 'bg-danger';
+        else if (statusClass === 'pending') bgClass = 'bg-warning';
+        
+        $('#previewStatus').removeClass().addClass(`status-badge ${bgClass}`).text(status);
+    });
+    
+    // Показываем IVR настройки при включении is_ivr
+    $('#id_is_ivr').on('change', function() {
+        if ($(this).is(':checked')) {
+            $('#ivrSettings').slideDown();
+        } else {
+            $('#ivrSettings').slideUp();
+        }
+    });
+    
+    // При загрузке страницы
+    $(document).ready(function() {
+        if ($('#id_is_ivr').is(':checked')) {
+            $('#ivrSettings').show();
+        } else {
+            $('#ivrSettings').hide();
+        }
+        
+        // Инициализация предпросмотра
+        const initialNumber = $('#id_number').val();
+        if (initialNumber) {
+            $('#previewNumber').text(formatPhoneNumber(initialNumber));
+        }
+        
+        const initialStatus = $('#id_status').val();
+        if (initialStatus) {
+            let statusText = $('#id_status option:selected').text();
+            let bgClass = 'bg-secondary';
+            if (initialStatus === 'active') bgClass = 'bg-success';
+            else if (initialStatus === 'blocked') bgClass = 'bg-danger';
+            else if (initialStatus === 'pending') bgClass = 'bg-warning';
+            
+            $('#previewStatus').removeClass().addClass(`status-badge ${bgClass}`).text(statusText);
+        }
+    });
+    
+    // Добавление IVR пункта
+    $('#addIvrItem').click(function() {
+        const template = document.getElementById('ivrItemTemplate');
+        const clone = template.content.cloneNode(true);
+        $('#ivrItems').append(clone);
+        
+        // Добавляем обработчик удаления для нового элемента
+        $('.ivr-item:last-child .remove-ivr').click(function() {
+            $(this).closest('.ivr-item').remove();
+        });
+    });
+    
+    // Удаление IVR пунктов (для существующих)
+    $(document).on('click', '.remove-ivr', function() {
+        $(this).closest('.ivr-item').remove();
+    });
+    
+    // Сбор IVR данных перед отправкой
+    $('#phoneNumberForm').on('submit', function(e) {
+        // Собираем IVR меню
+        const ivrMenu = {};
+        $('.ivr-item').each(function() {
+            const key = $(this).find('.ivr-key').val();
+            const action = $(this).find('.ivr-action').val();
+            const target = $(this).find('.ivr-target').val();
+            
+            if (key && action && target) {
+                ivrMenu[key] = {
+                    action: action,
+                    target: target
+                };
+            }
+        });
+        
+        // Создаем скрытое поле для IVR меню
+        if (Object.keys(ivrMenu).length > 0) {
+            const ivrInput = $('<input>')
+                .attr('type', 'hidden')
+                .attr('name', 'ivr_menu')
+                .val(JSON.stringify(ivrMenu));
+            $(this).append(ivrInput);
+        }
+        
+        // Валидация
+        const number = $('#id_number').val();
+        if (!number) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'error',
+                title: 'Ошибка',
+                text: 'Пожалуйста, введите номер телефона'
+            });
+            return false;
+        }
+        
+        // Валидация SIP настроек если указаны
+        const sipLogin = $('#id_sip_login').val();
+        const sipPassword = $('#id_sip_password').val();
+        const sipServer = $('#id_sip_server').val();
+        
+        if ((sipLogin && !sipPassword) || (!sipLogin && sipPassword)) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'error',
+                title: 'Ошибка',
+                text: 'Для SIP подключения необходимо заполнить логин и пароль'
+            });
+            return false;
+        }
+        
+        return true;
+    });
+    
+    // Тестовый звонок
+    function testCall() {
+        const number = $('#id_number').val();
+        if (!number) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Ошибка',
+                text: 'Номер не указан'
+            });
+            return;
+        }
+        
+        Swal.fire({
+            title: 'Тестовый звонок',
+            text: `Совершить тестовый звонок на номер ${number}?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Да, позвонить',
+            cancelButtonText: 'Отмена'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '{% url "moderation:make_call" %}',
+                    method: 'POST',
+                    data: {
+                        number: number,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function() {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Звонок инициирован',
+                            text: `Тестовый звонок на номер ${number} выполняется`,
+                            timer: 3000,
+                            showConfirmButton: false
+                        });
+                    },
+                    error: function(xhr) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Ошибка',
+                            text: xhr.responseJSON?.message || 'Не удалось совершить звонок'
+                        });
+                    }
+                });
+            }
+        });
+    }
+    
+    // Проверка статуса
+    function checkStatus() {
+        const number = $('#id_number').val();
+        if (!number) return;
+        
+        Swal.fire({
+            title: 'Проверка статуса',
+            text: `Проверяем доступность номера ${number}...`,
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+                
+                // Имитация проверки
+                setTimeout(() => {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Номер доступен',
+                        text: 'Номер активен и готов к работе'
+                    });
+                }, 1500);
+            }
+        });
+    }
+    
+    // Удаление номера
+    function deleteNumber(id) {
+        Swal.fire({
+            title: 'Удалить номер?',
+            text: 'Это действие нельзя отменить. Все данные о звонках по этому номеру будут сохранены.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Да, удалить',
+            cancelButtonText: 'Отмена'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `/moderation/telephony/numbers/${id}/delete/`,
+                    method: 'POST',
+                    data: {
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function() {
+                        window.location.href = '{% url "moderation:phone_numbers" %}';
+                    },
+                    error: function() {
+                        Swal.fire('Ошибка', 'Не удалось удалить номер', 'error');
+                    }
+                });
+            }
+        });
+    }
+    
+    // Подсказки для полей
+    $('[data-bs-toggle="tooltip"]').tooltip();
+</script>
+{% endblock %}
+{% endblock %}

@@ -16,7 +16,7 @@ from .models import (
     Notificationgroups,
     Ticket,
     Groups,
-    Collaborations, EmailTemplate,
+    Collaborations, EmailTemplate, CallRecord, CallSettings, VoiceMenu, CallQueue, PhoneNumber,
 )
 from _project.settings import LANGUAGES
 
@@ -2776,3 +2776,151 @@ class EmailTemplateFilterForm(forms.Form):
                                  widget=forms.Select(attrs={'class': 'form-control'}))
     is_active = forms.ChoiceField(required=False, choices=[('', 'Все'), ('true', 'Активные'), ('false', 'Неактивные')],
                                   widget=forms.Select(attrs={'class': 'form-control'}))
+
+
+class PhoneNumberForm(forms.ModelForm):
+    class Meta:
+        model = PhoneNumber
+        fields = ['number', 'extension', 'owner', 'department', 'status',
+                  'sip_login', 'sip_password', 'sip_server', 'is_primary', 'is_ivr', 'ivr_menu']
+        widgets = {
+            'number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+7 (999) 123-45-67'}),
+            'extension': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '101'}),
+            'owner': forms.Select(attrs={'class': 'form-control'}),
+            'department': forms.TextInput(attrs={'class': 'form-control'}),
+            'status': forms.Select(attrs={'class': 'form-control'}),
+            'sip_login': forms.TextInput(attrs={'class': 'form-control'}),
+            'sip_password': forms.PasswordInput(attrs={'class': 'form-control'}),
+            'sip_server': forms.TextInput(attrs={'class': 'form-control'}),
+            'is_primary': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'is_ivr': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'ivr_menu': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
+        }
+
+    def clean_number(self):
+        number = self.cleaned_data.get('number')
+        # Валидация номера
+        import re
+        if not re.match(r'^\+?[0-9\s\-\(\)]{10,20}$', number):
+            raise forms.ValidationError("Неверный формат номера")
+        return number
+
+
+class CallQueueForm(forms.ModelForm):
+    class Meta:
+        model = CallQueue
+        fields = ['name', 'extension', 'strategy', 'timeout', 'max_wait_time',
+                  'music_on_hold', 'members', 'is_active']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'extension': forms.TextInput(attrs={'class': 'form-control'}),
+            'strategy': forms.Select(attrs={'class': 'form-control'}),
+            'timeout': forms.NumberInput(attrs={'class': 'form-control'}),
+            'max_wait_time': forms.NumberInput(attrs={'class': 'form-control'}),
+            'music_on_hold': forms.FileInput(attrs={'class': 'form-control'}),
+            'members': forms.SelectMultiple(attrs={'class': 'form-control', 'size': 10}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+
+class VoiceMenuForm(forms.ModelForm):
+    class Meta:
+        model = VoiceMenu
+        fields = ['name', 'extension', 'greeting_message', 'greeting_audio',
+                  'menu_items', 'timeout', 'max_retries', 'invalid_action', 'is_active']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'extension': forms.TextInput(attrs={'class': 'form-control'}),
+            'greeting_message': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'greeting_audio': forms.FileInput(attrs={'class': 'form-control'}),
+            'menu_items': forms.Textarea(attrs={'class': 'form-control', 'rows': 10}),
+            'timeout': forms.NumberInput(attrs={'class': 'form-control'}),
+            'max_retries': forms.NumberInput(attrs={'class': 'form-control'}),
+            'invalid_action': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+
+class CallSettingsForm(forms.ModelForm):
+    class Meta:
+        model = CallSettings
+        fields = ['extension', 'mobile_forward', 'email_forward', 'notify_on_call',
+                  'notify_on_missed', 'notify_by_email', 'notify_by_sms',
+                  'auto_record', 'record_outbound', 'record_inbound',
+                  'work_start', 'work_end', 'work_days', 'is_online',
+                  'dnd_mode', 'away_message']
+        widgets = {
+            'extension': forms.TextInput(attrs={'class': 'form-control'}),
+            'mobile_forward': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+7 (999) 123-45-67'}),
+            'email_forward': forms.EmailInput(attrs={'class': 'form-control'}),
+            'notify_on_call': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'notify_on_missed': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'notify_by_email': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'notify_by_sms': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'auto_record': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'record_outbound': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'record_inbound': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'work_start': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+            'work_end': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+            'work_days': forms.SelectMultiple(attrs={'class': 'form-control'}),
+            'is_online': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'dnd_mode': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'away_message': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
+
+
+class CallFilterForm(forms.Form):
+    """Форма фильтрации звонков"""
+    direction = forms.ChoiceField(required=False, choices=[('', 'Все')] + CallRecord.DIRECTION_CHOICES,
+                                  widget=forms.Select(attrs={'class': 'form-control'}))
+    status = forms.ChoiceField(required=False, choices=[('', 'Все')] + CallRecord.STATUS_CHOICES,
+                               widget=forms.Select(attrs={'class': 'form-control'}))
+
+    caller = forms.CharField(required=False,
+                             widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Номер звонящего'}))
+    callee = forms.CharField(required=False,
+                             widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Номер получателя'}))
+
+    date_from = forms.DateField(required=False, widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}))
+    date_to = forms.DateField(required=False, widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}))
+
+    duration_min = forms.IntegerField(required=False, widget=forms.NumberInput(
+        attrs={'class': 'form-control', 'placeholder': 'Мин. длительность (сек)'}))
+    duration_max = forms.IntegerField(required=False, widget=forms.NumberInput(
+        attrs={'class': 'form-control', 'placeholder': 'Макс. длительность (сек)'}))
+
+    operator = forms.ModelChoiceField(queryset=User.objects.filter(is_staff=True), required=False,
+                                      widget=forms.Select(attrs={'class': 'form-control'}), label="Оператор")
+
+
+class QuickCallForm(forms.Form):
+    """Форма быстрого звонка"""
+    number = forms.CharField(max_length=20, widget=forms.TextInput(attrs={
+        'class': 'form-control',
+        'placeholder': 'Введите номер телефона',
+        'id': 'quickCallNumber'
+    }))
+
+    extension = forms.CharField(required=False, max_length=10, widget=forms.TextInput(attrs={
+        'class': 'form-control',
+        'placeholder': 'Внутренний номер (опционально)'
+    }))
+
+
+class CallNoteForm(forms.ModelForm):
+    """Форма добавления заметки к звонку"""
+
+    class Meta:
+        model = CallRecord
+        fields = ['notes', 'tags']
+        widgets = {
+            'notes': forms.Textarea(
+                attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Добавить заметку о звонке...'}),
+            'tags': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'тег1, тег2, тег3'}),
+        }
+
+    def clean_tags(self):
+        tags = self.cleaned_data.get('tags', '')
+        if tags:
+            return [tag.strip() for tag in tags.split(',') if tag.strip()]
+        return []

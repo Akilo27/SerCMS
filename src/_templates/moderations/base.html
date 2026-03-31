@@ -640,10 +640,44 @@
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link text-danger" href="{% url 'moderation:indevelopment' %}">
-                        <span class="nav-icon"><iconify-icon icon="solar:phone-calling-rounded-bold""></iconify-icon></span>
+                    <a class="nav-link menu-arrow" href="#sidebarTelephony" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarTelephony">
+                        <span class="nav-icon"><iconify-icon icon="solar:phone-calling-rounded-bold"></iconify-icon></span>
                         <span class="nav-text"> {% trans "Телефония" %} </span>
                     </a>
+                    <div class="collapse" id="sidebarTelephony">
+                        <ul class="nav sub-navbar-nav">
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link" href="{% url 'moderation:call_dashboard' %}">
+                                    <i class="ri-dashboard-line"></i> {% trans "Дашборд" %}
+                                </a>
+                            </li>
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link" href="{% url 'moderation:call_records' %}">
+                                    <i class="ri-list-view"></i> {% trans "Журнал звонков" %}
+                                </a>
+                            </li>
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link" href="{% url 'moderation:phone_numbers' %}">
+                                    <i class="ri-smartphone-line"></i> {% trans "Номера" %}
+                                </a>
+                            </li>
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link" href="{% url 'moderation:queues' %}">
+                                    <i class="ri-stack-line"></i> {% trans "Очереди" %}
+                                </a>
+                            </li>
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link" href="{% url 'moderation:voice_menus' %}">
+                                    <i class="ri-menu-line"></i> {% trans "Голосовые меню" %}
+                                </a>
+                            </li>
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link" href="{% url 'moderation:call_settings' %}">
+                                    <i class="ri-settings-4-line"></i> {% trans "Настройки" %}
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link " href="{% url 'crm:leadlist' %}">

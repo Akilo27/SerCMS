@@ -1,0 +1,318 @@
+{% extends 'moderations/base.html' %}
+{% load static i18n %}
+
+{% block title %}{% trans "Детали звонка" %} #{{ call.id }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="page-title">
+                <i class="ri-phone-line me-1"></i> {% trans "Детали звонка" %}
+                <small class="text-muted">#{{ call.id }}</small>
+            </h4>
+            <div class="page-title-right">
+                <a href="{% url 'moderation:call_records' %}" class="btn btn-secondary">
+                    <i class="ri-arrow-left-line"></i> {% trans "Назад к списку" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Основная информация -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Информация о звонке" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <table class="table table-borderless">
+                            <tr>
+                                <th width="40%">{% trans "Дата и время:" %}</th>
+                                <td>{{ call.start_time|date:"d.m.Y H:i:s" }}</td>
+                            </tr>
+                            <tr>
+                                <th>{% trans "Направление:" %}</th>
+                                <td>
+                                    {% if call.direction == 'inbound' %}
+                                    <span class="badge bg-info">{% trans "Входящий" %}</span>
+                                    {% elif call.direction == 'outbound' %}
+                                    <span class="badge bg-success">{% trans "Исходящий" %}</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">{% trans "Внутренний" %}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>{% trans "Статус:" %}</th>
+                                <td>
+                                    {% if call.status == 'answered' %}
+                                    <span class="badge bg-success">{% trans "Отвечен" %}</span>
+                                    {% elif call.status == 'missed' %}
+                                    <span class="badge bg-danger">{% trans "Пропущен" %}</span>
+                                    {% elif call.status == 'busy' %}
+                                    <span class="badge bg-warning">{% trans "Занято" %}</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">{{ call.get_status_display }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>{% trans "Длительность:" %}</th>
+                                <td><strong class="fs-4">{{ call.get_duration_formatted }}</strong></td>
+                            </tr>
+                            <tr>
+                                <th>{% trans "Ожидание ответа:" %}</th>
+                                <td>{{ call.get_wait_formatted }}</td>
+                            </tr>
+                            <tr>
+                                <th>{% trans "Стоимость:" %}</th>
+                                <td>{{ call.cost|default:"0.00" }} ₽</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <table class="table table-borderless">
+                            <tr>
+                                <th width="40%">{% trans "Звонящий:" %}</th>
+                                <td>
+                                    <strong>{{ call.caller_name|default:"—" }}</strong><br>
+                                    <small class="text-muted">{{ call.caller_number }}</small>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>{% trans "Получатель:" %}</th>
+                                <td>
+                                    <strong>{{ call.callee_name|default:"—" }}</strong><br>
+                                    <small class="text-muted">{{ call.callee_number }}</small>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>{% trans "Оператор:" %}</th>
+                                <td>
+                                    {% if call.callee %}
+                                    <img src="{{ call.callee.avatar.url }}" width="32" height="32" class="rounded-circle me-2">
+                                    {{ call.callee.get_full_name|default:call.callee.username }}
+                                    {% else %}
+                                    <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>{% trans "Call ID:" %}</th>
+                                <td><code>{{ call.call_id }}</code></td>
+                            </tr>
+                            {% if call.sip_call_id %}
+                            <tr>
+                                <th>{% trans "SIP Call ID:" %}</th>
+                                <td><small class="text-muted">{{ call.sip_call_id|truncatechars:40 }}</small></td>
+                            </tr>
+                            {% endif %}
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Запись разговора -->
+        {% if recording %}
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="ri-mic-line"></i> {% trans "Запись разговора" %}
+                </h5>
+            </div>
+            <div class="card-body">
+                <audio controls style="width: 100%;">
+                    <source src="{{ recording.audio_file.url }}" type="audio/mpeg">
+                    {% trans "Ваш браузер не поддерживает аудио" %}
+                </audio>
+                
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <small class="text-muted">
+                            <i class="ri-file-info-line"></i> 
+                            {% trans "Формат:" %} {{ recording.file_format|upper }} | 
+                            {% trans "Размер:" %} {{ recording.file_size|filesizeformat }}
+                        </small>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <a href="{{ recording.audio_file.url }}" class="btn btn-sm btn-outline-primary" download>
+                            <i class="ri-download-line"></i> {% trans "Скачать" %}
+                        </a>
+                    </div>
+                </div>
+                
+                {% if recording.transcript %}
+                <div class="mt-3">
+                    <h6>{% trans "Транскрипция:" %}</h6>
+                    <div class="border rounded p-3 bg-light">
+                        {{ recording.transcript|linebreaks }}
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if recording.sentiment_score %}
+                <div class="mt-3">
+                    <h6>{% trans "Тон разговора:" %}</h6>
+                    <div class="progress" style="height: 30px;">
+                        <div class="progress-bar bg-success" style="width: {% widthratio recording.sentiment_score 1 100 %}%">
+                            {{ recording.sentiment_score|floatformat:2 }}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Заметки -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Заметки и теги" %}</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        {{ note_form.notes }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{% trans "Теги" %}</label>
+                        {{ note_form.tags }}
+                        <small class="text-muted">{% trans "Введите теги через запятую" %}</small>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="ri-save-line"></i> {% trans "Сохранить заметку" %}
+                    </button>
+                </form>
+                
+                {% if call.tags %}
+                <div class="mt-3">
+                    {% for tag in call.tags %}
+                    <span class="badge bg-secondary me-1">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <!-- Дополнительная информация -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Дополнительная информация" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <small class="text-muted d-block">{% trans "User Agent:" %}</small>
+                    <code class="text-break">{{ call.user_agent|default:"—" }}</code>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted d-block">{% trans "IP адрес:" %}</small>
+                    <code>{{ call.ip_address|default:"—" }}</code>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted d-block">{% trans "Создано:" %}</small>
+                    {{ call.created_at|date:"d.m.Y H:i:s" }}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Действия -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Действия" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-success" onclick="makeCallAgain('{{ call.callee_number }}')">
+                        <i class="ri-phone-line"></i> {% trans "Перезвонить" %}
+                    </button>
+                    <button class="btn btn-info" onclick="copyToClipboard('{{ call.callee_number }}')">
+                        <i class="ri-copy-line"></i> {% trans "Скопировать номер" %}
+                    </button>
+                    {% if not recording %}
+                    <button class="btn btn-warning" onclick="requestRecording('{{ call.id }}')">
+                        <i class="ri-download-line"></i> {% trans "Запросить запись" %}
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Статистика оператора -->
+        {% if call.callee %}
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{% trans "Статистика оператора" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <img src="{{ call.callee.avatar.url }}" width="80" height="80" class="rounded-circle mb-2">
+                    <h6>{{ call.callee.get_full_name|default:call.callee.username }}</h6>
+                </div>
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h4>{{ operator_stats.total|default:0 }}</h4>
+                        <small class="text-muted">{% trans "Всего звонков" %}</small>
+                    </div>
+                    <div class="col-6">
+                        <h4>{{ operator_stats.avg_duration|floatformat:0|default:0 }} сек</h4>
+                        <small class="text-muted">{% trans "Средняя длительность" %}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% block javascript %}
+<script>
+    function makeCallAgain(number) {
+        Swal.fire({
+            title: 'Перезвонить',
+            text: `Совершить звонок на номер ${number}?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Да, позвонить',
+            cancelButtonText: 'Отмена'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '{% url "moderation:make_call" %}',
+                    method: 'POST',
+                    data: {
+                        number: number,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function() {
+                        Swal.fire('Успех', 'Звонок инициирован', 'success');
+                    }
+                });
+            }
+        });
+    }
+    
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text);
+        Swal.fire('Скопировано', `Номер ${text} скопирован в буфер обмена`, 'success');
+    }
+    
+    function requestRecording(callId) {
+        Swal.fire({
+            title: 'Запрос записи',
+            text: 'Запись разговора будет запрошена у оператора связи. Ожидайте уведомление.',
+            icon: 'info',
+            confirmButtonText: 'OK'
+        });
+    }
+</script>
+{% endblock %}
+{% endblock %}

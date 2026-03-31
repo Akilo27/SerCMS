@@ -1,0 +1,258 @@
+{% extends 'moderations/base.html' %}
+{% load static i18n %}
+
+{% block title %}{% trans "Голосовые меню (IVR)" %}{% endblock %}
+
+{% block head %}
+<style>
+    .ivr-card {
+        transition: all 0.3s;
+        border: 1px solid #dee2e6;
+    }
+    .ivr-card:hover {
+        border-color: #4a90e2;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .menu-tree {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        font-family: monospace;
+        font-size: 12px;
+    }
+    .menu-tree pre {
+        margin: 0;
+        white-space: pre-wrap;
+    }
+    .action-transfer { color: #28a745; }
+    .action-queue { color: #17a2b8; }
+    .action-voicemail { color: #ffc107; }
+    .action-repeat { color: #6c757d; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="page-title">
+                <i class="ri-menu-line me-1"></i> {% trans "Голосовые меню (IVR)" %}
+            </h4>
+            <div class="page-title-right">
+                <a href="{% url 'moderation:voice_menu_create' %}" class="btn btn-primary">
+                    <i class="ri-add-line"></i> {% trans "Создать меню" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    {% for menu in menus %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card ivr-card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <h5 class="card-title mb-1">{{ menu.name }}</h5>
+                        <small class="text-muted">
+                            <i class="ri-phone-line"></i> {% trans "Внутренний:" %} {{ menu.extension }}
+                        </small>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-link" data-bs-toggle="dropdown">
+                            <i class="ri-more-2-line"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'moderation:voice_menu_edit' menu.id %}">
+                                    <i class="ri-edit-line"></i> {% trans "Редактировать" %}
+                                </a>
+                            </li>
+                            <li>
+                                <button class="dropdown-item" onclick="testMenu('{{ menu.extension }}')">
+                                    <i class="ri-phone-line"></i> {% trans "Тестовый звонок" %}
+                                </button>
+                            </li>
+                            <li>
+                                <button class="dropdown-item text-danger" onclick="deleteMenu({{ menu.id }})">
+                                    <i class="ri-delete-bin-line"></i> {% trans "Удалить" %}
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="d-flex gap-2">
+                        <span class="badge {% if menu.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                            {% if menu.is_active %}{% trans "Активно" %}{% else %}{% trans "Неактивно" %}{% endif %}
+                        </span>
+                        <span class="badge bg-info">{% trans "Таймаут:" %} {{ menu.timeout }} сек</span>
+                        <span class="badge bg-warning">{% trans "Попыток:" %} {{ menu.max_retries }}</span>
+                    </div>
+                </div>
+                
+                <div class="menu-tree">
+                    <small class="text-muted d-block mb-2">{% trans "Структура меню:" %}</small>
+                    <pre>{% if menu.menu_items %}
+{% for key, value in menu.menu_items.items %}{{ key }} → 
+  {% if value.action == 'transfer' %}📞 {% trans "Перевод на" %} {{ value.target }}
+  {% elif value.action == 'queue' %}👥 {% trans "Очередь" %} {{ value.target }}
+  {% elif value.action == 'voicemail' %}🎙️ {% trans "Голосовая почта" %}
+  {% elif value.action == 'repeat' %}🔄 {% trans "Повторить меню" }}
+  {% endif %}{% endfor %}{% else %}{% trans "Нет пунктов меню" %}{% endif %}</pre>
+                </div>
+                
+                <div class="mt-3">
+                    <button class="btn btn-sm btn-outline-primary w-100" onclick="viewMenuStructure({{ menu.id }})">
+                        <i class="ri-code-view"></i> {% trans "Просмотреть структуру" %}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="ri-menu-line fs-48 text-muted"></i>
+                <h5 class="mt-3">{% trans "Нет голосовых меню" %}</h5>
+                <p class="text-muted">{% trans "Создайте голосовое меню для автоматической маршрутизации звонков" %}</p>
+                <a href="{% url 'moderation:voice_menu_create' %}" class="btn btn-primary">
+                    <i class="ri-add-line"></i> {% trans "Создать меню" %}
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Modal структуры меню -->
+<div class="modal fade" id="structureModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{% trans "Структура голосового меню" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="structureContent"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block javascript %}
+<script>
+    function deleteMenu(id) {
+        Swal.fire({
+            title: '{% trans "Удалить меню?" %}',
+            text: '{% trans "Это действие нельзя отменить" %}',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: '{% trans "Да, удалить" %}',
+            cancelButtonText: '{% trans "Отмена" %}'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `/moderation/telephony/menus/${id}/delete/`,
+                    method: 'POST',
+                    data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+                    success: function() {
+                        location.reload();
+                    }
+                });
+            }
+        });
+    }
+    
+    function testMenu(extension) {
+        Swal.fire({
+            title: '{% trans "Тестовый звонок" %}',
+            text: `{% trans "Совершить тестовый звонок в голосовое меню" %} ${extension}?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: '{% trans "Да" %}',
+            cancelButtonText: '{% trans "Отмена" %}'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '{% url "moderation:make_call" %}',
+                    method: 'POST',
+                    data: {
+                        number: extension,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function() {
+                        Swal.fire('{% trans "Успех" %}', '{% trans "Звонок направлен в голосовое меню" %}', 'success');
+                    }
+                });
+            }
+        });
+    }
+    
+    function viewMenuStructure(id) {
+        $.ajax({
+            url: `/moderation/telephony/api/menu-structure/${id}/`,
+            method: 'GET',
+            success: function(data) {
+                let html = `
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h6>${data.name}</h6>
+                            <p class="text-muted">${data.greeting_message}</p>
+                            <hr>
+                            <h6>{% trans "Пункты меню:" %}</h6>
+                            <div class="list-group">
+                `;
+                
+                for (const [key, value] of Object.entries(data.menu_items)) {
+                    let actionIcon = '';
+                    let actionClass = '';
+                    switch(value.action) {
+                        case 'transfer':
+                            actionIcon = '📞';
+                            actionClass = 'text-success';
+                            break;
+                        case 'queue':
+                            actionIcon = '👥';
+                            actionClass = 'text-info';
+                            break;
+                        case 'voicemail':
+                            actionIcon = '🎙️';
+                            actionClass = 'text-warning';
+                            break;
+                        case 'repeat':
+                            actionIcon = '🔄';
+                            actionClass = 'text-secondary';
+                            break;
+                    }
+                    
+                    html += `
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong class="fs-4 me-3">${key}</strong>
+                                    <span class="${actionClass}">${actionIcon} ${value.action}</span>
+                                    <span class="ms-2">→ ${value.target}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                html += `
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                $('#structureContent').html(html);
+                $('#structureModal').modal('show');
+            }
+        });
+    }
+</script>
+{% endblock %}
+{% endblock %}

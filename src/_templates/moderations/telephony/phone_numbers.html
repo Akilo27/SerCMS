@@ -1,0 +1,188 @@
+{% extends 'moderations/base.html' %}
+{% load static i18n %}
+
+{% block title %}{% trans "Телефонные номера" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="page-title">
+                <i class="ri-phone-line me-1"></i> {% trans "Телефонные номера" %}
+            </h4>
+            <div class="page-title-right">
+                <a href="{% url 'moderation:phone_number_create' %}" class="btn btn-primary">
+                    <i class="ri-add-line"></i> {% trans "Добавить номер" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    {% for number in numbers %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <h5 class="mb-1">
+                            <i class="ri-phone-fill text-primary me-2"></i>
+                            {{ number.number }}
+                        </h5>
+                        {% if number.extension %}
+                        <small class="text-muted">{% trans "Внутренний:" %} {{ number.extension }}</small>
+                        {% endif %}
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-link" data-bs-toggle="dropdown">
+                            <i class="ri-more-2-line"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'moderation:phone_number_edit' number.id %}">
+                                    <i class="ri-edit-line"></i> {% trans "Редактировать" %}
+                                </a>
+                            </li>
+                            <li>
+                                <button class="dropdown-item text-danger" onclick="deleteNumber({{ number.id }})">
+                                    <i class="ri-delete-bin-line"></i> {% trans "Удалить" %}
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <span class="badge bg-{% if number.status == 'active' %}success{% elif number.status == 'inactive' %}secondary{% elif number.status == 'blocked' %}danger{% else %}warning{% endif %}">
+                        {{ number.get_status_display }}
+                    </span>
+                    {% if number.is_primary %}
+                    <span class="badge bg-primary">{% trans "Основной" %}</span>
+                    {% endif %}
+                    {% if number.is_ivr %}
+                    <span class="badge bg-info">{% trans "IVR" %}</span>
+                    {% endif %}
+                </div>
+                
+                <div class="info-item">
+                    <small class="text-muted">{% trans "Владелец:" %}</small>
+                    <div>{{ number.owner|default:"—" }}</div>
+                </div>
+                
+                <div class="info-item mt-2">
+                    <small class="text-muted">{% trans "Отдел:" %}</small>
+                    <div>{{ number.department|default:"—" }}</div>
+                </div>
+                
+                {% if number.sip_login %}
+                <div class="info-item mt-2">
+                    <small class="text-muted">{% trans "SIP логин:" %}</small>
+                    <div><code>{{ number.sip_login }}</code></div>
+                </div>
+                {% endif %}
+                
+                <div class="mt-3">
+                    <button class="btn btn-sm btn-outline-primary" onclick="testCall('{{ number.number }}')">
+                        <i class="ri-phone-line"></i> {% trans "Тестовый звонок" %}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="ri-phone-off-line fs-48 text-muted"></i>
+                <h5 class="mt-3">{% trans "Нет телефонных номеров" %}</h5>
+                <p class="text-muted">{% trans "Добавьте первый телефонный номер" %}</p>
+                <a href="{% url 'moderation:phone_number_create' %}" class="btn btn-primary">
+                    <i class="ri-add-line"></i> {% trans "Добавить номер" %}
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if page_obj.has_other_pages %}
+<div class="row mt-3">
+    <div class="col-12">
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                </li>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                </li>
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</div>
+{% endif %}
+
+{% block javascript %}
+<script>
+    function deleteNumber(id) {
+        Swal.fire({
+            title: 'Удалить номер?',
+            text: 'Это действие нельзя отменить',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Да, удалить',
+            cancelButtonText: 'Отмена'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `/moderation/phone-numbers/${id}/delete/`,
+                    method: 'POST',
+                    data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+                    success: function() {
+                        location.reload();
+                    }
+                });
+            }
+        });
+    }
+    
+    function testCall(number) {
+        Swal.fire({
+            title: 'Тестовый звонок',
+            text: `Совершить тестовый звонок на номер ${number}?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Да',
+            cancelButtonText: 'Отмена'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '{% url "moderation:make_call" %}',
+                    method: 'POST',
+                    data: {
+                        number: number,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function() {
+                        Swal.fire('Успех', 'Тестовый звонок инициирован', 'success');
+                    }
+                });
+            }
+        });
+    }
+</script>
+{% endblock %}
+{% endblock %}
